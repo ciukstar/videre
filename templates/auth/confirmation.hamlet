@@ -1,0 +1,36 @@
+<header.app-top-app-bar.background>
+  <div #headerStart>
+    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+      <md-icon>arrow_back
+          
+    <h1.title-large>
+      _{MsgEmailVerification}
+      
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+  
+
+  <h2.title-medium>
+    _{MsgVerifyEmailPlease}.
+
+  <div.body-medium>
+    _{MsgJustSentEmailTo} #
+    <code.body-medium.shape-extra-small.surface-variant>
+      #{email}
+    \.
+    <div.body-medium>
+      _{MsgClickToVerifyAccount}.
+
+  <p>
+    <div.body-small>
+      _{MsgDidNotGetEmail}
+    <md-text-button href=@{parent registerR} type=button>
+      _{MsgResendEmail}
+
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    #{status}. #{msg}
