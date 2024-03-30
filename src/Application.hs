@@ -49,8 +49,25 @@ import System.Log.FastLogger
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
-import Handler.Accounts (getAccountPhotoR)
+import Handler.Accounts
+    ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
+    , postAccountR, getAccountInfoR, getAccountInfoEditR, postAccountInfoR
+    )
+    
 import Handler.Home (getHomeR)
+
+import Handler.Resources ( getDocsR )
+
+import Handler.Tokens
+    ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
+    , postTokensVapidR, postTokensVapidClearR
+    )
+
+import Handler.Users
+    ( getUsersR, getUserR, postUserDeleR, getUserEditR
+    , getUserPhotoR, postUserR
+    )
+
 import Handler.Common ( getFaviconR, getRobotsR )
 
 -- This line actually creates our YesodDispatch instance. It is the second half

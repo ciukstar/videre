@@ -30,3 +30,54 @@ InvalidArguments: Неверные аргументы
 BackToHomepage: Вернуться на домашнюю страницу
 InvalidUrlOrRemoved: Неверный URL-адрес или ресурс удален
 Authentication: Аутентификация
+AccessDeniedAdminsOnly: Доступ к этой странице имеют только администраторы. Пожалуйста, войдите под учетной записью администратора
+LoginPlease: Пожалуйста, войдите для доступа к этой странице
+Welcome: Добро пожаловать
+Tokens: Токены
+MainMenu: Главное меню
+Data: Данные
+Users: Пользователи
+Documentation: Документация
+SourceCode: Исходный код
+Resources: Ресурсы
+AppDocumentation: Документация приложения
+NoUsersYet: Пользователей пока нет
+SignOut: Выйти
+UserAccount: Учетная запись
+User: Пользователь
+Save: Сохранить
+Cancel: Отмена
+Yes: Да
+VerificationKey: Ключ проверки
+Verified: Проверено
+No: Нет
+FullName: Полное имя
+Google: Google
+Email: Электронная почта
+Edit: Редактировать
+Dele: Удалить
+ConfirmPlease: Пожалуйста подтвердите
+DeleteAreYouSure: Вы уверены, что хотите удалить?
+InvalidFormData: Неверные данные формы
+RecordDeleted: Запись удалена
+NotSpecified: Не указано
+RecordEdited: Запись отредактирована
+SuperuserCannotBeDeleted: Суперпользователя нельзя удалить
+Attribution: Атрибуция
+AnotherAccountAccessProhibited: Доступ к учетной записи другого пользователя запрещен
+PersonalInfo: Персональные данные
+Account: Учетная запись
+Birthday: День рождения
+NotIndicated: Не указано
+Initialize: Инициализировать
+UserSession: Пользовательская сессия
+Database: База данных
+StoreType: Тип хранилища
+InvalidStoreType: Неверный тип хранилища
+ClearSettings: Сбросить
+Cleared: Очищено
+GmailAccount: Учетная запись Gmail
+GoogleSecretManager: Google Secret Manager
+Generate: Генерировать
+VapidGenerationWarning: Для создания нового ключа VAPID всем клиентам необходимо повторно подписаться на push-уведомления
+InvalidGoogleAPITokens: Неверные токены Google API

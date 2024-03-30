@@ -26,6 +26,7 @@ import Data.Eq (Eq)
 import Data.Ord (Ord)
 import Data.String (String)
 import Data.Text (Text)
+import Data.Time.Calendar (Day)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
@@ -73,6 +74,11 @@ apiInfoGoogle = "GOOGLE_API"
 secretVolumeGmail :: String
 secretVolumeGmail = "/grt/gmail_refresh_token"
 
+secretVapid :: Text
+secretVapid = "vapid_min_details"
+
+apiInfoVapid :: Text
+apiInfoVapid = "VAPID"
 
 statusSuccess :: Text
 statusSuccess = "success"

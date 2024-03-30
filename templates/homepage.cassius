@@ -1,0 +1,14 @@
+header
+
+    position: sticky
+    top: 0
+    height: var(--app-top-app-bar-height)
+    display: flex
+    align-items: center
+    column-gap: 1rem
+    padding: 0 1rem
+
+main
+
+    fisplay: flex
+    flex-direction: column

@@ -244,21 +244,36 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
-    authRoute
-        :: App
-        -> Maybe (Route App)
+    authRoute :: App -> Maybe (Route App)
     authRoute _ = Just $ AuthR LoginR
 
-    isAuthorized
-        :: Route App  -- ^ The route the user is visiting.
-        -> Bool       -- ^ Whether or not this is a "write" request.
-        -> Handler AuthResult
-
+    isAuthorized :: Route App -> Bool -> Handler AuthResult
     
     isAuthorized (AccountPhotoR _) _ = isAuthenticated
     isAuthorized HomeR _ = isAuthenticated
+
+    isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid
+    isAuthorized AccountsR _ = return Authorized
+    isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountPhotoR _) _ = return Authorized
+
+    isAuthorized (DataR TokensVapidClearR) _ = isAdmin
+    isAuthorized (DataR TokensVapidR) _ = isAdmin
+    isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
+    isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
+    isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
+
+
+    isAuthorized (DataR (UserPhotoR _)) _ = isAdmin
+    isAuthorized (DataR (UserDeleR _)) _ = isAdmin
+    isAuthorized (DataR (UserEditR _)) _ = isAdmin
+    isAuthorized (DataR (UserR _)) _ = isAdmin
+    isAuthorized r@(DataR UsersR) _ = setUltDest r >> isAdmin
     
     -- Routes not requiring authentication.    
+    isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
     isAuthorized RobotsR _ = return Authorized
@@ -299,6 +314,26 @@ instance Yesod App where
 
     makeLogger :: App -> IO Logger
     makeLogger = return . appLogger
+
+
+isAuthenticatedSelf :: UserId -> Handler AuthResult
+isAuthenticatedSelf uid = do
+    muid <- maybeAuthId
+    case muid of
+        Just uid' | uid == uid' -> return Authorized
+                  | otherwise -> unauthorizedI MsgAnotherAccountAccessProhibited
+        Nothing -> unauthorizedI MsgLoginPlease
+
+
+isAdmin :: Handler AuthResult
+isAdmin = do
+    user <- maybeAuth
+    case user of
+        Just (Entity _ (User _ _ _ _ _ _ True _)) -> return Authorized
+        Just (Entity _ (User _ _ _ _ _ _ _ True)) -> return Authorized
+        Just (Entity _ (User _ _ _ _ _ _ _ False)) -> unauthorizedI MsgAccessDeniedAdminsOnly
+        Nothing -> unauthorizedI MsgLoginPlease
+        
 
 -- Define breadcrumbs.
 instance YesodBreadcrumbs App where

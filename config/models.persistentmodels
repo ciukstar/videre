@@ -15,6 +15,11 @@ UserCred
     ident Text Maybe
     UniqueUserCred user
 
+UserInfo
+    user UserId OnDeleteCascade
+    birthDate Day Maybe
+    UniqueUserInfo user
+
 User
     email Text
     authType AuthenticationType

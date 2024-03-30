@@ -1,4 +1,7 @@
 
+:root
+    --app-top-app-bar-height: 64px
+
 body
 
     font-family: Roboto, sans-serif;

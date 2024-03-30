@@ -1,0 +1,67 @@
+
+<header.primary>
+  <div #headerStart>
+    ^{menu}
+
+    <h1.title-large>
+      _{MsgTokens}
+
+  $maybe Entity uid _ <- user
+    <span style="position:relaive">
+      <md-filled-icon-button type=button aria-label=_{MsgUserAccount} #btnUserAccount
+        onclick="document.getElementById('menuUserAccount').open = !document.getElementById('menuUserAccount').open">
+        <img src=@{AccountPhotoR uid} width=24 height=24 alt=_{MsgPhoto}
+             loading=lazy style="clip-path:circle(50%)">
+      <md-menu anchor=btnUserAccount x-offset=16 y-offset=16 #menuUserAccount>
+        <md-menu-item href=@{AccountR uid}>
+          <div slot=headline>_{MsgUserAccount}
+        <md-menu-item href=@{AuthR LogoutR}>
+          <div slot=headline>_{MsgSignOut}
+  $nothing
+    <md-filled-icon-button href=@{AuthR LoginR} aria-label=_{MsgSignIn}>
+      <md-icon>login
+
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  <div.app-card.shape-large.outline>
+    <div.app-card-title.headline-medium>
+      Gmail
+    <div.app-card-content>
+    
+      <form.formStoreType method=post action=@{DataR TokensR} enctype=#{etGmail} ##{formTokensGmail}>
+        ^{fwGmail}
+          
+    <div.app-card-actions>
+      <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etGmailClear} ##{formTokensGmailClear}>
+        ^{fwGmailClear}
+      <md-text-button type=submit form=#{formTokensGmailClear}>
+        _{MsgClearSettings}
+      <md-filled-button type=submit form=#{formTokensGmail}>
+        _{MsgInitialize}
+
+  <div.app-card.shape-large.outline>
+    <div.app-card-title.headline-medium>
+      VAPID
+    <div.body-small>_{MsgVapidGenerationWarning}.
+    <div.app-card-content>
+    
+      <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} ##{formTokensVapid}>
+        ^{fwVapid}
+          
+    <div.app-card-actions>
+      <form method=post action=@{DataR TokensVapidClearR} enctype=#{etVapidClear} ##{formTokensVapidClear}>
+        ^{fwVapidClear}
+        
+      <md-text-button type=submit form=#{formTokensVapidClear}>
+        _{MsgClearSettings}
+      <md-filled-button type=submit form=#{formTokensVapid}>
+        _{MsgGenerate}
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    #{status}. #{msg}

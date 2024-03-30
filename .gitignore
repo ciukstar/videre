@@ -23,3 +23,7 @@ videre.cabal
 node_modules/
 package-lock.json
 package.json
+build-demo-en.sh
+deploy-demo-en.sh
+env.sh
+videre

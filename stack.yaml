@@ -42,6 +42,10 @@ packages:
 #
 # extra-deps: []
 
+extra-deps:
+- git: https://github.com/sarthakbagaria/web-push.git
+  commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+
 # Override default flag values for local packages and extra-deps
 # flags: {}
 

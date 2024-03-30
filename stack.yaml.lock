@@ -3,7 +3,18 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/lock_files
 
-packages: []
+packages:
+- completed:
+    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    git: https://github.com/sarthakbagaria/web-push.git
+    name: web-push
+    pantry-tree:
+      sha256: 6a95d33c838e6987e68225cb66693c8d5825fc3c248c33fa996a895e47130d61
+      size: 1110
+    version: '0.4'
+  original:
+    commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+    git: https://github.com/sarthakbagaria/web-push.git
 snapshots:
 - completed:
     sha256: 48ac4445a1906866c846cd2a3a9c28fcdf3b2066237e49405dbe56ce1974a043

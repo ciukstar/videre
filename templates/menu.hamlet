@@ -1,0 +1,46 @@
+
+<details.app-nav-drawer>
+  <summary>
+    <md-filled-icon-button type=button aria-label=_{MsgMainMenu}
+      onclick="document.querySelector('details.app-nav-drawer').open = true">
+      <md-icon>menu
+
+  <aside.app-nav-drawer.surface.large-end.elevation-1>
+    <md-elevation>
+    <div.app-header>
+      <md-icon-button type=button onclick="document.querySelector('details.app-nav-drawer').open = false">
+        <md-icon>close
+
+    <md-menu-item href=@{HomeR} :curr == Just HomeR:selected>
+      MsgUserList
+
+    <details.app-submenu #idDetailsData
+      :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open
+      ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
+      <summary>
+        <md-menu-item>
+          <div>
+            _{MsgData}
+            <md-icon.app-expand-icon slot=icon>expand_more
+          
+      <md-menu-item href=@{DataR UsersR} :curr == Just (DataR UsersR):selected>
+        _{MsgUsers}
+          
+      <md-menu-item href=@{DataR TokensR} :curr == Just (DataR TokensR):selected>
+        _{MsgTokens}
+
+    <details.app-submenu #idDetailsResources
+      :elem curr [Just DocsR]:open
+      ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
+      <summary>
+        <md-menu-item>
+          <div>
+            _{MsgResources}
+            <md-icon.app-expand-icon slot=icon>expand_more
+          
+      <md-menu-item href=@{DocsR} :curr == Just DocsR:selected>
+        _{MsgDocumentation}
+          
+      <md-menu-item type=button href="https://github.com/ciukstar/videre">
+        _{MsgSourceCode}
+        

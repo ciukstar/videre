@@ -29,3 +29,54 @@ InvalidArguments: Arguments invalides
 BackToHomepage: Retournez à la page d'accueil
 InvalidUrlOrRemoved: URL invalide ou ressource supprimée
 Authentication: Authentification
+AccessDeniedAdminsOnly: Seuls les administrateurs ont accès à cette page. Veuillez vous connecter avec un compte administrateur
+LoginPlease: Veuillez vous connecter pour accéder à cette page
+Welcome: Bienvenu
+Tokens: Jetons
+MainMenu: Menu principal
+Data: Donnés
+Users: Utilisateurs
+Documentation: Documentation
+SourceCode: Code source
+Resources: Ressources
+AppDocumentation: Documentation de l'application
+NoUsersYet: Il n'y a pas encore d'utilisateurs
+SignOut: Se déconnecter
+UserAccount: Compte d'utilisateur
+User: Utilisateur
+Save: Enregistrer
+Cancel: Annuler
+Yes: Oui
+VerificationKey: Clé de vérification
+Verified: Vérifié
+No: Non
+FullName: Nom et prénom
+Google: Google
+Email: E-mail
+Edit: Modifier
+Dele: Supprimer
+ConfirmPlease: Veuillez confirmer
+DeleteAreYouSure: Etes-vous sûr que vous voulez supprimer ?
+InvalidFormData: Données de formulaire incorrectes
+RecordDeleted: L'enregistrement a été supprimé
+NotSpecified: Not specified
+RecordEdited: L'enregistrement a été modifié
+SuperuserCannotBeDeleted: Le superutilisateur ne peut pas être supprimé
+Attribution: Attribution
+AnotherAccountAccessProhibited: L'accès au compte d'un autre utilisateur est interdit
+PersonalInfo: Données personnelles
+Account: Compte
+Birthday: Date de naissance
+NotIndicated: Non indiqué
+Initialize: Initialiser
+UserSession: Session utilisateur
+Database: Base de données
+StoreType: Type de stockage
+InvalidStoreType: Type de stockage invalide
+ClearSettings: Effacer
+Cleared: Effacé
+GmailAccount: Compte Gmail
+GoogleSecretManager: Google Secret Manager
+Generate: Générer
+VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
+InvalidGoogleAPITokens: Jetons d'API Google non valides
