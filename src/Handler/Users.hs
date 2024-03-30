@@ -12,6 +12,12 @@ module Handler.Users
   , postUserR
   ) where
 
+import Control.Monad (void, join)
+
+import Data.Bifunctor (Bifunctor(second))
+import Data.Text.Encoding (encodeUtf8)
+import Data.Text (Text)
+
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy, desc, Entity (entityVal), selectOne
     , (^.), (==.), (=.), (:&)((:&)), (?.)
@@ -36,7 +42,7 @@ import Foundation
     )
     
 import Material3 ( md3textField, md3switchField, md3htmlField, md3mopt, md3mreq )
-import Menu (menu)
+
 import Model
     ( statusError, statusSuccess
     , UserId
@@ -57,7 +63,9 @@ import Settings.StaticFiles
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     )
 import Text.Hamlet (Html)
-import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
+
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core
     ( defaultLayout, newIdent, getMessages, setUltDestCurrent
@@ -73,10 +81,6 @@ import Yesod.Form.Types
     , FieldView (fvInput, fvLabel, fvId)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
-import Data.Text.Encoding (encodeUtf8)
-import Control.Monad (void, join)
-import Data.Text (Text)
-import Data.Bifunctor (Bifunctor(second))
 
 
 postUserDeleR :: UserId -> Handler Html
@@ -233,8 +237,6 @@ formUser user extra = do
 
 getUsersR :: Handler Html
 getUsersR = do
-
-    user <- maybeAuth
 
     users <- (second (join . unValue) <$>) <$> runDB ( select $ do
         x :& h <- from $ table @User

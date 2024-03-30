@@ -38,7 +38,7 @@ import qualified Database.Persist as P ((=.))
 
 import Foundation
     ( Handler, Form, App (appSettings)
-    , Route (DataR, AuthR, AccountR, AccountPhotoR)
+    , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
       , TokensVapidClearR
@@ -47,15 +47,14 @@ import Foundation
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
       , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
-      , MsgGmailAccount, MsgGoogleSecretManager, MsgSignIn, MsgSignOut
-      , MsgUserAccount, MsgPhoto, MsgGenerate, MsgVapidGenerationWarning
+      , MsgGmailAccount, MsgGoogleSecretManager
+      , MsgGenerate, MsgVapidGenerationWarning
       , MsgInvalidGoogleAPITokens
       )
     )
 import Data.Function ((&))
 
 import Material3 (md3radioField, md3emailField)
-import Menu (menu)
 import Model
     ( gmailAccessToken, gmailRefreshToken, apiInfoGoogle
     , StoreType
@@ -73,8 +72,8 @@ import Network.Wreq
 import Network.Wreq.Lens (statusCode, responseStatus)
 
 import Settings
-    ( widgetFile, AppSettings (appGoogleApiConf)
-    , GoogleApiConf (googleApiConfClientSecret, googleApiConfClientId)
+    ( widgetFile, AppSettings (appGoogleApiConf, appGcloudConf)
+    , GoogleApiConf (googleApiConfClientSecret, googleApiConfClientId), GcloudConf (gcloudProjectId)
     )
 import System.IO (readFile')
 
@@ -85,7 +84,8 @@ import Text.Shakespeare.Text (st)
 
 import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails))
 
-import Yesod.Auth (Route (LoginR, LogoutR), maybeAuth)
+import Widgets (widgetMenu, widgetUser)
+
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
@@ -157,6 +157,8 @@ postTokensVapidClearR = do
 
           case accessToken of
             Just at -> do
+                app <- appSettings <$> getYesod
+                let project = gcloudProjectId . appGcloudConf $ app
                 let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 at)
 
                 res <- liftIO $ getWith opts
@@ -185,7 +187,6 @@ postTokensVapidClearR = do
           addMessageI statusSuccess MsgCleared
           redirect $ DataR TokensR
       _otherwise -> do
-          user <- maybeAuth
           (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
           (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
@@ -237,10 +238,11 @@ postTokensVapidR = do
               liftIO $ pure . pack <$> readFile' secretVolumeGmail
 
             Nothing -> return Nothing
+            
+          app <- appSettings <$> getYesod
 
           accessToken <- case refreshToken of
             Just rt -> do
-                app <- appSettings <$> getYesod
                 
                 refreshResponse <- liftIO $ post "https://oauth2.googleapis.com/token"
                     [ "refresh_token" := rt
@@ -254,7 +256,7 @@ postTokensVapidR = do
 
           case accessToken of
             Just at -> do
-
+                let project = gcloudProjectId . appGcloudConf $ app
                 let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 at)
                 response <- liftIO $ tryAny $ postWith opts
                     (unpack [st|#{projects}/#{project}/secrets/#{secretVapid}:addVersion|])
@@ -340,6 +342,8 @@ getTokensGoogleapisHookR = do
       Just (email,x@StoreTypeGoogleSecretManager) -> do
           setSession gmailSender email
 
+          let project = gcloudProjectId . appGcloudConf $ app
+
           let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 accessToken)
           response <- liftIO $ tryAny $ postWith opts
               (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}:addVersion|])
@@ -352,7 +356,7 @@ getTokensGoogleapisHookR = do
                 let prev :: Maybe Int
                     prev = (fmap (\y -> y - 1) . readMaybe . unpack) <=< (LS.last . splitOn "/")
                         $ res L.^. responseBody . key "name" . _String
-
+                
                 case prev of
                   Just v | v > 0 -> do
                                void $ liftIO $ tryAny $ postWith opts
@@ -424,6 +428,8 @@ postTokensGoogleapisClearR = do
 
           let opts = defaults & auth L.?~ oauth2Bearer (encodeUtf8 newAccessToken)
 
+          let project = gcloudProjectId . appGcloudConf $ app
+          
           res <- liftIO $ getWith opts
               (unpack [st|#{projects}/#{project}/secrets/#{gmailRefreshToken}/versions/latest|])
 
@@ -456,7 +462,6 @@ postTokensGoogleapisClearR = do
           addMessageI statusSuccess MsgCleared
           redirect $ DataR TokensR
       _otherwise -> do
-          user <- maybeAuth
           (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
           (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
@@ -510,7 +515,6 @@ postTokensR = do
           return $ preEscapedToHtml $ decodeUtf8 $ toStrict (r L.^. responseBody)
 
       _otherwise -> do
-          user <- maybeAuth
           (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
           (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
@@ -526,7 +530,6 @@ postTokensR = do
 
 getTokensR :: Handler Html
 getTokensR = do
-    user <- maybeAuth
     
     tokenGmail <- runDB $ selectOne $ do
         x <- from $ table @Token
@@ -604,6 +607,3 @@ formStoreOptions token extra = do
 projects :: Text
 projects = "https://secretmanager.googleapis.com/v1/projects" :: Text
 
-
-project :: Text
-project = "medcab-410214" :: Text

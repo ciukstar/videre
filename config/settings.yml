@@ -40,9 +40,16 @@ connection-pool:
   idle-timeout: "_env:YESOD_CONNECTION_POOL_IDLETIMEOUT:1200"
   size:         "_env:YESOD_CONNECTION_POOL_POOLSIZE:1"
 
+superuser:
+  username: "_env:YESOD_SUPERUSER_USERNAME:superuser@gmail.com"
+  password: "_env:YESOD_SUPERUSER_PASSWORD:superuser"
+
 google-api:
   client-id:     "_env:YESOD_GOOGLE_CLIENT_ID:xyz"
   client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
+
+gcloud:
+  project-id: "_env:YESOD_GCLOUD_PROJECT_ID:videre-418810"
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

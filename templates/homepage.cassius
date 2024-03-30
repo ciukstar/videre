@@ -7,6 +7,8 @@ header
     align-items: center
     column-gap: 1rem
     padding: 0 1rem
+    .app-top-app-bar-end
+        margin-left: auto
 
 main
 

@@ -249,7 +249,6 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
     
-    isAuthorized (AccountPhotoR _) _ = isAuthenticated
     isAuthorized HomeR _ = isAuthenticated
 
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
@@ -264,7 +263,6 @@ instance Yesod App where
     isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
-
 
     isAuthorized (DataR (UserPhotoR _)) _ = isAdmin
     isAuthorized (DataR (UserDeleR _)) _ = isAdmin

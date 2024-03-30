@@ -1,8 +1,11 @@
-<header.app-top-app-bar.background>
-  ^{menu}
+<header.app-top-app-bar.primary>
+  ^{widgetMenu}
 
   <h1.title-large>
     Videre
+
+  <span.app-top-app-bar-end>
+    ^{widgetUser}
 
 <main>
   Main content
