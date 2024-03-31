@@ -25,6 +25,8 @@ import Control.Monad.Logger (liftLoc, runLoggingT)
 
 import Database.Persist.Sqlite
     ( runSqlPool, sqlDatabase, createSqlitePoolWithConfig )
+
+import Demo.DemoEn (fillDemoEn)
     
 import Import
 
@@ -49,6 +51,8 @@ import System.Log.FastLogger
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
+import Handler.Contacts (getContactsR)
+
 import Handler.Accounts
     ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
     , postAccountR, getAccountInfoR, getAccountInfoEditR, postAccountInfoR
@@ -71,6 +75,8 @@ import Handler.Users
 import Handler.Common ( getFaviconR, getRobotsR )
 
 import Yesod.Auth.Email (saltPass)
+import ChatRoom.Data (ChatRoom(ChatRoom))
+import ChatRoom ()
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -90,6 +96,8 @@ makeFoundation appSettings = do
     appStatic <-
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
+
+    let getChatRoom = ChatRoom
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
@@ -112,6 +120,7 @@ makeFoundation appSettings = do
     -- runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
     flip runLoggingT logFunc $ flip runSqlPool pool $ do
+        
         runMigration migrateAll
         
         superpass <- liftIO $ saltPass (superuserPassword . appSuperuser $ appSettings)
@@ -124,6 +133,7 @@ makeFoundation appSettings = do
                      , userSuperuser = True
                      , userAdmin = True
                      }
+        fillDemoEn appSettings
 
     -- Return the foundation
     return $ mkFoundation pool

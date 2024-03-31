@@ -1,12 +1,18 @@
 -- By default this file is used by `parseRoutesFile` in Foundation.hs
 -- Syntax for this file here: https://www.yesodweb.com/book/routing-and-handlers
 
-/accounts/#UserId/info/edit          AccountInfoEditR GET
-/accounts/#UserId/info               AccountInfoR     GET POST
-/accounts/#UserId/edit               AccountEditR     GET
-/accounts/#UserId/photo 	     AccountPhotoR    GET
-/accounts/#UserId                    AccountR         GET POST
-/accounts                            AccountsR        GET
+
+/chat ChatR ChatRoom getChatRoom
+
+
+/contacts/#UserId ContactsR GET
+
+/accounts/#UserId/info/edit AccountInfoEditR GET
+/accounts/#UserId/info      AccountInfoR     GET POST
+/accounts/#UserId/edit      AccountEditR     GET
+/accounts/#UserId/photo     AccountPhotoR    GET
+/accounts/#UserId           AccountR         GET POST
+/accounts                   AccountsR        GET
 
 / HomeR GET
 

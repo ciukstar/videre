@@ -12,7 +12,7 @@
         <md-icon>close
 
     <md-menu-item href=@{HomeR} :curr == Just HomeR:selected>
-      MsgUserList
+      _{MsgWelcome}
 
     <details.app-submenu #idDetailsData
       :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open

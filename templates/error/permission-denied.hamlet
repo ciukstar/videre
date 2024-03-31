@@ -9,7 +9,7 @@
 <main>
 
   <h2.headline-medium>
-    #{msg}
+    _{MsgLoginPlease}
   
   <md-filled-button type=button href=@{AuthR LoginR}>
     _{MsgSignIn}

@@ -1,3 +1,5 @@
+LoginToViewContacts: Log in to view contacts
+Contacts: Contacte
 GmailAccountNotSet: Contul Gmail nu este setat. Inițializați jetoanele.
 ThankYou: Vă mulțumim
 ConfirmEmailPlease: Vă rugăm să confirmați adresa dvs. de e-mail făcând clic pe link-ul de mai jos

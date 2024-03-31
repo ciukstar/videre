@@ -1,3 +1,5 @@
+LoginToViewContacts: Log in to view contacts
+Contacts: Contacts
 GmailAccountNotSet: Gmail account is not set. Initialize tokens.
 ThankYou: Thank you
 ConfirmEmailPlease: Please confirm your email address by clicking on the link below

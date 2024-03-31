@@ -2,7 +2,7 @@
   ^{widgetMenu}
 
   <h1.title-large>
-    Videre
+    _{MsgWelcome}
 
   <span.app-top-app-bar-end>
     ^{widgetUser}
@@ -13,26 +13,18 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null accounts
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.body-large>
-        _{MsgNoUsersYet}
-  $else
-    <md-list>
-      $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- accounts
-        <md-list-item type=link href=#>
-          <img slot=start src=@{AccountPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-          <div slot=headline>
-            $maybe name <- name
-              #{name}
-          <div slot=supporting-text>#{email}
-          <md-icon slot=end>arrow_forward_ios
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
-              #{attrib}
-        <md-divider>
+  <h2.headline>
+    Welcome to Videre 
+
+  $maybe Entity uid _ <- user
+    <md-filled-tonal-button has-icon type=link href=@{ContactsR uid}>
+      <md-icon slot=icon>contacts
+      _{MsgContacts}
+  $nothing
+    <md-filled-tonal-button has-icon type=link href=@{AuthR LoginR}>
+      <md-icon slot=icon>login
+      _{MsgLoginToViewContacts}
+    
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

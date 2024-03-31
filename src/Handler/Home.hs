@@ -18,8 +18,8 @@ import Database.Persist (Entity (Entity))
 
 import Foundation
     ( Handler
-    , Route (AccountPhotoR)
-    , AppMessage (MsgNoUsersYet)
+    , Route (AuthR, AccountPhotoR, ContactsR)
+    , AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
     )
 
 import Model
@@ -34,6 +34,7 @@ import Text.Hamlet (Html)
 
 import Widgets (widgetMenu, widgetUser)
 
+import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages)
 import Yesod.Core.Handler (setUltDestCurrent)
 import Yesod.Core.Widget (setTitle)
@@ -42,15 +43,8 @@ import Yesod.Persist.Core (YesodPersist(runDB))
 
 getHomeR :: Handler Html
 getHomeR = do
-    
-    accounts <- (second (join . unValue) <$>) <$> runDB ( select $ do
-        x :& h <- from $ table @User
-            `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
-        orderBy [desc (x ^. UserId)]
-        return (x, h ?. UserPhotoAttribution) )
-
+    user <- maybeAuth
     msgs <- getMessages
-    
     setUltDestCurrent
     defaultLayout $ do
         setTitle "Videre"

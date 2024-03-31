@@ -1,3 +1,5 @@
+LoginToViewContacts: Log in to view contacts
+Contacts: Контакты
 GmailAccountNotSet: Аккаунт Gmail не установлен. Инициализируйте токены.
 ThankYou: Спасибо
 ConfirmEmailPlease: Пожалуйста, подтвердите свой адрес электронной почты, нажав на ссылку ниже

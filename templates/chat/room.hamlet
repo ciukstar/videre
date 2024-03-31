@@ -1,0 +1,20 @@
+
+<header.app-top-app-bar.primary>
+  <md-filled-icon-button type=link href=@{backlink}>
+    <md-icon>arrow_back
+
+  <img src=@{photo}
+       width=24 height=24 alt="MsgPhoto" loading=lazy style="clip-path:circle(50%)">
+
+  <h1.title-small>
+    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+      $maybe name <- name
+        #{name}
+      $nothing
+        #{email}
+
+  <span.app-top-app-bar-end>
+    
+
+<main>
+  Chat room

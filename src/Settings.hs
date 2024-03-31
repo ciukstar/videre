@@ -69,6 +69,8 @@ data AppSettings = AppSettings
     -- ^ Get the IP address from the header when logging. Useful when sitting
     -- behind a reverse proxy.
 
+    , appDevelopment            :: Bool
+    -- ^ Development mode
     , appDetailedRequestLogging :: Bool
     -- ^ Use detailed request logging system
     , appShouldLogAll           :: Bool
@@ -144,18 +146,18 @@ instance FromJSON AppSettings where
         appPort                   <- o .: "port"
         appIpFromHeader           <- o .: "ip-from-header"
 
-        dev                       <- o .:? "development"      .!= defaultDev
+        appDevelopment            <- o .:? "development"      .!= defaultDev
 
-        appDetailedRequestLogging <- o .:? "detailed-logging" .!= dev
-        appShouldLogAll           <- o .:? "should-log-all"   .!= dev
-        appReloadTemplates        <- o .:? "reload-templates" .!= dev
-        appMutableStatic          <- o .:? "mutable-static"   .!= dev
-        appSkipCombining          <- o .:? "skip-combining"   .!= dev
+        appDetailedRequestLogging <- o .:? "detailed-logging" .!= appDevelopment
+        appShouldLogAll           <- o .:? "should-log-all"   .!= appDevelopment
+        appReloadTemplates        <- o .:? "reload-templates" .!= appDevelopment
+        appMutableStatic          <- o .:? "mutable-static"   .!= appDevelopment
+        appSkipCombining          <- o .:? "skip-combining"   .!= appDevelopment
 
         appCopyright              <- o .:  "copyright"
         appAnalytics              <- o .:? "analytics"
 
-        appAuthDummyLogin         <- o .:? "auth-dummy-login"  .!= dev
+        appAuthDummyLogin         <- o .:? "auth-dummy-login"  .!= appDevelopment
 
         appSuperuser              <- o .:  "superuser"
         appGoogleApiConf          <- o .: "google-api"

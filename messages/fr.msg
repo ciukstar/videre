@@ -1,3 +1,5 @@
+LoginToViewContacts: Connectez-vous pour voir les contacts
+Contacts: Les contacts
 GmailAccountNotSet: Le compte Gmail n'est pas défini. Initialisez les jetons.
 ThankYou: Merci
 ConfirmEmailPlease: Veuillez confirmer votre adresse email en cliquant sur le lien ci-dessous

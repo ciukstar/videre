@@ -14,6 +14,8 @@
 
 module Foundation where
 
+import ChatRoom.Data ( ChatRoom, Route (ChatRoomR) )
+
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
@@ -65,6 +67,7 @@ import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Auth.Email
     ( authEmail, Email, Identifier, SaltedPass, VerKey, VerUrl
+    , forgotPasswordR, registerR, loginR, setpassR
     , EmailCreds
       ( emailCredsId, emailCredsAuthId, emailCredsStatus, emailCredsVerkey
       , emailCredsEmail, EmailCreds
@@ -76,7 +79,6 @@ import Yesod.Auth.Email
       , registerHandler, confirmationEmailSentResponse, setPasswordHandler
       , forgotPasswordHandler
       )
-    , forgotPasswordR, registerR, loginR, setpassR
     )
 import qualified Yesod.Auth.Email as AE (Email)
 import Yesod.Auth.OAuth2.Google (oauth2GoogleScopedWidget)
@@ -104,6 +106,7 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
+    , getChatRoom    :: ChatRoom
     }
 
 data MenuItem = MenuItem
@@ -169,7 +172,7 @@ instance Yesod App where
         provideRep $ return $ T.intercalate ", " msgs
 
     errorHandler x = defaultErrorHandler x
-    
+
     -- Controls the base of generated URLs. For more information on modifying,
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot :: Approot App
@@ -248,8 +251,9 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
-    
-    isAuthorized HomeR _ = isAuthenticated
+
+    isAuthorized (ChatR _) _ = isAuthenticated
+    isAuthorized (ContactsR uid) _ = isAuthenticatedSelf uid
 
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
@@ -269,8 +273,9 @@ instance Yesod App where
     isAuthorized (DataR (UserEditR _)) _ = isAdmin
     isAuthorized (DataR (UserR _)) _ = isAdmin
     isAuthorized r@(DataR UsersR) _ = setUltDest r >> isAdmin
-    
-    -- Routes not requiring authentication.    
+
+    -- Routes not requiring authentication.
+    isAuthorized HomeR _ = return Authorized
     isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
@@ -331,7 +336,7 @@ isAdmin = do
         Just (Entity _ (User _ _ _ _ _ _ _ True)) -> return Authorized
         Just (Entity _ (User _ _ _ _ _ _ _ False)) -> unauthorizedI MsgAccessDeniedAdminsOnly
         Nothing -> unauthorizedI MsgLoginPlease
-        
+
 
 -- Define breadcrumbs.
 instance YesodBreadcrumbs App where
@@ -364,9 +369,11 @@ instance YesodAuth App where
     -- Where to send a user after successful login
     loginDest :: App -> Route App
     loginDest _ = HomeR
+
     -- Where to send a user after logout
     logoutDest :: App -> Route App
     logoutDest _ = HomeR
+
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer :: App -> Bool
     redirectToReferer _ = True
@@ -438,6 +445,7 @@ instance YesodAuth App where
                             _otherwise -> return ()
                         return ()
                     Nothing -> return ()
+                  setUltDest $ ContactsR uid
                   return $ Authenticated uid
               _otherwise -> return $ UserError InvalidLogin
 
@@ -446,9 +454,11 @@ instance YesodAuth App where
               x <- from $ table @User
               where_ $ x ^. UserEmail E.==. val ident
               return x
-          return $ case user of
-            Just (Entity uid _) -> Authenticated uid
-            Nothing -> UserError InvalidLogin
+          case user of
+            Just (Entity uid _) -> do
+                setUltDest $ ContactsR uid
+                return $ Authenticated uid
+            Nothing -> return $ UserError InvalidLogin
 
     -- You can add other plugins like Google Email, email or OAuth here
     authPlugins :: App -> [AuthPlugin App]
@@ -470,7 +480,7 @@ instance YesodAuthEmail App where
         authLayout $ do
             setTitleI PasswordResetTitle
             idFormForgotPassword <- newIdent
-            $(widgetFile "auth/forgot") 
+            $(widgetFile "auth/forgot")
       where
           formForgotPassword :: Form Text
           formForgotPassword extra = do
@@ -571,7 +581,7 @@ instance YesodAuthEmail App where
 
     emailLoginHandler :: (Route Auth -> Route App) -> Widget
     emailLoginHandler parent = do
-        
+
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
@@ -594,14 +604,14 @@ instance YesodAuthEmail App where
               let r = (,) <$> emailR <*> passR
                   w = do
 
-                      users <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
+                      users <- liftHandler $ runDB ( select $ do
                           x <- from $ table @User
                           where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
                           where_ $ not_ $ x ^. UserSuperuser
                           orderBy [asc (x ^. UserId)]
                           return x )
 
-                      supers <- liftHandler $ ((,False) <$>) <$> runDB ( select $ do
+                      supers <- liftHandler $ runDB ( select $ do
                           x <- from $ table @User
                           where_ $ x ^. UserAuthType `in_` valList [UserAuthTypeEmail,UserAuthTypePassword]
                           where_ $ x ^. UserSuperuser
@@ -622,7 +632,7 @@ instance YesodAuthEmail App where
     <md-icon slot=icon>arrow_drop_down
   <md-menu #menuDemoAccounts anchor=anchorDemoAccounts>
     $with n <- length accounts
-      $forall (i,(Entity uid (User email _ _ _ _ name super admin),doctor)) <- zip (irange 1) accounts
+      $forall (i,Entity uid (User email _ _ _ _ name super admin)) <- zip (irange 1) accounts
         $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
           <md-menu-item onclick="document.getElementById('#{fvId emailV}').value = '#{email}';document.getElementById('#{fvId passV}').value = '#{pass}'">
             <md-icon slot=start>
