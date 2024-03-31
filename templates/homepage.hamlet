@@ -8,4 +8,34 @@
     ^{widgetUser}
 
 <main>
-  Main content
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $if null accounts
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoUsersYet}
+  $else
+    <md-list>
+      $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- accounts
+        <md-list-item type=link href=#>
+          <img slot=start src=@{AccountPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+          <div slot=headline>
+            $maybe name <- name
+              #{name}
+          <div slot=supporting-text>#{email}
+          <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
+        <md-divider>
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

@@ -28,10 +28,10 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 import Foundation
     ( Handler, Widget, Form
-    , Route (AuthR, DataR, AccountPhotoR, StaticR, AccountR)
+    , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage
-      ( MsgUsers, MsgNoUsersYet, MsgSignIn, MsgSignOut, MsgUserAccount
+      ( MsgUsers, MsgNoUsersYet
       , MsgPhoto, MsgUser, MsgSave, MsgBack, MsgCancel, MsgEmailAddress, MsgYes
       , MsgAuthentication, MsgPassword, MsgVerificationKey, MsgVerified, MsgNo
       , MsgFullName, MsgGoogle, MsgEmail, MsgEdit, MsgDele, MsgConfirmPlease
