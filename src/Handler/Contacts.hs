@@ -21,9 +21,11 @@ import Database.Esqueleto.Experimental
 import Database.Persist (Entity (Entity))
 
 import Foundation
-    ( Handler, App
+    ( Handler
     , Route (AccountPhotoR, ChatR, ContactsR)
-    , AppMessage (MsgNoUsersYet)
+    )
+import Foundation.Data
+    ( App, AppMessage (MsgNoUsersYet)
     )
 
 import Model

@@ -34,18 +34,23 @@ import Model
     , User (User, userName)
     , UserInfo (UserInfo, userInfoBirthDate)
     )
+
+ 
 import Foundation
     ( Handler, Widget
     , Route
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
       , AccountInfoR, AccountInfoEditR
       )
-    , AppMessage
+    )
+import Foundation.Data
+    ( AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
       , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
       , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
       )
     )
+
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg

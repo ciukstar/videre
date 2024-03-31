@@ -77,6 +77,7 @@ import Handler.Common ( getFaviconR, getRobotsR )
 import Yesod.Auth.Email (saltPass)
 import ChatRoom.Data (ChatRoom(ChatRoom))
 import ChatRoom ()
+import Foundation.Data (App (..))
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

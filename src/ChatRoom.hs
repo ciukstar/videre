@@ -15,7 +15,6 @@ module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route (ChatRoomR)
-    , ChatRoomMessage (MsgPhoto)
     )
 
 import Database.Esqueleto.Experimental
@@ -23,6 +22,8 @@ import Database.Esqueleto.Experimental
     , (^.), (==.), SqlBackend
     )
 import Database.Persist (Entity (Entity))
+
+import Foundation.Data (AppMessage (MsgPhoto))
     
 import Model (UserId, User (User), EntityField (UserId))
 
@@ -33,14 +34,14 @@ import Text.Hamlet (Html)
 import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
-    , Application, RenderMessage, HandlerFor
+    , Application, RenderMessage (renderMessage), HandlerFor, mkMessage
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 
 
-class ( Yesod m, RenderMessage m FormMessage
+class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
       , YesodPersist m, YesodPersistBackend m ~ SqlBackend
       ) => YesodChat m where
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
@@ -60,6 +61,8 @@ getChatRoomR sid rid = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val rid
         return x
+
+    -- renderMessage
 
     liftHandler $ defaultLayout $ do
         $(widgetFile "chat/room")

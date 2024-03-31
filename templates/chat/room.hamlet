@@ -4,7 +4,7 @@
     <md-icon>arrow_back
 
   <img src=@{photo}
-       width=24 height=24 alt="MsgPhoto" loading=lazy style="clip-path:circle(50%)">
+       width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
 
   <h1.title-small>
     $maybe Entity _ (User email _ _ _ _ name _ _) <- user

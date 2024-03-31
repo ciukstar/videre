@@ -14,6 +14,8 @@
 
 module Foundation where
 
+import Foundation.Data
+
 import ChatRoom.Data ( ChatRoom, Route (ChatRoomR) )
 
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
@@ -61,7 +63,6 @@ import Text.Jasmine ( minifym )
 import Text.Shakespeare.Text (stext)
 import Text.Printf (printf)
 
-
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -96,18 +97,6 @@ import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
--- | The foundation datatype for your application. This can be a good place to
--- keep settings and values requiring initialization before your application
--- starts running, such as database connections. Every handler will have
--- access to the data present here.
-data App = App
-    { appSettings    :: AppSettings
-    , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
-    , appHttpManager :: Manager
-    , appLogger      :: Logger
-    , getChatRoom    :: ChatRoom
-    }
 
 data MenuItem = MenuItem
     { menuItemLabel :: Text
@@ -119,7 +108,7 @@ data MenuTypes
     = NavbarLeft MenuItem
     | NavbarRight MenuItem
 
-mkMessage "App" "messages" "en"
+
 
 -- This is where we define all of the routes in our application. For a full
 -- explanation of the syntax, please see:

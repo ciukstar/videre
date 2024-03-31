@@ -12,7 +12,9 @@ import Foundation
     ( Widget
     , Route (HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR)
     , DataR (UsersR, TokensR)
-    , AppMessage
+    )
+import Foundation.Data
+    ( AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut
       , MsgPhoto

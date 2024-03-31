@@ -19,7 +19,9 @@ import Database.Persist (Entity (Entity))
 import Foundation
     ( Handler
     , Route (AuthR, AccountPhotoR, ContactsR)
-    , AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
+    )
+import Foundation.Data
+    ( AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
     )
 
 import Model

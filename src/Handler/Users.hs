@@ -26,11 +26,14 @@ import Database.Esqueleto.Experimental
 import Database.Persist
     ( Entity (Entity), PersistStoreWrite (delete), PersistUniqueWrite (upsert) )
 import qualified Database.Persist as P ((=.))
+
 import Foundation
     ( Handler, Widget, Form
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
-    , AppMessage
+    )
+import Foundation.Data
+    ( AppMessage
       ( MsgUsers, MsgNoUsersYet
       , MsgPhoto, MsgUser, MsgSave, MsgBack, MsgCancel, MsgEmailAddress, MsgYes
       , MsgAuthentication, MsgPassword, MsgVerificationKey, MsgVerified, MsgNo
