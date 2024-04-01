@@ -1,6 +1,13 @@
 -- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
 -- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
+Chat json
+    user UserId OnDeleteCascade
+    interlocutor UserId
+    timemark UTCTime
+    message Text
+    status ChatMessageStatus
+
 UserPhoto
     user UserId OnDeleteCascade
     mime Text

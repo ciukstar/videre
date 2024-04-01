@@ -56,6 +56,9 @@ dependencies:
 - web-push
 - safe-exceptions
 - transformers
+- stm
+- yesod-websockets
+- unliftio
 
 # The library contains all of our application code. The executable
 # defined below is just a thin wrapper.

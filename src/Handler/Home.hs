@@ -6,28 +6,16 @@
 
 module Handler.Home (getHomeR) where
 
-import Control.Monad (join)
-
-import Data.Bifunctor (Bifunctor(second))
-
-import Database.Esqueleto.Experimental
-    ( select, from, table, orderBy, desc, leftJoin, on, just
-    , (^.), (?.), (==.), (:&) ((:&)), Value (unValue)
-    )
 import Database.Persist (Entity (Entity))
 
-import Foundation
-    ( Handler
-    , Route (AuthR, AccountPhotoR, ContactsR)
-    )
 import Foundation.Data
-    ( AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
+    ( Handler
+    , Route (AuthR, ContactsR)
+    , AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
     )
 
 import Model
     ( statusError
-    , User (User), UserPhoto (UserPhoto)
-    , EntityField (UserId, UserPhotoUser, UserPhotoAttribution)
     )
 
 import Settings (widgetFile)
@@ -40,7 +28,6 @@ import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages)
 import Yesod.Core.Handler (setUltDestCurrent)
 import Yesod.Core.Widget (setTitle)
-import Yesod.Persist.Core (YesodPersist(runDB))
 
 
 getHomeR :: Handler Html

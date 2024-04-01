@@ -20,17 +20,15 @@ import Database.Esqueleto.Experimental
     )
 import Database.Persist (Entity (Entity))
 
-import Foundation
+import Foundation.Data
     ( Handler
     , Route (AccountPhotoR, ChatR, ContactsR)
-    )
-import Foundation.Data
-    ( App, AppMessage (MsgNoUsersYet)
+    , App, AppMessage (MsgNoUsersYet)
     )
 
 import Model
     ( statusError
-    , UserId, User (User), UserPhoto (UserPhoto)
+    , UserId, User (User), UserPhoto
     , EntityField (UserId, UserPhotoUser, UserPhotoAttribution)
     )
 

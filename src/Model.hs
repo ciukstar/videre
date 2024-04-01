@@ -12,13 +12,21 @@
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE DataKinds                  #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Model where
+
+import Control.Applicative (pure)
 
 import ClassyPrelude.Yesod
     ( Typeable, mkMigrate, mkPersist, persistFileWith
     , share, sqlSettings
     )
+
+import Data.Aeson
+    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON
+    )
+import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 
 import Data.Bool (Bool)
 import Data.ByteString (ByteString)
@@ -27,6 +35,7 @@ import Data.Ord (Ord)
 import Data.String (String)
 import Data.Text (Text)
 import Data.Time.Calendar (Day)
+import Data.Time.Clock (UTCTime)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
@@ -34,6 +43,23 @@ import Database.Persist.TH (derivePersistField)
 import Text.Read (Read)
 import Text.Show (Show)
 import Text.Hamlet (Html)
+
+
+data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
+    deriving (Show, Read, Eq, Ord)
+derivePersistField "ChatMessageStatus"
+
+
+instance ToJSON ChatMessageStatus where
+    toJSON :: ChatMessageStatus -> Value
+    toJSON ChatMessageStatusRead = "Read"
+    toJSON ChatMessageStatusUnread = "Unread"
+
+instance FromJSON ChatMessageStatus where
+    parseJSON :: Value -> Parser ChatMessageStatus
+    parseJSON (String "Read") = pure ChatMessageStatusRead
+    parseJSON (String "Unread") = pure ChatMessageStatusUnread
+    parseJSON invalid = prependFailure "parsing ChatMessageStatus failed" (typeMismatch "String" invalid)
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager

@@ -108,22 +108,6 @@ data MenuTypes
     = NavbarLeft MenuItem
     | NavbarRight MenuItem
 
-
-
--- This is where we define all of the routes in our application. For a full
--- explanation of the syntax, please see:
--- http://www.yesodweb.com/book/routing-and-handlers
---
--- Note that this is really half the story; in Application.hs, mkYesodDispatch
--- generates the rest of the code. Please see the following documentation
--- for an explanation for this split:
--- http://www.yesodweb.com/book/scaffolding-and-the-site-template#scaffolding-and-the-site-template_foundation_and_application_modules
---
--- This function also generates the following type synonyms:
--- type Handler = HandlerFor App
--- type Widget = WidgetFor App ()
-mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
-
 -- | A convenient synonym for creating forms.
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 

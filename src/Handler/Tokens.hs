@@ -38,15 +38,15 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Form
+    ( Form
+    )
+import Foundation.Data
+    ( App (appSettings), Handler
     , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
       , TokensVapidClearR
       )
-    )
-import Foundation.Data
-    ( App (appSettings)
     , AppMessage
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings

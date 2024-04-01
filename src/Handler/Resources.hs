@@ -3,11 +3,9 @@
 
 module Handler.Resources (getDocsR) where
 
-import Foundation
-    ( Handler
-    )
 import Foundation.Data
-    ( AppMessage
+    ( Handler
+    , AppMessage
       ( MsgAppDocumentation
       )
     )

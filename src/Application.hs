@@ -77,7 +77,20 @@ import Handler.Common ( getFaviconR, getRobotsR )
 import Yesod.Auth.Email (saltPass)
 import ChatRoom.Data (ChatRoom(ChatRoom))
 import ChatRoom ()
-import Foundation.Data (App (..))
+import Foundation.Data
+    ( App(..), Handler, resourcesApp
+    , Route
+      ( DataR, ChatR, ContactsR, AccountInfoEditR, AccountInfoR
+      , AccountEditR, AccountPhotoR, AccountR, AccountsR, HomeR, StaticR
+      , AuthR, FaviconR, RobotsR, DocsR
+      )
+    ,  DataR
+       ( UsersR, TokensVapidClearR, TokensVapidR
+       , TokensGoogleapisClearR, TokensGoogleapisHookR, TokensR, UserPhotoR
+       , UserDeleR, UserEditR, UserR
+       )
+    )
+import qualified Data.Map as M
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -98,7 +111,7 @@ makeFoundation appSettings = do
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
 
-    let getChatRoom = ChatRoom
+    getChatRoom <- ChatRoom <$> newTVarIO M.empty
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

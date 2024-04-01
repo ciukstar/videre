@@ -8,13 +8,12 @@ module Widgets
 
 import Database.Persist (Entity (Entity))
 
-import Foundation
+import Foundation ()
+import Foundation.Data
     ( Widget
     , Route (HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR)
     , DataR (UsersR, TokensR)
-    )
-import Foundation.Data
-    ( AppMessage
+    , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut
       , MsgPhoto

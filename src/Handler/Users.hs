@@ -28,12 +28,13 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Widget, Form
-    , Route (DataR, StaticR)
-    , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
+    ( Form
     )
 import Foundation.Data
-    ( AppMessage
+    ( Handler, Widget
+    , Route (DataR, StaticR)
+    , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
+    , AppMessage
       ( MsgUsers, MsgNoUsersYet
       , MsgPhoto, MsgUser, MsgSave, MsgBack, MsgCancel, MsgEmailAddress, MsgYes
       , MsgAuthentication, MsgPassword, MsgVerificationKey, MsgVerified, MsgNo
