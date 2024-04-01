@@ -8,6 +8,10 @@ Chat json
     message Text
     status ChatMessageStatus
 
+Contact
+    owner UserId OnDeleteCascade
+    entry UserId OnDeleteCascade
+
 UserPhoto
     user UserId OnDeleteCascade
     mime Text

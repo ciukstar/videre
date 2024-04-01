@@ -1,12 +1,10 @@
 
-<header.app-top-app-bar.primary>
-  ^{widgetMenu}
+<header.app-top-app-bar.background>
+  <md-icon-button type=link href=@{MyContactsR uid}>
+    <md-icon>arrow_back
 
   <h1.title-large>
-    Videre
-
-  <span.app-top-app-bar-end>
-    ^{widgetUser}
+    _{MsgContacts}
 
 <main>
 
@@ -14,29 +12,19 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null accounts
+  $if null users
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
       <figcaption.body-large>
-        _{MsgNoUsersYet}
+        _{MsgNoRegisteredUsersYet}
   $else
-    <md-list>
-      $forall (Entity rid (User email _ _ _ _ name _ _),attrib) <- accounts
-        <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid}>
-          <img slot=start src=@{AccountPhotoR rid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-          <div slot=headline>
-            $maybe name <- name
-              #{name}
-            $nothing
-              #{email}
-          <div slot=supporting-text>
-            Last long log Last long log Last long log Last long log
-          <md-icon slot=end>arrow_forward_ios
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
-              #{attrib}
-        <md-divider>
+
+    <form method=post action=@{ContactsR uid} enctype=#{et} ##{idFormPostContacts}>
+      ^{fw}
+
+        
+  <md-fab label=_{MsgAdd} aria-label=_{MsgAdd} ##{idFabAdd} onclick="#{idFormPostContacts}.submit()">
+    <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1.primary-container>

@@ -1,3 +1,14 @@
+Contact: Contact
+Actions: Actions
+ViewContact: View contact
+NewContactsAdded: New contacts added
+AddSelected: Add selected
+AddContacts: Add contacts
+Select: Select
+NoRegisteredUsersYet: There are no registered users yet
+Add: Add
+NoContactsYet: There are no contacts yet
+Message: Message
 LoginToViewContacts: Log in to view contacts
 Contacts: Contacts
 GmailAccountNotSet: Gmail account is not set. Initialize tokens.
@@ -83,3 +94,7 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generate
 VapidGenerationWarning: Generating a new VAPID key requires all clients to re-subscribe to the push notifications
 InvalidGoogleAPITokens: Invalid Google API tokens
+AppDescription: Instant messaging progressive web app
+AppName: Videre
+MetaKeywords: instant, messaging, progressive, web, app, pwa
+MetaDescription: Instant messaging progressive web app

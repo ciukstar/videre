@@ -11,15 +11,16 @@ import Control.Concurrent.STM.TChan (TChan)
 import Control.Concurrent.STM.TVar (TVar)
 
 import qualified Data.Map as M
+import qualified Data.Set as S
 import Data.Text (Text)
 
-import Model (UserId)
+import Model (UserId, ContactId)
 
 import Yesod.Core (renderRoute)
 import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
 
-newtype ChatRoom = ChatRoom (TVar (M.Map Text (TChan Text, Int)))
+newtype ChatRoom = ChatRoom (TVar (M.Map (S.Set UserId) (TChan Text, Int)))
 
 mkYesodSubData "ChatRoom" [parseRoutes|
-/#UserId/#UserId/room ChatRoomR GET
+/#UserId/#UserId/#ContactId/room ChatRoomR GET
 |]

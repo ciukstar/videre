@@ -5,7 +5,10 @@
 /chat ChatR ChatRoom getChatRoom
 
 
-/contacts/#UserId ContactsR GET
+/my/contacts/#UserId/#UserId/#ContactId/remove ContactRemoveR POST
+/my/contacts/#UserId/#UserId/#ContactId        ContactR       GET
+/my/contacts/#UserId 		       	       MyContactsR    GET
+/contacts/#UserId    		       	       ContactsR      GET POST
 
 /accounts/#UserId/info/edit AccountInfoEditR GET
 /accounts/#UserId/info      AccountInfoR     GET POST

@@ -1,0 +1,49 @@
+
+<header.app-top-app-bar.primary>
+  ^{widgetMenu}
+
+  <h1.title-large>
+    _{MsgAppName}
+
+  <span.app-top-app-bar-end>
+    ^{widgetUser}
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $if null entries
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoContactsYet}
+  $else
+    <md-list>
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), attrib)) <- entries
+        <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid cid}>
+          <img slot=start src=@{AccountPhotoR rid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+          <div slot=headline>
+            $maybe name <- name
+              #{name}
+            $nothing
+              #{email}
+          <div slot=supporting-text>
+            Last message
+          <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
+        <md-divider>
+        
+  <md-fab size=small aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{ContactsR uid}>
+    <md-icon slot=icon>add
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

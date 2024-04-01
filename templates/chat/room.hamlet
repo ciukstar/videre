@@ -3,18 +3,41 @@
   <md-filled-icon-button type=link href=@{backlink}>
     <md-icon>arrow_back
 
-  <img src=@{photo}
-       width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
+  <img src=@{photo} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
 
   <h1.title-small>
-    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+    $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
       $maybe name <- name
         #{name}
       $nothing
         #{email}
 
   <span.app-top-app-bar-end>
+    <span style="position:relaive">
+      <md-filled-icon-button type=button aria-label=_{MsgActions} #btnMenuMore
+        onclick="document.getElementById('menuMore').open = !document.getElementById('menuMore').open">
+        <md-icon>more_vert
+      <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
+        <md-menu-item href=@{contact}>
+          <div slot=headline>_{MsgViewContact}
     
 
 <main>
-  Chat room
+
+  <div ##{idChatOutput}>
+
+    $forall (day,messages) <- chats
+      <time.day-bubble.body-small datetime=#{show day}>#{show day}
+      $forall Entity _ (Chat userId _ time msg _) <- messages
+        <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
+          <span>#{msg}
+          <span.bubble-status-line>
+            <time.time-bubble.body-small datetime=#{show time}>
+            <i.icon>done_all
+          <span.bubble-tail-out>
+            <span.bubble-tail>
+
+  <form ##{idMessageForm}>
+      <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
+        <md-filled-icon-button type=submit slot=trailing-icon disabled>
+          <md-icon>send

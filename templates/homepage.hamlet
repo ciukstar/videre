@@ -17,7 +17,7 @@
     Welcome to Videre 
 
   $maybe Entity uid _ <- user
-    <md-filled-tonal-button has-icon type=link href=@{ContactsR uid}>
+    <md-filled-tonal-button has-icon type=link href=@{MyContactsR uid}>
       <md-icon slot=icon>contacts
       _{MsgContacts}
   $nothing

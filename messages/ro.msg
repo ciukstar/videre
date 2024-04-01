@@ -1,3 +1,14 @@
+Contact: Contact
+Actions: Acțiuni
+ViewContact: Vizualizați contactul
+NewContactsAdded: Contacte noi adăugate
+AddSelected: Adăugați selecționate
+AddContacts: Adaugă contacte
+Select: Selectează
+NoRegisteredUsersYet: Nu există încă utilizatori înregistrați
+Add: Adaugă
+NoContactsYet: Nu există încă contacte
+Message: Mesaj
 LoginToViewContacts: Log in to view contacts
 Contacts: Contacte
 GmailAccountNotSet: Contul Gmail nu este setat. Inițializați jetoanele.
@@ -83,3 +94,7 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generați
 VapidGenerationWarning: Generarea unei noi chei VAPID necesită ca toți clienții să se aboneze din nou la notificările push
 InvalidGoogleAPITokens: Jetoane Google API nevalide
+AppDescription: Aplicație web progresivă de mesagerie instantanee
+AppName: Videre
+MetaKeywords: mesagerie, instantanee, progresiv, web, aplicație, pwa
+MetaDescription: Aplicație web progresivă de mesagerie instantanee

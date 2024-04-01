@@ -10,7 +10,7 @@ import Database.Persist (Entity (Entity))
 
 import Foundation.Data
     ( Handler
-    , Route (AuthR, ContactsR)
+    , Route (AuthR, MyContactsR)
     , AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
     )
 

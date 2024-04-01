@@ -14,10 +14,6 @@
 
 module Foundation where
 
-import Foundation.Data
-
-import ChatRoom.Data ( ChatRoom, Route (ChatRoomR) )
-
 import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
@@ -39,7 +35,9 @@ import Database.Esqueleto.Experimental as E
     , (==.), (^.)
     , orderBy, valList, in_, not_
     )
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
+import Database.Persist.Sql (runSqlPool)
+
+import Foundation.Data
 
 import Material3 (md3passwordField, md3emailField)
 
@@ -217,6 +215,10 @@ instance Yesod App where
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
             $(widgetFile "default-layout")
+
+        lang <- fromMaybe "en" . headMay <$> languages
+        msgr <- getMessageRender
+        
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- The page to be redirected to when authentication is required.
@@ -226,6 +228,11 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     isAuthorized (ChatR _) _ = isAuthenticated
+
+    
+    isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid
+    isAuthorized (ContactR uid _ _) _ = isAuthenticatedSelf uid
+    isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (ContactsR uid) _ = isAuthenticatedSelf uid
 
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
@@ -418,7 +425,7 @@ instance YesodAuth App where
                             _otherwise -> return ()
                         return ()
                     Nothing -> return ()
-                  setUltDest $ ContactsR uid
+                  setUltDest $ MyContactsR uid
                   return $ Authenticated uid
               _otherwise -> return $ UserError InvalidLogin
 
@@ -429,7 +436,7 @@ instance YesodAuth App where
               return x
           case user of
             Just (Entity uid _) -> do
-                setUltDest $ ContactsR uid
+                setUltDest $ MyContactsR uid
                 return $ Authenticated uid
             Nothing -> return $ UserError InvalidLogin
 

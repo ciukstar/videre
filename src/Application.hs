@@ -21,7 +21,12 @@ module Application
     , db
     ) where
 
+import ChatRoom.Data (ChatRoom(ChatRoom))
+import ChatRoom ()
+
 import Control.Monad.Logger (liftLoc, runLoggingT)
+
+import qualified Data.Map as M
 
 import Database.Persist.Sqlite
     ( runSqlPool, sqlDatabase, createSqlitePoolWithConfig )
@@ -51,7 +56,10 @@ import System.Log.FastLogger
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 
-import Handler.Contacts (getContactsR)
+import Handler.Contacts
+    ( getContactsR, postContactsR, getMyContactsR, postContactRemoveR
+    , getContactR
+    )
 
 import Handler.Accounts
     ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
@@ -74,15 +82,13 @@ import Handler.Users
 
 import Handler.Common ( getFaviconR, getRobotsR )
 
-import Yesod.Auth.Email (saltPass)
-import ChatRoom.Data (ChatRoom(ChatRoom))
-import ChatRoom ()
 import Foundation.Data
     ( App(..), Handler, resourcesApp
     , Route
-      ( DataR, ChatR, ContactsR, AccountInfoEditR, AccountInfoR
-      , AccountEditR, AccountPhotoR, AccountR, AccountsR, HomeR, StaticR
-      , AuthR, FaviconR, RobotsR, DocsR
+      ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
+      , AccountInfoEditR, AccountInfoR, AccountEditR, AccountPhotoR
+      , AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR, RobotsR
+      , DocsR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR
@@ -90,7 +96,8 @@ import Foundation.Data
        , UserDeleR, UserEditR, UserR
        )
     )
-import qualified Data.Map as M
+    
+import Yesod.Auth.Email (saltPass)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

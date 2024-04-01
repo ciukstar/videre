@@ -30,7 +30,7 @@ import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 
 import Data.Bool (Bool)
 import Data.ByteString (ByteString)
-import Data.Eq (Eq)
+import Data.Eq (Eq ((==)))
 import Data.Ord (Ord)
 import Data.String (String)
 import Data.Text (Text)
@@ -79,6 +79,11 @@ derivePersistField "AuthenticationType"
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
 
+
+
+instance Eq User where
+    (==) :: User -> User -> Bool
+    a == b = userEmail a == userEmail b
 
 
 gmailSender :: Text

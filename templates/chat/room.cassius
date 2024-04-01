@@ -13,6 +13,84 @@ header
         margin-left: auto
 
 main
-
+    height: calc(100svh - var(--app-top-appbar-height,64px))
     display: flex
     flex-direction: column
+    
+    margin: 0
+    padding: 0
+    
+    ##{idChatOutput}
+        padding: 0 1rem
+        box-sizing: border-box
+        overflow: auto
+        flex: 1
+        
+        display: flex
+        flex-direction: column
+
+        time.day-bubble
+          align-self: center
+          padding: 0.5rem
+          border-radius: 0.5rem
+          box-shadow: 1px 1px 1px rgba(0,0,0,0.2)
+
+        .bubble
+            width: fit-content
+            max-width: 80%
+            border: 0
+            padding: 0.5rem
+            position: relative
+
+            .bubble-status-line
+                display: flex
+                justify-content: flex-end
+                align-items: center
+                i.icon
+                  font-family: 'Material Symbols Outlined'
+
+        .bubble.right
+            border-radius: 8px 0 8px 8px
+            align-self: flex-end
+            background-color: var(--md-sys-color-surface-variant)
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
+            
+            .bubble-tail-out
+                filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
+                position: absolute
+                top: 0
+                right: -10px
+                display: inline
+                
+                .bubble-tail
+                    display: block
+                    background-color: var(--md-sys-color-surface-variant)
+                    width: 10px
+                    height: 13px
+                    clip-path: polygon(0 0,100% 0,0 100%)
+          
+        .bubble.left
+            border-radius: 0 8px 8px 8px
+            align-self: flex-start
+            background-color: var(--md-sys-color-primary-container)
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
+            
+            .bubble-tail-out
+                filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
+                position: absolute
+                top: 0
+                left: -10px
+                display: block
+
+                .bubble-tail
+                    display: block
+                    background-color: var(--md-sys-color-primary-container)
+                    width: 10px
+                    height: 13px
+                    clip-path: polygon(0 0,100% 0,100% 100%)
+            
+    ##{idMessageForm}
+        padding: 0.5rem 0.5rem 1rem 0.5rem
+
+        ##{idMessageInput}
+            width: 100%

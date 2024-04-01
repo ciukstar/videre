@@ -1,3 +1,14 @@
+Contact: Контакт
+Actions: Действия
+ViewContact: Просмотр контакта
+NewContactsAdded: Добавлены новые контакты
+AddSelected: Добавить выбранные
+AddContacts: Добавить контакты
+Select: Выбирать
+NoRegisteredUsersYet: Зарегистрированных пользователей пока нет
+Add: Добавить
+NoContactsYet: Контактов пока нет
+Message: Сообщение
 LoginToViewContacts: Log in to view contacts
 Contacts: Контакты
 GmailAccountNotSet: Аккаунт Gmail не установлен. Инициализируйте токены.
@@ -83,3 +94,7 @@ GoogleSecretManager: Google Secret Manager
 Generate: Генерировать
 VapidGenerationWarning: Для создания нового ключа VAPID всем клиентам необходимо повторно подписаться на push-уведомления
 InvalidGoogleAPITokens: Неверные токены Google API
+AppDescription: Прогрессивное веб-приложение для обмена мгновенными сообщениями
+AppName: Videre
+MetaKeywords: мгновенные, сообщения, прогрессивное, веб, приложение, pwa
+MetaDescription: Прогрессивное веб-приложение для обмена мгновенными сообщениями

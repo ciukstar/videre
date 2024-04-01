@@ -1,3 +1,14 @@
+Contact: Contact
+Actions: Actions
+ViewContact: Voir le contact
+NewContactsAdded: Nouveaux contacts ajoutés
+AddSelected: Ajouter sélectionnée
+AddContacts: Ajouter des contacts
+Select: Sélectionner
+NoRegisteredUsersYet: Il n'y a pas encore d'utilisateurs enregistrés
+Add: Ajouter
+NoContactsYet: Il n'y a pas encore de contacts
+Message: Message
 LoginToViewContacts: Connectez-vous pour voir les contacts
 Contacts: Les contacts
 GmailAccountNotSet: Le compte Gmail n'est pas défini. Initialisez les jetons.
@@ -82,3 +93,7 @@ GoogleSecretManager: Google Secret Manager
 Generate: Générer
 VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
 InvalidGoogleAPITokens: Jetons d'API Google non valides
+AppDescription: Application Web progressive de messagerie instantanée
+AppName: Videre
+MetaKeywords: messagerie, instantanée, progressif, web, application, pwa
+MetaDescription: Application Web progressive de messagerie instantanée

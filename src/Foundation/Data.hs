@@ -12,7 +12,7 @@ import Database.Persist.Sql (ConnectionPool)
 import Import.NoFoundation
     ( Static, Manager, AppSettings, parseRoutesFile, mkYesodData)
 
-import Model (UserId)
+import Model (UserId, ContactId)
 
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))
 
