@@ -17,6 +17,7 @@
 module Model where
 
 import Control.Applicative (pure)
+import Control.Monad (return)
 
 import ClassyPrelude.Yesod
     ( Typeable, mkMigrate, mkPersist, persistFileWith
@@ -24,7 +25,8 @@ import ClassyPrelude.Yesod
     )
 
 import Data.Aeson
-    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON
+    ( Value (String), ToJSON, toJSON, FromJSON, parseJSON, withObject
+    , (.:)
     )
 import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 
@@ -39,6 +41,8 @@ import Data.Time.Clock (UTCTime)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
+
+import Data.Function (($))
 
 import Text.Read (Read)
 import Text.Show (Show)
@@ -80,6 +84,16 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
 
 
+instance FromJSON PushSubscription where
+    parseJSON :: Value -> Parser PushSubscription
+    parseJSON = withObject "PushSubscription" $ \v -> do
+        user <- v .: "user"
+        endpoint <- v .: "endpoint"
+        keys <- v .: "keys"
+        keyP256dh <- keys .: "p256dh"
+        keyAuth <- keys .: "auth"
+        return $ PushSubscription user endpoint keyP256dh keyAuth
+
 
 instance Eq User where
     (==) :: User -> User -> Bool
@@ -105,6 +119,9 @@ apiInfoGoogle = "GOOGLE_API"
 secretVolumeGmail :: String
 secretVolumeGmail = "/grt/gmail_refresh_token"
 
+secretVolumeVapid :: String
+secretVolumeVapid = "/vapid/vapid_min_details"
+
 secretVapid :: Text
 secretVapid = "vapid_min_details"
 
@@ -116,6 +133,8 @@ statusSuccess = "success"
 
 statusError :: Text
 statusError = "error"
+
+
 
 
 ultDestKey :: Text

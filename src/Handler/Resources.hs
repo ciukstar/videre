@@ -5,14 +5,17 @@ module Handler.Resources (getDocsR) where
 
 import Foundation.Data
     ( Handler
+    , Route (StaticR)
     , AppMessage
-      ( MsgAppDocumentation
+      ( MsgAppDocumentation, MsgAppDescription, MsgErDiagram, MsgDocumentation
       )
     )
 
 import Model (statusError)
 
 import Settings (widgetFile)
+
+import Settings.StaticFiles (img_ERD_Videre_svg)
 
 import Text.Hamlet (Html)
 

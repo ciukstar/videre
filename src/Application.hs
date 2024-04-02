@@ -58,7 +58,7 @@ import System.Log.FastLogger
 
 import Handler.Contacts
     ( getContactsR, postContactsR, getMyContactsR, postContactRemoveR
-    , getContactR
+    , getContactR, postContactR, deleteContactR
     )
 
 import Handler.Accounts

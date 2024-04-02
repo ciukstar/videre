@@ -1,3 +1,7 @@
+NoMessagesExchangedYet: Niciun mesaj încă schimbat
+SubscribeToNotifications: Abonați-vă la notificări
+NotGeneratedVAPID: VAPID nu a fost generat
+ErDiagram: Diagrama ER
 Contact: Contact
 Actions: Acțiuni
 ViewContact: Vizualizați contactul

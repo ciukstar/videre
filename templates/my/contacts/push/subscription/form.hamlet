@@ -1,0 +1,6 @@
+
+#{extra}
+<div style="display:flex;align-items:center;gap:1rem">
+  ^{fvInput v}
+  <label.body-large for=#{fvId v}>
+    #{fvLabel v}

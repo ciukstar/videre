@@ -2,6 +2,9 @@
 <header.primary>
   ^{widgetMenu}
 
+  <h1.title-large>
+    _{MsgDocumentation}
+
   ^{widgetUser}
 
 <main>
@@ -9,6 +12,14 @@
   $forall (status,msg) <- filter ((==) statusError . fst) msgs
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
+
+  <section>
+    <h2.headline-medium>_{MsgAppDescription}
+    <p.body-large>
+
+  <section>
+    <h2.headline-medium>_{MsgErDiagram}
+    <img #idImgErdDiagram src=@{StaticR img_ERD_Videre_svg} alt=_{MsgErDiagram} loading=lazy>
       
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

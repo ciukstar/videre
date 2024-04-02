@@ -33,10 +33,8 @@ import Model
     )
 
 import Text.Hamlet (shamlet)
-import Text.Shakespeare.Text (st)
 
 import Yesod.Auth.Email (saltPass)
-import Yesod.Form.Fields (Textarea(Textarea))
 import Yesod.Persist(PersistStoreWrite (insert, insert_))
 import Settings (AppSettings (appDevelopment))
 
@@ -56,7 +54,7 @@ fillDemoEn appSettings = do
                             }
         insert_ Store { storeToken = tid
                       , storeKey = "VAPID triple"
-                      , storeVal = "(22879504107471320671126810649052900428463951865620953018730582802067053764751,106963013057532433758118925351970093795784080248924999494142080730165234056952,106312979860921952110239664650581548265214157776781431141487974369128419274671)"
+                      , storeVal = "(8677994634232137212423785113544593598794450523536086396106826224669259901966,73724105402471006992357097408426893033736283540148048266080568591403695025869,107806506999142580483555956834506212618380772926302841504042472637602767614975)"
                       }
         else do
         insert_ Token { tokenApi = apiInfoGoogle

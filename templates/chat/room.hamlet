@@ -18,7 +18,7 @@
         onclick="document.getElementById('menuMore').open = !document.getElementById('menuMore').open">
         <md-icon>more_vert
       <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
-        <md-menu-item href=@{contact}>
+        <md-menu-item href=@{contact} ##{idMenuItemViewContact}>
           <div slot=headline>_{MsgViewContact}
     
 
@@ -26,16 +26,22 @@
 
   <div ##{idChatOutput}>
 
-    $forall (day,messages) <- chats
-      <time.day-bubble.body-small datetime=#{show day}>#{show day}
-      $forall Entity _ (Chat userId _ time msg _) <- messages
-        <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
-          <span>#{msg}
-          <span.bubble-status-line>
-            <time.time-bubble.body-small datetime=#{show time}>
-            <i.icon>done_all
-          <span.bubble-tail-out>
-            <span.bubble-tail>
+    $if null chats
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&varnothing;
+        <figcaption.body-large>
+          _{MsgNoMessagesExchangedYet}
+    $else
+      $forall (day,messages) <- chats
+        <time.day-bubble.body-small datetime=#{show day}>#{show day}
+        $forall Entity _ (Chat userId _ time msg _) <- messages
+          <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
+            <span>#{msg}
+            <span.bubble-status-line>
+              <time.time-bubble.body-small datetime=#{show time}>
+              <i.icon>done_all
+            <span.bubble-tail-out>
+              <span.bubble-tail>
 
   <form ##{idMessageForm}>
       <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>

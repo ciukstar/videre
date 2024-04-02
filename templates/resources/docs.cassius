@@ -1,20 +1,15 @@
 
 header
-  min-height: var(--app-top-appbar-height,64px)
-  position: sticky
-  top: 0
-  z-index: 2
-  padding: 0 1rem
-  display: flex
-  flex-direction: row
-  justify-content: space-between
-  align-items: center
-  #headerStart
+    min-height: var(--app-top-appbar-height,64px)
+    position: sticky
+    top: 0
+    z-index: 2
+    padding: 0 1rem
     display: flex
-    flex-direction: row
-    justify-content: flex-start
     align-items: center
-    gap: 1rem
+    column-gap: 1rem
+    .app-top-app-bar-end
+        margin-left: auto
   
 main
   margin: 1rem 2rem

@@ -10,6 +10,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 
@@ -20,31 +21,50 @@ import ChatRoom.Data
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
-import Control.Monad (forever)
+import Control.Applicative ((<|>))
+import Control.Lens ((.~))
+import Control.Monad (forever, forM_)
 import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
     , (^.), (==.), (=.), (&&.), (||.)
+    , just, Value (unValue), Entity (entityVal)
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert_))
-import Database.Persist.Sql (SqlBackend, fromSqlKey)
+import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
+import Data.Aeson (object, (.=), ToJSON, toJSON)
+import qualified Data.Aeson as A (Value (String))
 import Data.Aeson.Text (encodeToLazyText)
+import Data.Bifunctor (Bifunctor(bimap))
+import Data.Function ((&))
 import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
-import Data.Text (pack)
+import qualified Data.Set as S
+import Data.Text (Text, pack, unpack)
 import Data.Text.Lazy (toStrict)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 import Foundation.Data
-    ( AppMessage (MsgPhoto, MsgMessage, MsgViewContact, MsgActions)
+    ( AppMessage
+      ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNotGeneratedVAPID
+      , MsgNoMessagesExchangedYet
+      )
     )
 
+import Network.HTTP.Client.Conduit (Manager)
+
 import Model
-    ( UserId, User (User), Chat (Chat), ContactId
+    ( UserId, User (User, userName, userEmail), Chat (Chat), ContactId
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
-    , EntityField (UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatTimemark)
+    , PushSubscription (PushSubscription), secretVolumeVapid, apiInfoVapid
+    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
+    , Token, Store
+    , EntityField
+      ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatTimemark, TokenApi
+      , PushSubscriptionUser, TokenId, TokenStore, StoreToken, StoreVal
+      )
     )
 
 import UnliftIO.Exception (try, SomeException)
@@ -52,23 +72,33 @@ import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
 import Settings (widgetFile)
 
+import System.IO (readFile')
+
 import Text.Hamlet (Html)
+import Text.Read (readMaybe)
+
+import Web.WebPush
+    ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
+    , sendPushNotification
+    )
 
 import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
-    , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
+    , Application, RenderMessage, HandlerFor, getSubYesod, newIdent, invalidArgsI
     )
+import Yesod.Core.Handler (lookupPostParam, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
-import qualified Data.Set as S
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
       , YesodPersist m, YesodPersistBackend m ~ SqlBackend
       ) => YesodChat m where
+    getAppHttpManager :: HandlerFor m Manager
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
     getContactRoute :: UserId -> UserId -> ContactId -> HandlerFor m (Route m)
@@ -77,12 +107,99 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
 
 
+data PushMsgType = PushMsgTypeMessage
+    deriving (Eq, Show, Read)
+
+instance ToJSON PushMsgType where
+    toJSON :: PushMsgType -> A.Value
+    toJSON = A.String . pack . show
+
+
+postPushMessageR :: YesodChat m
+                 => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+                 => (RenderMessage m FormMessage, RenderMessage m AppMessage)
+                 => SubHandlerFor ChatRoom m ()
+postPushMessageR = do
+
+    messageType <- (\x -> x <|> Just PushMsgTypeMessage) . (readMaybe . unpack =<<)
+        <$> lookupPostParam "messageType"
+    icon <- lookupPostParam "icon"
+    channelId <- (readMaybe @Int . unpack =<<) <$> lookupPostParam "channelId"
+    sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
+    rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
+
+    sender <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @User
+        where_ $ just (x ^. UserId) ==. val sid
+        return x
+
+    subscriptions <- liftHandler $ runDB $ select $ do
+        x <- from $ table @PushSubscription
+        where_ $ just (x ^. PushSubscriptionUser) ==. val rid
+        return x
+
+    manager <- liftHandler getAppHttpManager
+
+    storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi ==. val apiInfoVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken ==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
+
+    case details of
+      Just vapidKeysMinDetails -> do
+          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+          photor <- liftHandler $ case sid of
+            Just x -> Just <$> getAccountPhotoRoute x
+            Nothing -> return Nothing
+          urlr <- getUrlRender
+
+          forM_ subscriptions $ \(Entity _ (PushSubscription _ endpoint p256dh auth)) -> do
+              let notification = mkPushNotification endpoint p256dh auth
+                      & pushMessage .~ object [ "messageType" .= messageType
+                                              , "topic" .= messageType
+                                              , "icon" .= icon
+                                              , "channelId" .= channelId
+                                              , "senderId" .= sid
+                                              , "senderName" .= ( (userName . entityVal <$> sender)
+                                                                  <|> (Just . userEmail . entityVal <$> sender)
+                                                                )
+                                              , "senderPhoto" .= (urlr <$> photor)
+                                              , "recipientId" .= rid
+                                              ]
+                      & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                      & pushExpireInSeconds .~ 60 * 60
+
+              result <- sendPushNotification vapidKeys manager notification
+
+              case result of
+                Left ex -> do
+                    liftIO $ print ex
+                Right () -> return ()
+
+      Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
+
+
 getChatRoomR :: UserId -> UserId -> ContactId -> ChatHandler Html
 getChatRoomR sid rid cid = do
+
     backlink <- liftHandler $ getBacklink sid rid
     photo <- liftHandler $ getAccountPhotoRoute rid
     contact  <- liftHandler $ getContactRoute sid rid cid
-
 
     interlocutor <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -97,7 +214,6 @@ getChatRoomR sid rid cid = do
 
     webSockets (chatApp sid rid)
 
-
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
         where_ $ ( (x ^. ChatUser ==. val sid)
@@ -108,8 +224,9 @@ getChatRoomR sid rid cid = do
         orderBy [desc (x ^. ChatTimemark)]
         return x )
 
-    
+
     liftHandler $ defaultLayout $ do
+        idMenuItemViewContact <- newIdent
         idChatOutput <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent

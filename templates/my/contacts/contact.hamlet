@@ -36,3 +36,6 @@
         $maybe name <- name
           <div.body-large>#{name}
         <div.body-medium>#{email}
+
+  <form method=post action=@{ContactR uid rid cid} enctype=#{et2}>
+    ^{fw2}

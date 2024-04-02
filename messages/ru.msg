@@ -1,3 +1,7 @@
+NoMessagesExchangedYet: Сообщениями пока не обменивались
+SubscribeToNotifications: Подписаться на уведомления
+NotGeneratedVAPID: VAPID не был создан
+ErDiagram: ER-диаграмма
 Contact: Контакт
 Actions: Действия
 ViewContact: Просмотр контакта

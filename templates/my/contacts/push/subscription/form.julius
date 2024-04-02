@@ -1,0 +1,71 @@
+
+function saveSubscription (subscription) {
+
+  const subscr = JSON.parse(JSON.stringify(subscription));
+  subscr.user = #{rawJS userId};
+  
+  fetch('@{ContactR uid rid cid}', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(subscr)
+  }).then(function (response) {
+    if (!response.ok) {
+      throw new Error('Bad status code from server.');
+    }
+    return response.json();
+  }).then(function (responseData) {
+    if (!(responseData.data && responseData.data.success)) {
+      throw new Error('Bad response from server.');
+    }
+  }); 
+};
+
+function subscribeToPushService (registration) {
+  return registration.pushManager.getSubscription().then(function (subscription) {
+    if (!subscription) {
+      return registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+      });
+    } else {
+      return subscription.unsubscribe().then(function (success) {
+        return registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+        });
+      });
+    }
+  });
+};
+
+document.getElementById(#{fvId v}).onchange = function (e) {
+  
+  if (this.selected) {
+
+    Notification.requestPermission().then(function (permission) {
+      if (permission === 'granted') {
+        navigator.serviceWorker.ready.then(function (registration) {
+	  subscribeToPushService(registration).then(function (subscription) {
+	    saveSubscription(subscription);
+	  });
+	});
+      }
+    });
+    
+  } else {
+    
+    navigator.serviceWorker.ready.then(function (registration) {
+      registration.pushManager.getSubscription().then(function (subscription) {
+	subscription.unsubscribe().then(function (success) {
+	  if (success) {
+	    fetch(`@{ContactR uid rid cid}?endpoint=${subscription.endpoint}`, {
+              method: 'DELETE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(subscription)      
+            });
+	  }
+	});
+      });
+    });
+  }
+};

@@ -1,3 +1,7 @@
+NoMessagesExchangedYet: Aucun message échangé pour l'instant
+SubscribeToNotifications: Abonnez-vous aux notifications
+NotGeneratedVAPID: Le VAPID n'a pas été généré
+ErDiagram: Diagramme ER
 Contact: Contact
 Actions: Actions
 ViewContact: Voir le contact
