@@ -15,8 +15,8 @@ module Handler.Contacts
   , getMyContactsR
   , getContactR
   , postContactRemoveR
-  , postContactR
-  , deleteContactR
+  , postPushSubscriptionsR
+  , deletePushSubscriptionsR
   ) where
 
 import ChatRoom
@@ -52,7 +52,9 @@ import Foundation (Form)
 import Foundation.Data
     ( Handler, App (appHttpManager)
     , Route
-      ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR)
+      ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
+      , PushSubscriptionsR
+      )
     , AppMessage
       ( MsgNoContactsYet, MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
       , MsgAdd, MsgInvalidFormData, MsgNewContactsAdded, MsgViewContact
@@ -69,9 +71,9 @@ import Model
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
-      , ContactId, ChatInterlocutor, ChatTimemark, ChatUser, PushSubscriptionUser
+      , ContactId, ChatInterlocutor, ChatCreated, ChatUser, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
-      , StoreVal, PushSubscriptionP256dh, PushSubscriptionAuth
+      , StoreVal, PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       )
     , Token (Token)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
@@ -118,21 +120,38 @@ import System.IO (readFile')
 import Text.Julius (RawJS(rawJS))
 
 
-deleteContactR :: UserId -> UserId -> ContactId -> Handler ()
-deleteContactR uid rid cid = do
+deletePushSubscriptionsR :: UserId -> UserId -> ContactId -> Handler ()
+deletePushSubscriptionsR sid pid cid = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
           y <- from $ table @PushSubscription
-          where_ $ y ^. PushSubscriptionUser ==. val uid
+          where_ $ y ^. PushSubscriptionSubscriber ==. val sid
+          where_ $ y ^. PushSubscriptionPublisher ==. val pid
           where_ $ y ^. PushSubscriptionEndpoint ==. val x
       Nothing -> return ()
 
 
-formSubscribe :: VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
-formSubscribe vapidKeys uid rid cid notif extra = do
+postPushSubscriptionsR :: UserId -> UserId -> ContactId -> Handler A.Value
+postPushSubscriptionsR sid pid cid = do
+    result <- parseCheckJsonBody
+    case result of
 
-    let userId = pack $ show (fromSqlKey uid)
+      A.Success ps@(PushSubscription _ _ psEndpoint psKeyP256dh psKeyAuth) -> do
+          _ <- runDB $ upsertBy (UniquePushSubscription sid pid psEndpoint) ps
+               [ PushSubscriptionP256dh =. psKeyP256dh
+               , PushSubscriptionAuth =. psKeyAuth
+               ]
+          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
+
+      A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
+
+
+formSubscribe :: VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
+formSubscribe vapidKeys sid pid cid notif extra = do
+
+    let subscriberId = pack $ show (fromSqlKey sid)
+    let publisherId = pack $ show (fromSqlKey pid)
 
     (r,v) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
@@ -157,23 +176,8 @@ postContactRemoveR uid rid cid = do
           redirect $ ContactR uid rid cid
 
 
-postContactR :: UserId -> UserId -> ContactId -> Handler A.Value
-postContactR uid rid cid = do
-    result <- parseCheckJsonBody
-    case result of
-
-      A.Success ps@(PushSubscription uid' psEndpoint psKeyP256dh psKeyAuth) -> do
-          _ <- runDB $ upsertBy (UniquePushSubscription psEndpoint) ps [ PushSubscriptionUser =. uid'
-                                                                       , PushSubscriptionP256dh =. psKeyP256dh
-                                                                       , PushSubscriptionAuth =. psKeyAuth
-                                                                       ]
-          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
-
-      A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
-
-
 getContactR :: UserId -> UserId -> ContactId -> Handler Html
-getContactR uid rid cid = do
+getContactR sid pid cid = do
 
     contact <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& e :& h <- from $ table @Contact
@@ -209,12 +213,13 @@ getContactR uid rid cid = do
 
           permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
               x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionUser ==. val uid
+              where_ $ x ^. PushSubscriptionSubscriber ==. val sid
+              where_ $ x ^. PushSubscriptionPublisher ==. val pid
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys uid rid cid permission
+          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid cid permission
 
           (fw,et) <- generateFormPost formContactRemove
 
@@ -244,11 +249,11 @@ getMyContactsR uid = do
                                          (just (x ^. ContactOwner) ==. c ?. ChatInterlocutor)
                                        )
                 &&.
-                c ?. ChatTimemark ==. subSelectMaybe ( do
+                c ?. ChatCreated ==. subSelectMaybe ( do
                                                            y <- from $ table @Chat
                                                            where_ $ just (y ^. ChatUser) ==. c ?. ChatUser
                                                            where_ $ just (y ^. ChatInterlocutor) ==. c ?. ChatInterlocutor
-                                                           return $ max_ (y ^. ChatTimemark)
+                                                           return $ max_ (y ^. ChatCreated)
                                                      )
             )
 

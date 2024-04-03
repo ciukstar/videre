@@ -21,8 +21,8 @@ module Application
     , db
     ) where
 
-import ChatRoom.Data (ChatRoom(ChatRoom))
 import ChatRoom ()
+import ChatRoom.Data (ChatRoom(ChatRoom))
 
 import Control.Monad.Logger (liftLoc, runLoggingT)
 
@@ -58,7 +58,7 @@ import System.Log.FastLogger
 
 import Handler.Contacts
     ( getContactsR, postContactsR, getMyContactsR, postContactRemoveR
-    , getContactR, postContactR, deleteContactR
+    , getContactR, postPushSubscriptionsR, deletePushSubscriptionsR
     )
 
 import Handler.Accounts
@@ -86,9 +86,9 @@ import Foundation.Data
     ( App(..), Handler, resourcesApp
     , Route
       ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
-      , AccountInfoEditR, AccountInfoR, AccountEditR, AccountPhotoR
-      , AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR, RobotsR
-      , DocsR
+      , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
+      , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
+      , RobotsR, DocsR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR

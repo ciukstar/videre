@@ -3,18 +3,21 @@
 
 
 PushSubscription
-    user UserId OnDeleteCascade
+    subscriber UserId OnDeleteCascade
+    publisher UserId OnDeleteCascade
     endpoint Text
     p256dh Text
     auth Text
-    UniquePushSubscription endpoint
+    UniquePushSubscription subscriber publisher endpoint
 
 Chat json
     user UserId OnDeleteCascade
     interlocutor UserId
-    timemark UTCTime
+    created UTCTime
     message Text
     status ChatMessageStatus
+    received UTCTime Maybe
+    notified Bool
 
 Contact
     owner UserId OnDeleteCascade

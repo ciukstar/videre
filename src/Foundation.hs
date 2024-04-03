@@ -230,6 +230,7 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
 
     
+    isAuthorized (PushSubscriptionsR sid _ _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (ContactR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid

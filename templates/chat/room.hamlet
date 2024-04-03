@@ -34,7 +34,7 @@
     $else
       $forall (day,messages) <- chats
         <time.day-bubble.body-small datetime=#{show day}>#{show day}
-        $forall Entity _ (Chat userId _ time msg _) <- messages
+        $forall Entity _ (Chat userId _ time msg _ _ _) <- messages
           <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
             <span>#{msg}
             <span.bubble-status-line>

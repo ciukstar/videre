@@ -4,9 +4,10 @@
 
 /chat ChatR ChatRoom getChatRoom
 
+/subscribers/#UserId/publishers/#UserId/#ContactId PushSubscriptionsR POST DELETE
 
 /my/contacts/#UserId/#UserId/#ContactId/remove ContactRemoveR POST
-/my/contacts/#UserId/#UserId/#ContactId        ContactR       GET POST DELETE
+/my/contacts/#UserId/#UserId/#ContactId        ContactR       GET
 /my/contacts/#UserId 		       	       MyContactsR    GET
 /contacts/#UserId    		       	       ContactsR      GET POST
 

@@ -87,12 +87,13 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
 instance FromJSON PushSubscription where
     parseJSON :: Value -> Parser PushSubscription
     parseJSON = withObject "PushSubscription" $ \v -> do
-        user <- v .: "user"
+        subscriber <- v .: "subscriber"
+        publisher <- v .: "publisher"
         endpoint <- v .: "endpoint"
         keys <- v .: "keys"
         keyP256dh <- keys .: "p256dh"
         keyAuth <- keys .: "auth"
-        return $ PushSubscription user endpoint keyP256dh keyAuth
+        return $ PushSubscription subscriber publisher endpoint keyP256dh keyAuth
 
 
 instance Eq User where

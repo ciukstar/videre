@@ -29,7 +29,7 @@
               #{name}
             $nothing
               #{email}
-          $maybe Entity _ (Chat _ _ time message _) <- chat
+          $maybe Entity _ (Chat _ _ time message _ _ _) <- chat
             <div slot=supporting-text>
               $with dt <- iso8601Show time
                 <time datetime=#{dt}>#{dt}
