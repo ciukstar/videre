@@ -1,3 +1,8 @@
+NewMessage: Новое сообщение
+Notification: Уведомление
+Ignore: Игнорировать
+Reply: Отвечать
+PushNotificationExcception: Ошибка push-уведомления
 NoMessagesExchangedYet: Сообщениями пока не обменивались
 SubscribeToNotifications: Подписаться на уведомления
 NotGeneratedVAPID: VAPID не был создан

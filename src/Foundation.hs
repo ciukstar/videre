@@ -11,6 +11,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Foundation where
 
@@ -214,6 +215,15 @@ instance Yesod App where
         pc <- widgetToPageContent $ do
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
+
+            idDialogChatNotification <- newIdent
+            idFigureSenderPhoto <- newIdent
+            idImgSenderPhoto <- newIdent
+            idFigcaptionSenderInfo <- newIdent
+            idNotificationBody <- newIdent
+            idButtonIgnoreNotification <- newIdent
+            idButtonReplyNotification <- newIdent
+            
             $(widgetFile "default-layout")
 
         lang <- fromMaybe "en" . headMay <$> languages
@@ -230,7 +240,7 @@ instance Yesod App where
     isAuthorized (ChatR _) _ = isAuthenticated
 
     
-    isAuthorized (PushSubscriptionsR sid _ _) _ = isAuthenticatedSelf sid
+    isAuthorized (PushSubscriptionsR sid _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (ContactR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid

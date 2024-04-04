@@ -5,7 +5,7 @@ function saveSubscription (subscription) {
   subscr.subscriber = #{rawJS subscriberId};
   subscr.publisher = #{rawJS publisherId};
   
-  fetch('@{PushSubscriptionsR sid pid cid}', {
+  fetch('@{PushSubscriptionsR sid pid}', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(subscr)
@@ -59,7 +59,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
       registration.pushManager.getSubscription().then(function (subscription) {
 	subscription.unsubscribe().then(function (success) {
 	  if (success) {
-	    fetch(`@{PushSubscriptionsR sid pid cid}?endpoint=${subscription.endpoint}`, {
+	    fetch(`@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`, {
               method: 'DELETE',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify(subscription)      

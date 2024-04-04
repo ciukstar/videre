@@ -1,3 +1,8 @@
+NewMessage: Nouveau message
+Notification: Notification
+Ignore: Ignorez
+Reply: Répondez
+PushNotificationExcception: Erreur de notification push
 NoMessagesExchangedYet: Aucun message échangé pour l'instant
 SubscribeToNotifications: Abonnez-vous aux notifications
 NotGeneratedVAPID: Le VAPID n'a pas été généré

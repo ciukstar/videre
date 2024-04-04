@@ -1,3 +1,8 @@
+NewMessage: New message
+Notification: Notification
+Ignore: Ignore
+Reply: Reply
+PushNotificationExcception: Push notification error
 NoMessagesExchangedYet: No messages exchanged yet
 SubscribeToNotifications: Subscribe to notifications
 NotGeneratedVAPID: VAPID not generated

@@ -1,4 +1,21 @@
 
 if ("serviceWorker" in navigator) {
+  
   navigator.serviceWorker.register('@{StaticR js_sw_js}', { scope: '/' });
+
+  navigator.serviceWorker.addEventListener('message', function (message) {
+    
+    document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
+    document.getElementById(#{idNotificationBody}).textContent = message.data.body;
+    
+    document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
+    document.getElementById(#{idDialogChatNotification}).show();
+
+    document.getElementById(#{idButtonIgnoreNotification}).addEventListener('click', function (e) {
+      document.getElementById(#{idDialogChatNotification}).close();
+    });    
+    
+  });
+  
 }

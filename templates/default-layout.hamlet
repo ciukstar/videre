@@ -1,2 +1,23 @@
 
 ^{widget}
+
+<md-dialog ##{idDialogChatNotification}>
+  <div slot=headline>
+    _{MsgNewMessage}
+
+  <form slot=content method=dialog>
+
+    <figure ##{idFigureSenderPhoto}>
+      <img ##{idImgSenderPhoto} width=48>
+      <figcaption.body-large ##{idFigcaptionSenderInfo}>
+
+    <p.body-medium ##{idNotificationBody}>
+
+  <div slot=actions>
+
+    <md-text-button ##{idButtonIgnoreNotification} type=button>
+      _{MsgIgnore}
+
+    <md-filled-button ##{idButtonReplyNotification} has-icon type=link>
+      <md-icon slot=icon>reply
+      _{MsgReply}

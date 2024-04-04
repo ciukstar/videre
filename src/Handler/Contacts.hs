@@ -21,7 +21,9 @@ module Handler.Contacts
 
 import ChatRoom
     ( YesodChat
-      ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager)
+      ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
+      , getStaticRoute
+      )
     )
 import ChatRoom.Data (Route (ChatRoomR))
 
@@ -29,7 +31,8 @@ import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Aeson (toJSON)
-import qualified Data.Aeson as A (object, Value (Bool), Result( Success, Error ), (.=))
+import qualified Data.Aeson as A
+    ( object, Value (Bool), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.Text (pack, unpack)
 import Data.Time.Clock (getCurrentTime)
@@ -46,20 +49,21 @@ import Database.Persist
     , PersistUniqueWrite (upsert)
     )
 import qualified Database.Persist as P ( PersistStoreWrite (delete) )
-import Database.Persist.Sql (fromSqlKey) 
+import Database.Persist.Sql (fromSqlKey)
 
 import Foundation (Form)
 import Foundation.Data
     ( Handler, App (appHttpManager)
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
-      , PushSubscriptionsR
+      , PushSubscriptionsR, StaticR
       )
     , AppMessage
       ( MsgNoContactsYet, MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
       , MsgAdd, MsgInvalidFormData, MsgNewContactsAdded, MsgViewContact
       , MsgContact, MsgPhoto, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
-      , MsgCancel, MsgRecordDeleted, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
+      , MsgRecordDeleted, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
+      , MsgCancel
       )
     )
 
@@ -69,17 +73,19 @@ import Model
     ( statusError, statusSuccess
     , UserId, User (User, userName), UserPhoto, Chat (Chat)
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
+    , Token, Store
+    , StoreType
+      ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
+    , apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
-      , ContactId, ChatInterlocutor, ChatCreated, ChatUser, PushSubscriptionSubscriber
+      , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
-      , StoreVal, PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
+      , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
+      , StoreVal, ChatUser
       )
-    , Token (Token)
-    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store (Store), apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
     )
-    
+
 import Network.HTTP.Client.Conduit (Manager)
 import Network.HTTP.Types.Status (status400)
 
@@ -118,10 +124,11 @@ import Yesod.Persist.Core (YesodPersist(runDB))
 import Text.Read (readMaybe)
 import System.IO (readFile')
 import Text.Julius (RawJS(rawJS))
+import Yesod.Static (StaticRoute)
 
 
-deletePushSubscriptionsR :: UserId -> UserId -> ContactId -> Handler ()
-deletePushSubscriptionsR sid pid cid = do
+deletePushSubscriptionsR :: UserId -> UserId -> Handler ()
+deletePushSubscriptionsR sid pid = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
       Just x -> runDB $ delete $ do
@@ -132,8 +139,8 @@ deletePushSubscriptionsR sid pid cid = do
       Nothing -> return ()
 
 
-postPushSubscriptionsR :: UserId -> UserId -> ContactId -> Handler A.Value
-postPushSubscriptionsR sid pid cid = do
+postPushSubscriptionsR :: UserId -> UserId -> Handler A.Value
+postPushSubscriptionsR sid pid = do
     result <- parseCheckJsonBody
     case result of
 
@@ -147,8 +154,8 @@ postPushSubscriptionsR sid pid cid = do
       A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
 
 
-formSubscribe :: VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
-formSubscribe vapidKeys sid pid cid notif extra = do
+formSubscribe :: VAPIDKeys -> UserId -> UserId -> Bool -> Form Bool
+formSubscribe vapidKeys sid pid notif extra = do
 
     let subscriberId = pack $ show (fromSqlKey sid)
     let publisherId = pack $ show (fromSqlKey pid)
@@ -158,7 +165,7 @@ formSubscribe vapidKeys sid pid cid notif extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
         } ( pure notif )
-    
+
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
     return (r, $(widgetFile "my/contacts/push/subscription/form"))
 
@@ -219,14 +226,14 @@ getContactR sid pid cid = do
               return x )
 
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid cid permission
+          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid permission
 
           (fw,et) <- generateFormPost formContactRemove
 
           defaultLayout $ do
               setTitleI MsgViewContact
               $(widgetFile "my/contacts/contact")
-              
+
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -361,10 +368,10 @@ formContacts options extra = do
 
 
 instance YesodChat App where
-    
+
     getAppHttpManager :: Handler Manager
     getAppHttpManager = getYesod >>= \app -> return $ appHttpManager app
-    
+
     getBacklink :: UserId -> UserId -> Handler (Route App)
     getBacklink sid _ = return $ MyContactsR sid
 
@@ -373,3 +380,6 @@ instance YesodChat App where
 
     getContactRoute :: UserId -> UserId -> ContactId -> Handler (Route App)
     getContactRoute uid rid cid = return $ ContactR uid rid cid
+
+    getStaticRoute :: StaticRoute -> Handler (Route App)
+    getStaticRoute = return . StaticR

@@ -1,3 +1,8 @@
+NewMessage: Mesaj nou
+Notification: Notificare
+Ignore: Ignorați
+Reply: Răspundeți
+PushNotificationExcception: Eroare de notificare push
 NoMessagesExchangedYet: Niciun mesaj încă schimbat
 SubscribeToNotifications: Abonați-vă la notificări
 NotGeneratedVAPID: VAPID nu a fost generat

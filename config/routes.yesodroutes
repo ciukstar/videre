@@ -4,7 +4,7 @@
 
 /chat ChatR ChatRoom getChatRoom
 
-/subscribers/#UserId/publishers/#UserId/#ContactId PushSubscriptionsR POST DELETE
+/subscribers/#UserId/publishers/#UserId PushSubscriptionsR POST DELETE
 
 /my/contacts/#UserId/#UserId/#ContactId/remove ContactRemoveR POST
 /my/contacts/#UserId/#UserId/#ContactId        ContactR       GET

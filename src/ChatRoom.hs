@@ -30,7 +30,7 @@ import Control.Concurrent.STM.TChan
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
     , (^.), (==.), (=.), (&&.), (||.)
-    , just, Value (unValue), Entity (entityVal), not_, isNothing_
+    , just, Value (unValue), Entity (entityVal), not_
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
@@ -48,8 +48,8 @@ import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 import Foundation.Data
     ( AppMessage
-      ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNotGeneratedVAPID
-      , MsgNoMessagesExchangedYet
+      ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
+      , MsgNoMessagesExchangedYet, MsgPushNotificationExcception
       )
     )
 
@@ -66,7 +66,7 @@ import Model
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
       , ChatReceived, ChatId, ChatNotified
-      )
+      ), statusError
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -89,15 +89,20 @@ import Web.WebPush
 import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
-    , Application, RenderMessage, HandlerFor, getSubYesod, newIdent, invalidArgsI
+    , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
     )
-import Yesod.Core.Handler (lookupPostParam, getUrlRender, getRouteToParent)
+import Yesod.Core.Handler
+    ( getUrlRender, getRouteToParent, addMessageI
+    , getMessageRender
+    )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Fields (FormMessage, intField)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
 import Yesod.Form.Input (runInputPost, ireq)
 import Text.Julius (RawJS(rawJS))
+import Settings.StaticFiles (img_chat_FILL0_wght400_GRAD0_opsz24_svg)
+import Yesod.Static (StaticRoute)
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
@@ -107,6 +112,7 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
     getContactRoute :: UserId -> UserId -> ContactId -> HandlerFor m (Route m)
+    getStaticRoute :: StaticRoute -> HandlerFor m (Route m) 
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
@@ -118,85 +124,6 @@ data PushMsgType = PushMsgTypeMessage
 instance ToJSON PushMsgType where
     toJSON :: PushMsgType -> A.Value
     toJSON = A.String . pack . show
-
-
-postPushMessageR :: YesodChat m
-                 => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-                 => (RenderMessage m FormMessage, RenderMessage m AppMessage)
-                 => SubHandlerFor ChatRoom m ()
-postPushMessageR = do
-
-    messageType <- (\x -> x <|> Just PushMsgTypeMessage) . (readMaybe . unpack =<<)
-        <$> lookupPostParam "messageType"
-    icon <- lookupPostParam "icon"
-    channelId <- (readMaybe @Int . unpack =<<) <$> lookupPostParam "channelId"
-    sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
-    rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
-
-    sender <- liftHandler $ runDB $ selectOne $ do
-        x <- from $ table @User
-        where_ $ just (x ^. UserId) ==. val sid
-        return x
-
-    subscriptions <- liftHandler $ runDB $ select $ do
-        x <- from $ table @PushSubscription
-        where_ $ just (x ^. PushSubscriptionSubscriber) ==. val rid
-        return x
-
-    manager <- liftHandler getAppHttpManager
-
-    storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
-
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
-
-    case details of
-      Just vapidKeysMinDetails -> do
-          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          photor <- liftHandler $ case sid of
-            Just x -> Just <$> getAccountPhotoRoute x
-            Nothing -> return Nothing
-          urlr <- getUrlRender
-
-          forM_ subscriptions $ \(Entity _ (PushSubscription _subscriber _publisher endpoint p256dh auth)) -> do
-              let notification = mkPushNotification endpoint p256dh auth
-                      & pushMessage .~ object [ "messageType" .= messageType
-                                              , "topic" .= messageType
-                                              , "icon" .= icon
-                                              , "channelId" .= channelId
-                                              , "senderId" .= sid
-                                              , "senderName" .= ( (userName . entityVal <$> sender)
-                                                                  <|> (Just . userEmail . entityVal <$> sender)
-                                                                )
-                                              , "senderPhoto" .= (urlr <$> photor)
-                                              , "recipientId" .= rid
-                                              ]
-                      & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
-                      & pushExpireInSeconds .~ 60 * 60
-
-              result <- sendPushNotification vapidKeys manager notification
-
-              case result of
-                Left ex -> do
-                    liftIO $ print ex
-                Right () -> return ()
-
-      Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
 
 
 postAcknowledgeR :: ChatHandler ()
@@ -231,7 +158,7 @@ getChatRoomR sid rid cid = do
         where_ $ x ^. ChatUser ==. val rid
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
-    webSockets (chatApp sid rid)
+    webSockets (chatApp sid rid cid)
 
     chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _ _ _)) -> utctDay t) <$> runDB ( select $ do
         x <- from $ table @Chat
@@ -256,10 +183,11 @@ getChatRoomR sid rid cid = do
 chatApp :: YesodChat m
         => UserId -- ^ user
         -> UserId -- ^ interlocutor
+        -> ContactId
         -> WebSocketsT (SubHandlerFor ChatRoom m) ()
-chatApp uid iid = do
+chatApp userId interlocutorId contactId = do
 
-    let channelId = S.fromList [uid,iid]
+    let channelId = S.fromList [userId, interlocutorId]
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -281,37 +209,112 @@ chatApp uid iid = do
     (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
         (runConduit (sourceWS .| mapM_C (
-                          \msg -> do
-                              now <- liftIO getCurrentTime
-                              let chat = Chat uid iid now msg ChatMessageStatusUnread Nothing False
-                              cid <- liftHandler (runDB $ insert chat)
-                              atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
-                                  [ "cid" .= cid
-                                  , "user" .= chatUser chat
-                                  , "interlocutor" .= chatInterlocutor chat
-                                  , "created" .= chatCreated chat
-                                  , "message" .= chatMessage chat
-                                  ]
+             \msg -> do
+                 now <- liftIO getCurrentTime
+                 let chat = Chat userId interlocutorId now msg ChatMessageStatusUnread Nothing False
+                 cid <- liftHandler (runDB $ insert chat)
+                 atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
+                     [ "cid" .= cid
+                     , "user" .= chatUser chat
+                     , "interlocutor" .= chatInterlocutor chat
+                     , "created" .= chatCreated chat
+                     , "message" .= chatMessage chat
+                     ]
 
-                              _ <- forkIO $ do
-                                  threadDelay (5 * 1000000)
+                 _ <- forkIO $ do
+                     threadDelay (5 * 1000000)
 
-                                  chat' <- liftHandler $ runDB $ selectOne $ do
-                                      x <- from $ table @Chat
-                                      where_ $ x ^. ChatId ==. val cid
-                                      where_ $ not_ $ x ^. ChatNotified
-                                      where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
-                                      where_ $ isNothing_ $ x ^. ChatReceived
-                                      return x
+                     chat' <- liftHandler $ runDB $ selectOne $ do
+                         x <- from $ table @Chat
+                         where_ $ x ^. ChatId ==. val cid
+                         where_ $ not_ $ x ^. ChatNotified
+                         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
+                         return x
 
-                                  case chat' of
-                                    Just (Entity chatId c@(Chat _ _ _ _ _ _ _)) ->
-                                        liftIO $ print @Text ("------->: Push message: cid: " <> pack (show chatId))
-                                    Nothing -> return ()
-                                  
-                              return ()
-                          )
-                    ))
+                     case chat' of
+                       Just (Entity _ (Chat uid iid _ message _ _ _)) -> do
+
+                           storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+                               x <- from $ table @Token
+                               where_ $ x ^. TokenApi ==. val apiInfoVapid
+                               return (x ^. TokenId, x ^. TokenStore) )
+
+                           let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+                           details <- case storeType of
+                             Just (_, StoreTypeGoogleSecretManager) -> do
+                                 liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+                             Just (tid, StoreTypeDatabase) -> do
+                                 liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB
+                                     (
+                                         selectOne $ do
+                                           x <-from $ table @Store
+                                           where_ $ x ^. StoreToken ==. val tid
+                                           return $ x ^. StoreVal
+                                     )
+
+                             Just (_,StoreTypeSession) -> return Nothing
+                             Nothing -> return Nothing
+
+                           case details of
+                             Just vapidKeysMinDetails -> do
+                                 
+                                 subscriptions <- liftHandler $ runDB $ select $ do
+                                     x <- from $ table @PushSubscription
+                                     where_ $ x ^. PushSubscriptionSubscriber ==. val iid
+                                     return x
+
+                                 sender <- liftHandler $ runDB $ selectOne $ do
+                                     x <- from $ table @User
+                                     where_ $ x ^. UserId ==. val uid
+                                     return x
+                                     
+                                 let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+                                 iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
+                                 urlr <- getUrlRender
+                                 msgr <- getMessageRender
+                                 tpr <- getRouteToParent
+
+                                 forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth)) -> do
+                                     photor <- liftHandler $ getAccountPhotoRoute pid
+                                     let notification = mkPushNotification endpoint p256dh auth
+                                             & pushMessage .~ object
+                                                 [ "messageType" .= PushMsgTypeMessage
+                                                 , "topic" .= PushMsgTypeMessage
+                                                 , "title" .= msgr MsgNewMessage
+                                                 , "icon" .= urlr iconr
+                                                 , "reply" .= urlr (tpr $ ChatRoomR sid pid contactId)
+                                                 , "senderId" .= pid
+                                                 , "senderName" .= ( (userName . entityVal <$> sender)
+                                                                     <|> (Just . userEmail . entityVal <$> sender)
+                                                                   )
+                                                 , "senderPhoto" .= urlr photor
+                                                 , "recipientId" .= sid
+                                                 , "body" .= message
+                                                 ]
+                                             & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                                             & pushExpireInSeconds .~ 60 * 60
+
+                                     manager <- liftHandler getAppHttpManager
+
+                                     result <- sendPushNotification vapidKeys manager notification
+
+                                     case result of
+                                       Left ex -> do
+                                           liftIO $ print ex
+                                           liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                       Right () -> liftHandler $ runDB $ update $ \x -> do
+                                           set x [ChatNotified =. val True]
+                                           where_ $ x ^. ChatId ==. val cid
+                             Nothing -> do
+                                 liftIO $ print @Text "No VAPID details"
+                                 liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                
+                       Nothing -> return ()
+
+                 return ()
+             ) ))
     case e of
       Left _ -> do
           m <- readTVarIO channelMapTVar
