@@ -1,3 +1,5 @@
+ContactList: Список контактов
+TextChat: Чат с помощью текстового сообщения
 NewMessage: Новое сообщение
 Notification: Уведомление
 Ignore: Игнорировать

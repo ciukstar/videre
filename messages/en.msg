@@ -1,3 +1,5 @@
+ContactList: Contact list
+TextChat: Chat via text message
 NewMessage: New message
 Notification: Notification
 Ignore: Ignore

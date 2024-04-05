@@ -22,6 +22,8 @@
 
 /static StaticR Static appStatic
 /auth   AuthR   Auth   getAuth
+/manifest.json WebAppManifestR GET
+/sitemap.xml   SitemapR        GET
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 

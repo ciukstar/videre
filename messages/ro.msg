@@ -1,3 +1,5 @@
+ContactList: Listă de contacte
+TextChat: Chat prin mesaj text
 NewMessage: Mesaj nou
 Notification: Notificare
 Ignore: Ignorați

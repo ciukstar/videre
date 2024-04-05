@@ -80,7 +80,7 @@ import Handler.Users
     , getUserPhotoR, postUserR
     )
 
-import Handler.Common ( getFaviconR, getRobotsR )
+import Handler.Common ( getFaviconR, getRobotsR, getSitemapR, getWebAppManifestR )
 
 import Foundation.Data
     ( App(..), Handler, resourcesApp
@@ -88,7 +88,7 @@ import Foundation.Data
       ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
-      , RobotsR, DocsR
+      , RobotsR, DocsR, SitemapR, WebAppManifestR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR
