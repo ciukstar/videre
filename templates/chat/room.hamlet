@@ -4,7 +4,7 @@
     <md-icon>arrow_back
 
   <span.app-title>
-    <img src=@{photo} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
+    <img src=@{photor} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
 
     <span.title-small>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
@@ -15,10 +15,10 @@
 
   <span.app-top-app-bar-end>
 
-    <md-filled-icon-button type=button aria-label=_{MsgVideoCall}>
+    <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
       <md-icon>video_call
       
-    <md-filled-icon-button type=button aria-label=_{MsgAudioCall}>
+    <md-filled-icon-button type=button aria-label=_{MsgAudioCall} disabled>
       <md-icon>call
 
     <span style="position:relaive">
@@ -49,3 +49,46 @@
     <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
       <md-filled-icon-button type=submit slot=trailing-icon disabled ##{idButtonSend}>
         <md-icon>send
+
+
+<md-dialog ##{idDialogOutgoingCall}>
+  <div slot=headline>
+    _{MsgOutgoingCall} ...
+
+  <div slot=content>
+    <figure>
+      <img src=@{photos} width=48 alt=_{MsgPhoto} loading=lazy>
+
+    <md-icon>double_arrow
+
+    <figure>
+      <img src=@{photor} width=48 alt=_{MsgPhoto} loading=lazy>
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
+      <md-icon slot=icon>call_end
+      _{MsgCancel}
+
+<md-dialog ##{idDialogCallDeclined}>
+  <div slot=headline>
+    Call declined
+
+  <form slot=content method=dialog>
+    <p.body-large>Call declined ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button>
+      <md-icon slot=icon>close
+      Close
+      
+<md-dialog ##{idDialogVideoSessionEnded}>
+  <div slot=headline>
+    Call Ended
+
+  <form slot=content method=dialog>
+    <p.body-large>Call Ended ...
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
+      <md-icon slot=icon>close
+      Close

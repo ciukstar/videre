@@ -1,3 +1,11 @@
+Decline: Refuser
+Accept: Accepter
+MissedCall: Appel manqué
+Close: Fermer
+VideoSession: Séance vidéo
+CallEnded: Appel terminé
+IncomingCall: Appel entrant
+OutgoingCall: Appel sortant
 AudioCall: Appel audio
 VideoCall: Appel vidéo
 ContactList: Liste de contacts

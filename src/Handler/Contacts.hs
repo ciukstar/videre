@@ -22,7 +22,7 @@ module Handler.Contacts
 import ChatRoom
     ( YesodChat
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
-      , getStaticRoute
+      , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
@@ -34,6 +34,7 @@ import Data.Aeson (toJSON)
 import qualified Data.Aeson as A
     ( object, Value (Bool), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
+import Data.Functor ((<&>))
 import Data.Text (pack, unpack)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
@@ -53,10 +54,10 @@ import Database.Persist.Sql (fromSqlKey)
 
 import Foundation (Form)
 import Foundation.Data
-    ( Handler, App (appHttpManager)
+    ( Handler, App (appHttpManager, appSettings)
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
-      , PushSubscriptionsR, StaticR
+      , PushSubscriptionsR, StaticR, VideoR
       )
     , AppMessage
       ( MsgNoContactsYet, MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
@@ -89,10 +90,13 @@ import Model
 import Network.HTTP.Client.Conduit (Manager)
 import Network.HTTP.Types.Status (status400)
 
-import Settings (widgetFile)
+import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
 
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
+
+import VideoRoom (YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager), Route (OutgoingR))
+import VideoRoom.Data (Route (PushMessageR))
 
 import Web.WebPush
     ( VAPIDKeys, vapidPublicKeyBytes, readVAPIDKeys
@@ -121,7 +125,9 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
+
 import Text.Read (readMaybe)
+
 import System.IO (readFile')
 import Text.Julius (RawJS(rawJS))
 import Yesod.Static (StaticRoute)
@@ -366,6 +372,14 @@ formContacts options extra = do
           }
 
 
+instance YesodVideo App where
+    
+    getRtcPeerConnectionConfig :: Handler (Maybe A.Value)
+    getRtcPeerConnectionConfig = getYesod <&> (appRtcPeerConnectionConfig . appSettings)
+
+    getAppHttpManager :: Handler Manager
+    getAppHttpManager = getYesod <&> appHttpManager
+
 
 instance YesodChat App where
 
@@ -383,3 +397,9 @@ instance YesodChat App where
 
     getStaticRoute :: StaticRoute -> Handler (Route App)
     getStaticRoute = return . StaticR
+
+    getVideoPushRoute :: Handler (Route App)
+    getVideoPushRoute = return $ VideoR PushMessageR
+
+    getVideoOutgoingRoute :: UserId -> UserId -> Handler (Route App)
+    getVideoOutgoingRoute sid rid = return $ VideoR $ OutgoingR sid rid

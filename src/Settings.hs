@@ -93,7 +93,8 @@ data AppSettings = AppSettings
     , appGcloudConf             :: GcloudConf
     -- ^ Google API config
 
-    , appAuthDummyLogin         :: Bool
+    , appRtcPeerConnectionConfig :: Maybe Value
+    , appAuthDummyLogin          :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
     }
 
@@ -162,6 +163,8 @@ instance FromJSON AppSettings where
         appSuperuser              <- o .:  "superuser"
         appGoogleApiConf          <- o .: "google-api"
         appGcloudConf             <- o .: "gcloud"
+                                     
+        appRtcPeerConnectionConfig <- o .:? "rtc-peer-connection-config"
 
         return AppSettings {..}
 

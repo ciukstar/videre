@@ -87,12 +87,76 @@ form.addEventListener("submit", function(e) {
   e.preventDefault();
 });
 
+document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
+
+  fetch('@{video}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      "messageType": #{show PushMsgTypeCall},
+      "icon": '@{icon}',
+      "channelId": #{show channel},
+      "senderId": #{show $ fromSqlKey sid},
+      "recipientId": #{show $ fromSqlKey rid}
+    })
+  }).then(function (result) {
+    document.getElementById(#{idDialogOutgoingCall}).show();
+  }).catch(function (err) {
+    console.error(err);
+  });
+
+});
+
+document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click', function (event) {
+
+  fetch('@{video}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      "messageType": #{show PushMsgTypeCancel},
+      "icon": '@{icon}',
+      "channelId": #{show channel},
+      "senderId": #{show $ fromSqlKey sid},
+      "recipientId": #{show $ fromSqlKey rid}
+    })
+  }).then(function (result) {
+    document.getElementById(#{idDialogOutgoingCall}).close();
+  }).catch(function (err) {
+    console.error(err);
+  });
+
+});
+
 if ("serviceWorker" in navigator) {
+
+  navigator.serviceWorker.addEventListener('message', function (message) {
+    
+    if (message.data.messageType === #{show PushMsgTypeAccept}) {
+      
+      document.getElementById(#{idDialogOutgoingCall}).close();
+      
+      const params = new URLSearchParams({
+	channel: message.data.channelId,
+	backlink: '@{backlink}'
+      });
+
+      window.location.href = `@{outgoing}?${params}`;
+      
+    } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+
+      document.getElementById(#{idDialogOutgoingCall}).close();
+      document.getElementById(#{idDialogCallDeclined}).show();
+      
+    }
+    
+  });
+  
   navigator.serviceWorker.ready.then(function (registration) {
     registration.pushManager.getSubscription().then( function (subscription) {
       if (!!subscription) {
 	document.getElementById(#{idMenuItemViewContact}).href = `@{contact}?endpoint=${subscription.endpoint}`;
       }
     } );
-  });    
+  });
+  
 }

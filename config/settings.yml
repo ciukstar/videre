@@ -50,6 +50,8 @@ google-api:
 
 gcloud:
   project-id: "_env:YESOD_GCLOUD_PROJECT_ID:videre-418810"
+  
+rtc-peer-connection-config: "_env:YESOD_RTC_PEER_CONNECTION_CONFIG"
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

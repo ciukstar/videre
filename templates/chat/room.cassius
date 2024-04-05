@@ -4,7 +4,7 @@ header
     position: sticky
     top: 0
     z-index: 1
-    height: var(--app-top-app-bar-height)
+    height: var(--app-top-app-bar-height,64px)
     display: flex
     align-items: center
     justify-content: flex-start
@@ -21,6 +21,7 @@ header
         margin-left: auto
 
 main
+
     height: calc(100svh - var(--app-top-appbar-height,64px))
     display: flex
     flex-direction: column
@@ -46,6 +47,7 @@ main
         .bubble
             width: fit-content
             max-width: 80%
+            margin: 0.2rem
             border: 0
             padding: 0.5rem
             position: relative
@@ -102,3 +104,24 @@ main
 
         ##{idMessageInput}
             width: 100%
+
+##{idDialogOutgoingCall}
+
+    div[slot=content]
+        display: flex
+        align-items: center
+        justify-content: space-around
+
+        figure
+            margin: 0
+            padding: 0
+            
+            img
+                clip-path: circle(50%)
+
+        md-icon
+            --md-icon-size: 48px
+
+    ##{idButtonOutgoingCallCancel}
+        --md-sys-color-primary: red
+        --md-sys-color-on-primary: #FFFFFF

@@ -88,7 +88,7 @@ import Foundation.Data
       ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
-      , RobotsR, DocsR, SitemapR, WebAppManifestR
+      , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR
@@ -96,6 +96,9 @@ import Foundation.Data
        , UserDeleR, UserEditR, UserR
        )
     )
+
+import VideoRoom ()
+import VideoRoom.Data (VideoRoom(VideoRoom))
     
 import Yesod.Auth.Email (saltPass)
 
@@ -119,6 +122,7 @@ makeFoundation appSettings = do
         (appStaticDir appSettings)
 
     getChatRoom <- ChatRoom <$> newTVarIO M.empty
+    getVideoRoom <- VideoRoom <$> newTVarIO M.empty
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

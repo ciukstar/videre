@@ -62,6 +62,8 @@ import Text.Jasmine ( minifym )
 import Text.Shakespeare.Text (stext)
 import Text.Printf (printf)
 
+import VideoRoom.Data (Route(IncomingR, PushMessageR))
+
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
@@ -96,16 +98,6 @@ import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
-
-data MenuItem = MenuItem
-    { menuItemLabel :: Text
-    , menuItemRoute :: Route App
-    , menuItemAccessCallback :: Bool
-    }
-
-data MenuTypes
-    = NavbarLeft MenuItem
-    | NavbarRight MenuItem
 
 -- | A convenient synonym for creating forms.
 type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
@@ -173,38 +165,6 @@ instance Yesod App where
     defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
         master <- getYesod
-        mmsg <- getMessage
-
-        muser <- maybeAuthPair
-        mcurrentRoute <- getCurrentRoute
-
-        -- Get the breadcrumbs, as defined in the YesodBreadcrumbs instance.
-        (title, parents) <- breadcrumbs
-
-        -- Define the menu items of the header.
-        let menuItems =
-                [ NavbarLeft $ MenuItem
-                    { menuItemLabel = "Home"
-                    , menuItemRoute = HomeR
-                    , menuItemAccessCallback = True
-                    }
-                , NavbarRight $ MenuItem
-                    { menuItemLabel = "Login"
-                    , menuItemRoute = AuthR LoginR
-                    , menuItemAccessCallback = isNothing muser
-                    }
-                , NavbarRight $ MenuItem
-                    { menuItemLabel = "Logout"
-                    , menuItemRoute = AuthR LogoutR
-                    , menuItemAccessCallback = isJust muser
-                    }
-                ]
-
-        let navbarLeftMenuItems = [x | NavbarLeft x <- menuItems]
-        let navbarRightMenuItems = [x | NavbarRight x <- menuItems]
-
-        let navbarLeftFilteredMenuItems = [x | x <- navbarLeftMenuItems, menuItemAccessCallback x]
-        let navbarRightFilteredMenuItems = [x | x <- navbarRightMenuItems, menuItemAccessCallback x]
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -213,6 +173,7 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
+            
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
 
@@ -223,6 +184,18 @@ instance Yesod App where
             idNotificationBody <- newIdent
             idButtonIgnoreNotification <- newIdent
             idButtonReplyNotification <- newIdent
+
+            idDialogIncomingCall <- newIdent
+            idFormIncomingCall <- newIdent
+            idFigurePhoto <- newIdent
+            idImgPhoto <- newIdent
+            idFigcaptionPhoto <- newIdent
+            idButtonDecline <- newIdent
+            idButtonAccept <- newIdent
+            idDialogMissedCall <- newIdent
+            idMissedCallCaller <- newIdent
+
+            backlink <- fromMaybe HomeR <$> getCurrentRoute
             
             $(widgetFile "default-layout")
 
@@ -237,8 +210,9 @@ instance Yesod App where
 
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
+    isAuthorized (VideoR _) _ = isAuthenticated
+    
     isAuthorized (ChatR _) _ = isAuthenticated
-
     
     isAuthorized (PushSubscriptionsR sid _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid

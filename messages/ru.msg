@@ -1,3 +1,11 @@
+Decline: Отклонить
+Accept: Принять
+MissedCall: Пропущенный звонок
+Close: Закрыть
+VideoSession: Видеосессия
+CallEnded: Звонок окончен
+IncomingCall: Входящий звонок
+OutgoingCall: Исходящий звонок
 AudioCall: Аудио звонок
 VideoCall: Видеозвонок
 ContactList: Список контактов

@@ -7,6 +7,7 @@
 module Foundation.Data where
 
 import ChatRoom.Data (ChatRoom)
+
 import Database.Persist.Sql (ConnectionPool)
 
 import Import.NoFoundation
@@ -15,6 +16,8 @@ import Import.NoFoundation
 import Model (UserId, ContactId)
 
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))
+
+import VideoRoom.Data (VideoRoom)
 
 import Yesod.Auth (Auth, getAuth)
 import Yesod.Core (mkMessage, renderRoute)
@@ -32,6 +35,7 @@ data App = App
     , appHttpManager :: Manager
     , appLogger      :: Logger
     , getChatRoom    :: ChatRoom
+    , getVideoRoom   :: VideoRoom
     }
 
 mkMessage "App" "messages" "en"

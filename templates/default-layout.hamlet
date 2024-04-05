@@ -21,3 +21,38 @@
     <md-filled-button ##{idButtonReplyNotification} has-icon type=link>
       <md-icon slot=icon>reply
       _{MsgReply}
+
+<md-dialog ##{idDialogIncomingCall}>
+  <div slot=headline>
+    _{MsgIncomingCall}
+
+  <form slot=content method=dialog ##{idFormIncomingCall}>
+
+    <figure ##{idFigurePhoto}>
+      <img ##{idImgPhoto} width=64>
+      <figcaption.body-large ##{idFigcaptionPhoto}>
+
+  <div slot=actions>
+
+    <md-filled-button has-icon ##{idButtonDecline}>
+      <md-icon slot=icon>call_end
+      _{MsgDecline}
+
+    <md-filled-button ##{idButtonAccept} has-icon type=button>
+      <md-icon slot=icon>call
+      _{MsgAccept}
+
+
+<md-dialog ##{idDialogMissedCall}>
+  <div slot=headline>
+    _{MsgMissedCall}
+
+  <form slot=content method=dialog>
+    <p.body-large>
+      _{MsgMissedCall}:
+      <span ##{idMissedCallCaller}>
+
+  <div slot=actions>
+    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
+      <md-icon slot=icon>close
+      _{MsgClose}

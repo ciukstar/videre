@@ -5,17 +5,79 @@ if ("serviceWorker" in navigator) {
 
   navigator.serviceWorker.addEventListener('message', function (message) {
     
-    document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
-    document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
-    document.getElementById(#{idNotificationBody}).textContent = message.data.body;
-    
-    document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
-    document.getElementById(#{idDialogChatNotification}).show();
-
     document.getElementById(#{idButtonIgnoreNotification}).addEventListener('click', function (e) {
       document.getElementById(#{idDialogChatNotification}).close();
-    });    
+    });
+
+    document.getElementById(#{idButtonDecline}).onclick = function (event) {
+      fetch('@{VideoR PushMessageR}', {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+          "messageType": #{show PushMsgTypeDecline},
+          "icon": message.data.icon,
+          "channelId": message.data.channelId,
+          "senderId": message.data.recipientId,
+          "recipientId": message.data.senderId
+	})
+      }).then(function (result) {
+	document.getElementById(#{idDialogIncomingCall}).close();
+      });
+    };
+
+    document.getElementById(#{idButtonAccept}).onclick = function (event) {
+      fetch('@{VideoR PushMessageR}', {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+          "messageType": #{show PushMsgTypeAccept},
+          "icon": message.data.icon,
+          "channelId": message.data.channelId,
+          "senderId": message.data.recipientId,
+          "recipientId": message.data.senderId
+	})
+      }).then(function (result) {
+
+	document.getElementById(#{idDialogIncomingCall}).close();
+
+	const params = new URLSearchParams({
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+          channel: message.data.channelId,
+          backlink: '@{backlink}'
+	});
+
+	window.location.href = `@{VideoR $ IncomingR}?${params}`;
+
+      });
+    };
     
+  });
+
+  navigator.serviceWorker.addEventListener('message', function (message) {
+
+    if (message.data.messageType === #{show PushMsgTypeMessage}) {
+      
+      document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
+      document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
+      document.getElementById(#{idNotificationBody}).textContent = message.data.body;
+      document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
+      document.getElementById(#{idDialogChatNotification}).show();
+
+    } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
+
+      document.getElementById(#{idDialogIncomingCall}).close();
+      document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
+      document.getElementById(#{idDialogMissedCall}).show();
+
+    } else if (message.data.messageType === #{show PushMsgTypeCall}) {
+      
+      document.getElementById(#{idImgPhoto}).src = message.data.senderPhoto;
+      document.getElementById(#{idFigcaptionPhoto}).textContent = message.data.senderName;
+      document.getElementById(#{idDialogIncomingCall}).show();
+
+    }
+
   });
   
 }

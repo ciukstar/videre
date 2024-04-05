@@ -1,3 +1,11 @@
+Decline: Refuzați
+Accept: Acceptați
+MissedCall: Apel pierdut
+Close: Închide
+VideoSession: Sesiune video
+CallEnded: Apel terminat
+IncomingCall: Apel de intrare
+OutgoingCall: Apel de ieșire
 AudioCall: Apel audio
 VideoCall: Apel video
 ContactList: Listă de contacte

@@ -75,3 +75,17 @@ body
     
     margin: 0
     padding: 0
+
+    ##{idDialogIncomingCall}
+
+        ##{idFigurePhoto}
+            text-align: center
+
+        ##{idButtonDecline}
+          --md-sys-color-primary: red
+          --md-sys-color-on-primary: #FFFFFF
+
+        ##{idButtonAccept}
+          --md-sys-color-primary: green
+          --md-sys-color-on-primary: #FFFFFF
+          margin-left: 1rem

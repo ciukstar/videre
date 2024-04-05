@@ -35,8 +35,7 @@ import Database.Esqueleto.Experimental
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
-import Data.Aeson (object, (.=), ToJSON, toJSON)
-import qualified Data.Aeson as A (Value (String))
+import Data.Aeson (object, (.=))
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
@@ -50,23 +49,28 @@ import Foundation.Data
     ( AppMessage
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
+      , MsgOutgoingCall, MsgCancel
       )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
 
 import Model
-    ( UserId, User (User, userName, userEmail)
+    ( UserId, User (User, userName, userEmail), statusError
     , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription), secretVolumeVapid, apiInfoVapid
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , ContactId, Token, Store
+    , PushMsgType
+      ( PushMsgTypeCall, PushMsgTypeMessage, PushMsgTypeCancel, PushMsgTypeDecline
+      , PushMsgTypeAccept
+      )
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
       , ChatReceived, ChatId, ChatNotified
-      ), statusError
+      )
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -74,10 +78,15 @@ import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
 import Settings (widgetFile)
+import Settings.StaticFiles
+    ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
+    , img_call_FILL0_wght400_GRAD0_opsz24_svg
+    )
 
 import System.IO (readFile')
 
 import Text.Hamlet (Html)
+import Text.Julius (RawJS(rawJS))
 import Text.Read (readMaybe)
 
 import Web.WebPush
@@ -97,33 +106,26 @@ import Yesod.Core.Handler
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Fields (FormMessage, intField)
-import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
-import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
 import Yesod.Form.Input (runInputPost, ireq)
-import Text.Julius (RawJS(rawJS))
-import Settings.StaticFiles (img_chat_FILL0_wght400_GRAD0_opsz24_svg)
+import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
+import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
       , YesodPersist m, YesodPersistBackend m ~ SqlBackend
       ) => YesodChat m where
+    
     getAppHttpManager :: HandlerFor m Manager
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
     getContactRoute :: UserId -> UserId -> ContactId -> HandlerFor m (Route m)
-    getStaticRoute :: StaticRoute -> HandlerFor m (Route m) 
+    getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
+    getVideoPushRoute :: HandlerFor m (Route m)
+    getVideoOutgoingRoute :: UserId -> UserId -> HandlerFor m (Route m)
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
-
-
-data PushMsgType = PushMsgTypeMessage
-    deriving (Eq, Show, Read)
-
-instance ToJSON PushMsgType where
-    toJSON :: PushMsgType -> A.Value
-    toJSON = A.String . pack . show
 
 
 postAcknowledgeR :: ChatHandler ()
@@ -144,8 +146,12 @@ getChatRoomR :: UserId -> UserId -> ContactId -> ChatHandler Html
 getChatRoomR sid rid cid = do
     
     backlink <- liftHandler $ getBacklink sid rid
-    photo <- liftHandler $ getAccountPhotoRoute rid
+    photos <- liftHandler $ getAccountPhotoRoute sid
+    photor <- liftHandler $ getAccountPhotoRoute rid
     contact  <- liftHandler $ getContactRoute sid rid cid
+    icon <- liftHandler $ getStaticRoute img_call_FILL0_wght400_GRAD0_opsz24_svg
+    video <- liftHandler getVideoPushRoute
+    outgoing <- liftHandler $ getVideoOutgoingRoute sid rid
 
     interlocutor <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -172,13 +178,23 @@ getChatRoomR sid rid cid = do
 
     toParent <- getRouteToParent
 
+    let channel = fromSqlKey cid
+
     liftHandler $ defaultLayout $ do
+        
+        idButtonVideoCall <- newIdent
         idMenuItemViewContact <- newIdent
         idChatOutput <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
+        idDialogOutgoingCall <- newIdent
+        idButtonOutgoingCallCancel <- newIdent
+        idDialogCallDeclined <- newIdent
+        idDialogVideoSessionEnded <- newIdent
+        
         $(widgetFile "chat/room")
+
 
 
 chatApp :: YesodChat m
