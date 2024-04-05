@@ -49,7 +49,7 @@ import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 import Foundation.Data
     ( AppMessage
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
-      , MsgNoMessagesExchangedYet, MsgPushNotificationExcception
+      , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
       )
     )
 
@@ -177,6 +177,7 @@ getChatRoomR sid rid cid = do
         idChatOutput <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
+        idButtonSend <- newIdent
         $(widgetFile "chat/room")
 
 

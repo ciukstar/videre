@@ -7,8 +7,16 @@ header
     height: var(--app-top-app-bar-height)
     display: flex
     align-items: center
-    column-gap: 1rem
-    padding: 0 1rem
+    justify-content: flex-start
+    column-gap: 0.5rem
+    padding: 0 0.5rem
+
+    .app-title
+        display: flex
+        align-items: center
+        justify-content: flex-start
+        column-gap: 0.5rem
+        
     .app-top-app-bar-end
         margin-left: auto
 

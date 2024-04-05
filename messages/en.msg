@@ -1,3 +1,5 @@
+AudioCall: Audio call
+VideoCall: Video call
 ContactList: Contact list
 TextChat: Chat via text message
 NewMessage: New message

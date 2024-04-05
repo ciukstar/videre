@@ -1,3 +1,5 @@
+AudioCall: Apel audio
+VideoCall: Apel video
 ContactList: Listă de contacte
 TextChat: Chat prin mesaj text
 NewMessage: Mesaj nou

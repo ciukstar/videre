@@ -24,7 +24,7 @@ var url = document.URL,
 output.scrollTop = output.scrollHeight;
 
 input.addEventListener('input',function (e) {
-  var btnSubmit = this.querySelector('md-filled-icon-button');
+  var btnSubmit = document.getElementById(#{idButtonSend});
   btnSubmit.disabled = !(this.value && this.value.trim());
 });
 
@@ -83,6 +83,7 @@ form.addEventListener("submit", function(e) {
   input.value = "";
   var btnSubmit = this.querySelector('md-filled-icon-button');
   btnSubmit.disabled = true;
+  input.focus();
   e.preventDefault();
 });
 
