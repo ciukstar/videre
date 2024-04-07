@@ -3,17 +3,24 @@
   <md-icon-button href=#{backlink} aria-label=MsgBack ##{idButtonExitVideoSession}>
     <md-icon>arrow_back
 
-  <h1.title-large>
-    _{MsgVideoSession}
+  <md-filled-icon-button has-icon ##{idButtonSwitchVideo} data-facing-mode=user>
+    <md-icon>switch_video
+
+  <md-filled-icon-button has-icon disabled>
+    <md-icon>videocam_off
+
+  <md-filled-icon-button has-icon disabled>
+    <md-icon>mic_off
+
+  <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
+    <md-icon>call_end
+    
 
 <main>
 
   <video controls autoplay ##{idVideoRemote}>
 
   <video controls autoplay muted ##{idVideoSelf}>
-
-  <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
-    <md-icon>call_end
 
 
 <md-dialog ##{idDialogCallEnded}>

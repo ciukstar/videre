@@ -72,14 +72,40 @@ ws.onmessage = async (e) => {
 };
 
 
-navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function (stream) {
+navigator.mediaDevices.getUserMedia({
+  audio: true,
+  video: true
+}).then(function (stream) {
 
-  stream.getTracks().forEach(function (track) { pc.addTrack(track, stream); });
+  stream.getTracks().forEach((track) => { pc.addTrack(track, stream); });
   document.getElementById(#{idVideoSelf}).srcObject = stream;
   return stream;
 
-}).then(function (stream) {
+}).then((stream) => {
+  
+  if (navigator.mediaDevices.getSupportedConstraints().facingMode) {
+    
+    document.getElementById(#{idButtonSwitchVideo}).disabled = false;
+    
+    document.getElementById(#{idButtonSwitchVideo}).onclick = (e) => {
+      
+      document.getElementById(#{idVideoSelf}).srcObject = null;
+      
+      navigator.mediaDevices.getUserMedia({
+	audio: true,
+	video: { facingMode: e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user' }
+      }).then((stream) => {
 
+	pc.getSenders().find(
+	  (s) => s.track.kind === stream.getVideoTracks()[0].kind
+	).replaceTrack(stream.getVideoTracks()[0]);
+	
+	document.getElementById(#{idVideoSelf}).srcObject = stream;
+	
+      });
+    };
+  }
+  
   [#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
     document.getElementById(x).addEventListener('click', function (event) {
       stream.getTracks().forEach(function (track) { track.stop(); });

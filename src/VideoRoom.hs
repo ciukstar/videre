@@ -11,6 +11,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module VideoRoom
   ( module VideoRoom.Data, module VideoRoom
@@ -40,7 +41,7 @@ import Data.Text (Text, unpack)
 
 import Foundation.Data
     ( AppMessage
-      ( MsgOutgoingCall, MsgIncomingCall, MsgClose, MsgNotGeneratedVAPID
+      ( MsgOutgoingCall, MsgClose, MsgNotGeneratedVAPID
       , MsgCallEnded, MsgVideoSession
       )
     )
@@ -54,7 +55,7 @@ import Model
       ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEnd
       )
     , EntityField
-      ( UserId, PushSubscriptionPublisher, TokenApi, TokenId, TokenStore
+      ( UserId, TokenApi, TokenId, TokenStore
       , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
       )
     )
@@ -128,6 +129,7 @@ getOutgoingR sid rid = do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
+        idButtonSwitchVideo <- newIdent
         idButtonEndVideoSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
@@ -155,6 +157,7 @@ getIncomingR = do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
+        idButtonSwitchVideo <- newIdent
         idButtonEndVideoSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
