@@ -69,17 +69,23 @@
       <md-icon slot=icon>call_end
       _{MsgCancel}
 
+
 <md-dialog ##{idDialogCallDeclined}>
   <div slot=headline>
-    Call declined
+    _{MsgCallDeclined}
 
   <form slot=content method=dialog>
-    <p.body-large>Call declined ...
+    <p.body-large>
+      $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
+        $maybe name <- name
+          _{MsgCalleeDeclinedTheCall name}
+        $nothing
+          _{MsgCalleeDeclinedTheCall email}
 
   <div slot=actions>
-    <md-filled-button has-icon type=button>
-      <md-icon slot=icon>close
-      Close
+    <md-text-button type=button onclick="document.getElementById('#{idDialogCallDeclined}').close()">
+      _{MsgClose}
+
       
 <md-dialog ##{idDialogVideoSessionEnded}>
   <div slot=headline>

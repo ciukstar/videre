@@ -185,13 +185,20 @@ instance Yesod App where
             idButtonIgnoreNotification <- newIdent
             idButtonReplyNotification <- newIdent
 
-            idDialogIncomingCall <- newIdent
-            idFormIncomingCall <- newIdent
-            idFigurePhoto <- newIdent
-            idImgPhoto <- newIdent
-            idFigcaptionPhoto <- newIdent
-            idButtonDecline <- newIdent
-            idButtonAccept <- newIdent
+            idDialogIncomingVideoCall <- newIdent
+            idFigureVideoCallerPhoto <- newIdent
+            idImgVideoCallerPhoto <- newIdent
+            idFigcaptionVideoCallerPhoto <- newIdent
+            idButtonVideoCallDecline <- newIdent
+            idButtonVideoCallAccept <- newIdent
+
+            idDialogIncomingAudioCall <- newIdent
+            idFigureAudioCallerPhoto <- newIdent
+            idImgAudioCallerPhoto <- newIdent
+            idFigcaptionAudioCallerPhoto <- newIdent
+            idButtonAudioCallDecline <- newIdent
+            idButtonAudioCallAccept <- newIdent
+            
             idDialogMissedCall <- newIdent
             idMissedCallCaller <- newIdent
 

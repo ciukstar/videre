@@ -1,3 +1,13 @@
+FailedToCancelSubscription: Échec de l'annulation de l'abonnement
+SubscriptionCanceled: Abonnement annulé
+SubscriptionFailed: L'abonnement a échoué
+SubscriptionSucceeded: L'abonnement a réussi
+RemoveAreYouSure: Êtes-vous sûr de vouloir supprimer ?
+Remove: Supprimer
+CalleeDeclinedTheCall callee: #{callee} a décliné l'appel
+CallDeclined: Appel refusé
+IncomingAudioCall: Appel audio entrant
+IncomingVideoCall: Appel vidéo entrant
 Decline: Refuser
 Accept: Accepter
 MissedCall: Appel manqué

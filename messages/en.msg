@@ -1,3 +1,13 @@
+FailedToCancelSubscription: Failed to cancel subscription
+SubscriptionCanceled: Subscription canceled
+SubscriptionFailed: Subscription failed
+SubscriptionSucceeded: Subscription succeeded
+RemoveAreYouSure: Are you sure you want to remove?
+Remove: Remove
+CalleeDeclinedTheCall callee@Text: #{callee} declined the call 
+CallDeclined: Call declined
+IncomingAudioCall: Incoming audio call
+IncomingVideoCall: Incoming video call
 Decline: Decline
 Accept: Accept
 MissedCall: Missed call

@@ -8,6 +8,8 @@ module Foundation.Data where
 
 import ChatRoom.Data (ChatRoom)
 
+import Data.Text (Text)
+
 import Database.Persist.Sql (ConnectionPool)
 
 import Import.NoFoundation

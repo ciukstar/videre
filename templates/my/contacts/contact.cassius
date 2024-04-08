@@ -13,11 +13,26 @@ header
         margin-left: auto
 
 main
+
     display: flex
     flex-direction: column
     align-items: center
+    
+    .error
+      align-self: stretch
+      padding: 1rem
 
     figure
       text-align: center
       img
           clip-path: circle(50%)
+
+aside.app-snackbar
+    box-sizing: border-box
+    position: fixed
+    bottom: 4rem
+    left: 0
+    margin: 1rem
+    width: calc(100% - 2 * 1rem)
+    padding: 1rem
+    --md-elevation-level: 1

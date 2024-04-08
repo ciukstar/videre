@@ -18,7 +18,7 @@ pc.ontrack = ({track, streams}) => {
 let makingOffer = false;
 
 ws.addEventListener('open', (e) => {
-  
+
   pc.onnegotiationneeded = async () => {
     try {
       makingOffer = true;
@@ -32,7 +32,7 @@ ws.addEventListener('open', (e) => {
   };
 
   pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
-  
+
 });
 
 let ignoreOffer = false;
@@ -84,64 +84,64 @@ navigator.mediaDevices.getUserMedia({
   return stream;
 
 }).then((stream) => {
-  
+
   document.getElementById(#{idButtonSwitchVideocam}).onclick = (e) => {
 
     e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user';
-    
+
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
     ).forEach((sender) => {
       sender.track.stop();
     });
-    
+
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: e.target.dataset.facingMode } }
     }).then((stream) => {
 
       const [videoTrack] = stream.getVideoTracks();
-      
+
       pc.getSenders().filter(
 	(sender) => sender.track.kind === videoTrack.kind
       ).forEach((sender) => {
 	sender.replaceTrack(videoTrack);
       });
-      
+
       document.getElementById(#{idVideoSelf}).srcObject = stream;
-      
+
     });
   };
-  
+
   document.getElementById(#{idButtonVideoSwitch}).onclick = (e) => {
-      
+
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
       e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'videocam_off' : 'videocam';
     });
-    
+
   };
-  
+
   document.getElementById(#{idButtonAudioSwitch}).onclick = (e) => {
-      
+
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getAudioTracks()[0].kind
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
       e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'mic_off' : 'mic';
     });
-    
+
   };
-    
-  [#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
+
+  [#{idButtonExitSession}, #{idButtonEndSession}].forEach((x) => {
     document.getElementById(x).addEventListener('click', (e) => {
       stream.getTracks().forEach((track) => { track.stop(); });
     }, { once: true });
   });
 
   navigator.serviceWorker.addEventListener('message', (message) => {
-    if (message.data.messageType === #{show PushMsgTypeEnd}) {
+    if (message.data.messageType === #{show PushMsgTypeEndSession}) {
       stream.getTracks().forEach((track) => { track.stop(); });
     }
   }, { once: true });
@@ -153,7 +153,7 @@ navigator.mediaDevices.getUserMedia({
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeEnd}) {
+  if (message.data.messageType === #{show PushMsgTypeEndSession}) {
     pc.close();
     ws.close();
     document.getElementById(#{idDialogCallEnded}).show();
@@ -161,13 +161,13 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 });
 
-[#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
+[#{idButtonExitSession}, #{idButtonEndSession}].forEach((x) => {
   document.getElementById(x).addEventListener('click', (e) => {
     fetch('@{toParent PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"messageType": #{show PushMsgTypeEnd},
+	"messageType": #{show PushMsgTypeEndSession},
 	"channelId": #{show channel},
 	"senderId": #{show $ fromSqlKey sid},
 	"recipientId": #{show $ fromSqlKey rid}
@@ -175,7 +175,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     }).then((result) => {
       pc.close();
       ws.close();
-      window.location.href = #{backlink};      
+      window.location.href = #{backlink};
     });
   });
 });
@@ -187,4 +187,3 @@ navigator.mediaDevices.enumerateDevices().then((devices) => {
     document.getElementById(#{idButtonSwitchVideocam}).removeAttribute('disabled');
   }
 });
-

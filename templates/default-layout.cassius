@@ -76,16 +76,34 @@ body
     margin: 0
     padding: 0
 
-    ##{idDialogIncomingCall}
+    ##{idDialogIncomingVideoCall}
 
-        ##{idFigurePhoto}
+        ##{idFigureVideoCallerPhoto}
             text-align: center
+            ##{idImgVideoCallerPhoto}
+                clip-path: circle(50%)
 
-        ##{idButtonDecline}
+        ##{idButtonVideoCallDecline}
           --md-sys-color-primary: red
           --md-sys-color-on-primary: #FFFFFF
 
-        ##{idButtonAccept}
+        ##{idButtonVideoCallAccept}
+          --md-sys-color-primary: green
+          --md-sys-color-on-primary: #FFFFFF
+          margin-left: 1rem
+
+    ##{idDialogIncomingAudioCall}
+
+        ##{idFigureAudioCallerPhoto}
+            text-align: center
+            ##{idImgAudioCallerPhoto}
+                clip-path: circle(50%)
+
+        ##{idButtonAudioCallDecline}
+          --md-sys-color-primary: red
+          --md-sys-color-on-primary: #FFFFFF
+
+        ##{idButtonAudioCallAccept}
           --md-sys-color-primary: green
           --md-sys-color-on-primary: #FFFFFF
           margin-left: 1rem

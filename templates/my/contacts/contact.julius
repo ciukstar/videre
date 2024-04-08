@@ -1,0 +1,10 @@
+
+document.getElementById(#{idFormRemove}).addEventListener('submit', function (event) {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.ready.then(
+      (registration) => registration.pushManager.getSubscription()
+    ).then(
+      (subscription) => { subscription.unsubscribe(); }
+    );
+  }
+});

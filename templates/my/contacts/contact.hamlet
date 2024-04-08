@@ -8,23 +8,27 @@
 
   <span.app-top-app-bar-end>
     <md-icon-button type=button aria-label=_{MsgDele}
-      onclick="document.getElementById('idDialogDelete').open = true">
+      onclick="document.getElementById(#{idDialogRemove}).open = true">
       <md-icon>delete
 
-<md-dialog #idDialogDelete>
+<md-dialog ##{idDialogRemove}>
   <div slot=headline>
     _{MsgConfirmPlease}
   <div slot=content>
-    _{MsgDeleteAreYouSure}
+    _{MsgRemoveAreYouSure}
   <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('idDialogDelete').open = false">
+    <md-text-button type=button onclick="document.getElementById('#{idDialogRemove}').open = false">
       _{MsgCancel}
-    <form slot=content method=post action=@{ContactRemoveR sid pid cid} enctype=#{et}>
+    <form slot=content method=post action=@{ContactRemoveR sid pid cid} enctype=#{et} ##{idFormRemove}>
       ^{fw}
       <md-filled-button type=submit>
-        _{MsgDele}
+        _{MsgRemove}
 
 <main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
 
   <figure>
     <img src=@{AccountPhotoR pid} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
@@ -37,5 +41,13 @@
           <div.body-large>#{name}
         <div.body-medium>#{email}
 
+
   <form method=post action=@{ContactR sid pid cid} enctype=#{et2}>
     ^{fw2}
+
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1.primary-container>
+    <md-elevation>
+    <span.body-medium>#{status}. #
+    <span.body-medium>#{msg}

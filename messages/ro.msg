@@ -1,3 +1,13 @@
+FailedToCancelSubscription: Anularea abonamentului a eșuat
+SubscriptionCanceled: Abonamentul a fost anulat
+SubscriptionFailed: Abonamentul a eșuat
+SubscriptionSucceeded: Abonamentul a reușit
+RemoveAreYouSure: Sigur doriți să eliminați?
+Remove: Eliminați
+CalleeDeclinedTheCall callee: #{callee} a refuzat apelul
+CallDeclined: Apel refuzat
+IncomingAudioCall: Apel audio de intrare
+IncomingVideoCall: Apel video de intrare
 Decline: Refuzați
 Accept: Acceptați
 MissedCall: Apel pierdut

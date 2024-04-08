@@ -52,7 +52,7 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
     , PushMsgType
-      ( PushMsgTypeVideoCall, PushMsgTypeEnd
+      ( PushMsgTypeVideoCall, PushMsgTypeEndSession
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
@@ -125,13 +125,13 @@ getOutgoingR sid rid = do
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
     liftHandler $ defaultLayout $ do
-        idButtonExitVideoSession <- newIdent
+        idButtonExitSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
         idButtonSwitchVideocam <- newIdent
         idButtonVideoSwitch <- newIdent
         idButtonAudioSwitch <- newIdent
-        idButtonEndVideoSession <- newIdent
+        idButtonEndSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
 
@@ -157,13 +157,13 @@ getIncomingR = do
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
     liftHandler $ defaultLayout $ do
-        idButtonExitVideoSession <- newIdent
+        idButtonExitSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
         idButtonSwitchVideocam <- newIdent
         idButtonVideoSwitch <- newIdent
         idButtonAudioSwitch <- newIdent
-        idButtonEndVideoSession <- newIdent
+        idButtonEndSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
 

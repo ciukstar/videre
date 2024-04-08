@@ -32,7 +32,7 @@ import Control.Monad.IO.Class (liftIO)
 
 import Data.Aeson (toJSON)
 import qualified Data.Aeson as A
-    ( object, Value (Bool), Result( Success, Error ), (.=) )
+    ( object, Value (Bool, String), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.Functor ((<&>))
 import Data.Text (pack, unpack)
@@ -62,9 +62,10 @@ import Foundation.Data
     , AppMessage
       ( MsgNoContactsYet, MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
       , MsgAdd, MsgInvalidFormData, MsgNewContactsAdded, MsgViewContact
-      , MsgContact, MsgPhoto, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
-      , MsgRecordDeleted, MsgSubscribeToNotifications, MsgNotGeneratedVAPID
-      , MsgCancel
+      , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
+      , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
+      , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
+      , MsgRemove, MsgSubscriptionCanceled, MsgFailedToCancelSubscription
       )
     )
 
@@ -95,7 +96,10 @@ import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
-import VideoRoom (YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager), Route (OutgoingR))
+import VideoRoom
+    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+    , Route (OutgoingR)
+    )
 import VideoRoom.Data (Route (PushMessageR))
 
 import Web.WebPush
@@ -133,16 +137,21 @@ import Text.Julius (RawJS(rawJS))
 import Yesod.Static (StaticRoute)
 
 
-deletePushSubscriptionsR :: UserId -> UserId -> Handler ()
+deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
 deletePushSubscriptionsR sid pid = do
     endpoint <- lookupGetParam "endpoint"
     case endpoint of
-      Just x -> runDB $ delete $ do
-          y <- from $ table @PushSubscription
-          where_ $ y ^. PushSubscriptionSubscriber ==. val sid
-          where_ $ y ^. PushSubscriptionPublisher ==. val pid
-          where_ $ y ^. PushSubscriptionEndpoint ==. val x
-      Nothing -> return ()
+      Just x -> do
+          runDB $ delete $ do
+              y <- from $ table @PushSubscription
+              where_ $ y ^. PushSubscriptionSubscriber ==. val sid
+              where_ $ y ^. PushSubscriptionPublisher ==. val pid
+              where_ $ y ^. PushSubscriptionEndpoint ==. val x
+          addMessageI statusSuccess MsgSubscriptionCanceled
+          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
+      Nothing -> do
+          addMessageI statusError MsgFailedToCancelSubscription
+          sendStatusJSON status400 (A.object [ "msg" A..= A.String "No endpoint provided" ])
 
 
 postPushSubscriptionsR :: UserId -> UserId -> Handler A.Value
@@ -155,13 +164,16 @@ postPushSubscriptionsR sid pid = do
                [ PushSubscriptionP256dh =. psKeyP256dh
                , PushSubscriptionAuth =. psKeyAuth
                ]
+          addMessageI statusSuccess MsgSubscriptionSucceeded
           returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
 
-      A.Error msg -> sendStatusJSON status400 (A.object [ "msg" A..= msg ])
+      A.Error msg -> do
+          addMessageI statusSuccess MsgSubscriptionFailed
+          sendStatusJSON status400 (A.object [ "msg" A..= msg ])
 
 
-formSubscribe :: VAPIDKeys -> UserId -> UserId -> Bool -> Form Bool
-formSubscribe vapidKeys sid pid notif extra = do
+formSubscribe :: VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
+formSubscribe vapidKeys sid pid cid notif extra = do
 
     let subscriberId = pack $ show (fromSqlKey sid)
     let publisherId = pack $ show (fromSqlKey pid)
@@ -171,7 +183,9 @@ formSubscribe vapidKeys sid pid notif extra = do
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("icons","")]
         } ( pure notif )
-
+        
+    idFormFieldSubscribe <- newIdent
+    
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
     return (r, $(widgetFile "my/contacts/push/subscription/form"))
 
@@ -232,12 +246,15 @@ getContactR sid pid cid = do
               return x )
 
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
-          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid permission
+          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid cid permission
 
           (fw,et) <- generateFormPost formContactRemove
 
+          msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgViewContact
+              idDialogRemove <- newIdent
+              idFormRemove <- newIdent
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]

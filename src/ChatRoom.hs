@@ -49,7 +49,8 @@ import Foundation.Data
     ( AppMessage
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
-      , MsgOutgoingCall, MsgCancel
+      , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
+      , MsgCancel, MsgClose
       )
     )
 

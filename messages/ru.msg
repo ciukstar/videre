@@ -1,3 +1,13 @@
+FailedToCancelSubscription: Не удалось отменить подписку
+SubscriptionCanceled: Подписка отменена
+SubscriptionFailed: Подписка не удалась
+SubscriptionSucceeded: Подписка прошла успешно
+RemoveAreYouSure: Вы уверены, что хотите удалить?
+Remove: Удалить
+CalleeDeclinedTheCall callee: #{callee} отклонил(а) звонок
+CallDeclined: Вызов отклонен
+IncomingAudioCall: Входящий аудиовызов
+IncomingVideoCall: Входящий видеозвонок
 Decline: Отклонить
 Accept: Принять
 MissedCall: Пропущенный звонок

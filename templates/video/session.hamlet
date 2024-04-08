@@ -1,6 +1,6 @@
 
 <header.app-top-app-bar.background>
-  <md-icon-button href=#{backlink} aria-label=MsgBack ##{idButtonExitVideoSession}>
+  <md-icon-button href=#{backlink} aria-label=MsgBack ##{idButtonExitSession}>
     <md-icon>arrow_back
 
   <md-outlined-icon-button has-icon ##{idButtonSwitchVideocam} data-facing-mode=user>
@@ -12,7 +12,7 @@
   <md-outlined-icon-button has-icon ##{idButtonAudioSwitch}>
     <md-icon>mic_off
 
-  <md-filled-icon-button has-icon ##{idButtonEndVideoSession}>
+  <md-filled-icon-button has-icon ##{idButtonEndSession}>
     <md-icon>call_end
     
 
@@ -34,6 +34,5 @@
 
   <div slot=actions>
 
-    <md-filled-button has-icon type=link href=#{backlink}>
-      <md-icon slot=icon>close
+    <md-text-button type=link href=#{backlink}>
       _{MsgClose}

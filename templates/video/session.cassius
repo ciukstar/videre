@@ -15,7 +15,7 @@ header
     ##{idButtonSwitchVideocam}
         margin-left: auto
 
-    ##{idButtonEndVideoSession}
+    ##{idButtonEndSession}
         --md-sys-color-primary: red
         --md-sys-color-on-primary: #FFFFFF
     

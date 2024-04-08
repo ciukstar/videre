@@ -23,3 +23,11 @@ self.onpush = function (e) {
   );
   
 };
+
+self.addEventListener('fetch', function (e) {
+  
+  self.registration.pushManager.getSubscription().then(function (subscription) {
+    console.log('subscription: ', subscription);    
+  });
+  
+});

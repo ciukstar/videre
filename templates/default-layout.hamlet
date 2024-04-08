@@ -22,23 +22,45 @@
       <md-icon slot=icon>reply
       _{MsgReply}
 
-<md-dialog ##{idDialogIncomingCall}>
+
+<md-dialog ##{idDialogIncomingVideoCall}>
   <div slot=headline>
-    _{MsgIncomingCall}
+    _{MsgIncomingVideoCall}
 
-  <form slot=content method=dialog ##{idFormIncomingCall}>
+  <form slot=content method=dialog>
 
-    <figure ##{idFigurePhoto}>
-      <img ##{idImgPhoto} width=64>
-      <figcaption.body-large ##{idFigcaptionPhoto}>
+    <figure ##{idFigureVideoCallerPhoto}>
+      <img ##{idImgVideoCallerPhoto} width=64>
+      <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
 
   <div slot=actions>
 
-    <md-filled-button has-icon ##{idButtonDecline}>
+    <md-filled-button ##{idButtonVideoCallDecline} has-icon type=button>
       <md-icon slot=icon>call_end
       _{MsgDecline}
 
-    <md-filled-button ##{idButtonAccept} has-icon type=button>
+    <md-filled-button ##{idButtonVideoCallAccept} has-icon type=button>
+      <md-icon slot=icon>call
+      _{MsgAccept}
+      
+
+<md-dialog ##{idDialogIncomingAudioCall}>
+  <div slot=headline>
+    _{MsgIncomingAudioCall}
+
+  <form slot=content method=dialog>
+
+    <figure ##{idFigureAudioCallerPhoto}>
+      <img ##{idImgAudioCallerPhoto} width=64>
+      <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
+
+  <div slot=actions>
+
+    <md-filled-button ##{idButtonAudioCallDecline} has-icon type=button>
+      <md-icon slot=icon>call_end
+      _{MsgDecline}
+
+    <md-filled-button ##{idButtonAudioCallAccept} has-icon type=button>
       <md-icon slot=icon>call
       _{MsgAccept}
 
