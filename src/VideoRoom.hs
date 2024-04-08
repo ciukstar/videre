@@ -38,11 +38,11 @@ import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, unpack)
+import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
     ( AppMessage
-      ( MsgOutgoingCall, MsgClose, MsgNotGeneratedVAPID
-      , MsgCallEnded, MsgVideoSession
+      ( MsgClose, MsgNotGeneratedVAPID, MsgCallEnded
       )
     )
 
@@ -52,7 +52,7 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeEnd
+      ( PushMsgTypeVideoCall, PushMsgTypeEnd
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
@@ -91,19 +91,16 @@ import Yesod
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
     , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
-    , getCurrentRoute
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
 import Yesod.Core.Handler (invalidArgsI, getUrlRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Core.Widget (WidgetFor)
-import Yesod.Form.Input (runInputGet, ireq)
-import Yesod.Form.Fields (intField, urlField)
+import Yesod.Form.Input (runInputGet, runInputPost, ireq)
+import Yesod.Form.Fields (boolField, intField, urlField)
 import Yesod.Persist.Core (runDB)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Data.Text.Encoding (encodeUtf8)
 
 
 class YesodVideo m where
@@ -120,6 +117,8 @@ getOutgoingR sid rid = do
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
+    video <- runInputGet (ireq boolField "video")
+    audio <- runInputGet (ireq boolField "audio")
 
     toParent <- getRouteToParent
 
@@ -129,7 +128,9 @@ getOutgoingR sid rid = do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
-        idButtonSwitchVideo <- newIdent
+        idButtonSwitchVideocam <- newIdent
+        idButtonVideoSwitch <- newIdent
+        idButtonAudioSwitch <- newIdent
         idButtonEndVideoSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
@@ -145,6 +146,8 @@ getIncomingR = do
 
     (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
     (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
+    video <- runInputGet (ireq boolField "video")
+    audio <- runInputGet (ireq boolField "audio")
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
@@ -157,26 +160,12 @@ getIncomingR = do
         idButtonExitVideoSession <- newIdent
         idVideoRemote <- newIdent
         idVideoSelf <- newIdent
-        idButtonSwitchVideo <- newIdent
+        idButtonSwitchVideocam <- newIdent
+        idButtonVideoSwitch <- newIdent
+        idButtonAudioSwitch <- newIdent
         idButtonEndVideoSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
-
-
-widgetOutgoingCall :: (YesodVideo m, RenderMessage m AppMessage)
-                   => Text -- ^ Dialog id Outgoing
-                   -> Text -- ^ Button id for cancelig outgoing call
-                   -> UserId -> UserId
-                   -> (Route VideoRoom -> Route m)
-                   -> WidgetFor m ()
-widgetOutgoingCall idDialogOutgoingCall idButtonOutgoingCallCancel sid rid toParent = do
-
-    backlink <- fromMaybe (toParent (OutgoingR sid rid)) <$> getCurrentRoute
-
-    idDialogCallDeclined <- newIdent
-    idDialogVideoSessionEnded <- newIdent
-    
-    $(widgetFile "video/outgoing")
 
 
 getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
@@ -190,12 +179,14 @@ postPushMessageR :: (Yesod m, YesodVideo m)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
 
-    messageType <- (\x -> x <|> Just PushMsgTypeCall) . (readMaybe . unpack =<<)
+    messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<)
         <$> lookupPostParam "messageType"
     icon <- lookupPostParam "icon"
     channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
+    video <- runInputPost $ ireq boolField "video"
+    audio <- runInputPost $ ireq boolField "audio"
 
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -248,6 +239,8 @@ postPushMessageR = do
                                                                   )
                                                 , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
                                                 , "recipientId" .= rid
+                                                , "video" .= video
+                                                , "audio" .= audio
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                         & pushExpireInSeconds .~ 60 * 60

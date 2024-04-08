@@ -63,8 +63,8 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , ContactId, Token, Store
     , PushMsgType
-      ( PushMsgTypeCall, PushMsgTypeMessage, PushMsgTypeCancel, PushMsgTypeDecline
-      , PushMsgTypeAccept
+      ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeMessage
+      , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
       )
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
@@ -183,6 +183,7 @@ getChatRoomR sid rid cid = do
     liftHandler $ defaultLayout $ do
         
         idButtonVideoCall <- newIdent
+        idButtonAudioCall <- newIdent
         idMenuItemViewContact <- newIdent
         idChatOutput <- newIdent
         idMessageForm <- newIdent

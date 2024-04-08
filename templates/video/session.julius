@@ -71,50 +71,78 @@ ws.onmessage = async (e) => {
   }
 };
 
-
 navigator.mediaDevices.getUserMedia({
   audio: true,
-  video: true
+  video: { facingMode: { ideal: document.getElementById(#{idButtonSwitchVideocam}).dataset.facingMode } }
 }).then(function (stream) {
 
-  stream.getTracks().forEach((track) => { pc.addTrack(track, stream); });
+  stream.getTracks().forEach((track) => {
+    track.enabled = track.kind === 'video' ? #{rawJS video} : (track.kind === 'audio' ? #{rawJS audio} : true);
+    pc.addTrack(track, stream);
+  });
   document.getElementById(#{idVideoSelf}).srcObject = stream;
   return stream;
 
 }).then((stream) => {
   
-  if (navigator.mediaDevices.getSupportedConstraints().facingMode) {
-    
-    document.getElementById(#{idButtonSwitchVideo}).disabled = false;
-    
-    document.getElementById(#{idButtonSwitchVideo}).onclick = (e) => {
-      
-      document.getElementById(#{idVideoSelf}).srcObject = null;
-      
-      navigator.mediaDevices.getUserMedia({
-	audio: true,
-	video: { facingMode: e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user' }
-      }).then((stream) => {
+  document.getElementById(#{idButtonSwitchVideocam}).onclick = (e) => {
 
-	pc.getSenders().find(
-	  (s) => s.track.kind === stream.getVideoTracks()[0].kind
-	).replaceTrack(stream.getVideoTracks()[0]);
-	
-	document.getElementById(#{idVideoSelf}).srcObject = stream;
-	
+    e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user';
+    
+    pc.getSenders().filter(
+      (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
+    ).forEach((sender) => {
+      sender.track.stop();
+    });
+    
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: { ideal: e.target.dataset.facingMode } }
+    }).then((stream) => {
+
+      const [videoTrack] = stream.getVideoTracks();
+      
+      pc.getSenders().filter(
+	(sender) => sender.track.kind === videoTrack.kind
+      ).forEach((sender) => {
+	sender.replaceTrack(videoTrack);
       });
-    };
-  }
+      
+      document.getElementById(#{idVideoSelf}).srcObject = stream;
+      
+    });
+  };
   
+  document.getElementById(#{idButtonVideoSwitch}).onclick = (e) => {
+      
+    pc.getSenders().filter(
+      (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
+    ).forEach((sender) => {
+      sender.track.enabled = !sender.track.enabled;
+      e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'videocam_off' : 'videocam';
+    });
+    
+  };
+  
+  document.getElementById(#{idButtonAudioSwitch}).onclick = (e) => {
+      
+    pc.getSenders().filter(
+      (sender) => sender.track.kind === stream.getAudioTracks()[0].kind
+    ).forEach((sender) => {
+      sender.track.enabled = !sender.track.enabled;
+      e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'mic_off' : 'mic';
+    });
+    
+  };
+    
   [#{idButtonExitVideoSession}, #{idButtonEndVideoSession}].forEach((x) => {
-    document.getElementById(x).addEventListener('click', function (event) {
-      stream.getTracks().forEach(function (track) { track.stop(); });
+    document.getElementById(x).addEventListener('click', (e) => {
+      stream.getTracks().forEach((track) => { track.stop(); });
     }, { once: true });
   });
 
-  navigator.serviceWorker.addEventListener('message', function (message) {
+  navigator.serviceWorker.addEventListener('message', (message) => {
     if (message.data.messageType === #{show PushMsgTypeEnd}) {
-      stream.getTracks().forEach(function (track) { track.stop(); });
+      stream.getTracks().forEach((track) => { track.stop(); });
     }
   }, { once: true });
 
@@ -151,3 +179,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     });
   });
 });
+
+navigator.mediaDevices.enumerateDevices().then((devices) => {
+  if (devices.filter((device) => device.kind === 'videoinput').length < 2) {
+    document.getElementById(#{idButtonSwitchVideocam}).setAttribute('disabled','');
+  } else {
+    document.getElementById(#{idButtonSwitchVideocam}).removeAttribute('disabled');
+  }
+});
+

@@ -93,11 +93,35 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeCall},
+      "messageType": #{show PushMsgTypeVideoCall},
       "icon": '@{icon}',
       "channelId": #{show channel},
       "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid}
+      "recipientId": #{show $ fromSqlKey rid},
+      "video": true,
+      "audio": true
+    })
+  }).then(function (result) {
+    document.getElementById(#{idDialogOutgoingCall}).show();
+  }).catch(function (err) {
+    console.error(err);
+  });
+
+});
+
+document.getElementById(#{idButtonAudioCall}).addEventListener('click', function (event) {
+
+  fetch('@{video}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      "messageType": #{show PushMsgTypeAudioCall},
+      "icon": '@{icon}',
+      "channelId": #{show channel},
+      "senderId": #{show $ fromSqlKey sid},
+      "recipientId": #{show $ fromSqlKey rid},
+      "video": false,
+      "audio": true
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -137,7 +161,9 @@ if ("serviceWorker" in navigator) {
       
       const params = new URLSearchParams({
 	channel: message.data.channelId,
-	backlink: '@{backlink}'
+	backlink: '@{backlink}',
+	video: message.data.video,
+	audio: message.data.audio
       });
 
       window.location.href = `@{outgoing}?${params}`;

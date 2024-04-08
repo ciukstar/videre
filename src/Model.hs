@@ -34,6 +34,7 @@ import Data.Bool (Bool)
 import Data.ByteString (ByteString)
 import Data.Eq (Eq ((==)))
 import Data.Ord (Ord)
+import Data.Function ((.), ($))
 import Data.String (String)
 import Data.Text (Text, pack)
 import Data.Time.Calendar (Day)
@@ -42,26 +43,20 @@ import Data.Time.Clock (UTCTime)
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
 
-import Data.Function (($))
-
 import Text.Read (Read)
 import Text.Show (Show (show))
 import Text.Hamlet (Html)
 
 
-data PushMsgType = PushMsgTypeMessage | PushMsgTypeCall | PushMsgTypeAccept
-                 | PushMsgTypeDecline | PushMsgTypeCancel | PushMsgTypeEnd
+data PushMsgType = PushMsgTypeMessage | PushMsgTypeVideoCall | PushMsgTypeAudioCall
+                 | PushMsgTypeAccept | PushMsgTypeDecline | PushMsgTypeCancel
+                 | PushMsgTypeEnd
     deriving (Eq, Show, Read)
 
 
 instance ToJSON PushMsgType where
     toJSON :: PushMsgType -> Data.Aeson.Value
-    toJSON PushMsgTypeMessage = String (pack $ show PushMsgTypeMessage)
-    toJSON PushMsgTypeCall = String (pack $ show PushMsgTypeCall)
-    toJSON PushMsgTypeAccept = String (pack $ show PushMsgTypeAccept)
-    toJSON PushMsgTypeDecline = String (pack $ show PushMsgTypeDecline)
-    toJSON PushMsgTypeCancel = String (pack $ show PushMsgTypeCancel)
-    toJSON PushMsgTypeEnd = String (pack $ show PushMsgTypeEnd)
+    toJSON = String . pack . show
 
 
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread

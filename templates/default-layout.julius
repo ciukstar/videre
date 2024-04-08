@@ -14,11 +14,13 @@ if ("serviceWorker" in navigator) {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	body: new URLSearchParams({
-          "messageType": #{show PushMsgTypeDecline},
-          "icon": message.data.icon,
-          "channelId": message.data.channelId,
-          "senderId": message.data.recipientId,
-          "recipientId": message.data.senderId
+          messageType: #{show PushMsgTypeDecline},
+          icon: message.data.icon,
+          channelId: message.data.channelId,
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+	  video: message.data.video,
+	  audio: message.data.audio
 	})
       }).then(function (result) {
 	document.getElementById(#{idDialogIncomingCall}).close();
@@ -30,11 +32,13 @@ if ("serviceWorker" in navigator) {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	body: new URLSearchParams({
-          "messageType": #{show PushMsgTypeAccept},
-          "icon": message.data.icon,
-          "channelId": message.data.channelId,
-          "senderId": message.data.recipientId,
-          "recipientId": message.data.senderId
+          messageType: #{show PushMsgTypeAccept},
+          icon: message.data.icon,
+          channelId: message.data.channelId,
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+	  video: message.data.video,
+	  audio: message.data.audio
 	})
       }).then(function (result) {
 
@@ -44,6 +48,8 @@ if ("serviceWorker" in navigator) {
           senderId: message.data.recipientId,
           recipientId: message.data.senderId,
           channel: message.data.channelId,
+	  video: message.data.video,
+	  audio: message.data.audio,
           backlink: '@{backlink}'
 	});
 
@@ -70,7 +76,13 @@ if ("serviceWorker" in navigator) {
       document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
       document.getElementById(#{idDialogMissedCall}).show();
 
-    } else if (message.data.messageType === #{show PushMsgTypeCall}) {
+    } else if (message.data.messageType === #{show PushMsgTypeVideoCall}) {
+      
+      document.getElementById(#{idImgPhoto}).src = message.data.senderPhoto;
+      document.getElementById(#{idFigcaptionPhoto}).textContent = message.data.senderName;
+      document.getElementById(#{idDialogIncomingCall}).show();
+
+    } else if (message.data.messageType === #{show PushMsgTypeAudioCall}) {
       
       document.getElementById(#{idImgPhoto}).src = message.data.senderPhoto;
       document.getElementById(#{idFigcaptionPhoto}).textContent = message.data.senderName;

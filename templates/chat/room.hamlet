@@ -16,9 +16,9 @@
   <span.app-top-app-bar-end>
 
     <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
-      <md-icon>videocam
+      <md-icon>video_call
       
-    <md-filled-icon-button type=button aria-label=_{MsgAudioCall} disabled>
+    <md-filled-icon-button type=button aria-label=_{MsgAudioCall} ##{idButtonAudioCall}>
       <md-icon>call
 
     <span style="position:relaive">
