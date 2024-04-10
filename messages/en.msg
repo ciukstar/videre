@@ -1,3 +1,7 @@
+Allow: Allow
+Subscribe: Subscribe
+NotNow: Not now
+AllowToBeNotified: Allow to be notified about incoming video calls, audio calls and messages
 FailedToCancelSubscription: Failed to cancel subscription
 SubscriptionCanceled: Subscription canceled
 SubscriptionFailed: Subscription failed

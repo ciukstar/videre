@@ -1,3 +1,7 @@
+Allow: Permettre
+Subscribe: Abonnez-vous
+NotNow: Pas maintenant
+AllowToBeNotified: Permet d'être averti des appels vidéo entrants, des appels audio et des messages
 FailedToCancelSubscription: Échec de l'annulation de l'abonnement
 SubscriptionCanceled: Abonnement annulé
 SubscriptionFailed: L'abonnement a échoué

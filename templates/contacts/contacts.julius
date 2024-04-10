@@ -1,0 +1,4 @@
+
+document.getElementById(#{idFabAdd}).onclick = (e) => {
+  document.getElementById(#{idDialogSubscribeToPushNotifications}).show();
+};

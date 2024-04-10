@@ -16,9 +16,15 @@ header
         align-items: center
         justify-content: flex-start
         column-gap: 0.5rem
+        .title-small
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
         
     .app-top-app-bar-end
         margin-left: auto
+        display: flex
+        flex-wrap: nowrap
 
 main
 

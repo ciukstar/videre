@@ -1,3 +1,7 @@
+Allow: Разрешить
+Subscribe: Подписаться
+NotNow: Не сейчас
+AllowToBeNotified: Разрешить получать уведомления о входящих видеозвонках, аудиовызовах и сообщениях
 FailedToCancelSubscription: Не удалось отменить подписку
 SubscriptionCanceled: Подписка отменена
 SubscriptionFailed: Подписка не удалась

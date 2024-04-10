@@ -1,4 +1,26 @@
 
 #{extra}
 
+^{fvInput endpointV}
+^{fvInput p256dhV}
+^{fvInput authV}
+
 ^{fvInput usersV}
+
+
+<md-dialog ##{idDialogSubscribeToPushNotifications}>
+  <div slot=headline>
+    _{MsgSubscribeToNotifications}
+
+  <form slot=content method=dialog>
+    <p.body-medium>
+      _{MsgAllowToBeNotified}.
+
+  <div slot=actions>
+
+    <md-text-button type=button ##{idButtonSubmitNoSubscription}>
+      _{MsgNotNow}
+
+    <md-filled-button has-icon type=button ##{idButtonSubmitWithSubscription}>
+      <md-icon slot=icon>check
+      _{MsgAllow}

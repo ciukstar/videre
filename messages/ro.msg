@@ -1,3 +1,7 @@
+Allow: Permite
+Subscribe: Abonați-vă
+NotNow: Nu acum
+AllowToBeNotified: Permiteți să fiți notificat despre apelurile video, apelurile audio și mesajele primite
 FailedToCancelSubscription: Anularea abonamentului a eșuat
 SubscriptionCanceled: Abonamentul a fost anulat
 SubscriptionFailed: Abonamentul a eșuat

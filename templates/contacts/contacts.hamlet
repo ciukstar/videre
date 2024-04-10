@@ -23,7 +23,7 @@
       ^{fw}
 
         
-  <md-fab label=_{MsgAdd} aria-label=_{MsgAdd} ##{idFabAdd} onclick="#{idFormPostContacts}.submit()">
+  <md-fab ##{idFabAdd} label=_{MsgAdd} aria-label=_{MsgAdd}>
     <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
