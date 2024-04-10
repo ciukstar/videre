@@ -1,37 +1,4 @@
 
-function saveSubscription (subscription) {
-
-  const subscr = JSON.parse(JSON.stringify(subscription));
-  subscr.subscriber = #{rawJS subscriberId};
-  subscr.publisher = #{rawJS publisherId};
-  
-  fetch('@{PushSubscriptionsR sid pid}', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(subscr)
-  }).then(function (response) {
-    window.location.href = `@{ContactR sid pid cid}?endpoint=${subscription.endpoint}`;
-  }); 
-};
-
-function subscribeToPushService (registration) {
-  return registration.pushManager.getSubscription().then(function (subscription) {
-    if (!subscription) {
-      return registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-      });
-    } else {
-      return subscription.unsubscribe().then(function (success) {
-        return registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-        });
-      });
-    }
-  });
-};
-
 document.getElementById(#{fvId v}).onchange = function (e) {
 
   const progress = document.createElement('md-circular-progress');
@@ -41,30 +8,54 @@ document.getElementById(#{fvId v}).onchange = function (e) {
   if (this.selected) {
 
     Notification.requestPermission().then(function (permission) {
+      
       if (permission === 'granted') {
+	
         navigator.serviceWorker.ready.then(function (registration) {
-	  subscribeToPushService(registration).then(function (subscription) {
-	    saveSubscription(subscription);
+
+	  registration.pushManager.subscribe({
+            userVisibleOnly: true, applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+          }).then(function (subscription) {
+	    
+	    if (subscription) { 
+	      const subscr = JSON.parse(JSON.stringify(subscription));
+	      subscr.subscriber = #{rawJS subscriberId};
+	      subscr.publisher = #{rawJS publisherId};
+	      
+	      fetch('@{PushSubscriptionsR sid pid}', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(subscr)
+	      }).then(function (response) {
+		window.location.href = '@{ContactR sid pid cid}';
+	      });
+	    }
+	    
 	  });
+  
 	});
+	
       }
+      
     });
     
   } else {
     
     navigator.serviceWorker.ready.then(function (registration) {
       registration.pushManager.getSubscription().then(function (subscription) {
-	subscription.unsubscribe().then(function (success) {
-	  if (success) {
-	    fetch(`@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`, {
-              method: 'DELETE',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(subscription)      
-            }).then(function (result) {
-	      window.location.href = '@{ContactR sid pid cid}';
-	    });
-	  }
+
+	let url = !!subscription
+	    ? `@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`
+	    : '@{PushSubscriptionsR sid pid}'
+	
+	fetch(url, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(subscription)      
+        }).then(function (result) {
+	  window.location.href = '@{ContactR sid pid cid}';
 	});
+	
       });
     });
   }

@@ -21,11 +21,13 @@
         _{MsgNoContactsYet}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib,chat))) <- entries
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (chat, subscription)))) <- entries
         <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid cid}>
           <div slot=start>
             <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-            <md-icon.notifications-disabled>notifications_off
+            $maybe _ <- subscription
+            $nothing
+              <md-icon.notifications-disabled>notifications_off
           <div slot=headline>
             $maybe name <- name
               #{name}

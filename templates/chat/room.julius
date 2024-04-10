@@ -177,12 +177,4 @@ if ("serviceWorker" in navigator) {
     
   });
   
-  navigator.serviceWorker.ready.then(function (registration) {
-    registration.pushManager.getSubscription().then( function (subscription) {
-      if (!!subscription) {
-	document.getElementById(#{idMenuItemViewContact}).href = `@{contact}?endpoint=${subscription.endpoint}`;
-      }
-    } );
-  });
-  
 }

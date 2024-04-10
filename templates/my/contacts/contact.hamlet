@@ -8,7 +8,7 @@
 
   <span.app-top-app-bar-end>
     <md-icon-button type=button aria-label=_{MsgDele}
-      onclick="document.getElementById(#{idDialogRemove}).open = true">
+      onclick="document.getElementById('#{idDialogRemove}').show()">
       <md-icon>delete
 
 <md-dialog ##{idDialogRemove}>
@@ -17,9 +17,9 @@
   <div slot=content>
     _{MsgRemoveAreYouSure}
   <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('#{idDialogRemove}').open = false">
+    <md-text-button type=button onclick="document.getElementById('#{idDialogRemove}').close()">
       _{MsgCancel}
-    <form slot=content method=post action=@{ContactRemoveR sid pid cid} enctype=#{et} ##{idFormRemove}>
+    <form slot=content method=post action=@{ContactRemoveR sid pid cid} enctype=#{et}>
       ^{fw}
       <md-filled-button type=submit>
         _{MsgRemove}

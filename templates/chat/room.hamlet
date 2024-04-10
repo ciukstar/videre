@@ -26,7 +26,7 @@
         onclick="document.getElementById('menuMore').open = !document.getElementById('menuMore').open">
         <md-icon>more_vert
       <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
-        <md-menu-item href=@{contact} ##{idMenuItemViewContact}>
+        <md-menu-item href=@{contact}>
           <div slot=headline>_{MsgViewContact}
     
 

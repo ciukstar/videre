@@ -76,6 +76,12 @@ body
     margin: 0
     padding: 0
 
+    ##{idDialogChatNotification}
+        ##{idFigureSenderPhoto}
+            text-align: center
+            ##{idImgSenderPhoto}
+                clip-path: circle(50%)
+
     ##{idDialogIncomingVideoCall}
 
         ##{idFigureVideoCallerPhoto}

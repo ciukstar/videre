@@ -93,7 +93,11 @@ import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
 
+import System.IO (readFile')
+
 import Text.Hamlet (Html)
+import Text.Julius (RawJS(rawJS))
+import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
@@ -129,11 +133,6 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
-
-import Text.Read (readMaybe)
-
-import System.IO (readFile')
-import Text.Julius (RawJS(rawJS))
 import Yesod.Static (StaticRoute)
 
 
@@ -148,10 +147,13 @@ deletePushSubscriptionsR sid pid = do
               where_ $ y ^. PushSubscriptionPublisher ==. val pid
               where_ $ y ^. PushSubscriptionEndpoint ==. val x
           addMessageI statusSuccess MsgSubscriptionCanceled
-          returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
       Nothing -> do
-          addMessageI statusError MsgFailedToCancelSubscription
-          sendStatusJSON status400 (A.object [ "msg" A..= A.String "No endpoint provided" ])
+          runDB $ delete $ do
+              y <- from $ table @PushSubscription
+              where_ $ y ^. PushSubscriptionSubscriber ==. val sid
+              where_ $ y ^. PushSubscriptionPublisher ==. val pid
+          addMessageI statusSuccess MsgSubscriptionCanceled
+    returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
 
 
 postPushSubscriptionsR :: UserId -> UserId -> Handler A.Value
@@ -254,7 +256,6 @@ getContactR sid pid cid = do
           defaultLayout $ do
               setTitleI MsgViewContact
               idDialogRemove <- newIdent
-              idFormRemove <- newIdent
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
@@ -267,9 +268,11 @@ formContactRemove extra = return (FormSuccess (),[whamlet|#{extra}|])
 getMyContactsR :: UserId -> Handler Html
 getMyContactsR uid = do
 
+    endpoint <- lookupGetParam "endpoint"
+
     entries <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
 
-        x :& e :& h :& c <- from $ table @Contact
+        x :& e :& h :& c :& s <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
             `leftJoin` table @Chat `on`
@@ -286,14 +289,19 @@ getMyContactsR uid = do
                                                            return $ max_ (y ^. ChatCreated)
                                                      )
             )
-
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
+                                            
+                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
+                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
+            )
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, c))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, s)))) )
 
     msgs <- getMessages
-
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgAppName

@@ -24,10 +24,25 @@ self.onpush = function (e) {
   
 };
 
+
 self.addEventListener('fetch', function (e) {
-  
-  self.registration.pushManager.getSubscription().then(function (subscription) {
-    console.log('subscription: ', subscription);    
-  });
-  
+
+  if (e.request.method === 'GET' && e.request.url.includes('my/contacts/')) {
+
+    e.respondWith(
+      self.registration.pushManager.getSubscription().then(function (subscription) {
+	
+	if (!subscription) {
+	  return fetch(e.request);
+	} else {	  
+	  let url = new URL(e.request.url);
+	  url.searchParams.set('endpoint', subscription.endpoint);	  
+	  return fetch(url);
+	}
+	
+      })
+    );
+
+  }
+
 });

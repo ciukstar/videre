@@ -185,7 +185,6 @@ getChatRoomR sid rid cid = do
         
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
-        idMenuItemViewContact <- newIdent
         idChatOutput <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
