@@ -1,4 +1,10 @@
 
+[En français](https://github.com/ciukstar/videre/blob/master/README.fr.md)  
+
+[În română](https://github.com/ciukstar/videre/blob/master/README.ro.md)  
+
+[На русском](https://github.com/ciukstar/videre/blob/master/README.ru.md)
+
 ## Videre
 Progressive Web App for Instant Messaging
 

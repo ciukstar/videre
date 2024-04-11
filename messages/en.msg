@@ -143,7 +143,7 @@ AppName: Videre
 MetaKeywords: instant, messaging, progressive, web, app, pwa
 MetaDescription: Progressive Web App for Instant Messaging
 
-Doc001 appname@Text href1@Text href2@Text href3@Text href4@Text: Application <a href=#{href1}>#{appname}</a> allows users to exchange instant messages via <a href=#{href2}>WebSockets</a>, make audio and video calls via <a href=#{href3}>WebRTC</a>, and be notified via <a href=#{href4}>Web Push</a>.
+Doc001 appname@Text href1@Text href2@Text href3@Text href4@Text: Application <a href=#{href1} target=_blank>#{appname}</a> allows users to exchange instant messages via <a href=#{href2} target=_blank>WebSockets</a>, make audio and video calls via <a href=#{href3} target=_blank>WebRTC</a>, and be notified via <a href=#{href4} target=_blank>Web Push</a>.
 
 Doc002: A superuser account is defined at deployment time. The superuser manages other users and grants or revokes administrator privileges to specific users.
 

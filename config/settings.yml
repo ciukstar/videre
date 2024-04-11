@@ -49,7 +49,7 @@ google-api:
   client-secret: "_env:YESOD_GOOGLE_CLIENT_SECRET:xyz"
 
 gcloud:
-  project-id: "_env:YESOD_GCLOUD_PROJECT_ID:videre-418810"
+  project-id: "_env:YESOD_GCLOUD_PROJECT_ID:videre"
 
 seo:
   google-site-verification: "_env:YESOD_GOOGLE_SITE_VERIFICATION"

@@ -143,7 +143,7 @@ AppName: Videre
 MetaKeywords: mesagerie, instantanee, progresiv, web, aplicație, pwa
 MetaDescription: Aplicație web progresivă pentru mesagerie instantanee
 
-Doc001 appname href1 href2 href3 href4: Aplicația <a href=#{href1}>#{appname}</a> permite utilizatorilor să schimbe mesaje instantanee prin <a href=#{href2}>WebSockets</a>, să efectueze apeluri audio și video prin <a href=#{href1}>WebRTC</a> și să fie notificați prin <a href=#{href4}>Web Push</a>.
+Doc001 appname href1 href2 href3 href4: Aplicația <a href=#{href1} target=_blank>#{appname}</a> permite utilizatorilor să schimbe mesaje instantanee prin <a href=#{href2} target=_blank>WebSockets</a>, să efectueze apeluri audio și video prin <a href=#{href1} target=_blank>WebRTC</a> și să fie notificați prin <a href=#{href4} target=_blank>Web Push</a>.
 
 Doc002: Un cont de superutilizator este definit în momentul implementării. Superutilizatorul gestionează alți utilizatori și acordă sau revocă privilegii de administrator anumitor utilizatori.
 
