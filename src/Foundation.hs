@@ -165,6 +165,7 @@ instance Yesod App where
     defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
         master <- getYesod
+        msgr <- getMessageRender
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -173,7 +174,7 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
-            
+
             addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
             addScript $ StaticR js_md3_min_js
 
@@ -198,18 +199,20 @@ instance Yesod App where
             idFigcaptionAudioCallerPhoto <- newIdent
             idButtonAudioCallDecline <- newIdent
             idButtonAudioCallAccept <- newIdent
-            
+
             idDialogMissedCall <- newIdent
             idMissedCallCaller <- newIdent
 
             backlink <- fromMaybe HomeR <$> getCurrentRoute
-            
+            calleeName <- resolveName <$> maybeAuth
+
             $(widgetFile "default-layout")
 
         lang <- fromMaybe "en" . headMay <$> languages
-        msgr <- getMessageRender
-        
+
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+      where
+          resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
     -- The page to be redirected to when authentication is required.
     authRoute :: App -> Maybe (Route App)
@@ -218,9 +221,9 @@ instance Yesod App where
     isAuthorized :: Route App -> Bool -> Handler AuthResult
 
     isAuthorized (VideoR _) _ = isAuthenticated
-    
+
     isAuthorized (ChatR _) _ = isAuthenticated
-    
+
     isAuthorized (PushSubscriptionsR sid _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (ContactR uid _ _) _ = isAuthenticatedSelf uid
@@ -250,7 +253,7 @@ instance Yesod App where
     isAuthorized HomeR _ = return Authorized
     isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
-    
+
     isAuthorized WebAppManifestR _ = return Authorized
     isAuthorized SitemapR _ = return Authorized
     isAuthorized FaviconR _ = return Authorized

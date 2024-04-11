@@ -36,6 +36,10 @@ import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
 
+data Seo = Seo { seoGoogleSiteVerification :: Maybe Text
+               , seoMsvalidate :: Maybe Text
+               }
+
 data Superuser = Superuser { superuserUsername :: Text
                            , superuserPassword :: Text
                            }
@@ -93,10 +97,21 @@ data AppSettings = AppSettings
     , appGcloudConf             :: GcloudConf
     -- ^ Google API config
 
+    , appSeo                     :: Seo
+    -- ^ Search Engine Optimization
+    
     , appRtcPeerConnectionConfig :: Maybe Value
     , appAuthDummyLogin          :: Bool
     -- ^ Indicate if auth dummy login should be enabled.
     }
+
+
+instance FromJSON Seo where
+    parseJSON :: Value -> Parser Seo
+    parseJSON = withObject "Seo" $ \o -> do
+        seoGoogleSiteVerification <- o .: "google-site-verification"
+        seoMsvalidate <- o .: "msvalidate"
+        return Seo {..}
 
 
 instance FromJSON Superuser where
@@ -163,6 +178,8 @@ instance FromJSON AppSettings where
         appSuperuser              <- o .:  "superuser"
         appGoogleApiConf          <- o .: "google-api"
         appGcloudConf             <- o .: "gcloud"
+
+        appSeo                    <- o .: "seo"
                                      
         appRtcPeerConnectionConfig <- o .:? "rtc-peer-connection-config"
 

@@ -8,13 +8,12 @@
 ^{fvInput usersV}
 
 
-<md-dialog ##{idDialogSubscribeToPushNotifications}>
+<md-dialog ##{idDialogSubscribe}>
   <div slot=headline>
     _{MsgSubscribeToNotifications}
 
-  <form slot=content method=dialog>
-    <p.body-medium>
-      _{MsgAllowToBeNotified}.
+  <p.body-medium slot=content>
+    _{MsgAllowToBeNotified}.
 
   <div slot=actions>
 

@@ -102,7 +102,7 @@ import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
-    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager)
+    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute)
     , Route (OutgoingR)
     )
 import VideoRoom.Data (Route (PushMessageR))
@@ -328,14 +328,14 @@ postContactsR uid = do
         return x
 
     idFormPostContacts <- newIdent
-    idDialogSubscribeToPushNotifications <- newIdent
+    idDialogSubscribe <- newIdent
 
     mVAPIDKeys <- getVAPIDKeys
 
     case mVAPIDKeys of
       Just vapidKeys -> do
 
-        ((fr,fw),et) <- runFormPost $ formContacts users vapidKeys idFormPostContacts idDialogSubscribeToPushNotifications
+        ((fr,fw),et) <- runFormPost $ formContacts uid users vapidKeys idFormPostContacts idDialogSubscribe
 
         case fr of
           FormSuccess (contacts, subscription) -> do
@@ -377,14 +377,14 @@ getContactsR uid = do
         return x
 
     idFormPostContacts <- newIdent
-    idDialogSubscribeToPushNotifications <- newIdent
+    idDialogSubscribe <- newIdent
 
     mVAPIDKeys <- getVAPIDKeys
 
     case mVAPIDKeys of
       Just vapidKeys -> do
 
-          (fw,et) <- generateFormPost $ formContacts users vapidKeys idFormPostContacts idDialogSubscribeToPushNotifications
+          (fw,et) <- generateFormPost $ formContacts uid users vapidKeys idFormPostContacts idDialogSubscribe
 
           msgs <- getMessages
           defaultLayout $ do
@@ -394,8 +394,9 @@ getContactsR uid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formContacts :: [Entity User] -> VAPIDKeys -> Text -> Text -> Form ([Entity User], Maybe (Text,Text,Text))
-formContacts options vapidKeys idFormPostContacts idDialogSubscribeToPushNotifications extra = do
+formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text
+             -> Form ([Entity User], Maybe (Text,Text,Text))
+formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe extra = do
 
     (endpointR, endpointV) <- mopt hiddenField "" Nothing
     (p256dhR, p256dhV) <- mopt hiddenField "" Nothing
@@ -448,6 +449,9 @@ instance YesodVideo App where
 
     getAppHttpManager :: Handler Manager
     getAppHttpManager = getYesod <&> appHttpManager
+
+    getStaticRoute :: StaticRoute -> Handler (Route App)
+    getStaticRoute = return . StaticR
 
 
 instance YesodChat App where

@@ -1,103 +1,103 @@
 
-if ("serviceWorker" in navigator) {
+navigator.serviceWorker.register('@{StaticR js_sw_js}', { scope: '/' });
+
+navigator.serviceWorker.addEventListener('message', (message) => {
   
-  navigator.serviceWorker.register('@{StaticR js_sw_js}', { scope: '/' });
-
-  navigator.serviceWorker.addEventListener('message', (message) => {
-    
-    document.getElementById(#{idButtonIgnoreNotification}).addEventListener('click', function (e) {
-      document.getElementById(#{idDialogChatNotification}).close();
-    });
-
-    [ [#{idButtonVideoCallDecline}, #{idDialogIncomingVideoCall}],
-      [#{idButtonAudioCallDecline}, #{idDialogIncomingAudioCall}]
-    ].forEach(([buttonId, dialogId]) => {
-      document.getElementById(buttonId).onclick = function (event) {
-	fetch('@{VideoR PushMessageR}', {
-	  method: 'POST',
-	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	  body: new URLSearchParams({
-            messageType: #{show PushMsgTypeDecline},
-            icon: message.data.icon,
-            channelId: message.data.channelId,
-            senderId: message.data.recipientId,
-            recipientId: message.data.senderId,
-	    video: message.data.video,
-	    audio: message.data.audio
-	  })
-	}).then(function (result) {
-	  document.getElementById(dialogId).close();
-	});
-      }
-    });
-
-    [ [#{idButtonVideoCallAccept}, #{idDialogIncomingVideoCall}],
-      [#{idButtonAudioCallAccept}, #{idDialogIncomingAudioCall}]
-    ].forEach(([buttonId, dialogId]) => {
-      document.getElementById(buttonId).onclick = (event) => {
-	fetch('@{VideoR PushMessageR}', {
-	  method: 'POST',
-	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	  body: new URLSearchParams({
-            messageType: #{show PushMsgTypeAccept},
-            icon: message.data.icon,
-            channelId: message.data.channelId,
-            senderId: message.data.recipientId,
-            recipientId: message.data.senderId,
-	    video: message.data.video,
-	    audio: message.data.audio
-	  })
-	}).then((result) => {
-
-	  document.getElementById(dialogId).close();
-
-	  const params = new URLSearchParams({
-            senderId: message.data.recipientId,
-            recipientId: message.data.senderId,
-            channel: message.data.channelId,
-	    video: message.data.video,
-	    audio: message.data.audio,
-            backlink: '@{backlink}'
-	  });
-
-	  window.location.href = `@{VideoR $ IncomingR}?${params}`;
-
-	});
-      };
-    });
-    
+  document.getElementById(#{idButtonIgnoreNotification}).addEventListener('click', function (e) {
+    document.getElementById(#{idDialogChatNotification}).close();
   });
 
-  navigator.serviceWorker.addEventListener('message', function (message) {
-
-    if (message.data.messageType === #{show PushMsgTypeMessage}) {
-      
-      document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
-      document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
-      document.getElementById(#{idNotificationBody}).textContent = message.data.body;
-      document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
-      document.getElementById(#{idDialogChatNotification}).show();
-
-    } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
-
-      document.getElementById(#{idDialogIncomingVideoCall}).close();
-      document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
-      document.getElementById(#{idDialogMissedCall}).show();
-
-    } else if (message.data.messageType === #{show PushMsgTypeVideoCall}) {
-      
-      document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.senderPhoto;
-      document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
-      document.getElementById(#{idDialogIncomingVideoCall}).show();
-
-    } else if (message.data.messageType === #{show PushMsgTypeAudioCall}) {
-      
-      document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.senderPhoto;
-      document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;
-      document.getElementById(#{idDialogIncomingAudioCall}).show();
-
+  [ [#{idButtonVideoCallDecline}, #{idDialogIncomingVideoCall}],
+    [#{idButtonAudioCallDecline}, #{idDialogIncomingAudioCall}]
+  ].forEach(([buttonId, dialogId]) => {
+    document.getElementById(buttonId).onclick = function (event) {
+      fetch('@{VideoR PushMessageR}', {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+          messageType: #{show PushMsgTypeDecline},
+	  title: #{msgr MsgAppName},
+          icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+	  body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
+          channelId: message.data.channelId,
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+	  video: message.data.video,
+	  audio: message.data.audio
+	})
+      }).then(function (result) {
+	document.getElementById(dialogId).close();
+      });
     }
+  });
 
+  [ [#{idButtonVideoCallAccept}, #{idDialogIncomingVideoCall}],
+    [#{idButtonAudioCallAccept}, #{idDialogIncomingAudioCall}]
+  ].forEach(([buttonId, dialogId]) => {
+    document.getElementById(buttonId).onclick = (event) => {
+      fetch('@{VideoR PushMessageR}', {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+          messageType: #{show PushMsgTypeAccept},
+	  title: #{msgr MsgAppName},
+          icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
+	  body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+          channelId: message.data.channelId,
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+	  video: message.data.video,
+	  audio: message.data.audio
+	})
+      }).then((result) => {
+
+	document.getElementById(dialogId).close();
+
+	const params = new URLSearchParams({
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+          channel: message.data.channelId,
+	  video: message.data.video,
+	  audio: message.data.audio,
+          backlink: '@{backlink}'
+	});
+
+	window.location.href = `@{VideoR $ IncomingR}?${params}`;
+
+      });
+    };
   });
   
-}
+});
+
+navigator.serviceWorker.addEventListener('message', function (message) {
+
+  if (message.data.messageType === #{show PushMsgTypeMessage}) {
+    
+    document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
+    document.getElementById(#{idNotificationBody}).textContent = message.data.body;
+    document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
+    document.getElementById(#{idDialogChatNotification}).show();
+
+  } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
+
+    document.getElementById(#{idDialogIncomingVideoCall}).close();
+    document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
+    document.getElementById(#{idDialogMissedCall}).show();
+
+  } else if (message.data.messageType === #{show PushMsgTypeVideoCall}) {
+    
+    document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
+    document.getElementById(#{idDialogIncomingVideoCall}).show();
+
+  } else if (message.data.messageType === #{show PushMsgTypeAudioCall}) {
+    
+    document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;
+    document.getElementById(#{idDialogIncomingAudioCall}).show();
+
+  }
+
+});

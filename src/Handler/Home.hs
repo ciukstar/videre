@@ -11,7 +11,9 @@ import Database.Persist (Entity (Entity))
 import Foundation.Data
     ( Handler
     , Route (AuthR, MyContactsR)
-    , AppMessage (MsgWelcome, MsgContacts, MsgLoginToViewContacts)
+    , AppMessage
+      ( MsgWelcome, MsgContacts, MsgLoginToViewContacts, MsgWelcomeTo, MsgAppName
+      )
     )
 
 import Model

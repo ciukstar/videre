@@ -14,12 +14,66 @@
       #{status}. #{msg}
 
   <section>
-    <h2.headline-medium>_{MsgAppDescription}
-    <p.body-large>
+    <h2.headline-medium>_{MsgAppName}
+    <h3.body-large>
+      _{MsgAppDescription}
+    <p.body-medium>
+      #{t $ MsgDoc001 (m MsgAppName) (r HomeR) ws wrtc wp}
+
+  <section>
+    <h2.headline-medium>_{MsgSuperuser}
+    <dl>
+
+      <dt.label-large>_{MsgUsername}
+      <dd.body-small>
+        <code>&dollar;YESOD_SUPERUSER_USERNAME
+
+      <dt.label-large>_{MsgPassword}
+      <dd.body-small>
+        <code>&dollar;YESOD_SUPERUSER_PASSWORD
+
+    <p.body-medium>_{MsgDoc002}
+
+  <section>
+    <h2.headline-medium>_{MsgDoc003}
+    <ul>
+      <li.body-large>
+        _{MsgEmail}:
+        <a href="https://developers.google.com/gmail/api/guides" target=_blank>Gmail API
+        <dl>
+          <dt.label-large>
+            _{MsgClientId}
+          <dd.body-small>
+            <code>&dollar;YESOD_GOOGLE_CLIENT_ID
+
+          <dt.label-large>
+            _{MsgClientSecret}
+          <dd.body-small>
+            <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
+
+  <section>
+    <h2.headline-medium>_{MsgSearchEngineOptimization}
+    <ul>
+      <li.body-large>
+        <a href="https://search.google.com/search-console" target=_blank>Google SEO
+        <div>
+          <code.body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
+      <li.body-large>
+        <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
+        <div>
+          <code.body-small>&dollar;YESOD_MS_VALIDATE
 
   <section>
     <h2.headline-medium>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_Videre_svg} alt=_{MsgErDiagram} loading=lazy>
+
+  <section>
+    <h2.headline-medium>_{MsgSourceCode}
+    <p.body-medium>#{t $ MsgDoc004 "https://github.com/ciukstar/videre"}
+
+  <section>
+    <h2.headline-medium>_{MsgIssueTracking}
+    <p.body-medium>#{t $ MsgDoc005 "https://github.com/ciukstar/videre/issues"}
       
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

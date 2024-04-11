@@ -3,7 +3,6 @@ let ws = new WebSocket(
   '@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:")
 );
 
-
 let pc = new RTCPeerConnection(#{config});
 
 pc.ontrack = ({track, streams}) => {
@@ -167,10 +166,15 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
+	"title": #{msgr MsgAppName},
+	"icon": '@{iconCallEnd}',
+	"body": #{msgr $ MsgInterlocutorEndedSession interlocutorName},
 	"messageType": #{show PushMsgTypeEndSession},
 	"channelId": #{show channel},
 	"senderId": #{show $ fromSqlKey sid},
-	"recipientId": #{show $ fromSqlKey rid}
+	"recipientId": #{show $ fromSqlKey rid},
+	"video": #{rawJS video},
+	"audio": #{rawJS audio}
       })
     }).then((result) => {
       pc.close();

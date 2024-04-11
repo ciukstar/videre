@@ -1,3 +1,12 @@
+WelcomeTo: Bun venit la
+ClientSecret: Secretul clientului
+ClientId: Id-ul clientului
+SearchEngineOptimization: Optimizare motor de căutare
+Username: Nume de utilizator
+IssueTracking: Raportarea erorilor
+InterlocutorStartedSession interlocutor: #{interlocutor} a început sesiunea
+InterlocutorEndedSession interlocutor: #{interlocutor} a încheiat sesiunea
+EndSession: Termină sesiunea
 Allow: Permite
 Subscribe: Abonați-vă
 NotNow: Nu acum
@@ -44,7 +53,7 @@ NoRegisteredUsersYet: Nu există încă utilizatori înregistrați
 Add: Adaugă
 NoContactsYet: Nu există încă contacte
 Message: Mesaj
-LoginToViewContacts: Log in to view contacts
+LoginToViewContacts: Conectați-vă pentru a vizualiza contacte
 Contacts: Contacte
 GmailAccountNotSet: Contul Gmail nu este setat. Inițializați jetoanele.
 ThankYou: Vă mulțumim
@@ -129,7 +138,17 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generați
 VapidGenerationWarning: Generarea unei noi chei VAPID necesită ca toți clienții să se aboneze din nou la notificările push
 InvalidGoogleAPITokens: Jetoane Google API nevalide
-AppDescription: Aplicație web progresivă de mesagerie instantanee
+AppDescription: Aplicație web progresivă pentru mesagerie instantanee
 AppName: Videre
 MetaKeywords: mesagerie, instantanee, progresiv, web, aplicație, pwa
-MetaDescription: Aplicație web progresivă de mesagerie instantanee
+MetaDescription: Aplicație web progresivă pentru mesagerie instantanee
+
+Doc001 appname href1 href2 href3 href4: Aplicația <a href=#{href1}>#{appname}</a> permite utilizatorilor să schimbe mesaje instantanee prin <a href=#{href2}>WebSockets</a>, să efectueze apeluri audio și video prin <a href=#{href1}>WebRTC</a> și să fie notificați prin <a href=#{href4}>Web Push</a>.
+
+Doc002: Un cont de superutilizator este definit în momentul implementării. Superutilizatorul gestionează alți utilizatori și acordă sau revocă privilegii de administrator anumitor utilizatori.
+
+Doc003: Integrare cu API-uri externe
+
+Doc004 href: <a href=#{href} target=_blank>Depozitul de proiect</a> pe GitHub.
+
+Doc005 href: Vă rugăm să rețineți că aplicația care rulează în prezent este o aplicație demonstrativă. Orice acțiune este permisă și încurajată. <a href=#{href} target=_blank>Raportați erori</a> pe GitHub.

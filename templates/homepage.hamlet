@@ -14,7 +14,7 @@
       #{status}. #{msg}
 
   <h2.headline>
-    Welcome to Videre 
+    _{MsgWelcomeTo} _{MsgAppName} 
 
   $maybe Entity uid _ <- user
     <md-filled-tonal-button has-icon type=link href=@{MyContactsR uid}>

@@ -1,3 +1,12 @@
+WelcomeTo: Welcome to
+ClientSecret: Client secret
+ClientId: Client id
+SearchEngineOptimization: Search Engine Optimization
+Username: Username
+IssueTracking: Issue tracking
+InterlocutorStartedSession interlocutor@Text: #{interlocutor} started the session
+InterlocutorEndedSession interlocutor@Text: #{interlocutor} has ended the session
+EndSession: End session
 Allow: Allow
 Subscribe: Subscribe
 NotNow: Not now
@@ -129,7 +138,17 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generate
 VapidGenerationWarning: Generating a new VAPID key requires all clients to re-subscribe to the push notifications
 InvalidGoogleAPITokens: Invalid Google API tokens
-AppDescription: Instant messaging progressive web app
+AppDescription: Progressive Web App for Instant Messaging
 AppName: Videre
 MetaKeywords: instant, messaging, progressive, web, app, pwa
-MetaDescription: Instant messaging progressive web app
+MetaDescription: Progressive Web App for Instant Messaging
+
+Doc001 appname@Text href1@Text href2@Text href3@Text href4@Text: Application <a href=#{href1}>#{appname}</a> allows users to exchange instant messages via <a href=#{href2}>WebSockets</a>, make audio and video calls via <a href=#{href3}>WebRTC</a>, and be notified via <a href=#{href4}>Web Push</a>.
+
+Doc002: A superuser account is defined at deployment time. The superuser manages other users and grants or revokes administrator privileges to specific users.
+
+Doc003: Integration with external APIs
+
+Doc004 href@Text: <a href=#{href} target=_blank>Project repository</a> on GitHub.
+
+Doc005 href@Text: Please note that the application currently running is a demo application. Any actions are allowed and encouraged. <a href=#{href} target=_blank>Report issues</a> on GitHub.

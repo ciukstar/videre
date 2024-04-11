@@ -42,12 +42,13 @@ import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
     ( AppMessage
-      ( MsgClose, MsgNotGeneratedVAPID, MsgCallEnded
+      ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
+      , MsgEndSession, MsgAppName
       )
     )
 
 import Model
-    ( UserId, User (userEmail, userName), apiInfoVapid, secretVolumeVapid
+    ( UserId, User (User, userEmail, userName), apiInfoVapid, secretVolumeVapid
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
@@ -67,6 +68,8 @@ import UnliftIO.STM
     (atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue)
 
 import Settings (widgetFile)
+import Settings.StaticFiles
+    (img_call_end_FILL0_wght400_GRAD0_opsz24_svg)
 
 import System.IO (readFile')
 
@@ -94,11 +97,12 @@ import Yesod
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
-import Yesod.Core.Handler (invalidArgsI, getUrlRender)
+import Yesod.Core.Handler (invalidArgsI, getUrlRender, getMessageRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Form.Input (runInputGet, runInputPost, ireq)
-import Yesod.Form.Fields (boolField, intField, urlField)
+import Yesod.Form.Input (runInputGet, runInputPost, ireq, iopt)
+import Yesod.Form.Fields (boolField, intField, urlField, textField)
 import Yesod.Persist.Core (runDB)
+import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
 
@@ -106,9 +110,11 @@ import Yesod.WebSockets
 class YesodVideo m where
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
+    getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
 
 
 getOutgoingR :: (Yesod m, YesodVideo m)
+             => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
              => (RenderMessage m AppMessage, RenderMessage m FormMessage)
              => UserId -> UserId -> SubHandlerFor VideoRoom m Html
 getOutgoingR sid rid = do
@@ -124,6 +130,14 @@ getOutgoingR sid rid = do
 
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
+    interlocutorName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val rid
+        return x )
+
+    msgr <- getMessageRender
+    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
+
     liftHandler $ defaultLayout $ do
         idButtonExitSession <- newIdent
         idVideoRemote <- newIdent
@@ -134,6 +148,8 @@ getOutgoingR sid rid = do
         idButtonEndSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
+  where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
 getIncomingR :: (Yesod m, YesodVideo m)
@@ -156,6 +172,14 @@ getIncomingR = do
 
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
+    interlocutorName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val rid
+        return x )
+
+    msgr <- getMessageRender
+    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
+
     liftHandler $ defaultLayout $ do
         idButtonExitSession <- newIdent
         idVideoRemote <- newIdent
@@ -166,6 +190,8 @@ getIncomingR = do
         idButtonEndSession <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
+  where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
 getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
@@ -181,12 +207,16 @@ postPushMessageR = do
 
     messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<)
         <$> lookupPostParam "messageType"
+    messageTitle <- runInputPost $ iopt textField "title"
     icon <- lookupPostParam "icon"
     channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
+
     video <- runInputPost $ ireq boolField "video"
     audio <- runInputPost $ ireq boolField "audio"
+
+    messageBody <- runInputPost $ iopt textField "body"
 
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -229,9 +259,11 @@ postPushMessageR = do
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
-                        & pushMessage .~ object [ "messageType" .= messageType
-                                                , "topic" .= messageType
+                        & pushMessage .~ object [ "topic" .= messageType
+                                                , "title" .= messageTitle
                                                 , "icon" .= icon
+                                                , "body" .= messageBody
+                                                , "messageType" .= messageType
                                                 , "channelId" .= channelId
                                                 , "senderId" .= sid
                                                 , "senderName" .= ( (userName . entityVal <$> sender)

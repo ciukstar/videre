@@ -1,3 +1,12 @@
+WelcomeTo: Bienvenue à
+ClientSecret: Secret client
+ClientId: Identifiant client
+SearchEngineOptimization: Optimisation du moteur de recherche
+Username: Nom d'utilisateur
+IssueTracking: Signalement de bogues
+InterlocutorStartedSession interlocutor: #{interlocutor} a commencé la session
+InterlocutorEndedSession interlocutor: #{interlocutor} a terminé la session
+EndSession: Terminer la séance
 Allow: Permettre
 Subscribe: Abonnez-vous
 NotNow: Pas maintenant
@@ -128,7 +137,17 @@ GoogleSecretManager: Google Secret Manager
 Generate: Générer
 VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
 InvalidGoogleAPITokens: Jetons d'API Google non valides
-AppDescription: Application Web progressive de messagerie instantanée
+AppDescription: Application Web progressive pour la messagerie instantanée
 AppName: Videre
 MetaKeywords: messagerie, instantanée, progressif, web, application, pwa
 MetaDescription: Application Web progressive de messagerie instantanée
+
+Doc001 appname href1 href2 href3 href4: L'application <a href=#{href1}>#{appname}</a> permet aux utilisateurs d'échanger des messages instantanés via <a href=#{href2}>WebSockets</a>, de passer des appels audio et vidéo via <a href=#{href3}>WebRTC</a> et d'être avertis via <a href=#{href4}>Web Push</a>.
+
+Doc002: Un compte superutilisateur est défini au moment du déploiement. Le superutilisateur gère les autres utilisateurs et accorde ou révoque les privilèges d'administrateur à des utilisateurs spécifiques.
+
+Doc003: Intégration avec des API externes
+
+Doc004 href: <a href=#{href} target=_blank>Le référentiel du projet</a> sur GitHub.
+
+Doc005 href: Veuillez noter que l'application actuellement en cours d'exécution est une application de démonstration. Toutes les actions sont autorisées et encouragées. <a href=#{href} target=_blank>Signalez les bugs</a> sur GitHub.

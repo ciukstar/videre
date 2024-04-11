@@ -10,13 +10,13 @@ self.onpush = function (e) {
       return message;
       
     }).then(function (message) {
-
+      
       return self.registration.showNotification( message.title, {
         tag: message.messageType,
         renotify: true,
-        image: message.senderPhoto,
         icon: message.icon,
-        body: message.body
+        body: message.body,
+        image: message.senderPhoto
       } );
       
     })

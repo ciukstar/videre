@@ -18,6 +18,11 @@ $doctype 5
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined">
 
+    $maybe gsv <- seoGoogleSiteVerification $ appSeo $ appSettings master
+      <meta name="google-site-verification" content=#{gsv}>
+    $maybe msv <- seoMsvalidate $ appSeo $ appSettings master
+      <meta name="msvalidate.01" content=#{msv}>
+
     ^{pageHead pc}
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js">

@@ -32,6 +32,9 @@ import Database.Persist.Sqlite
     ( runSqlPool, sqlDatabase, createSqlitePoolWithConfig )
 
 import Demo.DemoEn (fillDemoEn)
+import Demo.DemoFr (fillDemoFr)
+import Demo.DemoRo (fillDemoRo)
+import Demo.DemoRu (fillDemoRu)
     
 import Import
 
@@ -97,6 +100,8 @@ import Foundation.Data
        )
     )
 
+import System.Environment.Blank (getEnv)
+
 import VideoRoom ()
 import VideoRoom.Data (VideoRoom(VideoRoom))
     
@@ -158,7 +163,12 @@ makeFoundation appSettings = do
                      , userSuperuser = True
                      , userAdmin = True
                      }
-        fillDemoEn appSettings
+        demo <- liftIO $ getEnv "YESOD_DEMO_LANG"
+        case demo of
+          Just "FR" -> fillDemoFr appSettings
+          Just "RO" -> fillDemoRo appSettings
+          Just "RU" -> fillDemoRu appSettings
+          _ -> fillDemoEn appSettings
 
     -- Return the foundation
     return $ mkFoundation pool

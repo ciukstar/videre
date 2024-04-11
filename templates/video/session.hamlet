@@ -29,10 +29,10 @@
   <div slot=headline>
     _{MsgCallEnded}
 
-  <form slot=content method=dialog>
-    _{MsgCallEnded}
+  <p.body-medium slot=content>
+    _{MsgInterlocutorEndedSession interlocutorName}
 
   <div slot=actions>
 
     <md-text-button type=link href=#{backlink}>
-      _{MsgClose}
+      _{MsgEndSession}
