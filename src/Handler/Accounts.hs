@@ -26,7 +26,7 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 import Material3 ( md3textField, md3mopt, md3dayField )
 import Model
-    ( UserId, UserPhoto (UserPhoto), statusSuccess
+    ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
       , UserInfoUser, UserInfoBirthDate, UserSuperuser
@@ -54,12 +54,14 @@ import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     )
+
 import Text.Hamlet (Html)
+
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
     , MonadHandler (liftHandler), redirect, FileInfo (fileContentType)
-    , newIdent, fileSourceByteString, addMessageI, whamlet
+    , newIdent, fileSourceByteString, addMessageI, whamlet, getMessages
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
@@ -112,9 +114,7 @@ formUserInfo uid info extra = do
     let r = UserInfo uid <$> bdayR
     let w = [whamlet|
                     #{extra}
-                    <div.app-form-field>
-                      <label.label-large for=#{fvId bdayV}>_{MsgBirthday}
-                      ^{fvInput bdayV}
+                    ^{fvInput bdayV}
                     |]
     return (r,w)
 
@@ -129,6 +129,8 @@ getAccountInfoR uid = do
 
     (fw,et) <- generateFormPost $ formUserInfo uid info
 
+    msgs <- getMessages
+    
     defaultLayout $ do
         setTitleI MsgPersonalInfo
         idPanelInfo <- newIdent

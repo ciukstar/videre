@@ -12,7 +12,8 @@ import Foundation.Data
     ( Handler
     , Route (AuthR, MyContactsR)
     , AppMessage
-      ( MsgWelcome, MsgContacts, MsgLoginToViewContacts, MsgWelcomeTo, MsgAppName
+      ( MsgWelcomeTo, MsgAppName, MsgSendMessagesVideochatOrAudioCall
+      , MsgLoginToAccessYourContacts, MsgLogIn, MsgShowMyContacts
       )
     )
 

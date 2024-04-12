@@ -91,6 +91,7 @@ import Yesod.Auth.Message
       , RegisterLong, ConfirmationEmailSentTitle, NewPass, SetPass, InvalidLogin
       , LoginTitle
       )
+    , defaultMessage, englishMessage, frenchMessage, russianMessage
     )
 
 import Yesod.Form.I18n.English (englishFormMessage)
@@ -445,6 +446,13 @@ instance YesodAuth App where
                         (googleApiConfClientSecret . appGoogleApiConf . appSettings $ app)
                       , authEmail
                       ]
+
+    renderAuthMessage :: App -> [Text] -> AuthMessage -> Text
+    renderAuthMessage _ [] = defaultMessage
+    renderAuthMessage _ ("en":_) = englishMessage
+    renderAuthMessage _ ("fr":_) = frenchMessage
+    renderAuthMessage _ ("ru":_) = russianMessage
+    renderAuthMessage app (_:xs) = renderAuthMessage app xs
 
 
 instance YesodAuthEmail App where

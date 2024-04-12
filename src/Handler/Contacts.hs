@@ -60,13 +60,13 @@ import Foundation.Data
       , PushSubscriptionsR, StaticR, VideoR
       )
     , AppMessage
-      ( MsgNoContactsYet, MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
+      ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet
       , MsgAdd, MsgInvalidFormData, MsgNewContactsAdded, MsgViewContact
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
       , MsgRemove, MsgSubscriptionCanceled, MsgAllowToBeNotified, MsgNotNow
-      , MsgAllow
+      , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       )
     )
 

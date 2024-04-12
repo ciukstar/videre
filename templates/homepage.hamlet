@@ -2,7 +2,7 @@
   ^{widgetMenu}
 
   <h1.title-large>
-    _{MsgWelcome}
+    _{MsgAppName}
 
   <span.app-top-app-bar-end>
     ^{widgetUser}
@@ -14,16 +14,21 @@
       #{status}. #{msg}
 
   <h2.headline>
-    _{MsgWelcomeTo} _{MsgAppName} 
+    _{MsgWelcomeTo} _{MsgAppName}
+    
+  <p.body-small>
+    _{MsgSendMessagesVideochatOrAudioCall}
 
   $maybe Entity uid _ <- user
     <md-filled-tonal-button has-icon type=link href=@{MyContactsR uid}>
       <md-icon slot=icon>contacts
-      _{MsgContacts}
+      _{MsgShowMyContacts}
   $nothing
     <md-filled-tonal-button has-icon type=link href=@{AuthR LoginR}>
       <md-icon slot=icon>login
-      _{MsgLoginToViewContacts}
+      _{MsgLogIn}
+    <p.body-small>
+      _{MsgLoginToAccessYourContacts}
     
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

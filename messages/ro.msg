@@ -1,3 +1,10 @@
+SendMessagesVideochatOrAudioCall: Trimiteți mesaje, conversați prin chat video sau faceți apeluri audio
+MyContacts: Contactele mele
+YouMightWantToAddAFew: Poate doriți să adăugați câteva
+YourContactListIsEmpty: Lista dvs. de contacte este goală
+ShowMyContacts: Afișează contactele mele
+LogIn: Conectează
+LoginToAccessYourContacts: Conectați-vă pentru a vă accesa contactele
 WelcomeTo: Bun venit la
 ClientSecret: Secretul clientului
 ClientId: Id-ul clientului

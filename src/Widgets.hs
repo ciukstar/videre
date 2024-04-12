@@ -11,12 +11,12 @@ import Database.Persist (Entity (Entity))
 import Foundation ()
 import Foundation.Data
     ( Widget
-    , Route (HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR)
+    , Route (HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR)
     , DataR (UsersR, TokensR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut
-      , MsgPhoto
+      , MsgPhoto, MsgMyContacts
       )
     )
     
@@ -28,6 +28,7 @@ import Yesod.Core.Handler (getCurrentRoute)
 
 widgetMenu :: Widget
 widgetMenu = do
+    user <- maybeAuth
     curr <- getCurrentRoute
     $(widgetFile "widgets/menu")
 

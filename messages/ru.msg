@@ -1,3 +1,10 @@
+SendMessagesVideochatOrAudioCall: Отправляйте сообщения, общайтесь в видеочате или совершайте аудиозвонки
+MyContacts: Мои контакты
+YouMightWantToAddAFew: Возможно, вы захотите добавить несколько
+YourContactListIsEmpty: Ваш список контактов пуст
+ShowMyContacts: Показать мои контакты
+LogIn: Войти
+LoginToAccessYourContacts: Войдите, чтобы получить доступ к своим контактам
 WelcomeTo: Добро пожаловать в
 ClientSecret: Секрет клиента
 ClientId: Идентификатор клиента

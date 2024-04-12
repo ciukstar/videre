@@ -1,3 +1,10 @@
+SendMessagesVideochatOrAudioCall: Send messages, video chat or make audio calls
+MyContacts: My contacts
+YouMightWantToAddAFew: You might want to add a few
+YourContactListIsEmpty: Your contact list is empty
+ShowMyContacts: Show my contacts
+LogIn: Log in
+LoginToAccessYourContacts: Login to access your contacts
 WelcomeTo: Welcome to
 ClientSecret: Client secret
 ClientId: Client id

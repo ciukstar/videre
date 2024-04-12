@@ -18,7 +18,9 @@
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
       <figcaption.body-large>
-        _{MsgNoContactsYet}
+        _{MsgYourContactListIsEmpty}
+        <p.body-small>
+          _{MsgYouMightWantToAddAFew}
   $else
     <md-list>
       $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (chat, subscription)))) <- entries

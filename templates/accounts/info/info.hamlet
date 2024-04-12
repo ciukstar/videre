@@ -23,13 +23,18 @@
   <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
 
   <div ##{idPanelInfo} role=tabpanel aria-labelledby=tabInfo>
+
+    $forall (status,msg) <- filter ((==) statusError . fst) msgs
+      <div.app-banner.error.body-medium>
+        #{status}. #{msg}
+        
     $maybe Entity _ (UserInfo _ bday) <- info
-      <p>
-        <label.label-large>
-          _{MsgBirthday}: #
-          <span.body-medium>
-            $maybe bday <- bday
-              #{show bday}
+      <dl>
+        <dt.label-large>
+          _{MsgBirthday}
+        <dd.body-medium>
+            $maybe dt <- show <$> bday
+              <time datetime=#{dt}>#{dt}
             $nothing
               _{MsgNotIndicated}
     $nothing
@@ -38,3 +43,9 @@
         <div.app-form-actions>
           <md-text-button type=button href=@{HomeR}>_{MsgCancel}
           <md-filled-button type=submit>_{MsgSave}
+
+    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
+      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+        <md-elevation>
+        <span.body-medium>#{status}. #
+        <span.body-medium>#{msg}
