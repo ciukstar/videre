@@ -1,3 +1,6 @@
+IncomingVideoCallFrom caller: Appel vidéo entrant de #{caller}
+IncomingAudioCallFrom caller: Appel audio entrant de #{caller}
+CallCanceledByCaller caller: Appel annulé par #{caller}
 SendMessagesVideochatOrAudioCall: Envoyez des messages, discutez en vidéo ou passez des appels audio
 MyContacts: Mes contacts
 YouMightWantToAddAFew: Vous voudrez peut-être en ajouter quelques-uns

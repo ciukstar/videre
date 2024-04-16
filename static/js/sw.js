@@ -4,26 +4,40 @@ self.onpush = function (e) {
   const message = e.data.json();
 
   e.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then(function (clients) {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       
-      clients.forEach(function (client) { client.postMessage(message); });
-      return message;
+      const focused = clients.filter((client) => client.focused);
+
+      focused.forEach((client) => { client.postMessage(message); });
       
-    }).then(function (message) {
+      return [message, focused.length < 1];
       
-      return self.registration.showNotification( message.title, {
-        tag: message.messageType,
-        renotify: true,
-        icon: message.icon,
-        body: message.body,
-        image: message.senderPhoto
-      } );
+    }).then(([message, notify]) => {
+      
+      return !notify
+	? Promise.resolve()
+	: self.registration.showNotification(message.title, {
+          tag: message.messageType,
+          renotify: true,
+          icon: message.icon,
+          body: message.body,
+          image: message.senderPhoto,
+	  actions: [{ action: 'accept',
+		      title: 'Accept'
+		    },
+		    { action: 'decline',
+		      title: 'Decline'
+		    }]
+	});
       
     })
   );
   
 };
 
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+});
 
 self.addEventListener('fetch', function (e) {
 

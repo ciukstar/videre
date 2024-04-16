@@ -22,7 +22,7 @@ import ChatRoom.Data
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
 import Control.Applicative ((<|>))
-import Control.Lens ((.~))
+import Control.Lens ((.~),(?~))
 import Control.Monad (forever, forM_)
 import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
@@ -40,6 +40,7 @@ import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
 import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
+import Data.Maybe (fromMaybe)
 import qualified Data.Set as S
 import Data.Text (Text, pack, unpack)
 import Data.Text.Lazy (toStrict)
@@ -50,7 +51,8 @@ import Foundation.Data
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
       , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
-      , MsgCancel, MsgClose
+      , MsgCancel, MsgClose, MsgAppName, MsgCallCanceledByCaller
+      , MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom
       )
     )
 
@@ -82,6 +84,7 @@ import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_FILL0_wght400_GRAD0_opsz24_svg
+    , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     )
 
 import System.IO (readFile')
@@ -93,7 +96,7 @@ import Text.Read (readMaybe)
 import Web.WebPush
     ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
-    , sendPushNotification
+    , sendPushNotification, pushTopic, PushTopic (PushTopic)
     )
 
 import Yesod.Core
@@ -116,7 +119,7 @@ import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
       , YesodPersist m, YesodPersistBackend m ~ SqlBackend
       ) => YesodChat m where
-    
+
     getAppHttpManager :: HandlerFor m Manager
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
@@ -145,12 +148,13 @@ postAcknowledgeR = do
 
 getChatRoomR :: UserId -> UserId -> ContactId -> ChatHandler Html
 getChatRoomR sid rid cid = do
-    
+
     backlink <- liftHandler $ getBacklink sid rid
     photos <- liftHandler $ getAccountPhotoRoute sid
     photor <- liftHandler $ getAccountPhotoRoute rid
     contact  <- liftHandler $ getContactRoute sid rid cid
     icon <- liftHandler $ getStaticRoute img_call_FILL0_wght400_GRAD0_opsz24_svg
+    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     video <- liftHandler getVideoPushRoute
     outgoing <- liftHandler $ getVideoOutgoingRoute sid rid
 
@@ -181,8 +185,14 @@ getChatRoomR sid rid cid = do
 
     let channel = fromSqlKey cid
 
+    callerName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val sid
+        return x )
+
+    msgr <- getMessageRender
     liftHandler $ defaultLayout $ do
-        
+
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idChatOutput <- newIdent
@@ -193,9 +203,11 @@ getChatRoomR sid rid cid = do
         idButtonOutgoingCallCancel <- newIdent
         idDialogCallDeclined <- newIdent
         idDialogVideoSessionEnded <- newIdent
-        
+
         $(widgetFile "chat/room")
 
+    where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
 chatApp :: YesodChat m
@@ -277,7 +289,7 @@ chatApp userId interlocutorId contactId = do
 
                            case details of
                              Just vapidKeysMinDetails -> do
-                                 
+
                                  subscriptions <- liftHandler $ runDB $ select $ do
                                      x <- from $ table @PushSubscription
                                      where_ $ x ^. PushSubscriptionSubscriber ==. val iid
@@ -287,7 +299,7 @@ chatApp userId interlocutorId contactId = do
                                      x <- from $ table @User
                                      where_ $ x ^. UserId ==. val uid
                                      return x
-                                     
+
                                  let vapidKeys = readVAPIDKeys vapidKeysMinDetails
                                  iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
                                  urlr <- getUrlRender
@@ -299,9 +311,9 @@ chatApp userId interlocutorId contactId = do
                                      let notification = mkPushNotification endpoint p256dh auth
                                              & pushMessage .~ object
                                                  [ "messageType" .= PushMsgTypeMessage
-                                                 , "topic" .= PushMsgTypeMessage
                                                  , "title" .= msgr MsgNewMessage
                                                  , "icon" .= urlr iconr
+                                                 , "body" .= message
                                                  , "reply" .= urlr (tpr $ ChatRoomR sid pid contactId)
                                                  , "senderId" .= pid
                                                  , "senderName" .= ( (userName . entityVal <$> sender)
@@ -309,10 +321,10 @@ chatApp userId interlocutorId contactId = do
                                                                    )
                                                  , "senderPhoto" .= urlr photor
                                                  , "recipientId" .= sid
-                                                 , "body" .= message
                                                  ]
                                              & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                                              & pushExpireInSeconds .~ 60 * 60
+                                             & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeMessage)
 
                                      manager <- liftHandler getAppHttpManager
 
@@ -328,7 +340,7 @@ chatApp userId interlocutorId contactId = do
                              Nothing -> do
                                  liftIO $ print @Text "No VAPID details"
                                  liftHandler $ addMessageI statusError MsgPushNotificationExcception
-                                
+
                        Nothing -> return ()
 
                  return ()

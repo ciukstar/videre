@@ -1,3 +1,6 @@
+IncomingVideoCallFrom caller@Text: Incoming video call from #{caller}
+IncomingAudioCallFrom caller@Text: Incoming audio call from #{caller}
+CallCanceledByCaller caller@Text: Call canceled by #{caller}
 SendMessagesVideochatOrAudioCall: Send messages, video chat or make audio calls
 MyContacts: My contacts
 YouMightWantToAddAFew: You might want to add a few

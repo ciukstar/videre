@@ -91,7 +91,7 @@ import Yesod.Auth.Message
       , RegisterLong, ConfirmationEmailSentTitle, NewPass, SetPass, InvalidLogin
       , LoginTitle
       )
-    , defaultMessage, englishMessage, frenchMessage, russianMessage
+    , defaultMessage, englishMessage, frenchMessage, russianMessage, romanianMessage
     )
 
 import Yesod.Form.I18n.English (englishFormMessage)
@@ -451,6 +451,7 @@ instance YesodAuth App where
     renderAuthMessage _ [] = defaultMessage
     renderAuthMessage _ ("en":_) = englishMessage
     renderAuthMessage _ ("fr":_) = frenchMessage
+    renderAuthMessage _ ("ro":_) = romanianMessage
     renderAuthMessage _ ("ru":_) = russianMessage
     renderAuthMessage app (_:xs) = renderAuthMessage app xs
 

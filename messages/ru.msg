@@ -1,3 +1,6 @@
+IncomingVideoCallFrom caller: Входящий видеозвонок, #{caller}
+IncomingAudioCallFrom caller: Входящий аудиовызов, #{caller}
+CallCanceledByCaller caller: Вызов отменен, #{caller}
 SendMessagesVideochatOrAudioCall: Отправляйте сообщения, общайтесь в видеочате или совершайте аудиозвонки
 MyContacts: Мои контакты
 YouMightWantToAddAFew: Возможно, вы захотите добавить несколько

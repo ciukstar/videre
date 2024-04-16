@@ -20,7 +20,7 @@ module VideoRoom
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
 import Control.Applicative ((<|>))
-import Control.Lens ((.~))
+import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
@@ -37,7 +37,7 @@ import Data.Bifunctor (Bifunctor(bimap))
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
-import Data.Text (Text, unpack)
+import Data.Text (Text, unpack, pack)
 import Data.Text.Encoding (encodeUtf8)
 
 import Foundation.Data
@@ -87,6 +87,7 @@ import VideoRoom.Data
 import Web.WebPush
     ( VAPIDKeysMinDetails(VAPIDKeysMinDetails), readVAPIDKeys, mkPushNotification
     , pushMessage, pushSenderEmail, pushExpireInSeconds, sendPushNotification
+    , pushUrgency, PushUrgency (PushUrgencyHigh), pushTopic, PushTopic (PushTopic)
     )
 
 import Yesod
@@ -259,8 +260,7 @@ postPushMessageR = do
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
-                        & pushMessage .~ object [ "topic" .= messageType
-                                                , "title" .= messageTitle
+                        & pushMessage .~ object [ "title" .= messageTitle
                                                 , "icon" .= icon
                                                 , "body" .= messageBody
                                                 , "messageType" .= messageType
@@ -275,7 +275,9 @@ postPushMessageR = do
                                                 , "audio" .= audio
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
-                        & pushExpireInSeconds .~ 60 * 60
+                        & pushExpireInSeconds .~ 60
+                        & pushUrgency ?~ PushUrgencyHigh
+                        & pushTopic .~ (PushTopic . pack . show <$> messageType)
 
                 result <- sendPushNotification vapidKeys manager notification
 

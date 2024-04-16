@@ -18,7 +18,7 @@
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2023-01-01.yaml
 resolver:
-  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/14.yaml
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/22/17.yaml
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -31,6 +31,7 @@ resolver:
 #   - wai
 packages:
 - .
+
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
@@ -44,7 +45,7 @@ packages:
 
 extra-deps:
 - git: https://github.com/sarthakbagaria/web-push.git
-  commit: dd73623ab16469e13f2620cd872cecaf996eeb4c
+  commit: f52808bd5cf1c9a730d1b5a1569642787a413944
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

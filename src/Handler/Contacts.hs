@@ -140,7 +140,9 @@ import Control.Applicative (liftA3)
 
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
 deletePushSubscriptionsR sid pid = do
+
     endpoint <- lookupGetParam "endpoint"
+
     case endpoint of
       Just x -> do
           runDB $ delete $ do

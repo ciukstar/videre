@@ -1,3 +1,6 @@
+IncomingVideoCallFrom caller: Apel video primit de la #{caller}
+IncomingAudioCallFrom caller: Apel audio primit de la #{caller}
+CallCanceledByCaller caller: Apel anulat de #{caller}
 SendMessagesVideochatOrAudioCall: Trimiteți mesaje, conversați prin chat video sau faceți apeluri audio
 MyContacts: Contactele mele
 YouMightWantToAddAFew: Poate doriți să adăugați câteva

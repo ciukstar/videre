@@ -93,13 +93,15 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeVideoCall},
-      "icon": '@{icon}',
-      "channelId": #{show channel},
-      "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid},
-      "video": true,
-      "audio": true
+      messageType: #{show PushMsgTypeVideoCall},
+      icon: '@{icon}',
+      title: #{msgr MsgAppName},
+      body: #{msgr $ MsgIncomingVideoCallFrom callerName},
+      channelId: #{show channel},
+      senderId: #{show $ fromSqlKey sid},
+      recipientId: #{show $ fromSqlKey rid},
+      video: true,
+      audio: true
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -115,13 +117,15 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeAudioCall},
-      "icon": '@{icon}',
-      "channelId": #{show channel},
-      "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid},
-      "video": false,
-      "audio": true
+      messageType: #{show PushMsgTypeAudioCall},
+      icon: '@{icon}',
+      title: #{msgr MsgAppName},
+      body: #{msgr $ MsgIncomingAudioCallFrom callerName},
+      channelId: #{show channel},
+      senderId: #{show $ fromSqlKey sid},
+      recipientId: #{show $ fromSqlKey rid},
+      video: false,
+      audio: true
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -137,11 +141,15 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      "messageType": #{show PushMsgTypeCancel},
-      "icon": '@{icon}',
-      "channelId": #{show channel},
-      "senderId": #{show $ fromSqlKey sid},
-      "recipientId": #{show $ fromSqlKey rid}
+      messageType: #{show PushMsgTypeCancel},
+      title: #{msgr MsgAppName},
+      icon: '@{iconCallEnd}',
+      body: #{msgr $ MsgCallCanceledByCaller callerName},
+      channelId: #{show channel},
+      senderId: #{show $ fromSqlKey sid},
+      recipientId: #{show $ fromSqlKey rid},
+      video: false,
+      audio: false
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).close();

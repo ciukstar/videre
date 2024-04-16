@@ -71,7 +71,7 @@
 
   <form slot=content method=dialog>
     <p.body-large>
-      _{MsgMissedCall}:
+      _{MsgMissedCall},&nbsp;
       <span ##{idMissedCallCaller}>
 
   <div slot=actions>
