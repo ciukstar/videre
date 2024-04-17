@@ -86,12 +86,12 @@ import Handler.Users
 import Handler.Common ( getFaviconR, getRobotsR, getSitemapR, getWebAppManifestR )
 
 import Foundation.Data
-    ( App(..), Handler, resourcesApp
+    ( App(..), Handler, resourcesApp, getServiceWorkerR
     , Route
       ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
-      , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR
+      , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR, ServiceWorkerR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR

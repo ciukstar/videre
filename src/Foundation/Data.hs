@@ -17,12 +17,16 @@ import Import.NoFoundation
 
 import Model (UserId, ContactId)
 
+import Text.Julius (juliusFile) 
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))
 
 import VideoRoom.Data (VideoRoom)
 
 import Yesod.Auth (Auth, getAuth)
 import Yesod.Core (mkMessage, renderRoute)
+import Yesod.Core.Content
+    ( TypedContent (TypedContent), toContent, typeJavascript )
+import Yesod.Core.Handler (HandlerFor, getUrlRenderParams)
 import Yesod.Core.Types (Logger)
 
 
@@ -42,6 +46,11 @@ data App = App
 
 mkMessage "App" "messages" "en"
 
+
+getServiceWorkerR :: HandlerFor App TypedContent
+getServiceWorkerR = do
+    rndr <- getUrlRenderParams
+    return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
 
 
 -- This is where we define all of the routes in our application. For a full

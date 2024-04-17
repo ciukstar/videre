@@ -1,0 +1,89 @@
+
+self.onpush = function (e) {
+  
+  const message = e.data.json();
+
+  const promise = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
+
+    const focused = cs.filter((client) => client.focused);
+    
+    focused.forEach((client) => { client.postMessage(message); });
+    
+    return [focused.length < 1, message];
+    
+  }).then(([notify, message]) => {
+    
+    return !notify
+      ? Promise.resolve()
+      : self.registration.showNotification(message.title, {
+	requireInteraction: true,
+        tag: message.messageType,
+        renotify: true,
+        icon: message.icon,
+        body: message.body,
+        image: message.senderPhoto,
+	data: message,
+	actions: [{ action: 'accept',
+		    title: 'Accept'
+		  },
+		  { action: 'decline',
+		    title: 'Decline'
+		  }]
+      });
+    
+  });
+  
+  e.waitUntil(promise);
+  
+};
+
+
+self.addEventListener('notificationclick', (e) => {
+
+  e.notification.close();
+
+  const promise = self.clients.matchAll(
+    { type: 'window', includeUncontrolled: true }
+  ).then((clients) => {
+
+    return clients.length > 0
+      ? clients[0].focus().then(
+	(client) => { client.postMessage(e.notification.data); }
+      )
+      : self.clients.openWindow(self.location.origin).then(
+	(client) => { client.postMessage(e.notification.data); }
+      );
+    
+  });
+
+  e.waitUntil(promise);
+  
+});
+
+
+self.addEventListener('notificationclose', (e) => {
+  
+});
+
+
+self.addEventListener('fetch', function (e) {
+
+  if (e.request.method === 'GET' && e.request.url.includes('my/contacts/')) {
+
+    e.respondWith(
+      self.registration.pushManager.getSubscription().then(function (subscription) {
+	
+	if (!subscription) {
+	  return fetch(e.request);
+	} else {	  
+	  let url = new URL(e.request.url);
+	  url.searchParams.set('endpoint', subscription.endpoint);	  
+	  return fetch(url);
+	}
+	
+      })
+    );
+
+  }
+
+});
