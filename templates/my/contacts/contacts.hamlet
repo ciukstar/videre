@@ -16,7 +16,7 @@
 
   $if null entries
     <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&varnothing;
+      <span.on-secondary style="font-size:4rem">&#x1F4C2;
       <figcaption.body-large>
         _{MsgYourContactListIsEmpty}
         <p.body-small>

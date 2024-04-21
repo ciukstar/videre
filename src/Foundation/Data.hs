@@ -15,18 +15,26 @@ import Database.Persist.Sql (ConnectionPool)
 import Import.NoFoundation
     ( Static, Manager, AppSettings, parseRoutesFile, mkYesodData)
 
-import Model (UserId, ContactId)
+import Model
+    ( UserId, ContactId
+    , PushMsgType
+      ( PushMsgTypeDecline, PushMsgTypeIgnore, PushMsgTypeAudioCall
+      , PushMsgTypeVideoCall
+      )
+    )
 
-import Text.Julius (juliusFile) 
+import Settings.StaticFiles (img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg)
+
+import Text.Julius (juliusFile)
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))
 
-import VideoRoom.Data (VideoRoom)
+import VideoRoom.Data (VideoRoom, Route (PushMessageR))
 
 import Yesod.Auth (Auth, getAuth)
 import Yesod.Core (mkMessage, renderRoute)
 import Yesod.Core.Content
     ( TypedContent (TypedContent), toContent, typeJavascript )
-import Yesod.Core.Handler (HandlerFor, getUrlRenderParams)
+import Yesod.Core.Handler (HandlerFor, getUrlRenderParams, getMessageRender)
 import Yesod.Core.Types (Logger)
 
 
@@ -47,12 +55,6 @@ data App = App
 mkMessage "App" "messages" "en"
 
 
-getServiceWorkerR :: HandlerFor App TypedContent
-getServiceWorkerR = do
-    rndr <- getUrlRenderParams
-    return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
-
-
 -- This is where we define all of the routes in our application. For a full
 -- explanation of the syntax, please see:
 -- http://www.yesodweb.com/book/routing-and-handlers
@@ -66,3 +68,11 @@ getServiceWorkerR = do
 -- type Handler = HandlerFor App
 -- type Widget = WidgetFor App ()
 mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
+
+
+getServiceWorkerR :: HandlerFor App TypedContent
+getServiceWorkerR = do
+    rndr <- getUrlRenderParams
+    msgr <- getMessageRender
+
+    return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr

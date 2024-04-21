@@ -23,12 +23,8 @@ self.onpush = function (e) {
         body: message.body,
         image: message.senderPhoto,
 	data: message,
-	actions: [{ action: 'accept',
-		    title: 'Accept'
-		  },
-		  { action: 'decline',
-		    title: 'Decline'
-		  }]
+	actions: message.messageType === #{show PushMsgTypeAudioCall} || message.messageType === #{show PushMsgTypeVideoCall}
+	  ? [{ action: 'decline', title: #{msgr MsgDecline} }] : []
       });
     
   });
@@ -42,27 +38,63 @@ self.addEventListener('notificationclick', (e) => {
 
   e.notification.close();
 
-  const promise = self.clients.matchAll(
-    { type: 'window', includeUncontrolled: true }
-  ).then((clients) => {
-
-    return clients.length > 0
-      ? clients[0].focus().then(
-	(client) => { client.postMessage(e.notification.data); }
-      )
-      : self.clients.openWindow(self.location.origin).then(
-	(client) => { client.postMessage(e.notification.data); }
-      );
+  if (e.action === 'decline') {
     
-  });
+    fetch('@{VideoR PushMessageR}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	messageType: #{show PushMsgTypeDecline},
+	title: #{msgr MsgAppName},
+	icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+	body: #{msgr MsgCallDeclined},
+	channelId: e.notification.data.channelId,
+	senderId: e.notification.data.recipientId,
+	recipientId: e.notification.data.senderId,
+	video: e.notification.data.video,
+	audio: e.notification.data.audio
+      })
+    });
+    
+  } else {
+  
+    const promise = self.clients.matchAll(
+      { type: 'window', includeUncontrolled: true }
+    ).then((clients) => {
 
-  e.waitUntil(promise);
+      return clients.length > 0
+	? clients[0].focus().then(
+	  (client) => { client.postMessage(e.notification.data); }
+	)
+	: self.clients.openWindow(self.location.origin).then(
+	  (client) => { client.postMessage(e.notification.data); }
+	);
+      
+    });
+
+    e.waitUntil(promise);
+    
+  }
   
 });
 
 
 self.addEventListener('notificationclose', (e) => {
-  
+  fetch('@{VideoR PushMessageR}', {
+    method: 'POST',
+    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      messageType: #{show PushMsgTypeIgnore},
+      title: #{msgr MsgAppName},
+      icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+      body: #{msgr MsgCallDeclined},
+      channelId: e.notification.data.channelId,
+      senderId: e.notification.data.recipientId,
+      recipientId: e.notification.data.senderId,
+      video: e.notification.data.video,
+      audio: e.notification.data.audio
+    })
+  });
 });
 
 

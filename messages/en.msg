@@ -1,3 +1,5 @@
+AuthenticationRequired: Authentication required
+AuthorizationRequired: Authorization required
 IncomingVideoCallFrom caller@Text: Incoming video call from #{caller}
 IncomingAudioCallFrom caller@Text: Incoming audio call from #{caller}
 CallCanceledByCaller caller@Text: Call canceled by #{caller}

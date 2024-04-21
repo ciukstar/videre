@@ -14,7 +14,7 @@
 
   $if null users
     <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&varnothing;
+      <span.on-secondary style="font-size:4rem">&#x1F4C2;
       <figcaption.body-large>
         _{MsgNoRegisteredUsersYet}
   $else

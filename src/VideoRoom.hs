@@ -109,6 +109,7 @@ import Yesod.WebSockets
 
 
 class YesodVideo m where
+    
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
@@ -120,7 +121,7 @@ getOutgoingR :: (Yesod m, YesodVideo m)
              => UserId -> UserId -> SubHandlerFor VideoRoom m Html
 getOutgoingR sid rid = do
 
-    let polite = True
+    let polite = False
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
@@ -159,7 +160,7 @@ getIncomingR :: (Yesod m, YesodVideo m)
              => SubHandlerFor VideoRoom m Html
 getIncomingR = do
 
-    let polite = False
+    let polite = True
 
     (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
     (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
@@ -322,7 +323,7 @@ wsApp channelId polite = do
         (forever $ atomically (readTQueue (if polite then chan else peer)) >>= sendTextData)
         (runConduit (sourceWS .| mapM_C (
                           \msg -> do
-                              liftIO $ print msg
+                              -- liftIO $ print msg
                               atomically $ writeTQueue (if not polite then chan else peer) msg
                           )
                     ))

@@ -1,22 +1,25 @@
 
-let ws = new WebSocket(
-  '@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:")
-);
+let ws = new WebSocket('@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 let pc = new RTCPeerConnection(#{config});
 
+const remoteVideo = document.getElementById(#{idVideoRemote});
+
 pc.ontrack = ({track, streams}) => {
   track.onunmute = () => {
-    const remoteVideo = document.getElementById(#{idVideoRemote});
-    if ( ! remoteVideo.srcObject ) {
-      remoteVideo.srcObject = streams[0];
-    }
+    remoteVideo.srcObject = streams[0];
   }
 };
 
 let makingOffer = false;
 
-ws.addEventListener('open', (e) => {
+ws.onopen = (e) => {
+
+  makingOffer = true;
+  pc.setLocalDescription().then(() => {
+    ws.send(JSON.stringify({ description: pc.localDescription }));
+  }).catch((err) => { console.error(err); })
+    .finally(() => { makingOffer = false; });
 
   pc.onnegotiationneeded = async () => {
     try {
@@ -30,9 +33,11 @@ ws.addEventListener('open', (e) => {
     }
   };
 
-  pc.onicecandidate = ({ candidate }) => { ws.send(JSON.stringify({ candidate })); };
+  pc.onicecandidate = ({ candidate }) => {
+    ws.send(JSON.stringify({ candidate }));
+  };
 
-});
+};
 
 let ignoreOffer = false;
 
@@ -42,27 +47,29 @@ ws.onmessage = async (e) => {
 
   try {
     if (description) {
+
       const offerCollision = description.type === "offer" && (makingOffer || pc.signalingState !== "stable");
 
       ignoreOffer = ( #{rawJS polite} ) && offerCollision;
       if (ignoreOffer) {
-	return;
+        return;
       }
 
       await pc.setRemoteDescription(description);
+
       if (description.type === "offer") {
-	await pc.setLocalDescription();
-	ws.send(JSON.stringify({ description: pc.localDescription }));
+        await pc.setLocalDescription();
+        ws.send(JSON.stringify({ description: pc.localDescription }));
       }
 
     } else if (candidate) {
 
       try {
-	await pc.addIceCandidate(candidate);
+        await pc.addIceCandidate(candidate);
       } catch (err) {
-	if ( ! ignoreOffer ) {
-	  throw err;
-	}
+        if ( ! ignoreOffer ) {
+          throw err;
+        }
       }
     }
   } catch (err) {
@@ -76,8 +83,11 @@ navigator.mediaDevices.getUserMedia({
 }).then(function (stream) {
 
   stream.getTracks().forEach((track) => {
+
     track.enabled = track.kind === 'video' ? #{rawJS video} : (track.kind === 'audio' ? #{rawJS audio} : true);
+
     pc.addTrack(track, stream);
+
   });
   document.getElementById(#{idVideoSelf}).srcObject = stream;
   return stream;
@@ -101,9 +111,9 @@ navigator.mediaDevices.getUserMedia({
       const [videoTrack] = stream.getVideoTracks();
 
       pc.getSenders().filter(
-	(sender) => sender.track.kind === videoTrack.kind
+        (sender) => sender.track.kind === videoTrack.kind
       ).forEach((sender) => {
-	sender.replaceTrack(videoTrack);
+        sender.replaceTrack(videoTrack);
       });
 
       document.getElementById(#{idVideoSelf}).srcObject = stream;
@@ -136,14 +146,14 @@ navigator.mediaDevices.getUserMedia({
   [#{idButtonExitSession}, #{idButtonEndSession}].forEach((x) => {
     document.getElementById(x).addEventListener('click', (e) => {
       stream.getTracks().forEach((track) => { track.stop(); });
-    }, { once: true });
+    });
   });
 
   navigator.serviceWorker.addEventListener('message', (message) => {
     if (message.data.messageType === #{show PushMsgTypeEndSession}) {
       stream.getTracks().forEach((track) => { track.stop(); });
     }
-  }, { once: true });
+  });
 
 }).catch(function (err) {
   console.error(err);
@@ -155,6 +165,11 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{show PushMsgTypeEndSession}) {
     pc.close();
     ws.close();
+
+    pc = null;
+    ws = null;
+    remoteVideo.srcObject = null;
+
     document.getElementById(#{idDialogCallEnded}).show();
   }
 
@@ -166,19 +181,24 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	"title": #{msgr MsgAppName},
-	"icon": '@{iconCallEnd}',
-	"body": #{msgr $ MsgInterlocutorEndedSession interlocutorName},
-	"messageType": #{show PushMsgTypeEndSession},
-	"channelId": #{show channel},
-	"senderId": #{show $ fromSqlKey sid},
-	"recipientId": #{show $ fromSqlKey rid},
-	"video": #{rawJS video},
-	"audio": #{rawJS audio}
+        "title": #{msgr MsgAppName},
+        "icon": '@{iconCallEnd}',
+        "body": #{msgr $ MsgInterlocutorEndedSession interlocutorName},
+        "messageType": #{show PushMsgTypeEndSession},
+        "channelId": #{show channel},
+        "senderId": #{show $ fromSqlKey sid},
+        "recipientId": #{show $ fromSqlKey rid},
+        "video": #{rawJS video},
+        "audio": #{rawJS audio}
       })
     }).then((result) => {
       pc.close();
       ws.close();
+
+      pc = null;
+      ws = null;
+      remoteVideo.srcObject = null;
+
       window.location.href = #{backlink};
     });
   });

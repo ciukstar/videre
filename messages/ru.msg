@@ -1,3 +1,5 @@
+AuthenticationRequired: Требуется аутентификация
+AuthorizationRequired: Требуется авторизация
 IncomingVideoCallFrom caller: Входящий видеозвонок, #{caller}
 IncomingAudioCallFrom caller: Входящий аудиовызов, #{caller}
 CallCanceledByCaller caller: Вызов отменен, #{caller}

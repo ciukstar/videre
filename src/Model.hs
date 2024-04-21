@@ -50,7 +50,7 @@ import Text.Hamlet (Html)
 
 data PushMsgType = PushMsgTypeMessage | PushMsgTypeVideoCall | PushMsgTypeAudioCall
                  | PushMsgTypeAccept | PushMsgTypeDecline | PushMsgTypeCancel
-                 | PushMsgTypeEndSession
+                 | PushMsgTypeIgnore | PushMsgTypeEndSession
     deriving (Eq, Show, Read)
 
 

@@ -1,3 +1,5 @@
+AuthenticationRequired: Este necesară autentificarea
+AuthorizationRequired: Este necesară autorizarea
 IncomingVideoCallFrom caller: Apel video primit de la #{caller}
 IncomingAudioCallFrom caller: Apel audio primit de la #{caller}
 CallCanceledByCaller caller: Apel anulat de #{caller}
