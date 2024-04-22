@@ -3,11 +3,31 @@ let ws = new WebSocket('@{toParent $ WebSoketR channelId polite}'.replace("http:
 
 let pc = new RTCPeerConnection(#{config});
 
-const remoteVideo = document.getElementById(#{idVideoRemote});
+let dchan = pc.createDataChannel('dchan', { negotiated: true, id: 0 });
+
+const videoRemote = document.getElementById(#{idVideoRemote});
+const videoSelf = document.getElementById(#{idVideoSelf});
+
+let srcObject = null;
+
+dchan.onmessage = (e) => {
+  const data = JSON.parse(e.data);
+  if ('video' in data) {
+    const src = videoRemote.srcObject;
+    if (data.video) {
+      videoRemote.srcObject = srcObject;
+    } else {
+      videoRemote.srcObject = null;
+    }
+  }
+};
 
 pc.ontrack = ({track, streams}) => {
+  srcObject = streams[0];
   track.onunmute = () => {
-    remoteVideo.srcObject = streams[0];
+    if (!videoRemote.srcObject) {
+      videoRemote.srcObject = streams[0];
+    }
   }
 };
 
@@ -89,7 +109,7 @@ navigator.mediaDevices.getUserMedia({
     pc.addTrack(track, stream);
 
   });
-  document.getElementById(#{idVideoSelf}).srcObject = stream;
+  videoSelf.srcObject = stream;
   return stream;
 
 }).then((stream) => {
@@ -116,7 +136,7 @@ navigator.mediaDevices.getUserMedia({
         sender.replaceTrack(videoTrack);
       });
 
-      document.getElementById(#{idVideoSelf}).srcObject = stream;
+      videoSelf.srcObject = stream;
 
     });
   };
@@ -128,6 +148,8 @@ navigator.mediaDevices.getUserMedia({
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
       e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'videocam_off' : 'videocam';
+      videoSelf.style.visibility = sender.track.enabled ? 'visible' : 'hidden';
+      dchan.send(JSON.stringify({[sender.track.kind]: sender.track.enabled}));
     });
 
   };
@@ -139,6 +161,7 @@ navigator.mediaDevices.getUserMedia({
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
       e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'mic_off' : 'mic';
+      dchan.send(JSON.stringify({[sender.track.kind]: sender.track.enabled}));
     });
 
   };
@@ -168,7 +191,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
     pc = null;
     ws = null;
-    remoteVideo.srcObject = null;
+    videoRemote.srcObject = null;
 
     document.getElementById(#{idDialogCallEnded}).show();
   }
@@ -197,7 +220,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
       pc = null;
       ws = null;
-      remoteVideo.srcObject = null;
+      videoRemote.srcObject = null;
 
       window.location.href = #{backlink};
     });

@@ -109,7 +109,7 @@ import Yesod.WebSockets
 
 
 class YesodVideo m where
-    
+
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)

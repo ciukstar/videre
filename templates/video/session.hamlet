@@ -18,11 +18,9 @@
 
 <main>
 
-  <video controls autoplay ##{idVideoRemote}
-         poster=@{toParent $ PhotoR rid}>
+  <video controls autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}>
 
-  <video controls autoplay muted ##{idVideoSelf} 
-         poster=@{toParent $ PhotoR sid}>
+  <video controls autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}>
 
 
 <md-dialog ##{idDialogCallEnded}>
