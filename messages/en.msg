@@ -1,3 +1,4 @@
+Usage: Usage
 AuthenticationRequired: Authentication required
 AuthorizationRequired: Authorization required
 IncomingVideoCallFrom caller@Text: Incoming video call from #{caller}
@@ -164,3 +165,7 @@ Doc003: Integration with external APIs
 Doc004 href@Text: <a href=#{href} target=_blank>Project repository</a> on GitHub.
 
 Doc005 href@Text: Please note that the application currently running is a demo application. Any actions are allowed and encouraged. <a href=#{href} target=_blank>Report issues</a> on GitHub.
+
+Doc006 href@Text: To call each other, users must <a href=#{href} target=_blank>register</a> in the application and add each other to their contact list from among registered users.
+
+Doc007: When adding a user to your contacts list, the app will ask for permission to send notifications and subscribe to the push notification service.

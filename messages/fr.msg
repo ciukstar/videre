@@ -1,3 +1,4 @@
+Usage: Usage
 AuthenticationRequired: Authentification requise
 AuthorizationRequired: Autorisation requise
 IncomingVideoCallFrom caller: Appel vidéo entrant de #{caller}
@@ -163,3 +164,7 @@ Doc003: Intégration avec des API externes
 Doc004 href: <a href=#{href} target=_blank>Le référentiel du projet</a> sur GitHub.
 
 Doc005 href: Veuillez noter que l'application actuellement en cours d'exécution est une application de démonstration. Toutes les actions sont autorisées et encouragées. <a href=#{href} target=_blank>Signalez les bugs</a> sur GitHub.
+
+Doc006 href: Pour s'appeler, les utilisateurs doivent <a href=#{href} target=_blank>s'inscrire</a> dans l'application et s'ajouter à leur liste de contacts parmi les utilisateurs enregistrés.
+
+Doc007: Lors de l'ajout d'un utilisateur à votre liste de contacts, l'application demandera l'autorisation d'envoyer des notifications et de s'abonner au service de notification push.

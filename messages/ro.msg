@@ -1,3 +1,4 @@
+Usage: Utilizare
 AuthenticationRequired: Este necesară autentificarea
 AuthorizationRequired: Este necesară autorizarea
 IncomingVideoCallFrom caller: Apel video primit de la #{caller}
@@ -164,3 +165,7 @@ Doc003: Integrare cu API-uri externe
 Doc004 href: <a href=#{href} target=_blank>Depozitul de proiect</a> pe GitHub.
 
 Doc005 href: Vă rugăm să rețineți că aplicația care rulează în prezent este o aplicație demonstrativă. Orice acțiune este permisă și încurajată. <a href=#{href} target=_blank>Raportați erori</a> pe GitHub.
+
+Doc006 href: Pentru a se suna, utilizatorii trebuie să se <a href=#{href} target=_blank>înregistreze</a> în aplicație și să se adauge reciproc la lista de contacte dintre utilizatorii înregistrați.
+
+Doc007: Când adăugați un utilizator la lista de contacte, aplicația vă va cere permisiunea de a trimite notificări și de a vă abona la serviciul de notificare push.

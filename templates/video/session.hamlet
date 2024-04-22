@@ -7,7 +7,11 @@
     <md-icon>switch_video
 
   <md-outlined-icon-button has-icon ##{idButtonVideoSwitch}>
-    <md-icon>videocam_off
+    <md-icon>
+      $if video
+        videocam_off
+      $else
+        videocam
 
   <md-outlined-icon-button has-icon ##{idButtonAudioSwitch}>
     <md-icon>mic_off
@@ -18,9 +22,14 @@
 
 <main>
 
-  <video controls autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}>
+  <div ##{idWrapperVideoRemote}>
+    <video controls autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}>
+    <img src=@{toParent $ PhotoR rid} loading=lazy ##{idImgVideoRemotePlaceholder}>
 
-  <video controls autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}>
+  <div ##{idWrapperVideoSelf}>
+    <div style="position:relative">
+      <video controls autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}>
+      <img src=@{toParent $ PhotoR sid} loading=lazy ##{idImgVideoSelfPlaceholder}>
 
 
 <md-dialog ##{idDialogCallEnded}>

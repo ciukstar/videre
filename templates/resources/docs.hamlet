@@ -19,6 +19,16 @@
       _{MsgAppDescription}
     <p.body-medium>
       #{t $ MsgDoc001 (m MsgAppName) (r HomeR) ws wrtc wp}
+      
+    <h2.headline-small>
+      _{MsgUsage}
+
+    <p.body-medium>
+      #{t $ MsgDoc006 (r $ AuthR LoginR)}
+      
+    <p.body-medium>
+      _{MsgDoc007}
+      
 
   <section>
     <h2.headline-medium>_{MsgSuperuser}

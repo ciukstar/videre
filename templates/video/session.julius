@@ -6,29 +6,32 @@ let pc = new RTCPeerConnection(#{config});
 let dchan = pc.createDataChannel('dchan', { negotiated: true, id: 0 });
 
 const videoRemote = document.getElementById(#{idVideoRemote});
-const videoSelf = document.getElementById(#{idVideoSelf});
+const videoRemotePlaceholder = document.getElementById(#{idImgVideoRemotePlaceholder});
 
-let srcObject = null;
+const videoSelf = document.getElementById(#{idVideoSelf});
+const videoSelfPlaceholder = document.getElementById(#{idImgVideoSelfPlaceholder});
 
 dchan.onmessage = (e) => {
   const data = JSON.parse(e.data);
   if ('video' in data) {
-    const src = videoRemote.srcObject;
-    if (data.video) {
-      videoRemote.srcObject = srcObject;
+    if (!data.video) {
+      videoRemote.style.visibility = 'hidden';
+      videoRemotePlaceholder.style.visibility = 'visible';
     } else {
-      videoRemote.srcObject = null;
+      videoRemotePlaceholder.style.visibility = 'hidden';
+      videoRemote.style.visibility = 'visible';
     }
   }
 };
 
 pc.ontrack = ({track, streams}) => {
-  srcObject = streams[0];
+  
   track.onunmute = () => {
     if (!videoRemote.srcObject) {
       videoRemote.srcObject = streams[0];
     }
-  }
+  };
+  
 };
 
 let makingOffer = false;
@@ -148,7 +151,10 @@ navigator.mediaDevices.getUserMedia({
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
       e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'videocam_off' : 'videocam';
+
       videoSelf.style.visibility = sender.track.enabled ? 'visible' : 'hidden';
+      videoSelfPlaceholder.style.visibility = sender.track.enabled ? 'hidden' : 'visible';
+      
       dchan.send(JSON.stringify({[sender.track.kind]: sender.track.enabled}));
     });
 

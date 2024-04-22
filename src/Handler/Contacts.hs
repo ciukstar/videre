@@ -41,7 +41,7 @@ import Data.Time.Format.ISO8601 (iso8601Show)
 
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy, desc, leftJoin, on, just
-    , (^.), (?.), (==.), (:&) ((:&)), (&&.)
+    , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.)
     , Value (unValue), innerJoin, val, where_, selectOne, max_
     , subSelectMaybe, delete
     )
@@ -326,6 +326,7 @@ postContactsR uid = do
 
     users <- runDB $ select $ do
         x <- from $ table @User
+        where_ $ x ^. UserId !=. val uid
         orderBy [desc (x ^. UserId)]
         return x
 
@@ -375,6 +376,7 @@ getContactsR uid = do
 
     users <- runDB $ select $ do
         x <- from $ table @User
+        where_ $ x ^. UserId !=. val uid
         orderBy [desc (x ^. UserId)]
         return x
 

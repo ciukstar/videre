@@ -24,14 +24,41 @@ main
     position: relative
     height: calc(100svh - var(--app-top-appbar-height, 64px))
 
-    ##{idVideoSelf}
+    ##{idWrapperVideoRemote}
+        position: relative
+        
+        ##{idVideoRemote}
+            visibility: #{visibilityVideo}
+            
+        ##{idImgVideoRemotePlaceholder}
+            position: absolute
+            top:0
+            left: 0
+            width: 100%
+            height: auto
+            visibility: #{visibilityPlaceholder}
+
+    ##{idWrapperVideoSelf}
         width: 33%
-        height: auto
         position: absolute
         right: 1rem
         bottom: 1rem
         
-
+        ##{idVideoSelf}
+            width: 100%
+            height: auto
+            border-radius: 4px
+            visibility: #{visibilityVideo}
+            
+        ##{idImgVideoSelfPlaceholder}
+            position: absolute
+            top: 0
+            left: 0
+            width: 100%
+            height: auto
+            border-radius: 4px
+            visibility: #{visibilityPlaceholder}
+        
 @media screen and (orientation: portrait)
     ##{idVideoRemote}
         width: 100%

@@ -127,6 +127,9 @@ getOutgoingR sid rid = do
     backlink <- runInputGet (ireq urlField "backlink")
     video <- runInputGet (ireq boolField "video")
     audio <- runInputGet (ireq boolField "audio")
+    
+    let visibilityVideo = if video then "visible" else "hidden" :: Text
+    let visibilityPlaceholder = if not video then "visible" else "hidden" :: Text
 
     toParent <- getRouteToParent
 
@@ -142,8 +145,12 @@ getOutgoingR sid rid = do
 
     liftHandler $ defaultLayout $ do
         idButtonExitSession <- newIdent
+        idWrapperVideoRemote <- newIdent
         idVideoRemote <- newIdent
+        idImgVideoRemotePlaceholder <- newIdent
+        idWrapperVideoSelf <- newIdent
         idVideoSelf <- newIdent
+        idImgVideoSelfPlaceholder <- newIdent
         idButtonSwitchVideocam <- newIdent
         idButtonVideoSwitch <- newIdent
         idButtonAudioSwitch <- newIdent
@@ -166,6 +173,9 @@ getIncomingR = do
     (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
     video <- runInputGet (ireq boolField "video")
     audio <- runInputGet (ireq boolField "audio")
+    
+    let visibilityVideo = if video then "visible" else "hidden" :: Text
+    let visibilityPlaceholder = if not video then "visible" else "hidden" :: Text
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
@@ -184,8 +194,12 @@ getIncomingR = do
 
     liftHandler $ defaultLayout $ do
         idButtonExitSession <- newIdent
+        idWrapperVideoRemote <- newIdent
         idVideoRemote <- newIdent
+        idImgVideoRemotePlaceholder <- newIdent
+        idWrapperVideoSelf <- newIdent
         idVideoSelf <- newIdent
+        idImgVideoSelfPlaceholder <- newIdent
         idButtonSwitchVideocam <- newIdent
         idButtonVideoSwitch <- newIdent
         idButtonAudioSwitch <- newIdent
