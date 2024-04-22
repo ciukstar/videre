@@ -10,6 +10,11 @@ Progressive Web App for Instant Messaging
 
 Application [Videre](https://videre-2pg7fq7tgq-de.a.run.app) allows users to exchange instant messages via [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), make audio and video calls via [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API), and be notified via [Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API).
 
+## Usage
+To call each other, users must [register](https://videre-2pg7fq7tgq-de.a.run.app/auth/login) in the application and add each other to their contact list from among registered users.
+
+When adding a user to your contacts list, the app will ask for permission to send notifications and subscribe to the push notification service.
+
 ## Superuser
 
 * Username  

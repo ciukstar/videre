@@ -10,6 +10,11 @@
 
 Приложение [Videre](https://videreru-2pg7fq7tgq-de.a.run.app) позволяет пользователям обмениваться мгновенными сообщениями через [WebSockets](https://developer.mozilla.org/ru/docs/Web/API/WebSockets_API), совершать аудио- и видеозвонки через [WebRTC](https://developer.mozilla.org/ru/docs/Web/API/WebRTC_API) и получать уведомления через [Web Push](https://developer.mozilla.org/ru/docs/Web/API/Push_API).
 
+## Применение
+Чтобы звонить друг другу, пользователям необходимо [зарегистрироваться](https://videreru-2pg7fq7tgq-de.a.run.app/auth/login) в приложении и добавить друг друга в свой список контактов из числа зарегистрированных пользователей.
+
+При добавлении пользователя в список контактов приложение запросит разрешение на отправку уведомлений и подписку на службу push-уведомлений.
+
 ## Суперпользователь
 
 * Имя пользователя  

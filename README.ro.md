@@ -10,6 +10,11 @@ Aplicație web progresivă pentru mesagerie instantanee
 
 Aplicația [Videre](https://viderero-2pg7fq7tgq-de.a.run.app) permite utilizatorilor să schimbe mesaje instantanee prin [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), să efectueze apeluri audio și video prin [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) și să fie notificați prin [Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API).
 
+## Utilizare
+Pentru a se suna, utilizatorii trebuie să se [înregistreze](https://viderefr-2pg7fq7tgq-de.a.run.app/auth/login) în aplicație și să se adauge reciproc la lista de contacte dintre utilizatorii înregistrați.
+
+Când adăugați un utilizator la lista de contacte, aplicația vă va cere permisiunea de a trimite notificări și de a vă abona la serviciul de notificare push.
+
 ## Superutilizator
 
 * Nume de utilizator  
