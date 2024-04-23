@@ -22,13 +22,56 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           channelId: message.data.channelId,
           senderId: message.data.recipientId,
           recipientId: message.data.senderId,
-	  video: message.data.video,
-	  audio: message.data.audio
+	  videor: false,
+	  audior: false,
+	  videos: message.data.videos,
+	  audios: message.data.audios
 	})
       }).then(function (result) {
 	document.getElementById(dialogId).close();
       });
     }
+  });
+
+  [ [#{idButtonVideoCallAcceptAudio}, #{idDialogIncomingVideoCall}, { audio: true, video: false }],
+    [#{idButtonAudioCallAcceptVideo}, #{idDialogIncomingAudioCall}, { audio: true, video: true }]
+  ].forEach(([buttonId, dialogId, { audio, video }]) => {
+    document.getElementById(buttonId).onclick = (event) => {
+      fetch('@{VideoR PushMessageR}', {
+	method: 'POST',
+	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	body: new URLSearchParams({
+          messageType: #{show PushMsgTypeAccept},
+	  title: #{msgr MsgAppName},
+          icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
+	  body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+          channelId: message.data.channelId,
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+	  videor: video,
+	  audior: audio,
+	  videos: message.data.videos,
+	  audios: message.data.audios
+	})
+      }).then((result) => {
+
+	document.getElementById(dialogId).close();
+
+	const params = new URLSearchParams({
+          senderId: message.data.recipientId,
+          recipientId: message.data.senderId,
+          channel: message.data.channelId,
+	  videor: message.data.videor,
+	  audior: message.data.audior,
+	  videos: video,
+	  audios: audio,
+          backlink: '@{backlink}'
+	});
+
+	window.location.href = `@{VideoR $ IncomingR}?${params}`;
+
+      });
+    };
   });
 
   [ [#{idButtonVideoCallAccept}, #{idDialogIncomingVideoCall}],
@@ -46,8 +89,10 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           channelId: message.data.channelId,
           senderId: message.data.recipientId,
           recipientId: message.data.senderId,
-	  video: message.data.video,
-	  audio: message.data.audio
+	  videor: message.data.videor,
+	  audior: message.data.audior,
+	  videos: message.data.videos,
+	  audios: message.data.audios
 	})
       }).then((result) => {
 
@@ -57,8 +102,10 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           senderId: message.data.recipientId,
           recipientId: message.data.senderId,
           channel: message.data.channelId,
-	  video: message.data.video,
-	  audio: message.data.audio,
+	  videor: message.data.videor,
+	  audior: message.data.audior,
+	  videos: message.data.videos,
+	  audios: message.data.audios,
           backlink: '@{backlink}'
 	});
 
@@ -83,6 +130,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
 
     document.getElementById(#{idDialogIncomingVideoCall}).close();
+    document.getElementById(#{idDialogIncomingAudioCall}).close();
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
     document.getElementById(#{idDialogMissedCall}).show();
 

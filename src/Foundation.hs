@@ -192,6 +192,7 @@ instance Yesod App where
             idImgVideoCallerPhoto <- newIdent
             idFigcaptionVideoCallerPhoto <- newIdent
             idButtonVideoCallDecline <- newIdent
+            idButtonVideoCallAcceptAudio <- newIdent
             idButtonVideoCallAccept <- newIdent
 
             idDialogIncomingAudioCall <- newIdent
@@ -199,6 +200,7 @@ instance Yesod App where
             idImgAudioCallerPhoto <- newIdent
             idFigcaptionAudioCallerPhoto <- newIdent
             idButtonAudioCallDecline <- newIdent
+            idButtonAudioCallAcceptVideo <- newIdent
             idButtonAudioCallAccept <- newIdent
 
             idDialogMissedCall <- newIdent

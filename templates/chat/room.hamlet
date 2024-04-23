@@ -57,12 +57,12 @@
 
   <div slot=content>
     <figure>
-      <img src=@{photos} width=48 alt=_{MsgPhoto} loading=lazy>
+      <img src=@{photos} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
     <md-icon>double_arrow
 
     <figure>
-      <img src=@{photor} width=48 alt=_{MsgPhoto} loading=lazy>
+      <img src=@{photor} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>

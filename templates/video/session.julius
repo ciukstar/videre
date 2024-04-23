@@ -107,7 +107,7 @@ navigator.mediaDevices.getUserMedia({
 
   stream.getTracks().forEach((track) => {
 
-    track.enabled = track.kind === 'video' ? #{rawJS video} : (track.kind === 'audio' ? #{rawJS audio} : true);
+    track.enabled = track.kind === 'video' ? #{rawJS videos} : (track.kind === 'audio' ? #{rawJS audios} : true);
 
     pc.addTrack(track, stream);
 
@@ -121,11 +121,12 @@ navigator.mediaDevices.getUserMedia({
 
     e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user';
 
+    e.target.querySelector('md-icon').textContent =
+      e.target.dataset.facingMode === 'user' ? 'video_camera_back' : 'video_camera_front';
+
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
-    ).forEach((sender) => {
-      sender.track.stop();
-    });
+    ).forEach((sender) => { sender.track.stop(); });
 
     navigator.mediaDevices.getUserMedia({
       video: { facingMode: { ideal: e.target.dataset.facingMode } }
@@ -198,6 +199,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     pc = null;
     ws = null;
     videoRemote.srcObject = null;
+    videoSelf.srcObject = null;
 
     document.getElementById(#{idDialogCallEnded}).show();
   }
@@ -210,15 +212,17 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-        "title": #{msgr MsgAppName},
-        "icon": '@{iconCallEnd}',
-        "body": #{msgr $ MsgInterlocutorEndedSession interlocutorName},
-        "messageType": #{show PushMsgTypeEndSession},
-        "channelId": #{show channel},
-        "senderId": #{show $ fromSqlKey sid},
-        "recipientId": #{show $ fromSqlKey rid},
-        "video": #{rawJS video},
-        "audio": #{rawJS audio}
+        title: #{msgr MsgAppName},
+        icon: '@{iconCallEnd}',
+        body: #{msgr $ MsgInterlocutorEndedSession interlocutorName},
+        messageType: #{show PushMsgTypeEndSession},
+        channelId: #{show channel},
+        senderId: #{show $ fromSqlKey sid},
+        recipientId: #{show $ fromSqlKey rid},
+        videor: #{rawJS videor},
+        audior: #{rawJS audior},
+        videos: #{rawJS videos},
+        audios: #{rawJS audios}
       })
     }).then((result) => {
       pc.close();
@@ -227,6 +231,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       pc = null;
       ws = null;
       videoRemote.srcObject = null;
+      videoSelf.srcObject = null;
 
       window.location.href = #{backlink};
     });

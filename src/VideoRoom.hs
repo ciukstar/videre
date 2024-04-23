@@ -125,11 +125,18 @@ getOutgoingR sid rid = do
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
-    video <- runInputGet (ireq boolField "video")
-    audio <- runInputGet (ireq boolField "audio")
+
+    videor <- runInputGet (ireq boolField "videor")
+    audior <- runInputGet (ireq boolField "audior")
+
+    videos <- runInputGet (ireq boolField "videos")
+    audios <- runInputGet (ireq boolField "audios")
     
-    let visibilityVideo = if video then "visible" else "hidden" :: Text
-    let visibilityPlaceholder = if not video then "visible" else "hidden" :: Text
+    let visibilityVideoR = if videor then "visible" else "hidden" :: Text
+    let visibilityPlaceholderR = if videor then "hidden" else "visible" :: Text
+    
+    let visibilityVideoS = if videos then "visible" else "hidden" :: Text
+    let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
 
     toParent <- getRouteToParent
 
@@ -171,11 +178,18 @@ getIncomingR = do
 
     (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
     (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
-    video <- runInputGet (ireq boolField "video")
-    audio <- runInputGet (ireq boolField "audio")
     
-    let visibilityVideo = if video then "visible" else "hidden" :: Text
-    let visibilityPlaceholder = if not video then "visible" else "hidden" :: Text
+    videor <- runInputGet (ireq boolField "videor")
+    audior <- runInputGet (ireq boolField "audior")
+
+    videos <- runInputGet (ireq boolField "videos")
+    audios <- runInputGet (ireq boolField "audios")
+    
+    let visibilityVideoR = if videor then "visible" else "hidden" :: Text
+    let visibilityPlaceholderR = if videor then "hidden" else "visible" :: Text
+    
+    let visibilityVideoS = if videos then "visible" else "hidden" :: Text
+    let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
 
     channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
@@ -229,8 +243,10 @@ postPushMessageR = do
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
 
-    video <- runInputPost $ ireq boolField "video"
-    audio <- runInputPost $ ireq boolField "audio"
+    videor <- runInputPost $ ireq boolField "videor"
+    audior <- runInputPost $ ireq boolField "audior"
+    videos <- runInputPost $ ireq boolField "videos"
+    audios <- runInputPost $ ireq boolField "audios"
 
     messageBody <- runInputPost $ iopt textField "body"
 
@@ -286,8 +302,10 @@ postPushMessageR = do
                                                                   )
                                                 , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
                                                 , "recipientId" .= rid
-                                                , "video" .= video
-                                                , "audio" .= audio
+                                                , "videor" .= videor
+                                                , "audior" .= audior
+                                                , "videos" .= videos
+                                                , "audios" .= audios
                                                 ]
                         & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
                         & pushExpireInSeconds .~ 60

@@ -8,7 +8,7 @@
 
   <md-outlined-icon-button has-icon ##{idButtonVideoSwitch}>
     <md-icon>
-      $if video
+      $if videos
         videocam_off
       $else
         videocam
@@ -23,12 +23,14 @@
 <main>
 
   <div ##{idWrapperVideoRemote}>
-    <video controls autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}>
+    <video autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}
+           controlslist="nofullscreen noremoteplayback" disablepictureinpicture>
     <img src=@{toParent $ PhotoR rid} loading=lazy ##{idImgVideoRemotePlaceholder}>
 
   <div ##{idWrapperVideoSelf}>
     <div style="position:relative">
-      <video controls autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}>
+      <video autoplay muted ##{idVideoSelf} poster=@{toParent $ PhotoR sid}
+             controlslist="nofullscreen noremoteplayback" disablepictureinpicture>
       <img src=@{toParent $ PhotoR sid} loading=lazy ##{idImgVideoSelfPlaceholder}>
 
 

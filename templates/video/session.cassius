@@ -28,7 +28,7 @@ main
         position: relative
         
         ##{idVideoRemote}
-            visibility: #{visibilityVideo}
+            visibility: #{visibilityVideoR}
             
         ##{idImgVideoRemotePlaceholder}
             position: absolute
@@ -36,7 +36,7 @@ main
             left: 0
             width: 100%
             height: auto
-            visibility: #{visibilityPlaceholder}
+            visibility: #{visibilityPlaceholderR}
 
     ##{idWrapperVideoSelf}
         width: 33%
@@ -48,7 +48,7 @@ main
             width: 100%
             height: auto
             border-radius: 4px
-            visibility: #{visibilityVideo}
+            visibility: #{visibilityVideoS}
             
         ##{idImgVideoSelfPlaceholder}
             position: absolute
@@ -57,7 +57,7 @@ main
             width: 100%
             height: auto
             border-radius: 4px
-            visibility: #{visibilityPlaceholder}
+            visibility: #{visibilityPlaceholderS}
         
 @media screen and (orientation: portrait)
     ##{idVideoRemote}

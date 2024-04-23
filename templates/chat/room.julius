@@ -100,8 +100,10 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
       channelId: #{show channel},
       senderId: #{show $ fromSqlKey sid},
       recipientId: #{show $ fromSqlKey rid},
-      video: true,
-      audio: true
+      videor: true,
+      audior: true,
+      videos: true,
+      audios: true
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -124,8 +126,10 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
       channelId: #{show channel},
       senderId: #{show $ fromSqlKey sid},
       recipientId: #{show $ fromSqlKey rid},
-      video: false,
-      audio: true
+      videor: false,
+      audior: true,
+      videos: false,
+      audios: true
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
@@ -148,8 +152,10 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
       channelId: #{show channel},
       senderId: #{show $ fromSqlKey sid},
       recipientId: #{show $ fromSqlKey rid},
-      video: false,
-      audio: false
+      videor: false,
+      audior: false,
+      videos: false,
+      audios: false
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).close();
@@ -169,8 +175,10 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     const params = new URLSearchParams({
       channel: message.data.channelId,
       backlink: '@{backlink}',
-      video: message.data.video,
-      audio: message.data.audio
+      videor: message.data.videor,
+      audior: message.data.audior,
+      videos: message.data.videos,
+      audios: message.data.audios
     });
 
     window.location.href = `@{outgoing}?${params}`;

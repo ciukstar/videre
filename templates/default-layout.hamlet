@@ -8,7 +8,7 @@
   <form slot=content method=dialog>
 
     <figure ##{idFigureSenderPhoto}>
-      <img ##{idImgSenderPhoto} width=48>
+      <img ##{idImgSenderPhoto} width=48 height=48>
       <figcaption.body-large ##{idFigcaptionSenderInfo}>
 
     <p.body-medium ##{idNotificationBody}>
@@ -30,17 +30,19 @@
   <form slot=content method=dialog>
 
     <figure ##{idFigureVideoCallerPhoto}>
-      <img ##{idImgVideoCallerPhoto} width=64>
+      <img ##{idImgVideoCallerPhoto} width=64 height=64>
       <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
 
   <div slot=actions>
 
-    <md-filled-button ##{idButtonVideoCallDecline} has-icon type=button>
-      <md-icon slot=icon>call_end
-      _{MsgDecline}
+    <md-filled-icon-button ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
+      <md-icon>call_end
+
+    <md-filled-icon-button ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
+      <md-icon>call
 
     <md-filled-button ##{idButtonVideoCallAccept} has-icon type=button>
-      <md-icon slot=icon>call
+      <md-icon slot=icon>videocam
       _{MsgAccept}
       
 
@@ -51,14 +53,16 @@
   <form slot=content method=dialog>
 
     <figure ##{idFigureAudioCallerPhoto}>
-      <img ##{idImgAudioCallerPhoto} width=64>
+      <img ##{idImgAudioCallerPhoto} width=64 height=64>
       <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
 
   <div slot=actions>
 
-    <md-filled-button ##{idButtonAudioCallDecline} has-icon type=button>
-      <md-icon slot=icon>call_end
-      _{MsgDecline}
+    <md-filled-icon-button ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
+      <md-icon>call_end
+
+    <md-filled-icon-button ##{idButtonAudioCallAcceptVideo} type=button title=_{MsgVideoCall}>
+      <md-icon>videocam
 
     <md-filled-button ##{idButtonAudioCallAccept} has-icon type=button>
       <md-icon slot=icon>call
