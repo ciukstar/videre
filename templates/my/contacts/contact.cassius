@@ -14,18 +14,32 @@ header
 
 main
 
+    margin: 0 2rem
+
     display: flex
     flex-direction: column
     align-items: center
     
     .error
-      align-self: stretch
-      padding: 1rem
+        align-self: stretch
+        padding: 1rem
 
     figure
-      text-align: center
-      img
-          clip-path: circle(50%)
+        position: relative
+        text-align: center
+        img
+            clip-path: circle(50%)
+
+        .phone-disabled, .notifications-disabled
+            position: absolute
+            top: 0
+            right: 0
+    dl
+        display: flex
+    .phone-disabled, .notifications-disabled
+        color: white
+        background: red
+        clip-path: circle(50%)
 
 aside.app-snackbar
     box-sizing: border-box

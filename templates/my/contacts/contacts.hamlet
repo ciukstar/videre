@@ -23,11 +23,14 @@
           _{MsgYouMightWantToAddAFew}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (chat, subscription)))) <- entries
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (chat, (subscription, accessible))))) <- entries
         <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid cid}>
           <div slot=start>
             <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
             $maybe _ <- subscription
+              $maybe _ <- accessible
+              $nothing
+                <md-icon.pone-disabled>phone_disabled
             $nothing
               <md-icon.notifications-disabled>notifications_off
           <div slot=headline>

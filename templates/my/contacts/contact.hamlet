@@ -30,10 +30,18 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
+  
   <figure>
     <img src=@{AccountPhotoR pid} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
+    $maybe (_, (_, (subscription, accessible))) <- contact
+      $maybe _ <- subscription
+        $maybe _ <- accessible
+        $nothing
+          <md-icon.phone-disabled>phone_disabled
+      $nothing
+        <md-icon.notifications-disabled>notifications_off
     <figcaption>
-      $maybe (Entity _ (User email _ _ _ _ name _ _),attrib) <- contact
+      $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, _))) <- contact
         $maybe attribution <- attrib
           <div.body-small>
             ^{attribution}
@@ -44,6 +52,30 @@
 
   <form method=post action=@{ContactR sid pid cid} enctype=#{et2}>
     ^{fw2}
+
+  $maybe (Entity _ (User email _ _ _ _ name _ _), (_, (subscription, accessible))) <- contact
+    $maybe _ <- subscription
+    $nothing
+      <dl>
+        <dt>
+          <md-icon.notifications-disabled>notifications_off
+        <dd.body-small>
+          $maybe name <- name
+            _{MsgYouAreNotSubscribedToNotificationsFrom name}
+          $nothing
+            _{MsgYouAreNotSubscribedToNotificationsFrom email}
+      
+
+    $maybe _ <- accessible
+    $nothing
+      <dl>
+        <dt>
+          <md-icon.phone-disabled>phone_disabled
+        <dd.body-small>
+          $maybe name <- name
+            _{MsgUserHasNotAddedYouToHisContactListYet name}
+          $nothing
+            _{MsgUserHasNotAddedYouToHisContactListYet email}
 
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

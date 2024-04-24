@@ -1,3 +1,6 @@
+YouAreNotSubscribedToNotificationsFrom user: Vous n'êtes pas abonné aux notifications de l'utilisateur #{user}
+UserHasNotAddedYouToHisContactListYet user: #{user} ne vous a pas encore ajouté à sa liste de contacts
+AllowToBeNotifiedBy user: Autoriser l'utilisateur #{user} à vous envoyer des notifications sur les appels entrants
 Usage: Usage
 AuthenticationRequired: Authentification requise
 AuthorizationRequired: Autorisation requise

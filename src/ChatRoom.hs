@@ -40,7 +40,7 @@ import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
 import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Set as S
 import Data.Text (Text, pack, unpack)
 import Data.Text.Lazy (toStrict)
@@ -72,7 +72,7 @@ import Model
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
-      , ChatReceived, ChatId, ChatNotified
+      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher
       )
     )
 
@@ -162,6 +162,17 @@ getChatRoomR sid rid cid = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val rid
         return x
+
+    subscribed <- liftHandler $ isJust <$> runDB ( selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionPublisher ==. val sid
+        return x )
+
+    accessible <- liftHandler $ isJust <$> runDB ( selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+        return x )
+        
 
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatStatus =. val ChatMessageStatusRead]

@@ -72,6 +72,7 @@ mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
 
 getServiceWorkerR :: HandlerFor App TypedContent
 getServiceWorkerR = do
+    
     rndr <- getUrlRenderParams
     msgr <- getMessageRender
 

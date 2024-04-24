@@ -1,3 +1,6 @@
+YouAreNotSubscribedToNotificationsFrom user: Вы не подписаны на уведомления от пользователя #{user}
+UserHasNotAddedYouToHisContactListYet user: #{user} еще не добавил вас в свой список контактов
+AllowToBeNotifiedBy user: Разрешить пользователю #{user} отправлять вам уведомления о входящих звонках
 Usage: Применение
 AuthenticationRequired: Требуется аутентификация
 AuthorizationRequired: Требуется авторизация

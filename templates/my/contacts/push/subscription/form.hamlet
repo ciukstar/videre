@@ -4,3 +4,6 @@
   ^{fvInput v}
   <label.body-large for=#{fvId v}>
     #{fvLabel v}
+
+<p.body-small>
+  _{MsgAllowToBeNotifiedBy publisherName}

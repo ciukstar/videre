@@ -67,6 +67,8 @@ import Foundation.Data
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
       , MsgRemove, MsgSubscriptionCanceled, MsgAllowToBeNotified, MsgNotNow
       , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
+      , MsgAllowToBeNotifiedBy, MsgUserHasNotAddedYouToHisContactListYet
+      , MsgYouAreNotSubscribedToNotificationsFrom
       )
     )
 
@@ -85,7 +87,7 @@ import Model
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
-      , StoreVal, ChatUser
+      , StoreVal, ChatUser, UserName, UserEmail
       )
     )
 
@@ -116,7 +118,7 @@ import Widgets (widgetMenu, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
-    , addMessage, toHtml, getYesod, invalidArgsI
+    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
@@ -136,6 +138,7 @@ import Yesod.Form.Types
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
 import Control.Applicative (liftA3)
+import Data.Maybe (fromMaybe)
 
 
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
@@ -184,6 +187,11 @@ formSubscribe vapidKeys sid pid cid notif extra = do
     let subscriberId = pack $ show (fromSqlKey sid)
     let publisherId = pack $ show (fromSqlKey pid)
 
+    publisherName <- liftHandler $ maybe "" ((\(x,y) -> fromMaybe y x) . bimap unValue unValue) <$> runDB ( selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val pid
+        return (x ^. UserName, x ^. UserEmail) )
+    
     (r,v) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -239,19 +247,33 @@ getVAPIDKeys = do
 getContactR :: UserId -> UserId -> ContactId -> Handler Html
 getContactR sid pid cid = do
 
-    contact <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
-        x :& e :& h <- from $ table @Contact
+    endpoint <- lookupGetParam "endpoint"
+    
+    contact <- (second (first (join . unValue)) <$>) <$> runDB ( selectOne $ do
+        x :& e :& h :& s :& s' <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
+            
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
+
+                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val sid) )
+                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
+            )
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
+                
+                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val sid) )
+            )
         where_ $ x ^. ContactId ==. val cid
-        return (e, h ?. UserPhotoAttribution) )
+        return (e, (h ?. UserPhotoAttribution, (s, s'))) )
 
     mVAPIDKeys <- getVAPIDKeys
 
     case mVAPIDKeys of
       Just vapidKeys -> do
-
-          endpoint <- lookupGetParam "endpoint"
 
           permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
               x <- from $ table @PushSubscription
@@ -284,7 +306,7 @@ getMyContactsR uid = do
 
     entries <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
 
-        x :& e :& h :& c :& s <- from $ table @Contact
+        x :& e :& h :& c :& s :& s' <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
             `leftJoin` table @Chat `on`
@@ -308,10 +330,16 @@ getMyContactsR uid = do
                                             &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
                                             &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
             )
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
+                
+                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
+            )
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, s)))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
 
     msgs <- getMessages
     setUltDestCurrent

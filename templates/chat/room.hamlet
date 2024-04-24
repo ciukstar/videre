@@ -15,11 +15,17 @@
 
   <span.app-top-app-bar-end>
 
-    <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
-      <md-icon>video_call
-      
-    <md-filled-icon-button type=button aria-label=_{MsgAudioCall} ##{idButtonAudioCall}>
-      <md-icon>call
+    <div style="position:relative">
+      <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
+        <md-icon>video_call
+      $if not (subscribed && accessible)
+        <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
+
+    <div style="position:relative">
+      <md-filled-icon-button type=button aria-label=_{MsgAudioCall} ##{idButtonAudioCall}>
+        <md-icon>call
+      $if not (subscribed && accessible)
+        <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
 
     <span style="position:relaive">
       <md-filled-icon-button type=button aria-label=_{MsgActions} #btnMenuMore

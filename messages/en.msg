@@ -1,3 +1,6 @@
+YouAreNotSubscribedToNotificationsFrom user@Text: You are not subscribed to notifications from user #{user}
+UserHasNotAddedYouToHisContactListYet user@Text: #{user} has not added you to his contact list yet
+AllowToBeNotifiedBy user@Text: Allow user #{user} to send you notifications about incoming calls
 Usage: Usage
 AuthenticationRequired: Authentication required
 AuthorizationRequired: Authorization required
