@@ -1,3 +1,7 @@
+EntityChat: Chat
+PushSubscription: Push subscription
+BasicEntities: Basic Entities
+Overview: Overview
 YouAreNotSubscribedToNotificationsFrom user@Text: You are not subscribed to notifications from user #{user}
 UserHasNotAddedYouToHisContactListYet user@Text: #{user} has not added you to his contact list yet
 AllowToBeNotifiedBy user@Text: Allow user #{user} to send you notifications about incoming calls
@@ -154,10 +158,10 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generate
 VapidGenerationWarning: Generating a new VAPID key requires all clients to re-subscribe to the push notifications
 InvalidGoogleAPITokens: Invalid Google API tokens
-AppDescription: Progressive Web App for Instant Messaging
+AppDescription: Instant Messaging and Video Calling
 AppName: Videre
 MetaKeywords: instant, messaging, progressive, web, app, pwa
-MetaDescription: Progressive Web App for Instant Messaging
+MetaDescription: Progressive Web App for Instant Messaging and Video Calling
 
 Doc001 appname@Text href1@Text href2@Text href3@Text href4@Text: Application <a href=#{href1} target=_blank>#{appname}</a> allows users to exchange instant messages via <a href=#{href2} target=_blank>WebSockets</a>, make audio and video calls via <a href=#{href3} target=_blank>WebRTC</a>, and be notified via <a href=#{href4} target=_blank>Web Push</a>.
 
@@ -172,3 +176,19 @@ Doc005 href@Text: Please note that the application currently running is a demo a
 Doc006 href@Text: To call each other, users must <a href=#{href} target=_blank>register</a> in the application and add each other to their contact list from among registered users.
 
 Doc007: When adding a user to your contacts list, the app will ask for permission to send notifications and subscribe to the push notification service.
+
+Doc008: The app uses the browser's push notification service to notify the callee of an incoming video or audio call.
+
+Doc009 href@Text: By accepting the call, a peer-to-peer encrypted video/audio session will start between the caller and the callee as described by the <a href=#{href} target=_blank>WebRTC protocol</a>.
+
+Doc010 href1@Text href2@Text: A new user can <a href=#{href1} target=_blank>sign up</a> using an existing Google account or using a verified email address. <a href=#{href2} target=_blank>Gmail API</a> is used as an intermediary to send verification links to the user's inbox.
+
+Doc011: A user can be grated the administrator role by a superuser or by another administrator. Only users with the administrator role have access to administrative data.
+
+Doc012: A contact is created when a user adds another user to their contact list. If each user has each other in their contact list, then they can call each other.
+
+Doc013: A push subscription is created when the user is added to the contact list, or it can be deferred until later.
+
+Doc014: The subscription can be checked or renewed from the “View contact” menu item.
+
+Doc015 href@Text: <a href=#{href} target=_blank>Web Push Notifications</a> are used to notify a callee of an incoming video/audio call. It is also used to end the video/audio session.

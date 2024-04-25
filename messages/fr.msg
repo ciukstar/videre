@@ -1,3 +1,7 @@
+EntityChat: L'entité "Chat"
+PushSubscription: Abonnement push
+BasicEntities: Entités de base
+Overview: Aperçu
 YouAreNotSubscribedToNotificationsFrom user: Vous n'êtes pas abonné aux notifications de l'utilisateur #{user}
 UserHasNotAddedYouToHisContactListYet user: #{user} ne vous a pas encore ajouté à sa liste de contacts
 AllowToBeNotifiedBy user: Autoriser l'utilisateur #{user} à vous envoyer des notifications sur les appels entrants
@@ -153,10 +157,10 @@ GoogleSecretManager: Google Secret Manager
 Generate: Générer
 VapidGenerationWarning: La génération d'une nouvelle clé VAPID nécessite que tous les clients se réabonnent aux notifications push.
 InvalidGoogleAPITokens: Jetons d'API Google non valides
-AppDescription: Application Web progressive pour la messagerie instantanée
+AppDescription: Messagerie instantanée et appels vidéo
 AppName: Videre
 MetaKeywords: messagerie, instantanée, progressif, web, application, pwa
-MetaDescription: Application Web progressive de messagerie instantanée
+MetaDescription: Application Web progressive de messagerie instantanée et appels vidéo
 
 Doc001 appname href1 href2 href3 href4: L'application <a href=#{href1} target=_blank>#{appname}</a> permet aux utilisateurs d'échanger des messages instantanés via <a href=#{href2} target=_blank>WebSockets</a>, de passer des appels audio et vidéo via <a href=#{href3} target=_blank>WebRTC</a> et d'être avertis via <a href=#{href4} target=_blank>Web Push</a>.
 
@@ -171,3 +175,19 @@ Doc005 href: Veuillez noter que l'application actuellement en cours d'exécution
 Doc006 href: Pour s'appeler, les utilisateurs doivent <a href=#{href} target=_blank>s'inscrire</a> dans l'application et s'ajouter à leur liste de contacts parmi les utilisateurs enregistrés.
 
 Doc007: Lors de l'ajout d'un utilisateur à votre liste de contacts, l'application demandera l'autorisation d'envoyer des notifications et de s'abonner au service de notification push.
+
+Doc008: L'application utilise le service de notification push du navigateur pour informer l'appelé d'un appel vidéo ou audio entrant.
+
+Doc009 href: En acceptant l'appel, une session vidéo/audio cryptée peer-to-peer démarrera entre l'appelant et l'appelé comme décrit par <a href=#{href} target=_blank>le protocole WebRTC</a>.
+
+Doc010 href1 href2: Un nouvel utilisateur peut <a href=#{href1} target=_blank>s'inscrire</a> en utilisant un compte Google existant ou en utilisant une adresse e-mail vérifiée. <a href=#{href2} target=_blank>L'API Gmail</a> est utilisée comme intermédiaire pour envoyer des liens de vérification vers la boîte de réception de l'utilisateur.
+
+Doc011: Un utilisateur peut se voir attribuer le rôle d'administrateur par un superutilisateur ou par un autre administrateur. Seuls les utilisateurs disposant du rôle d'administrateur ont accès aux données administratives.
+
+Doc012: Un contact est créé lorsqu'un utilisateur ajoute un autre utilisateur à sa liste de contacts. Si chaque utilisateur se trouve dans sa liste de contacts, il peut alors s'appeler.
+
+Doc013: Un abonnement push est créé lorsqu'un utilisateur est ajouté à sa liste de contacts, ou peut être différé ultérieurement.
+
+Doc014: L'abonnement peut être vérifié ou renouvelé à partir de l'élément de menu « Afficher le contact ».
+
+Doc015 href: <a href=#{href} target=_blank>Les notifications Web Push</a> sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.

@@ -6,14 +6,19 @@
 [На русском](https://github.com/ciukstar/videre/blob/master/README.ru.md)
 
 ## Videre
-Progressive Web App for Instant Messaging
+Instant Messaging and Video Calling
 
+## Overview
 Application [Videre](https://videre-2pg7fq7tgq-de.a.run.app) allows users to exchange instant messages via [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), make audio and video calls via [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API), and be notified via [Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API).
 
 ## Usage
 To call each other, users must [register](https://videre-2pg7fq7tgq-de.a.run.app/auth/login) in the application and add each other to their contact list from among registered users.
 
 When adding a user to your contacts list, the app will ask for permission to send notifications and subscribe to the push notification service.
+
+The app uses the browser's push notification service to notify the callee of an incoming video or audio call.
+
+By accepting the call, a peer-to-peer encrypted video/audio session will start between the caller and the callee as described by the [WebRTC protocol](https://www.w3.org/TR/webrtc/).
 
 ## Superuser
 
@@ -42,6 +47,26 @@ A superuser account is defined at deployment time. The superuser manages other u
 * [Bing SEO](https://www.bing.com/webmasters)
 
   ```$YESOD_MS_VALIDATE```
+
+## Basic Entities
+
+### User
+A new user can [sign up](https://videre-2pg7fq7tgq-de.a.run.app/auth/login) using an existing Google account or using a verified email address. [Gmail API](https://developers.google.com/gmail/api/guides) is used as an intermediary to send verification links to the user's inbox.
+
+A user can be grated the administrator role by a superuser or by another administrator. Only users with the administrator role have access to administrative data.
+
+### Contact
+A contact is created when a user adds another user to their contact list. If each user has each other in their contact list, then they can call each other.
+
+### Push subscription
+A push subscription is created when the user is added to the contact list, or it can be deferred until later.
+
+The subscription can be checked or renewed from the “View contact” menu item.
+
+[Web Push Notifications](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) are used to notify a callee of an incoming video/audio call. It is also used to end the video/audio session.
+
+### Chat
+...
 
 ## ER Diagram
 

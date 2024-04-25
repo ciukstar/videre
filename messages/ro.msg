@@ -1,3 +1,7 @@
+EntityChat: Entitatea „Chat”
+PushSubscription: Abonament push
+BasicEntities: Entităţile de bază
+Overview: Prezentare generală
 YouAreNotSubscribedToNotificationsFrom user: Nu sunteți abonat la notificările de la utilizatorul #{user}
 UserHasNotAddedYouToHisContactListYet user: #{user} nu v-a adăugat încă la lista lui de contacte
 AllowToBeNotifiedBy user: Permiteți utilizatorului #{user} să vă trimită notificări despre apelurile primite
@@ -154,10 +158,10 @@ GoogleSecretManager: Google Secret Manager
 Generate: Generați
 VapidGenerationWarning: Generarea unei noi chei VAPID necesită ca toți clienții să se aboneze din nou la notificările push
 InvalidGoogleAPITokens: Jetoane Google API nevalide
-AppDescription: Aplicație web progresivă pentru mesagerie instantanee
+AppDescription: Mesagerie instantanee și apeluri video
 AppName: Videre
 MetaKeywords: mesagerie, instantanee, progresiv, web, aplicație, pwa
-MetaDescription: Aplicație web progresivă pentru mesagerie instantanee
+MetaDescription: Aplicație web progresivă pentru mesagerie instantanee și apeluri video
 
 Doc001 appname href1 href2 href3 href4: Aplicația <a href=#{href1} target=_blank>#{appname}</a> permite utilizatorilor să schimbe mesaje instantanee prin <a href=#{href2} target=_blank>WebSockets</a>, să efectueze apeluri audio și video prin <a href=#{href1} target=_blank>WebRTC</a> și să fie notificați prin <a href=#{href4} target=_blank>Web Push</a>.
 
@@ -172,3 +176,19 @@ Doc005 href: Vă rugăm să rețineți că aplicația care rulează în prezent 
 Doc006 href: Pentru a se suna, utilizatorii trebuie să se <a href=#{href} target=_blank>înregistreze</a> în aplicație și să se adauge reciproc la lista de contacte dintre utilizatorii înregistrați.
 
 Doc007: Când adăugați un utilizator la lista de contacte, aplicația vă va cere permisiunea de a trimite notificări și de a vă abona la serviciul de notificare push.
+
+Doc008: Aplicația folosește serviciul de notificare push al browserului pentru a notifica apelatul cu privire la un apel video sau audio primit.
+
+Doc009 href: La acceptarea apelului, o sesiune video/audio criptată peer-to-peer va începe între apelant și apelat, așa cum este descris de <a href=#{href} target=_blank>protocolul WebRTC</a>.
+
+Doc010 href1 href2: Un utilizator nou se poate <a href=#{href1} target=_blank>înscrie</a> folosind un cont Google existent sau folosind o adresă de e-mail verificată. <a href=#{href2} target=_blank>API-ul Gmail</a> este folosit ca intermediar pentru a trimite linkuri de verificare către căsuța de e-mail a utilizatorului.
+
+Doc011: Un utilizator poate primi rolul de administrator de un superutilizator sau de un alt administrator. Numai utilizatorii cu rol de administrator au acces la datele administrative.
+
+Doc012: Un contact este creat atunci când un utilizator adaugă un alt utilizator la lista de contacte. Dacă fiecare utilizator are unul pe celălalt în lista de contacte, atunci se pot suna.
+
+Doc013: Un abonament push este creat atunci când un utilizator este adăugat la lista de contacte sau poate fi amânat ulterior.
+
+Doc014: Abonamentul poate fi verificat sau reînnoit din elementul de meniu „Vizualizare contact”.
+
+Doc015 href: <a href=#{href} target=_blank>Notificările Web Push</a> sunt folosite pentru a notifica un apelat despre un apel video/audio primit. De asemenea, este folosit pentru a încheia sesiunea video/audio.

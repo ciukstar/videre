@@ -6,14 +6,19 @@
 [На русском](https://github.com/ciukstar/videre/blob/master/README.ru.md)
 
 ## Videre
-Aplicație web progresivă pentru mesagerie instantanee
+Mesagerie instantanee și apeluri video
 
+## Prezentare generală
 Aplicația [Videre](https://viderero-2pg7fq7tgq-de.a.run.app) permite utilizatorilor să schimbe mesaje instantanee prin [WebSockets](https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API), să efectueze apeluri audio și video prin [WebRTC](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API) și să fie notificați prin [Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API).
 
 ## Utilizare
-Pentru a se suna, utilizatorii trebuie să se [înregistreze](https://viderefr-2pg7fq7tgq-de.a.run.app/auth/login) în aplicație și să se adauge reciproc la lista de contacte dintre utilizatorii înregistrați.
+Pentru a se suna, utilizatorii trebuie să se [înregistreze](https://viderero-2pg7fq7tgq-de.a.run.app/auth/login) în aplicație și să se adauge reciproc la lista de contacte dintre utilizatorii înregistrați.
 
 Când adăugați un utilizator la lista de contacte, aplicația vă va cere permisiunea de a trimite notificări și de a vă abona la serviciul de notificare push.
+
+Aplicația folosește serviciul de notificare push al browserului pentru a notifica apelatul cu privire la un apel video sau audio primit.
+
+La acceptarea apelului, o sesiune video/audio criptată peer-to-peer va începe între apelant și apelat, așa cum este descris de [protocolul WebRTC](https://www.w3.org/TR/webrtc/).
 
 ## Superutilizator
 
@@ -42,6 +47,26 @@ Un cont de superutilizator este definit în momentul implementării. Superutiliz
 * [Bing SEO](https://www.bing.com/webmasters)
 
   ```$YESOD_MS_VALIDATE```
+
+## Entităţile de bază
+
+### Utilizator
+Un utilizator nou se poate [înscrie](https://viderero-2pg7fq7tgq-de.a.run.app/auth/login) folosind un cont Google existent sau folosind o adresă de e-mail verificată. [API-ul Gmail](https://developers.google.com/gmail/api/guides) este folosit ca intermediar pentru a trimite linkuri de verificare către căsuța de e-mail a utilizatorului.
+
+Un utilizator poate primi rolul de administrator de un superutilizator sau de un alt administrator. Numai utilizatorii cu rol de administrator au acces la datele administrative.
+
+### Contact
+Un contact este creat atunci când un utilizator adaugă un alt utilizator la lista de contacte. Dacă fiecare utilizator are unul pe celălalt în lista de contacte, atunci se pot suna.
+
+### Abonament push
+Un abonament push este creat atunci când un utilizator este adăugat la lista de contacte sau poate fi amânat ulterior.
+
+Abonamentul poate fi verificat sau reînnoit din elementul de meniu „Vizualizare contact”.
+
+[Notificările Web Push](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) sunt folosite pentru a notifica un apelat despre un apel video/audio primit. De asemenea, este folosit pentru a încheia sesiunea video/audio.
+
+### Entitatea „Chat”
+...
 
 ## Diagrama ER
 

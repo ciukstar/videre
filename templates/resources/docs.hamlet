@@ -17,17 +17,25 @@
     <h2.headline-medium>_{MsgAppName}
     <h3.body-large>
       _{MsgAppDescription}
+      
+    <h2.headline-small>
+      _{MsgOverview}
     <p.body-medium>
       #{t $ MsgDoc001 (m MsgAppName) (r HomeR) ws wrtc wp}
       
     <h2.headline-small>
       _{MsgUsage}
-
     <p.body-medium>
       #{t $ MsgDoc006 (r $ AuthR LoginR)}
       
     <p.body-medium>
       _{MsgDoc007}
+      
+    <p.body-medium>
+      _{MsgDoc008}
+      
+    <p.body-medium>
+      #{t $ MsgDoc009 "https://www.w3.org/TR/webrtc/"}
       
 
   <section>
@@ -73,6 +81,35 @@
         <div>
           <code.body-small>&dollar;YESOD_MS_VALIDATE
 
+  <section>
+    <h2.headline-medium>_{MsgBasicEntities}
+    
+  <section>
+    <h2.headline-small>_{MsgUser}
+    <p>
+      #{t $ MsgDoc010 (r $ AuthR LoginR) "https://developers.google.com/gmail/api/guides"}
+    <p>
+      _{MsgDoc011}
+      
+  <section>
+    <h2.headline-small>_{MsgContact}
+    <p>
+      _{MsgDoc012}
+      
+  <section>
+    <h2.headline-small>_{MsgPushSubscription}
+    <p>
+      _{MsgDoc013}
+    <p>
+      _{MsgDoc014}
+    <p>
+      #{t $ MsgDoc015 "https://developer.mozilla.org/en-US/docs/Web/API/Push_API"}
+      
+  <section>
+    <h2.headline-small>_{MsgEntityChat}
+    <p>
+      ...
+    
   <section>
     <h2.headline-medium>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_Videre_svg} alt=_{MsgErDiagram} loading=lazy>
