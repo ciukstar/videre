@@ -26,13 +26,3 @@ main
 
     p.body-small
         text-align: center
-
-aside.app-snackbar
-    --md-elevation-level: 1
-    box-sizing: border-box
-    position: fixed
-    bottom: 4rem
-    left: 0
-    margin: 1rem
-    width: calc(100% - 2 * 1rem)
-    padding: 1rem

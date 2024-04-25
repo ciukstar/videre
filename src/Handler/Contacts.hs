@@ -27,6 +27,7 @@ import ChatRoom
     )
 import ChatRoom.Data (Route (ChatRoomR))
 
+import Control.Applicative (liftA3)
 import Control.Monad (join, forM_)
 import Control.Monad.IO.Class (liftIO)
 
@@ -34,6 +35,7 @@ import Data.Aeson (toJSON)
 import qualified Data.Aeson as A
     ( object, Value (Bool), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
+import Data.Maybe (fromMaybe)
 import Data.Functor ((<&>))
 import Data.Text (pack, unpack, Text)
 import Data.Time.Clock (getCurrentTime)
@@ -98,8 +100,9 @@ import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
 
 import System.IO (readFile')
 
+import Text.Cassius (cassiusFile)
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS))
+import Text.Julius (RawJS(rawJS), juliusFile)
 import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
@@ -118,7 +121,7 @@ import Widgets (widgetMenu, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
-    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
+    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler), ToWidget (toWidget)
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
@@ -137,8 +140,6 @@ import Yesod.Form.Types
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
-import Control.Applicative (liftA3)
-import Data.Maybe (fromMaybe)
 
 
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
@@ -290,6 +291,9 @@ getContactR sid pid cid = do
           defaultLayout $ do
               setTitleI MsgViewContact
               idDialogRemove <- newIdent
+    
+              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
@@ -346,6 +350,8 @@ getMyContactsR uid = do
     defaultLayout $ do
         setTitleI MsgAppName
         idFabAdd <- newIdent
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "my/contacts/contacts")
 
 
@@ -422,6 +428,8 @@ getContactsR uid = do
           defaultLayout $ do
               setTitleI MsgContacts
               idFabAdd <- newIdent
+              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "contacts/contacts")
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 

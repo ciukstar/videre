@@ -17,12 +17,12 @@ import Foundation.Data
       )
     )
 
-import Model
-    ( statusError
-    )
+import Model (statusError, statusSuccess)
 
 import Settings (widgetFile)
 
+import Text.Cassius (cassiusFile)
+import Text.Julius (juliusFile)
 import Text.Hamlet (Html)
 
 import Widgets (widgetMenu, widgetUser)
@@ -30,7 +30,7 @@ import Widgets (widgetMenu, widgetUser)
 import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages)
 import Yesod.Core.Handler (setUltDestCurrent)
-import Yesod.Core.Widget (setTitle)
+import Yesod.Core.Widget (setTitleI, toWidget)
 
 
 getHomeR :: Handler Html
@@ -39,6 +39,8 @@ getHomeR = do
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
-        setTitle "Videre"
+        setTitleI MsgAppName
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "homepage")
 

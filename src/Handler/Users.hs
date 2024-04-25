@@ -66,11 +66,14 @@ import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     )
+    
+import Text.Cassius (cassiusFile)
+import Text.Julius (juliusFile)
 import Text.Hamlet (Html)
 
 import Widgets (widgetMenu, widgetUser)
 
-import Yesod.Core.Widget (setTitleI, whamlet)
+import Yesod.Core.Widget (setTitleI, whamlet, ToWidget (toWidget))
 import Yesod.Core
     ( defaultLayout, newIdent, getMessages, setUltDestCurrent
     , SomeMessage (SomeMessage), getMessageRender, FileInfo (fileContentType)
@@ -116,6 +119,8 @@ postUserDeleR uid = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgUser
+              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "data/users/user")
           
 
@@ -177,6 +182,8 @@ getUserR uid = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUser
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "data/users/user")
 
 
@@ -252,6 +259,8 @@ getUsersR = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgUsers
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "data/users/users")
 
 

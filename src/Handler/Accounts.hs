@@ -55,6 +55,8 @@ import Settings.StaticFiles
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     )
 
+import Text.Cassius (cassiusFile)
+import Text.Julius (juliusFile)
 import Text.Hamlet (Html)
 
 import Yesod.Auth (Route (LogoutR), maybeAuth)
@@ -65,7 +67,7 @@ import Yesod.Core
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
-import Yesod.Core.Widget (setTitleI)
+import Yesod.Core.Widget (setTitleI, toWidget)
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
@@ -134,6 +136,8 @@ getAccountInfoR uid = do
     defaultLayout $ do
         setTitleI MsgPersonalInfo
         idPanelInfo <- newIdent
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "accounts/info/info")
 
 

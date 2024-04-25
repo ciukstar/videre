@@ -98,6 +98,8 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import Text.Cassius (cassiusFile)
+import Text.Julius (juliusFile)
 
 
 -- | A convenient synonym for creating forms.
@@ -470,6 +472,8 @@ instance YesodAuthEmail App where
         authLayout $ do
             setTitleI PasswordResetTitle
             idFormForgotPassword <- newIdent
+            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+            toWidget $(juliusFile "static/js/app-snackbar.julius")
             $(widgetFile "auth/forgot")
       where
           formForgotPassword :: Form Text
@@ -492,6 +496,8 @@ instance YesodAuthEmail App where
             idFormSetPassWrapper <- newIdent
             idFormSetPass <- newIdent
             (fw,et) <- liftHandler $ generateFormPost formSetPassword
+            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+            toWidget $(juliusFile "static/js/app-snackbar.julius")
             $(widgetFile "auth/password")
       where
           formSetPassword :: Form (Text,Text,Text)
@@ -541,6 +547,8 @@ instance YesodAuthEmail App where
         msgs <- getMessages
         selectRep $ provideRep $ authLayout $ do
             setTitleI ConfirmationEmailSentTitle
+            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+            toWidget $(juliusFile "static/js/app-snackbar.julius")
             $(widgetFile "auth/confirmation")
 
     registerHandler :: AuthHandler App Html
@@ -552,6 +560,8 @@ instance YesodAuthEmail App where
             setTitleI RegisterLong
             formRegisterWrapper <- newIdent
             formRegister <- newIdent
+            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+            toWidget $(juliusFile "static/js/app-snackbar.julius")
             $(widgetFile "auth/register")
       where
           formRegEmailForm :: Form Text
@@ -573,10 +583,15 @@ instance YesodAuthEmail App where
     emailLoginHandler parent = do
 
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
+        msgs <- getMessages
+        
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
-        msgs <- getMessages
+        
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "auth/email")
+        
       where
           formEmailLogin :: Form (Text,Text)
           formEmailLogin extra = do

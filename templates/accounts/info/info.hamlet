@@ -44,8 +44,11 @@
           <md-text-button type=button href=@{HomeR}>_{MsgCancel}
           <md-filled-button type=submit>_{MsgSave}
 
+
     $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1.primary-container>
+      <aside.app-snackbar.shape-small.elevation-1
+        :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
         <md-elevation>
-        <span.body-medium>#{status}. #
         <span.body-medium>#{msg}
+        <md-icon-button type=button>
+          <md-icon>close

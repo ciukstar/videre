@@ -16,13 +16,15 @@ import Foundation.Data
       )
     )
 
-import Model (statusError)
+import Model (statusError, statusSuccess)
 
 import Settings (widgetFile)
 
 import Settings.StaticFiles (img_ERD_Videre_svg)
 
 import Text.Blaze.Html (preEscapedToHtml)
+import Text.Cassius (cassiusFile)
+import Text.Julius (juliusFile)
 import Text.Hamlet (Html)
 
 import Widgets (widgetMenu, widgetUser)
@@ -30,7 +32,7 @@ import Widgets (widgetMenu, widgetUser)
 import Yesod.Auth (Route (LoginR))
 import Yesod.Core
     ( Yesod(defaultLayout), setUltDestCurrent, getMessages, getUrlRender
-    , getMessageRender
+    , getMessageRender, ToWidget (toWidget)
     )
 import Yesod.Core.Widget (setTitleI)
 
@@ -48,4 +50,6 @@ getDocsR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgAppDocumentation
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "resources/docs")
