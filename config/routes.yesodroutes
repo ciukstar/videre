@@ -7,6 +7,9 @@
 
 /subscribers/#UserId/publishers/#UserId PushSubscriptionsR POST DELETE
 
+/callees/#UserId CalleesR GET
+/calls/#UserId   CallsR   GET
+
 /my/contacts/#UserId/#UserId/#ContactId/remove ContactRemoveR POST
 /my/contacts/#UserId/#UserId/#ContactId        ContactR       GET
 /my/contacts/#UserId 		       	       MyContactsR    GET

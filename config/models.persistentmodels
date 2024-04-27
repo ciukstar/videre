@@ -19,6 +19,13 @@ Chat json
     received UTCTime Maybe
     notified Bool
 
+Call
+    contact ContactId OnDeleteCascade
+    start UTCTime
+    end UTCTime Maybe
+    type CallType
+    status CallStatus Maybe
+
 Contact
     owner UserId OnDeleteCascade
     entry UserId OnDeleteCascade

@@ -3,7 +3,7 @@
   ^{widgetMenu}
 
   <h1.title-large>
-    _{MsgChats}
+    _{MsgCalls}
 
   <span.app-top-app-bar-end>
     ^{widgetUser}
@@ -14,17 +14,17 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null entries
+  $if null calls
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
       <figcaption.body-large>
-        _{MsgYourContactListIsEmpty}
+        _{MsgYouHaveNotMadeAnyCallsYet}
         <p.body-small>
-          _{MsgYouMightWantToAddAFew}
+          _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (chat, (subscription, accessible))))) <- entries
-        <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid cid}>
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (call, (subscription, accessible))))) <- calls
+        <md-list-item type=link href=#>
           <div slot=start>
             <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
             $maybe _ <- subscription
@@ -38,12 +38,13 @@
               #{name}
             $nothing
               #{email}
-          $maybe Entity _ (Chat _ _ time message _ _ _) <- chat
+          $with Entity _ (Call _ start end ctype status) <- call
             <div slot=supporting-text>
-              $with dt <- iso8601Show time
-                <time datetime=#{dt}>#{dt}
+              $with start <- iso8601Show start
+                <time datetime=#{start}>#{start}
             <div slot=supporting-text>
-              #{message}
+              $maybe end <- iso8601Show <$> end
+                <time datetime=#{end}>#{end}
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
@@ -52,8 +53,8 @@
         <md-divider>
         
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{ContactsR uid}>
-    <md-icon slot=icon>add
+    <a href=@{CalleesR uid}>
+    <md-icon slot=icon>add_call
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1

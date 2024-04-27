@@ -51,6 +51,16 @@
           <span.bubble-tail-out>
             <span.bubble-tail>
 
+    $forall (Entity _ (Call _ start end ctype status), Entity _ (Contact owner _ _)) <- calls
+      <p.bubble.body-medium :sid == owner:.right.user :sid /= owner:.left.interlocutor>
+        <span>_{MsgVideoCall}
+        <span.bubble-status-line>
+          <time.time-bubble.body-small datetime=#{show start}>
+          <i.icon>done_all
+        <span.bubble-tail-out>
+          <span.bubble-tail>
+      
+
   <form ##{idMessageForm}>
     <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
       <md-filled-icon-button type=submit slot=trailing-icon disabled ##{idButtonSend}>

@@ -28,7 +28,7 @@ import Database.Esqueleto.Experimental
     , (^.), (==.)
     , select, just
     )
-import Database.Persist (Entity (Entity, entityVal))
+import Database.Persist (Entity (Entity, entityVal), PersistStoreWrite (insert_))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
@@ -53,12 +53,12 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
     , PushMsgType
-      ( PushMsgTypeVideoCall, PushMsgTypeEndSession
+      ( PushMsgTypeVideoCall, PushMsgTypeEndSession, PushMsgTypeAudioCall
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
       , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
-      )
+      ), Call (Call, callContact, callStart, callEnd, callType, callStatus), CallType (CallTypeVideo, CallTypeAudio)
     )
 
 import Network.HTTP.Client (Manager)
@@ -106,6 +106,7 @@ import Yesod.Persist.Core (runDB)
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+import Data.Time.Clock (getCurrentTime)
 
 
 class YesodVideo m where
@@ -235,11 +236,10 @@ postPushMessageR :: (Yesod m, YesodVideo m)
                  => SubHandlerFor VideoRoom m ()
 postPushMessageR = do
 
-    messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<)
-        <$> lookupPostParam "messageType"
+    messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<) <$> lookupPostParam "messageType"
     messageTitle <- runInputPost $ iopt textField "title"
     icon <- lookupPostParam "icon"
-    channelId <- ((ChanId <$>) . readMaybe . unpack =<<) <$> lookupPostParam "channelId"
+    channelId@(ChanId channel) <- ChanId <$> runInputPost (ireq intField "channelId")
     sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
     rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
 
@@ -317,7 +317,26 @@ postPushMessageR = do
                 case result of
                   Left ex -> do
                       liftIO $ print ex
-                  Right () -> return ()
+                  Right () -> do
+                      now <- liftIO getCurrentTime
+                      case messageType of
+                        Just PushMsgTypeVideoCall ->
+                            liftHandler $ runDB $ insert_ $ Call { callContact = toSqlKey $ fromIntegral channel
+                                                                 , callStart = now
+                                                                 , callEnd = Nothing
+                                                                 , callType = CallTypeVideo
+                                                                 , callStatus = Nothing
+                                                                 }
+                        Just PushMsgTypeAudioCall ->
+                            liftHandler $ runDB $ insert_ $ Call { callContact = toSqlKey $ fromIntegral channel
+                                                                 , callStart = now
+                                                                 , callEnd = Nothing
+                                                                 , callType = CallTypeAudio
+                                                                 , callStatus = Nothing
+                                                                 }
+                        _ -> return ()
+                          
+                      return ()
 
       Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
 

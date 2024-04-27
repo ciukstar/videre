@@ -1,3 +1,7 @@
+SelectCalleeToCall: Selectați un apelat din listă pentru a apela
+YouHaveNotMadeAnyCallsYet: Încă nu ați efectuat niciun apel
+Chats: Conversații
+Calls: Apeluri
 EntityChat: Entitatea „Chat”
 PushSubscription: Abonament push
 BasicEntities: Entităţile de bază

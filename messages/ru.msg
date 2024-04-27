@@ -1,3 +1,7 @@
+SelectCalleeToCall: Выберите абонента из списка, чтобы позвонить
+YouHaveNotMadeAnyCallsYet: Вы еще не совершали ни одного звонка
+Chats: Чаты
+Calls: Звонки
 EntityChat: Сущность "Чат"
 PushSubscription: Push-подписка
 BasicEntities: Основные сущности

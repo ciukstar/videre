@@ -1,3 +1,7 @@
+SelectCalleeToCall: Select a callee from the list to call
+YouHaveNotMadeAnyCallsYet: You haven't made any calls yet
+Chats: Chats
+Calls: Calls
 EntityChat: Chat
 PushSubscription: Push subscription
 BasicEntities: Basic Entities

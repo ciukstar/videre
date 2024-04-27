@@ -48,6 +48,24 @@ import Text.Show (Show (show))
 import Text.Hamlet (Html)
 
 
+data CallStatus = CallStatusMissed | CallStatusIncoming | CallStatusOutgoing 
+    deriving (Eq, Show, Read)
+derivePersistField "CallStatus"
+
+instance ToJSON CallStatus where
+    toJSON :: CallStatus -> Data.Aeson.Value
+    toJSON = String . pack . show
+
+
+data CallType = CallTypeVideo | CallTypeAudio
+    deriving (Eq, Show, Read)
+derivePersistField "CallType"
+
+instance ToJSON CallType where
+    toJSON :: CallType -> Data.Aeson.Value
+    toJSON = String . pack . show
+
+
 data PushMsgType = PushMsgTypeMessage | PushMsgTypeVideoCall | PushMsgTypeAudioCall
                  | PushMsgTypeAccept | PushMsgTypeDecline | PushMsgTypeCancel
                  | PushMsgTypeIgnore | PushMsgTypeEndSession

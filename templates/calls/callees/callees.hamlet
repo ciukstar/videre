@@ -1,0 +1,35 @@
+
+<header.app-top-app-bar.background>
+  <md-icon-button type=link href=@{CallsR uid}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgContacts}
+
+<main>
+
+  $forall (status,msg) <- filter ((==) statusError . fst) msgs
+    <div.app-banner.error.body-medium>
+      #{status}. #{msg}
+
+  $if null users
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&#x1F4C2;
+      <figcaption.body-large>
+        _{MsgNoRegisteredUsersYet}
+  $else
+
+    <form method=post action=@{ContactsR uid} enctype=#{et} ##{idFormPostContacts}>
+      ^{fw}
+
+        
+  <md-fab ##{idFabAdd} label=_{MsgAdd} aria-label=_{MsgAdd}>
+    <md-icon slot=icon>add
+
+$forall (status,msg) <- filter ((/=) statusError . fst) msgs
+  <aside.app-snackbar.shape-small.elevation-1
+    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
+    <md-elevation>
+    <span.body-medium>#{msg}
+    <md-icon-button type=button>
+      <md-icon>close

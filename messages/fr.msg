@@ -1,3 +1,7 @@
+SelectCalleeToCall: Sélectionnez un appelé dans la liste à appeler
+YouHaveNotMadeAnyCallsYet: Vous n'avez pas encore passé d'appels
+Chats: Discussions
+Calls: Appels
 EntityChat: L'entité "Chat"
 PushSubscription: Abonnement push
 BasicEntities: Entités de base

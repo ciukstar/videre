@@ -16,7 +16,10 @@
 
     $maybe Entity uid _ <- user
       <md-menu-item href=@{MyContactsR uid} :curr == Just (MyContactsR uid):selected>
-        _{MsgMyContacts}
+        _{MsgChats}
+
+      <md-menu-item href=@{CallsR uid} :curr == Just (CallsR uid):selected>
+        _{MsgCalls}
 
     <details.app-submenu #idDetailsData
       :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open

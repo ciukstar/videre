@@ -29,8 +29,8 @@ import Control.Concurrent.STM.TChan
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
-    , (^.), (==.), (=.), (&&.), (||.)
-    , just, Value (unValue), Entity (entityVal), not_
+    , (^.), (==.), (=.), (&&.), (||.), (:&)((:&))
+    , just, Value (unValue), Entity (entityVal), not_, innerJoin, on
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
@@ -72,8 +72,8 @@ import Model
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
-      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher
-      )
+      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallContact, ContactId
+      ), Call (Call), Contact (Contact)
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -191,6 +191,12 @@ getChatRoomR sid rid cid = do
                        )
         orderBy [desc (x ^. ChatCreated)]
         return x )
+
+    calls <- liftHandler $ runDB $ select $ do
+        x :& c <- from $ table @Call
+            `innerJoin` table @Contact `on` (\(x :& c) -> x ^. CallContact ==. c ^. ContactId)
+        where_ $ x ^. CallContact ==. val cid
+        return (x,c)
 
     toParent <- getRouteToParent
 
