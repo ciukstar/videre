@@ -45,7 +45,7 @@ import Data.Time.Format.ISO8601 (iso8601Show)
 
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy, desc, leftJoin, on, just
-    , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.)
+    , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.), (||.)
     , Value (unValue), innerJoin, val, where_, selectOne, max_
     , subSelectMaybe, delete
     )
@@ -92,8 +92,8 @@ import Model
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
-      , StoreVal, ChatUser, UserName, UserEmail, CallContact
-      ), Call (Call)
+      , StoreVal, ChatUser, UserName, UserEmail, CallContact, CallStart
+      ), Call (Call), CallStatus (CallStatusOutgoing), CallType (CallTypeAudio, CallTypeVideo)
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -124,15 +124,16 @@ import Widgets (widgetMenu, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
-    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler), ToWidget (toWidget)
+    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
+    , ToWidget (toWidget)
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Fields
-    ( OptionList(olOptions), optionsPairs, multiSelectField
-    , Option (optionInternalValue, optionExternalValue, optionDisplay), hiddenField
+    ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
+    , Option (optionInternalValue, optionExternalValue, optionDisplay)
     )
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost, mopt)
 import Yesod.Core.Json (parseCheckJsonBody, returnJson)
@@ -143,6 +144,7 @@ import Yesod.Form.Types
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
+import Yesod.Auth (maybeAuth)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -225,9 +227,11 @@ formCallees uid options vapidKeys idFormPostContacts idDialogSubscribe extra = d
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
 
+    user <- maybeAuth
+    
     endpoint <- lookupGetParam "endpoint"
-
-    calls <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
+    
+    calls <- (second (second (first (join . unValue))) <$>) <$> runDB ( select $ do
 
         x :& e :& h :& c :& s :& s' <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
@@ -246,10 +250,10 @@ getCallsR uid = do
                 
                                             &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
             )
-        where_ $ x ^. ContactOwner ==. val uid
+        where_ (x ^. ContactOwner ==. val uid ||. x ^. ContactEntry ==. val uid)
 
-        orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
+        orderBy [desc (c ^. CallStart)]
+        return (x, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
 
     msgs <- getMessages
     setUltDestCurrent

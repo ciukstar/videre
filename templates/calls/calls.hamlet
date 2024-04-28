@@ -23,29 +23,79 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (call, (subscription, accessible))))) <- calls
-        <md-list-item type=link href=#>
-          <div slot=start>
-            <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-            $maybe _ <- subscription
-              $maybe _ <- accessible
-              $nothing
-                <md-icon.pone-disabled>phone_disabled
-            $nothing
-              <md-icon.notifications-disabled>notifications_off
-          <div slot=headline>
-            $maybe name <- name
-              #{name}
-            $nothing
-              #{email}
-          $with Entity _ (Call _ start end ctype status) <- call
-            <div slot=supporting-text>
-              $with start <- iso8601Show start
-                <time datetime=#{start}>#{start}
-            <div slot=supporting-text>
-              $maybe end <- iso8601Show <$> end
-                <time datetime=#{end}>#{end}
-          <md-icon slot=end>arrow_forward_ios
+      $forall (Entity cid (Contact owner entry _), (interlocutor, (attrib, (call, (subscription, accessible))))) <- calls
+        $with Entity _ (Call _ start end ctype status) <- call
+          $if uid == owner
+            <md-list-item type=link href=#>
+              <div slot=start>
+                <img.user-photo src=@{AccountPhotoR entry} width=56 height=56 loading=lazy>
+                $maybe _ <- subscription
+                  $maybe _ <- accessible
+                  $nothing
+                    <md-icon.pone-disabled>phone_disabled
+                $nothing
+                  <md-icon.notifications-disabled>notifications_off
+              <div slot=headline>
+                $with Entity iid (User email _ _ _ _ name _ _) <- interlocutor
+                  $if uid /= iid
+                    $maybe name <- name
+                      #{name}
+                    $nothing
+                      #{email}
+                  $else
+                    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+                      $maybe name <- name
+                        #{name}
+                      $nothing
+                        #{email}
+              <div slot=supporting-text>
+                $with start <- iso8601Show start
+                  <time datetime=#{start}>#{start}
+              <div slot=supporting-text>
+                $maybe end <- iso8601Show <$> end
+                  <time datetime=#{end}>#{end}
+              <md-icon slot=end>
+                $case ctype
+                  $of CallTypeVideo
+                    videocam
+                  $of CallTypeAudio
+                    call
+          $else
+            <md-list-item type=link href=#>
+              <div slot=start>
+                <img.user-photo src=@{AccountPhotoR owner} width=56 height=56 loading=lazy>
+
+                $maybe _ <- subscription
+                  $maybe _ <- accessible
+                  $nothing
+                    <md-icon.pone-disabled>phone_disabled
+                $nothing
+                  <md-icon.notifications-disabled>notifications_off
+              <div slot=headline>
+                $with Entity iid (User email _ _ _ _ name _ _) <- interlocutor
+                  $if uid == iid
+                    $maybe name <- name
+                      #{name}
+                    $nothing
+                      #{email}
+                  $else
+                    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+                      $maybe name <- name
+                        #{name}
+                      $nothing
+                        #{email}
+              <div slot=supporting-text>
+                $with start <- iso8601Show start
+                  <time datetime=#{start}>#{start}
+              <div slot=supporting-text>
+                $maybe end <- iso8601Show <$> end
+                  <time datetime=#{end}>#{end}
+              <md-icon slot=end>
+                $case ctype
+                  $of CallTypeVideo
+                    videocam
+                  $of CallTypeAudio
+                    call
         $maybe attrib <- attrib
           <div.app-attribution>
             <div.app-attribution-wrapper.body-small>
