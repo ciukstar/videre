@@ -23,83 +23,115 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (Entity cid (Contact owner entry _), (interlocutor, (attrib, (call, (subscription, accessible))))) <- calls
-        $with Entity _ (Call _ start end ctype status) <- call
-          $if uid == owner
-            <md-list-item type=link href=#>
-              <div slot=start>
-                <img.user-photo src=@{AccountPhotoR entry} width=56 height=56 loading=lazy>
-                $maybe _ <- subscription
-                  $maybe _ <- accessible
-                  $nothing
-                    <md-icon.pone-disabled>phone_disabled
-                $nothing
-                  <md-icon.notifications-disabled>notifications_off
-              <div slot=headline>
-                $with Entity iid (User email _ _ _ _ name _ _) <- interlocutor
-                  $if uid /= iid
-                    $maybe name <- name
-                      #{name}
-                    $nothing
-                      #{email}
-                  $else
-                    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
-                      $maybe name <- name
-                        #{name}
-                      $nothing
-                        #{email}
-              <div slot=supporting-text>
-                $with start <- iso8601Show start
-                  <time datetime=#{start}>#{start}
-              <div slot=supporting-text>
-                $maybe end <- iso8601Show <$> end
-                  <time datetime=#{end}>#{end}
-              <md-icon slot=end>
-                $case ctype
-                  $of CallTypeVideo
-                    videocam
-                  $of CallTypeAudio
-                    call
-          $else
-            <md-list-item type=link href=#>
-              <div slot=start>
-                <img.user-photo src=@{AccountPhotoR owner} width=56 height=56 loading=lazy>
+      $forall (Entity _ (Call caller callee start end ctype status),(((callerE,attribCaller),(calleeE,attribCallee)),c)) <- calls
+        $with Entity cid (Contact _ _ _) <- c
+          $if uid == callee
+            $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
+              <md-list-item type=button
+                :CallTypeVideo == ctype:data-call-type=video
+                :CallTypeAudio == ctype:data-call-type=audio
+                data-caller-name=#{fromMaybe email name}
+                data-channel=#{show $ fromSqlKey cid}
+                data-callee=#{show $ fromSqlKey caller}>
 
-                $maybe _ <- subscription
-                  $maybe _ <- accessible
+                <div slot=start>
+                  <img.user-photo src=@{AccountPhotoR caller} width=56 height=56 loading=lazy>
+                <div slot=headline>
+                  $maybe name <- name
+                    #{name}
                   $nothing
-                    <md-icon.pone-disabled>phone_disabled
-                $nothing
-                  <md-icon.notifications-disabled>notifications_off
-              <div slot=headline>
-                $with Entity iid (User email _ _ _ _ name _ _) <- interlocutor
-                  $if uid == iid
-                    $maybe name <- name
-                      #{name}
-                    $nothing
-                      #{email}
-                  $else
-                    $maybe Entity _ (User email _ _ _ _ name _ _) <- user
-                      $maybe name <- name
-                        #{name}
-                      $nothing
-                        #{email}
-              <div slot=supporting-text>
-                $with start <- iso8601Show start
-                  <time datetime=#{start}>#{start}
-              <div slot=supporting-text>
-                $maybe end <- iso8601Show <$> end
-                  <time datetime=#{end}>#{end}
-              <md-icon slot=end>
-                $case ctype
-                  $of CallTypeVideo
-                    videocam
-                  $of CallTypeAudio
-                    call
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
-              #{attrib}
+                    #{email}
+                  <sup>
+                    <md-icon>call_made
+                <div slot=supporting-text>
+                  $with start <- iso8601Show start
+                    <time datetime=#{start}>#{start}
+                <div slot=supporting-text>
+                  $maybe end <- iso8601Show <$> end
+                    <time datetime=#{end}>#{end}
+                <md-icon slot=end>
+                  $case ctype
+                    $of CallTypeVideo
+                      videocam
+                    $of CallTypeAudio
+                      call
+
+                <md-dialog.app-outgoing-call>
+                  <div slot=headline>
+                    _{MsgOutgoingCall} ...
+
+                  <div slot=content>
+                    <figure>
+                      <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+                    <md-icon>double_arrow
+
+                    <figure>
+                      <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+                  <div slot=actions>
+                    <md-filled-button.app-outgoing-call-cancel has-icon type=button>
+                      <md-icon slot=icon>call_end
+                      _{MsgCancel}
+
+              $maybe attrib <- attrib
+                <div.app-attribution>
+                  <div.app-attribution-wrapper.body-small>
+                    #{attrib}
+          $else
+            $with (Entity _ (User email _ _ _ _ name _ _), attrib) <- (calleeE, attribCallee)
+              <md-list-item.app-call type=button
+                :CallTypeVideo == ctype:data-call-type=video
+                :CallTypeAudio == ctype:data-call-type=audio
+                data-caller-name=#{fromMaybe email name}
+                data-channel=#{show $ fromSqlKey cid}
+                data-callee=#{show $ fromSqlKey callee}>
+                <div slot=start>
+                  <img.user-photo src=@{AccountPhotoR callee} width=56 height=56 loading=lazy>
+                <div slot=headline>
+                  $maybe name <- name
+                    #{name}
+                  $nothing
+                    #{email}
+                  <sup>
+                    <md-icon>call_received
+                <div slot=supporting-text>
+                  $with start <- iso8601Show start
+                    <time datetime=#{start}>#{start}
+                <div slot=supporting-text>
+                  $maybe end <- iso8601Show <$> end
+                    <time datetime=#{end}>#{end}
+                <md-icon slot=end>
+                  $case ctype
+                    $of CallTypeVideo
+                      videocam
+                    $of CallTypeAudio
+                      call
+
+                <md-dialog.app-outgoing-call>
+                  <div slot=headline>
+                    _{MsgOutgoingCall} ...
+
+                  <div slot=content>
+                    <figure>
+                      <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+                    <md-icon>double_arrow
+
+                    <figure>
+                      <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+                  <div slot=actions>
+                    <md-filled-button.app-outgoing-call-cancel has-icon type=button>
+                      <md-icon slot=icon>call_end
+                      _{MsgCancel}
+
+              $maybe attrib <- attrib
+                <div.app-attribution>
+                  <div.app-attribution-wrapper.body-small>
+                    #{attrib}
+          
+          
         <md-divider>
         
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">

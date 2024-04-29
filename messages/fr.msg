@@ -1,3 +1,4 @@
+CallCanceled: Appel annulé
 SelectCalleeToCall: Sélectionnez un appelé dans la liste à appeler
 YouHaveNotMadeAnyCallsYet: Vous n'avez pas encore passé d'appels
 Chats: Discussions

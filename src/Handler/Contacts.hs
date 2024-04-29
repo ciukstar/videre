@@ -64,7 +64,7 @@ import Foundation.Data
       , PushSubscriptionsR, StaticR, VideoR, CallsR, CalleesR
       )
     , AppMessage
-      ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgChats
+      ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgCalls
       , MsgAdd, MsgInvalidFormData, MsgNewContactsAdded, MsgViewContact
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
@@ -72,8 +72,9 @@ import Foundation.Data
       , MsgRemove, MsgSubscriptionCanceled, MsgAllowToBeNotified, MsgNotNow
       , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgUserHasNotAddedYouToHisContactListYet
-      , MsgYouAreNotSubscribedToNotificationsFrom, MsgCalls
-      , MsgSelectCalleeToCall, MsgYouHaveNotMadeAnyCallsYet
+      , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
+      , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgIncomingVideoCall
+      , MsgIncomingAudioCall, MsgCallCanceled
       )
     )
 
@@ -83,7 +84,8 @@ import Model
     ( statusError, statusSuccess
     , UserId, User (User, userName), UserPhoto, Chat (Chat)
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
-    , Token, Store
+    , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
+    , PushMsgType (PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel)
     , StoreType
       ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
     , apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
@@ -92,14 +94,19 @@ import Model
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
-      , StoreVal, ChatUser, UserName, UserEmail, CallContact, CallStart
-      ), Call (Call), CallStatus (CallStatusOutgoing), CallType (CallTypeAudio, CallTypeVideo)
+      , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
+      , CallStart
+      )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
 import Network.HTTP.Types.Status (status400)
 
 import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
+import Settings.StaticFiles
+    ( img_call_FILL0_wght400_GRAD0_opsz24_svg
+    , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
+    ) 
 
 import System.IO (readFile')
 
@@ -125,7 +132,7 @@ import Widgets (widgetMenu, widgetUser)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
-    , ToWidget (toWidget)
+    , ToWidget (toWidget), getMessageRender
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
@@ -144,7 +151,6 @@ import Yesod.Form.Types
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
-import Yesod.Auth (maybeAuth)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -226,40 +232,37 @@ formCallees uid options vapidKeys idFormPostContacts idDialogSubscribe extra = d
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
-
-    user <- maybeAuth
     
-    endpoint <- lookupGetParam "endpoint"
-    
-    calls <- (second (second (first (join . unValue))) <$>) <$> runDB ( select $ do
+    calls <- (second (first (bimap (second (join . unValue)) (second (join . unValue)))) <$>) <$> runDB ( select $ do
 
-        x :& e :& h :& c :& s :& s' <- from $ table @Contact
-            `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
-            `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            `innerJoin` table @Call `on` (\(x :& _ :& _ :& c) -> x ^. ContactId ==. c ^. CallContact)
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
+        x :& caller :& callerPhoto :& callee :& calleePhoto :& c <- from $ table @Call
+            `innerJoin` table @User
+            `on` (\(x :& caller) -> x ^. CallCaller ==. caller ^. UserId)
+            `leftJoin` table @UserPhoto
+            `on` (\(_ :& caller :& callerPhoto) -> just (caller ^. UserId) ==. callerPhoto ?. UserPhotoUser)
+            `innerJoin` table @User
+            `on` (\(x :& _ :& _ :& callee) -> x ^. CallCallee ==. callee ^. UserId)
+            `leftJoin` table @UserPhoto
+            `on` (\(_ :& _ :& _ :& callee :& calleePhoto) -> just (callee ^. UserId) ==. calleePhoto ?. UserPhotoUser)
+            `innerJoin` table @Contact
+            `on` ( \(x :& _ :& _ :& _ :& _ :& c) ->
+                     ( c ^. ContactOwner ==. val uid )
+                       &&. ( (c ^. ContactEntry ==. x ^. CallCaller) ||. (c ^. ContactEntry ==. x ^. CallCallee) )
+                 )
+            
+        where_ ( x ^. CallCaller ==. val uid ||. x ^. CallCallee ==. val uid )
+        
+        orderBy [desc (x ^. CallStart)]
+        return (x, (((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution)), c)) )
 
-                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
-                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
-            )
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
-                
-                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
-            )
-        where_ (x ^. ContactOwner ==. val uid ||. x ^. ContactEntry ==. val uid)
-
-        orderBy [desc (c ^. CallStart)]
-        return (x, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
-
+    msgr <- getMessageRender
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgCalls
+        
         idFabAdd <- newIdent
+        
         toWidget $(cassiusFile "static/css/app-snackbar.cassius")
         toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "calls/calls")

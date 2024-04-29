@@ -20,7 +20,8 @@ Chat json
     notified Bool
 
 Call
-    contact ContactId OnDeleteCascade
+    caller UserId OnDeleteCascade
+    callee UserId OnDeleteCascade
     start UTCTime
     end UTCTime Maybe
     type CallType

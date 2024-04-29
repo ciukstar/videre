@@ -52,13 +52,15 @@ import Model
     , PushSubscription (PushSubscription), Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
+    , Call (Call, callCaller, callCallee, callStart, callEnd, callType, callStatus)
+    , CallType (CallTypeVideo, CallTypeAudio)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeEndSession, PushMsgTypeAudioCall
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
-      , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
-      ), Call (Call, callContact, callStart, callEnd, callType, callStatus), CallType (CallTypeVideo, CallTypeAudio)
+      , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber, PushSubscriptionPublisher
+      )
     )
 
 import Network.HTTP.Client (Manager)
@@ -240,8 +242,8 @@ postPushMessageR = do
     messageTitle <- runInputPost $ iopt textField "title"
     icon <- lookupPostParam "icon"
     channelId@(ChanId channel) <- ChanId <$> runInputPost (ireq intField "channelId")
-    sid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "senderId"
-    rid <- ((toSqlKey <$>) . readMaybe . unpack =<<) <$> lookupPostParam "recipientId"
+    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
+    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
 
     videor <- runInputPost $ ireq boolField "videor"
     audior <- runInputPost $ ireq boolField "audior"
@@ -252,12 +254,13 @@ postPushMessageR = do
 
     sender <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
-        where_ $ just (x ^. UserId) ==. val sid
+        where_ $ x ^. UserId ==. val sid
         return x
 
     subscriptions <- liftHandler $ runDB $ select $ do
         x <- from $ table @PushSubscription
-        where_ $ just (x ^. PushSubscriptionSubscriber) ==. val rid
+        where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+        where_ $ x ^. PushSubscriptionPublisher ==. val sid
         return x
 
     manager <- liftHandler getAppHttpManager
@@ -300,7 +303,7 @@ postPushMessageR = do
                                                 , "senderName" .= ( (userName . entityVal <$> sender)
                                                                     <|> (Just . userEmail . entityVal <$> sender)
                                                                   )
-                                                , "senderPhoto" .= (urlRender . toParent . PhotoR <$> sid)
+                                                , "senderPhoto" .= (urlRender . toParent . PhotoR $ sid)
                                                 , "recipientId" .= rid
                                                 , "videor" .= videor
                                                 , "audior" .= audior
@@ -321,14 +324,16 @@ postPushMessageR = do
                       now <- liftIO getCurrentTime
                       case messageType of
                         Just PushMsgTypeVideoCall ->
-                            liftHandler $ runDB $ insert_ $ Call { callContact = toSqlKey $ fromIntegral channel
+                            liftHandler $ runDB $ insert_ $ Call { callCaller = sid
+                                                                 , callCallee = rid
                                                                  , callStart = now
                                                                  , callEnd = Nothing
                                                                  , callType = CallTypeVideo
                                                                  , callStatus = Nothing
                                                                  }
                         Just PushMsgTypeAudioCall ->
-                            liftHandler $ runDB $ insert_ $ Call { callContact = toSqlKey $ fromIntegral channel
+                            liftHandler $ runDB $ insert_ $ Call { callCaller = sid
+                                                                 , callCallee = rid
                                                                  , callStart = now
                                                                  , callEnd = Nothing
                                                                  , callType = CallTypeAudio

@@ -51,8 +51,8 @@
           <span.bubble-tail-out>
             <span.bubble-tail>
 
-    $forall (Entity _ (Call _ start end ctype status), Entity _ (Contact owner _ _)) <- calls
-      <p.bubble.body-medium :sid == owner:.right.user :sid /= owner:.left.interlocutor>
+    $forall (Entity _ (Call _ _ start end ctype status), Entity uid _) <- calls
+      <p.bubble.body-medium :sid == uid:.right.user :sid /= uid:.left.interlocutor>
         <span>_{MsgVideoCall}
         <span.bubble-status-line>
           <time.time-bubble.body-small datetime=#{show start}>

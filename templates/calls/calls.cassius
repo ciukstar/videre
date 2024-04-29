@@ -33,6 +33,27 @@ main
             background: red
             clip-path: circle(50%)
 
+    .app-outgoing-call
+
+        div[slot=content]
+            display: flex
+            align-items: center
+            justify-content: space-around
+
+            figure
+                margin: 0
+                padding: 0
+
+                img
+                    clip-path: circle(50%)
+
+            md-icon
+                --md-icon-size: 48px
+
+        .app-outgoing-call-cancel
+            --md-sys-color-primary: red
+            --md-sys-color-on-primary: #FFFFFF
+
     .app-attribution
         position: relative
         margin: 0

@@ -1,3 +1,4 @@
+CallCanceled: Вызов отменен
 SelectCalleeToCall: Выберите абонента из списка, чтобы позвонить
 YouHaveNotMadeAnyCallsYet: Вы еще не совершали ни одного звонка
 Chats: Чаты

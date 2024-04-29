@@ -64,7 +64,7 @@ import Model
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription), secretVolumeVapid, apiInfoVapid
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , ContactId, Token, Store
+    , ContactId, Token, Store, Call (Call), Contact (Contact)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeMessage
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
@@ -72,8 +72,8 @@ import Model
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
-      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallContact, ContactId
-      ), Call (Call), Contact (Contact)
+      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, ContactId, CallCaller, CallCallee
+      )
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -194,8 +194,8 @@ getChatRoomR sid rid cid = do
 
     calls <- liftHandler $ runDB $ select $ do
         x :& c <- from $ table @Call
-            `innerJoin` table @Contact `on` (\(x :& c) -> x ^. CallContact ==. c ^. ContactId)
-        where_ $ x ^. CallContact ==. val cid
+            `innerJoin` table @User `on` (\(x :& u) -> (x ^. CallCaller ==. u ^. UserId) ||. (x ^. CallCallee ==. u ^. UserId))
+        where_ $ x ^. CallCallee ==. val sid ||. x ^. CallCaller ==. val sid
         return (x,c)
 
     toParent <- getRouteToParent

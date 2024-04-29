@@ -1,3 +1,4 @@
+CallCanceled: Call canceled
 SelectCalleeToCall: Select a callee from the list to call
 YouHaveNotMadeAnyCallsYet: You haven't made any calls yet
 Chats: Chats

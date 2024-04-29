@@ -1,3 +1,4 @@
+CallCanceled: Apel anulat
 SelectCalleeToCall: Selectați un apelat din listă pentru a apela
 YouHaveNotMadeAnyCallsYet: Încă nu ați efectuat niciun apel
 Chats: Conversații
