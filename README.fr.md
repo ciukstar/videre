@@ -65,6 +65,9 @@ L'abonnement peut être vérifié ou renouvelé à partir de l'élément de menu
 
 [Les notifications Web Push](https://developer.mozilla.org/fr/docs/Web/API/Push_API) sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.
 
+### L'entité « Appel »
+L'entité « Appel » représente les appels sortants et entrants vers l'utilisateur.
+
 ### L'entité "Chat"
 ...
 

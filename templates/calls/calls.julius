@@ -15,32 +15,31 @@ Array.from(
 
 Array.from(
   document.querySelectorAll('md-list-item.app-call')
-).forEach(x => {
-  x.addEventListener('click', (e) => {
+).forEach(item => {
+  item.addEventListener('click', (e) => {
 
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: 'video' === x.dataset.callType ? #{show PushMsgTypeVideoCall} : #{show PushMsgTypeAudioCall},
+	messageType: item.dataset.messageType,
 	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
 	title: #{msgr MsgAppName},
-	body: ( 'video' === x.dataset.callType ? #{msgr MsgIncomingVideoCall} : #{msgr MsgIncomingAudioCall}
-	      ) + `, ${x.dataset.callerName}`,
-	channelId: x.dataset.channel,
+	body: item.dataset.body,
+	channelId: item.dataset.channelId,
 	senderId: #{show $ fromSqlKey uid},
-	recipientId: x.dataset.callee,
-	videor: 'video' === x.dataset.callType,
+	recipientId: item.dataset.recipientId,
+	videor: 'videor' in item.dataset,
 	audior: true,
-	videos: 'video' === x.dataset.callType,
+	videos: 'videos' in item.dataset,
 	audios: true
       })
     }).then(
       (result) => {
 	
-	const dlg = x.querySelector('md-dialog.app-outgoing-call');
+	const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${item.dataset.i}`);
 	
-	dlg.querySelector('md-filled-button.app-outgoing-call-cancel').addEventListener('click', (e) => {
+	document.getElementById(`idButtonOutgoingCallCancel${item.dataset.i}`).addEventListener('click', (e) => {
 
 	  fetch('@{VideoR PushMessageR}', {
 	    method: 'POST',
@@ -49,24 +48,50 @@ Array.from(
 	      messageType: #{show PushMsgTypeCancel},
 	      title: #{msgr MsgAppName},
 	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
-	      body: `#{msgr MsgCallCanceled}, ${x.dataset.callerName}`,
-	      channelId: x.dataset.channel,
+	      body: item.dataset.bodyCancel,
+	      channelId: item.dataset.channelId,
 	      senderId: #{show $ fromSqlKey uid},
-	      recipientId: x.dataset.callee,
+	      recipientId: item.dataset.recipientId,
 	      videor: false,
 	      audior: false,
 	      videos: false,
 	      audios: false
 	    })
 	  }).then(
-	    (result) => dlg.close();
+	    (result) => dlgOutgoingCall.close();
 	  ).catch(
 	    (err) => console.error(err);
 	  );
 	  
 	});
+
+	navigator.serviceWorker.addEventListener('message', function (message) {
+	  
+	  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+	    
+	    dlgOutgoingCall.close();
+	    
+	    const params = new URLSearchParams({
+	      channel: message.data.channelId,
+	      backlink: '@{CallsR uid}',
+	      videor: message.data.videor,
+	      audior: message.data.audior,
+	      videos: message.data.videos,
+	      audios: message.data.audios
+	    });
+
+	    window.location.href = `${item.dataset.videoroom}?${params}`;
+	    
+	  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+
+	    dlgOutgoingCall.close();
+	    document.getElementById(`idDialogCallDeclined${item.dataset.i}`).show();
+	    
+	  }
+	  
+	});
 	
-	dlg.show();
+	dlgOutgoingCall.show();
       }
     ).catch(
       (err) => { console.error(err); }

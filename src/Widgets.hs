@@ -6,8 +6,6 @@ module Widgets
   , widgetUser
   ) where
 
-
-import Database.Esqueleto.Experimental (selectOne, from, table)
 import Database.Persist (Entity (Entity))
 
 import Foundation ()
@@ -18,19 +16,15 @@ import Foundation.Data
     , DataR (UsersR, TokensR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
-      , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut
-      , MsgPhoto, MsgChats, MsgCalls, MsgContacts
+      , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
+      , MsgCalls, MsgContacts
       )
     )
-
-import Model (Call)
 
 import Settings (widgetFile)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
-import Yesod.Core (MonadHandler(liftHandler))
 import Yesod.Core.Handler (getCurrentRoute)
-import Yesod.Persist.Core (YesodPersist(runDB))
 
 
 widgetMenu :: Widget
@@ -38,8 +32,6 @@ widgetMenu = do
     
     user <- maybeAuth
     curr <- getCurrentRoute
-
-    oneCall <- liftHandler $ runDB $ selectOne $ from $ table @Call
     
     $(widgetFile "widgets/menu")
 

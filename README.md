@@ -65,6 +65,9 @@ The subscription can be checked or renewed from the “View contact” menu item
 
 [Web Push Notifications](https://developer.mozilla.org/en-US/docs/Web/API/Push_API) are used to notify a callee of an incoming video/audio call. It is also used to end the video/audio session.
 
+### Call
+The entity Call represents outgoing and incoming calls to the currently logged in user.
+
 ### Chat
 ...
 

@@ -1,3 +1,4 @@
+EntityCall: Call
 CallCanceled: Call canceled
 SelectCalleeToCall: Select a callee from the list to call
 YouHaveNotMadeAnyCallsYet: You haven't made any calls yet
@@ -197,3 +198,5 @@ Doc013: A push subscription is created when the user is added to the contact lis
 Doc014: The subscription can be checked or renewed from the “View contact” menu item.
 
 Doc015 href@Text: <a href=#{href} target=_blank>Web Push Notifications</a> are used to notify a callee of an incoming video/audio call. It is also used to end the video/audio session.
+
+Doc016: The entity Call represents outgoing and incoming calls to the currently logged in user.

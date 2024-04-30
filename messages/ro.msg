@@ -1,3 +1,4 @@
+EntityCall: Entitatea „Apel”
 CallCanceled: Apel anulat
 SelectCalleeToCall: Selectați un apelat din listă pentru a apela
 YouHaveNotMadeAnyCallsYet: Încă nu ați efectuat niciun apel
@@ -197,3 +198,5 @@ Doc013: Un abonament push este creat atunci când un utilizator este adăugat la
 Doc014: Abonamentul poate fi verificat sau reînnoit din elementul de meniu „Vizualizare contact”.
 
 Doc015 href: <a href=#{href} target=_blank>Notificările Web Push</a> sunt folosite pentru a notifica un apelat despre un apel video/audio primit. De asemenea, este folosit pentru a încheia sesiunea video/audio.
+
+Doc016: Entitatea „Apel” reprezintă apelurile efectuate și primite către utilizator.

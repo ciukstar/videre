@@ -73,8 +73,9 @@ import Foundation.Data
       , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgUserHasNotAddedYouToHisContactListYet
       , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
-      , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgIncomingVideoCall
-      , MsgIncomingAudioCall, MsgCallCanceled
+      , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
+      , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom
+      , MsgCallCanceledByCaller
       )
     )
 
@@ -85,7 +86,10 @@ import Model
     , UserId, User (User, userName), UserPhoto, Chat (Chat)
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
-    , PushMsgType (PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel)
+    , PushMsgType
+      ( PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel
+      , PushMsgTypeDecline, PushMsgTypeAccept
+      )
     , StoreType
       ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
     , apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
@@ -96,7 +100,7 @@ import Model
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
       , CallStart
-      )
+      ), CallStatus (CallStatusAccepted, CallStatusDeclined, CallStatusEnded)
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -117,7 +121,7 @@ import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
-    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute)
+    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute, getAppSettings)
     , Route (OutgoingR)
     )
 import VideoRoom.Data (Route (PushMessageR))
@@ -618,6 +622,9 @@ instance YesodVideo App where
 
     getStaticRoute :: StaticRoute -> Handler (Route App)
     getStaticRoute = return . StaticR
+
+    getAppSettings :: Handler AppSettings
+    getAppSettings = getYesod >>= \app -> return $ appSettings app
 
 
 instance YesodChat App where

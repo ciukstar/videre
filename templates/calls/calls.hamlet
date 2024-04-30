@@ -23,16 +23,21 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (Entity _ (Call caller callee start end ctype status),(((callerE,attribCaller),(calleeE,attribCallee)),c)) <- calls
-        $with Entity cid (Contact _ _ _) <- c
+      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),c)) <- calls
+        $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
-              <md-list-item type=button
-                :CallTypeVideo == ctype:data-call-type=video
-                :CallTypeAudio == ctype:data-call-type=audio
-                data-caller-name=#{fromMaybe email name}
-                data-channel=#{show $ fromSqlKey cid}
-                data-callee=#{show $ fromSqlKey caller}>
+              <md-list-item.app-call type=button #idItemCall#{i} data-i=#{i}
+                :CallTypeVideo == ctype:data-message-type=#{show PushMsgTypeVideoCall}
+                :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
+                :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                data-channel-id=#{show $ fromSqlKey cid}
+                data-recipient-id=#{show $ fromSqlKey caller}
+                :CallTypeVideo == ctype:data-videor
+                :CallTypeVideo == ctype:data-videos
+                data-videoroom=@{VideoR $ OutgoingR uid caller}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
 
                 <div slot=start>
                   <img.user-photo src=@{AccountPhotoR caller} width=56 height=56 loading=lazy>
@@ -52,27 +57,67 @@
                 <md-icon slot=end>
                   $case ctype
                     $of CallTypeVideo
-                      videocam
+                      $maybe status <- s
+                        $case status
+                          $of CallStatusAccepted
+                            videocam
+                          $of CallStatusDeclined
+                            missed_video_call
+                          $of CallStatusEnded
+                            videocam
+                          $of _
+                            videocam
+                      $nothing
+                        videocam
                     $of CallTypeAudio
-                      call
+                      $maybe status <- s
+                        $case status
+                          $of CallStatusAccepted
+                            call
+                          $of CallStatusDeclined
+                            phone_missed
+                          $of CallStatusEnded
+                            call
+                          $of _
+                            call
+                      $nothing
+                        call
+                      
 
-                <md-dialog.app-outgoing-call>
-                  <div slot=headline>
-                    _{MsgOutgoingCall} ...
+              <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+                <div slot=headline>
+                  _{MsgOutgoingCall} ...
 
-                  <div slot=content>
-                    <figure>
-                      <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                <div slot=content>
+                  <figure>
+                    <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
-                    <md-icon>double_arrow
+                  <md-icon>double_arrow
 
-                    <figure>
-                      <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                  <figure>
+                    <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
-                  <div slot=actions>
-                    <md-filled-button.app-outgoing-call-cancel has-icon type=button>
-                      <md-icon slot=icon>call_end
-                      _{MsgCancel}
+                <div slot=actions>
+                  <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
+                    <md-icon slot=icon>call_end
+                    _{MsgCancel}
+
+
+              <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
+                <div slot=headline>
+                  _{MsgCallDeclined}
+
+                <div slot=content>
+                  <p.body-large>
+                    $maybe name <- name
+                      _{MsgCalleeDeclinedTheCall name}
+                    $nothing
+                      _{MsgCalleeDeclinedTheCall email}
+
+                <div slot=actions>
+                  <md-text-button type=button
+                    onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+                    _{MsgClose}
 
               $maybe attrib <- attrib
                 <div.app-attribution>
@@ -80,12 +125,18 @@
                     #{attrib}
           $else
             $with (Entity _ (User email _ _ _ _ name _ _), attrib) <- (calleeE, attribCallee)
-              <md-list-item.app-call type=button
-                :CallTypeVideo == ctype:data-call-type=video
-                :CallTypeAudio == ctype:data-call-type=audio
-                data-caller-name=#{fromMaybe email name}
-                data-channel=#{show $ fromSqlKey cid}
-                data-callee=#{show $ fromSqlKey callee}>
+              <md-list-item.app-call type=button #idItemCall#{i} data-i=#{i}
+                :CallTypeVideo == ctype:data-message-type=#{show PushMsgTypeVideoCall}
+                :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
+                :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                data-channel-id=#{show $ fromSqlKey cid}
+                data-recipient-id=#{show $ fromSqlKey callee}
+                :CallTypeVideo == ctype:data-videor
+                :CallTypeVideo == ctype:data-videos
+                data-videoroom=@{VideoR $ OutgoingR uid callee}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                
                 <div slot=start>
                   <img.user-photo src=@{AccountPhotoR callee} width=56 height=56 loading=lazy>
                 <div slot=headline>
@@ -104,27 +155,66 @@
                 <md-icon slot=end>
                   $case ctype
                     $of CallTypeVideo
-                      videocam
+                      $maybe status <- s
+                        $case status
+                          $of CallStatusAccepted
+                            videocam
+                          $of CallStatusDeclined
+                            missed_video_call
+                          $of CallStatusEnded
+                            videocam
+                          $of _
+                            videocam
+                      $nothing
+                        videocam
                     $of CallTypeAudio
-                      call
+                      $maybe status <- s
+                        $case status
+                          $of CallStatusAccepted
+                            call
+                          $of CallStatusDeclined
+                            phone_missed
+                          $of CallStatusEnded
+                            call
+                          $of _
+                            call
+                      $nothing
+                        call
 
-                <md-dialog.app-outgoing-call>
-                  <div slot=headline>
-                    _{MsgOutgoingCall} ...
+              <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+                <div slot=headline>
+                  _{MsgOutgoingCall} ...
 
-                  <div slot=content>
-                    <figure>
-                      <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                <div slot=content>
+                  <figure>
+                    <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
-                    <md-icon>double_arrow
+                  <md-icon>double_arrow
 
-                    <figure>
-                      <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                  <figure>
+                    <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
 
-                  <div slot=actions>
-                    <md-filled-button.app-outgoing-call-cancel has-icon type=button>
-                      <md-icon slot=icon>call_end
-                      _{MsgCancel}
+                <div slot=actions>
+                  <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
+                    <md-icon slot=icon>call_end
+                    _{MsgCancel}
+
+
+              <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
+                <div slot=headline>
+                  _{MsgCallDeclined}
+
+                <div slot=content>
+                  <p.body-large>
+                    $maybe name <- name
+                      _{MsgCalleeDeclinedTheCall name}
+                    $nothing
+                      _{MsgCalleeDeclinedTheCall email}
+
+                <div slot=actions>
+                  <md-text-button type=button
+                    onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+                    _{MsgClose}
 
               $maybe attrib <- attrib
                 <div.app-attribution>

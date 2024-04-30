@@ -24,11 +24,12 @@ import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, Value (unValue), from, table, where_, val
-    , (^.), (==.)
-    , select, just
+    ( selectOne, Value (unValue), from, table, where_, val, update, set, just
+    , (^.), (==.), (=.)
+    , select
     )
-import Database.Persist (Entity (Entity, entityVal), PersistStoreWrite (insert_))
+import Database.Persist
+    ( Entity (Entity, entityVal), PersistStoreWrite (insert) )
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
@@ -39,6 +40,7 @@ import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, unpack, pack)
 import Data.Text.Encoding (encodeUtf8)
+import Data.Time.Clock (getCurrentTime)
 
 import Foundation.Data
     ( AppMessage
@@ -56,11 +58,13 @@ import Model
     , CallType (CallTypeVideo, CallTypeAudio)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeEndSession, PushMsgTypeAudioCall
+      , PushMsgTypeAccept, PushMsgTypeDecline
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
-      , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber, PushSubscriptionPublisher
-      )
+      , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
+      , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
+      ), CallStatus (CallStatusAccepted, CallStatusDeclined, CallStatusEnded)
     )
 
 import Network.HTTP.Client (Manager)
@@ -69,7 +73,10 @@ import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
     (atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue)
 
-import Settings (widgetFile)
+import Settings
+    ( widgetFile, AppSettings (appSuperuser)
+    , Superuser (Superuser, superuserUsername)
+    )
 import Settings.StaticFiles
     (img_call_end_FILL0_wght400_GRAD0_opsz24_svg)
 
@@ -108,14 +115,13 @@ import Yesod.Persist.Core (runDB)
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
     ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
-import Data.Time.Clock (getCurrentTime)
 
 
 class YesodVideo m where
-
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
+    getAppSettings :: HandlerFor m AppSettings
 
 
 getOutgoingR :: (Yesod m, YesodVideo m)
@@ -241,7 +247,7 @@ postPushMessageR = do
     messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<) <$> lookupPostParam "messageType"
     messageTitle <- runInputPost $ iopt textField "title"
     icon <- lookupPostParam "icon"
-    channelId@(ChanId channel) <- ChanId <$> runInputPost (ireq intField "channelId")
+    channelId <- ChanId <$> runInputPost (ireq intField "channelId")
     sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
     rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
 
@@ -249,6 +255,8 @@ postPushMessageR = do
     audior <- runInputPost $ ireq boolField "audior"
     videos <- runInputPost $ ireq boolField "videos"
     audios <- runInputPost $ ireq boolField "audios"
+
+    callId <- (toSqlKey <$>) <$> runInputPost (iopt intField "callId")
 
     messageBody <- runInputPost $ iopt textField "body"
 
@@ -290,7 +298,31 @@ postPushMessageR = do
 
     case details of
       Just vapidKeysMinDetails -> do
+          
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+
+          Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
+          
+          now <- liftIO getCurrentTime
+
+          call <- case messageType of
+            Just PushMsgTypeVideoCall ->
+                liftHandler $ pure <$> runDB (insert $ Call { callCaller = sid
+                                                            , callCallee = rid
+                                                            , callStart = now
+                                                            , callEnd = Nothing
+                                                            , callType = CallTypeVideo
+                                                            , callStatus = Nothing
+                                                            })
+            Just PushMsgTypeAudioCall ->
+                liftHandler $ pure <$> runDB (insert $ Call { callCaller = sid
+                                                            , callCallee = rid
+                                                            , callStart = now
+                                                            , callEnd = Nothing
+                                                            , callType = CallTypeAudio
+                                                            , callStatus = Nothing
+                                                            })
+            _ -> return Nothing
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
@@ -309,8 +341,9 @@ postPushMessageR = do
                                                 , "audior" .= audior
                                                 , "videos" .= videos
                                                 , "audios" .= audios
+                                                , "callId" .= (fromSqlKey <$> call)
                                                 ]
-                        & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                        & pushSenderEmail .~ superuserUsername
                         & pushExpireInSeconds .~ 60
                         & pushUrgency ?~ PushUrgencyHigh
                         & pushTopic .~ (PushTopic . pack . show <$> messageType)
@@ -321,24 +354,25 @@ postPushMessageR = do
                   Left ex -> do
                       liftIO $ print ex
                   Right () -> do
-                      now <- liftIO getCurrentTime
-                      case messageType of
-                        Just PushMsgTypeVideoCall ->
-                            liftHandler $ runDB $ insert_ $ Call { callCaller = sid
-                                                                 , callCallee = rid
-                                                                 , callStart = now
-                                                                 , callEnd = Nothing
-                                                                 , callType = CallTypeVideo
-                                                                 , callStatus = Nothing
-                                                                 }
-                        Just PushMsgTypeAudioCall ->
-                            liftHandler $ runDB $ insert_ $ Call { callCaller = sid
-                                                                 , callCallee = rid
-                                                                 , callStart = now
-                                                                 , callEnd = Nothing
-                                                                 , callType = CallTypeAudio
-                                                                 , callStatus = Nothing
-                                                                 }
+                      case (messageType, callId) of
+                        
+                        (Just PushMsgTypeAccept, Just cid) ->
+                            liftHandler $ runDB $ update $ \x -> do
+                            set x [CallStatus =. just (val CallStatusAccepted)]
+                            where_ $ x ^. CallId ==. val cid
+                            
+                        (Just PushMsgTypeDecline, Just cid) ->
+                            liftHandler $ runDB $ update $ \x -> do
+                            set x [CallStatus =. just (val CallStatusDeclined)]
+                            where_ $ x ^. CallId ==. val cid
+                            
+                        (Just PushMsgTypeEndSession, Just cid) ->
+                            liftHandler $ runDB $ update $ \x -> do
+                            set x [ CallStatus =. just (val CallStatusEnded)
+                                  , CallEnd =. just (val now)
+                                  ]
+                            where_ $ x ^. CallId ==. val cid
+                            
                         _ -> return ()
                           
                       return ()

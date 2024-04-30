@@ -1,3 +1,4 @@
+EntityCall: L'entité « Appel »
 CallCanceled: Appel annulé
 SelectCalleeToCall: Sélectionnez un appelé dans la liste à appeler
 YouHaveNotMadeAnyCallsYet: Vous n'avez pas encore passé d'appels
@@ -196,3 +197,5 @@ Doc013: Un abonnement push est créé lorsqu'un utilisateur est ajouté à sa li
 Doc014: L'abonnement peut être vérifié ou renouvelé à partir de l'élément de menu « Afficher le contact ».
 
 Doc015 href: <a href=#{href} target=_blank>Les notifications Web Push</a> sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.
+
+Doc016: L'entité « Appel » représente les appels sortants et entrants vers l'utilisateur.
