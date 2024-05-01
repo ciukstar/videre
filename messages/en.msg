@@ -57,6 +57,8 @@ IncomingCall: Incoming call
 OutgoingCall: Outgoing call
 AudioCall: Audio call
 VideoCall: Video call
+Audio: Audio
+Video: Video
 ContactList: Contact list
 TextChat: Chat via text message
 NewMessage: New message

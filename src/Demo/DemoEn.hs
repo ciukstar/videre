@@ -8,12 +8,6 @@ import Control.Monad.IO.Class (MonadIO (liftIO))
 import Control.Monad.Trans.Reader (ReaderT)
 
 import Data.FileEmbed (embedFile)
-import Data.Time
-    ( utcToLocalTime, addLocalTime, nominalDay, getCurrentTimeZone, addUTCTime
-    )
-import Data.Time.Calendar (addGregorianYearsClip)
-import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
-import Data.Time.LocalTime (localDay, localTimeOfDay)
 
 import Database.Persist.SqlBackend (SqlBackend)
 
@@ -41,11 +35,6 @@ import Settings (AppSettings (appDevelopment))
 
 fillDemoEn :: MonadIO m => AppSettings -> ReaderT SqlBackend m ()
 fillDemoEn appSettings = do
-
-    tz <- liftIO getCurrentTimeZone
-    now <- liftIO getCurrentTime
-    let today = utctDay now
-    let localNow = utcToLocalTime tz now
 
     if appDevelopment appSettings
         then do    

@@ -48,8 +48,8 @@ import Text.Show (Show (show))
 import Text.Hamlet (Html)
 
 
-data CallStatus = CallStatusMissed | CallStatusIncoming | CallStatusOutgoing
-                | CallStatusAccepted | CallStatusDeclined | CallStatusEnded
+data CallStatus = CallStatusAccepted | CallStatusDeclined
+                | CallStatusCanceled | CallStatusEnded
     deriving (Eq, Show, Read)
 derivePersistField "CallStatus"
 

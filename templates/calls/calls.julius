@@ -14,32 +14,32 @@ Array.from(
 });
 
 Array.from(
-  document.querySelectorAll('md-list-item.app-call')
-).forEach(item => {
-  item.addEventListener('click', (e) => {
+  document.querySelectorAll('md-icon-button.app-call')
+).forEach((call) => {
+  call.addEventListener('click', (e) => {
 
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: item.dataset.messageType,
+	messageType: call.dataset.messageType,
 	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
 	title: #{msgr MsgAppName},
-	body: item.dataset.body,
-	channelId: item.dataset.channelId,
+	body: call.dataset.body,
+	channelId: call.dataset.channelId,
 	senderId: #{show $ fromSqlKey uid},
-	recipientId: item.dataset.recipientId,
-	videor: 'videor' in item.dataset,
+	recipientId: call.dataset.recipientId,
+	videor: 'videor' in call.dataset,
 	audior: true,
-	videos: 'videos' in item.dataset,
+	videos: 'videos' in call.dataset,
 	audios: true
       })
     }).then(
       (result) => {
 	
-	const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${item.dataset.i}`);
+	const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${call.dataset.i}`);
 	
-	document.getElementById(`idButtonOutgoingCallCancel${item.dataset.i}`).addEventListener('click', (e) => {
+	document.getElementById(`idButtonOutgoingCallCancel${call.dataset.i}`).addEventListener('click', (e) => {
 
 	  fetch('@{VideoR PushMessageR}', {
 	    method: 'POST',
@@ -48,18 +48,19 @@ Array.from(
 	      messageType: #{show PushMsgTypeCancel},
 	      title: #{msgr MsgAppName},
 	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
-	      body: item.dataset.bodyCancel,
-	      channelId: item.dataset.channelId,
+	      body: call.dataset.bodyCancel,
+	      channelId: call.dataset.channelId,
 	      senderId: #{show $ fromSqlKey uid},
-	      recipientId: item.dataset.recipientId,
+	      recipientId: call.dataset.recipientId,
 	      videor: false,
 	      audior: false,
 	      videos: false,
 	      audios: false
 	    })
-	  }).then(
-	    (result) => dlgOutgoingCall.close();
-	  ).catch(
+	  }).then((result) => {
+	    dlgOutgoingCall.close();
+	    window.location.reload();
+	  }).catch(
 	    (err) => console.error(err);
 	  );
 	  
@@ -80,12 +81,15 @@ Array.from(
 	      audios: message.data.audios
 	    });
 
-	    window.location.href = `${item.dataset.videoroom}?${params}`;
+	    window.location.href = `${call.dataset.videoroom}?${params}`;
 	    
 	  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
 
 	    dlgOutgoingCall.close();
-	    document.getElementById(`idDialogCallDeclined${item.dataset.i}`).show();
+	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).show();
+	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).addEventListener('closed', () => {
+	      window.location.reload();
+	    });
 	    
 	  }
 	  

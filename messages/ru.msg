@@ -57,6 +57,8 @@ IncomingCall: Входящий звонок
 OutgoingCall: Исходящий звонок
 AudioCall: Аудио звонок
 VideoCall: Видеозвонок
+Audio: Аудио
+Video: Видео
 ContactList: Список контактов
 TextChat: Чат с помощью текстового сообщения
 NewMessage: Новое сообщение

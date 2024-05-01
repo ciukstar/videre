@@ -51,8 +51,11 @@ self.addEventListener('notificationclick', (e) => {
 	channelId: e.notification.data.channelId,
 	senderId: e.notification.data.recipientId,
 	recipientId: e.notification.data.senderId,
-	video: e.notification.data.video,
-	audio: e.notification.data.audio
+	videor: e.notification.data.videor,
+	audior: e.notification.data.audior,
+	videos: e.notification.data.videos,
+	audios: e.notification.data.audios,
+	callId: e.notification.data.audios
       })
     });
     
@@ -91,8 +94,11 @@ self.addEventListener('notificationclose', (e) => {
       channelId: e.notification.data.channelId,
       senderId: e.notification.data.recipientId,
       recipientId: e.notification.data.senderId,
-      video: e.notification.data.video,
-      audio: e.notification.data.audio
+      videor: e.notification.data.videor,
+      audior: e.notification.data.audior,
+      videos: e.notification.data.videos,
+      audios: e.notification.data.audios,
+      callId: e.notification.data.audios
     })
   });
 });

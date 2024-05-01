@@ -74,8 +74,8 @@ import Foundation.Data
       , MsgAllowToBeNotifiedBy, MsgUserHasNotAddedYouToHisContactListYet
       , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
       , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
-      , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom
-      , MsgCallCanceledByCaller
+      , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
+      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
       )
     )
 
@@ -93,6 +93,8 @@ import Model
     , StoreType
       ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
     , apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
+    , CallStatus
+      ( CallStatusAccepted, CallStatusDeclined, CallStatusCanceled, CallStatusEnded )
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
@@ -100,7 +102,7 @@ import Model
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
       , CallStart
-      ), CallStatus (CallStatusAccepted, CallStatusDeclined, CallStatusEnded)
+      )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -160,78 +162,38 @@ import Yesod.Static (StaticRoute)
 getCalleesR :: UserId -> Handler Html
 getCalleesR uid = do
 
-    users <- runDB $ select $ do
-        x <- from $ table @User
-        where_ $ x ^. UserId !=. val uid
-        orderBy [desc (x ^. UserId)]
-        return x
+    endpoint <- lookupGetParam "endpoint"
 
-    idFormPostContacts <- newIdent
-    idDialogSubscribe <- newIdent
+    callees <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
 
-    mVAPIDKeys <- getVAPIDKeys
+        x :& e :& h :& s :& s' <- from $ table @Contact
+            `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
 
-    case mVAPIDKeys of
-      Just vapidKeys -> do
+                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
+                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
+            )
+            `leftJoin` table @PushSubscription `on`
+            (
+                \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
+                
+                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
+            )
+        where_ $ x ^. ContactOwner ==. val uid
 
-          (fw,et) <- generateFormPost $ formCallees uid users vapidKeys idFormPostContacts idDialogSubscribe
-
-          msgs <- getMessages
-          defaultLayout $ do
-              setTitleI MsgContacts
-              idFabAdd <- newIdent
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
-              $(widgetFile "calls/callees/callees")
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
-
-
-formCallees :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text
-             -> Form ([Entity User], Maybe (Text,Text,Text))
-formCallees uid options vapidKeys idFormPostContacts idDialogSubscribe extra = do
-
-    (endpointR, endpointV) <- mopt hiddenField "" Nothing
-    (p256dhR, p256dhV) <- mopt hiddenField "" Nothing
-    (authR, authV) <- mopt hiddenField "" Nothing
-    (usersR,usersV) <- mreq (usersFieldList (option <$> options)) "" Nothing
-
-    idButtonSubmitNoSubscription <- newIdent
-    idButtonSubmitWithSubscription <- newIdent
-
-    let applicationServerKey = vapidPublicKeyBytes vapidKeys
-
-    return ( (,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR)
-           , $(widgetFile "calls/callees/form")
-           )
-  where
-      option e@(Entity _ (User email _ _ _ _ _ _ _)) = (email,e)
-
-      usersFieldList :: RenderMessage App msg => [(msg, Entity User)] -> Field Handler [Entity User]
-      usersFieldList = usersField . optionsPairs
-
-      usersField :: Handler (OptionList (Entity User)) -> Field Handler [Entity User]
-      usersField ioptlist = (multiSelectField ioptlist)
-          { fieldView = \theId name attrs eval _idReq -> do
-              opts <- olOptions <$> handlerToWidget ioptlist
-              let optselected (Left _) _ = False
-                  optselected (Right vals) opt = optionInternalValue opt `elem` vals
-              [whamlet|
-                <md-list ##{theId}>
-                  $forall opt <- opts
-                    <md-list-item type=button onclick="this.querySelector('md-radio').click()">
-                      <img slot=start src=@{AccountPhotoR (entityKey $ optionInternalValue opt)}
-                        width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-
-                      <div slot=headline>
-                        $maybe name <- userName $ entityVal $ optionInternalValue opt
-                          #{name}
-                      <div slot=supporting-text>
-                        #{optionDisplay opt}
-
-                      <md-radio touch-target=wrapper slot=end onclick="event.stopPropagation()"
-                        name=#{name} value=#{optionExternalValue opt} *{attrs} :optselected eval opt:checked>
-              |]
-          }
+        orderBy [desc (e ^. UserId)]
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (s, s')))) )
+    
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgContacts
+        idFabAdd <- newIdent
+        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
+        toWidget $(juliusFile "static/js/app-snackbar.julius")
+        $(widgetFile "calls/callees/callees")
 
 
 getCallsR :: UserId -> Handler Html

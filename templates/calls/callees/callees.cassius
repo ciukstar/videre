@@ -20,7 +20,19 @@ main
     .error
         align-self: stretch
         padding: 1rem
-        
+
+    div[slot=start]
+        position: relative
+        img.user-photo
+            clip-path: circle(50%)
+        .pone-disabled, .notifications-disabled
+            position: absolute
+            top: 0
+            right: -0.5rem
+            color: white
+            background: red
+            clip-path: circle(50%)
+
     .app-attribution
         position: relative
         margin: 0
@@ -32,6 +44,11 @@ main
             bottom: 0
             left: 0.4rem
             font-size: 0.5rem
+
+    figure.app-callee
+        text-align: center
+        img.user-photo
+          clip-path: circle(50%)
         
     ##{idFabAdd}
         position: fixed

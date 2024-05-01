@@ -12,18 +12,69 @@
     <div.app-banner.error.body-medium>
       #{status}. #{msg}
 
-  $if null users
+  $if null callees
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
       <figcaption.body-large>
         _{MsgNoRegisteredUsersYet}
   $else
+    <md-list>
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (subscription, accessible)))) <- callees
+        $with i <- fromSqlKey cid
+          <md-list-item type=button onclick="document.getElementById('idDialogDetails#{i}').show()">
+            <div slot=start>
+              <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
+              $maybe _ <- subscription
+                $maybe _ <- accessible
+                $nothing
+                  <md-icon.pone-disabled>phone_disabled
+              $nothing
+                <md-icon.notifications-disabled>notifications_off
+            <div slot=headline>
+              $maybe name <- name
+                #{name}
+              $nothing
+                #{email}
+            <md-icon-button slot=end>
+              <md-icon>more_horiz
+          $maybe attrib <- attrib
+            <div.app-attribution>
+              <div.app-attribution-wrapper.body-small>
+                #{attrib}
+                
+          <md-divider>
+          
+          <md-dialog.app-details #idDialogDetails#{i}>
+            <div slot=headline>
+              <span style="flex:1">_{MsgContact}
+              <md-icon-button type=button title=_{MsgClose}
+                onclick="document.getElementById('idDialogDetails#{i}').close()">
+                <md-icon>close
+              
+            <div slot=content>
+              <figure.app-callee>
+                <img.user-photo src=@{AccountPhotoR rid} width=96 height=96 loading=lazy>
+                <figcaption>
+                  $maybe attribution <- attrib
+                    <div.body-small>
+                      ^{attribution}
+                  $maybe name <- name
+                    <div.body-large>#{name}
+                  <div.body-medium>#{email}
 
-    <form method=post action=@{ContactsR uid} enctype=#{et} ##{idFormPostContacts}>
-      ^{fw}
+            <div slot=actions>
 
-        
-  <md-fab ##{idFabAdd} label=_{MsgAdd} aria-label=_{MsgAdd}>
+              <md-outlined-button type=button>
+                <md-icon slot=icon>call
+                _{MsgAudio}
+
+              <md-filled-button type=button>
+                <md-icon slot=icon>videocam
+                _{MsgVideoCall}
+                
+
+  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{ContactsR uid}>
     <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs

@@ -25,7 +25,8 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  videor: false,
 	  audior: false,
 	  videos: message.data.videos,
-	  audios: message.data.audios
+	  audios: message.data.audios,
+	  callId: message.data.callId
 	})
       }).then(function (result) {
 	document.getElementById(dialogId).close();
@@ -51,7 +52,8 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  videor: video,
 	  audior: audio,
 	  videos: message.data.videos,
-	  audios: message.data.audios
+	  audios: message.data.audios,
+	  callId: message.data.callId
 	})
       }).then((result) => {
 
@@ -92,7 +94,8 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  videor: message.data.videor,
 	  audior: message.data.audior,
 	  videos: message.data.videos,
-	  audios: message.data.audios
+	  audios: message.data.audios,
+	  callId: message.data.callId
 	})
       }).then((result) => {
 

@@ -57,6 +57,8 @@ IncomingCall: Apel de intrare
 OutgoingCall: Apel de ieșire
 AudioCall: Apel audio
 VideoCall: Apel video
+Audio: Audio
+Video: Video
 ContactList: Listă de contacte
 TextChat: Chat prin mesaj text
 NewMessage: Mesaj nou

@@ -24,9 +24,9 @@ import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, Value (unValue), from, table, where_, val, update, set, just
+    ( select, selectOne, Value (unValue), from, table, where_, val, update, set
     , (^.), (==.), (=.)
-    , select
+    , just
     )
 import Database.Persist
     ( Entity (Entity, entityVal), PersistStoreWrite (insert) )
@@ -56,15 +56,19 @@ import Model
     , Store, UserPhoto (UserPhoto)
     , Call (Call, callCaller, callCallee, callStart, callEnd, callType, callStatus)
     , CallType (CallTypeVideo, CallTypeAudio)
+    , CallStatus
+      ( CallStatusAccepted, CallStatusDeclined, CallStatusEnded
+      , CallStatusCanceled
+      )
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeEndSession, PushMsgTypeAudioCall
-      , PushMsgTypeAccept, PushMsgTypeDecline
+      , PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeCancel
       )
     , EntityField
       ( UserId, TokenApi, TokenId, TokenStore
       , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
-      ), CallStatus (CallStatusAccepted, CallStatusDeclined, CallStatusEnded)
+      )
     )
 
 import Network.HTTP.Client (Manager)
@@ -322,7 +326,7 @@ postPushMessageR = do
                                                             , callType = CallTypeAudio
                                                             , callStatus = Nothing
                                                             })
-            _ -> return Nothing
+            _otherwise -> return Nothing
 
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
@@ -373,7 +377,14 @@ postPushMessageR = do
                                   ]
                             where_ $ x ^. CallId ==. val cid
                             
-                        _ -> return ()
+                        (Just PushMsgTypeCancel, Just cid) ->
+                            liftHandler $ runDB $ update $ \x -> do
+                            set x [ CallStatus =. just (val CallStatusCanceled)
+                                  , CallEnd =. just (val now)
+                                  ]
+                            where_ $ x ^. CallId ==. val cid
+                            
+                        _otherwise -> return ()
                           
                       return ()
 
