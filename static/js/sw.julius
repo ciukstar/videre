@@ -106,7 +106,7 @@ self.addEventListener('notificationclose', (e) => {
 
 self.addEventListener('fetch', function (e) {
 
-  if (e.request.method === 'GET' && e.request.url.includes('my/contacts/')) {
+  if (e.request.method === 'GET' && (e.request.url.includes('my/contacts/') || e.request.url.includes('/callees/'))) {
 
     e.respondWith(
       self.registration.pushManager.getSubscription().then(function (subscription) {

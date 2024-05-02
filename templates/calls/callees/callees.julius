@@ -1,1 +1,93 @@
 
+
+Array.from(
+  document.querySelectorAll('.app-button-call')
+).forEach((call) => {
+  call.addEventListener('click', (e) => {
+
+    fetch('@{VideoR PushMessageR}', {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	messageType: call.dataset.messageType,
+	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+	title: call.dataset.title,
+	body: call.dataset.body,
+	channelId: call.dataset.channelId,
+	senderId: #{show $ fromSqlKey uid},
+	recipientId: call.dataset.recipientId,
+	videor: 'videor' in call.dataset,
+	audior: true,
+	videos: 'videos' in call.dataset,
+	audios: true
+      })
+    }).then(
+      (result) => {
+	
+	document.getElementById(`idDialogDetails${call.dataset.i}`).close();
+	const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${call.dataset.i}`);
+	
+	document.getElementById(`idButtonOutgoingCallCancel${call.dataset.i}`).addEventListener('click', (e) => {
+
+	  fetch('@{VideoR PushMessageR}', {
+	    method: 'POST',
+	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	    body: new URLSearchParams({
+	      messageType: #{show PushMsgTypeCancel},
+	      title: call.dataset.title,
+	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
+	      body: call.dataset.bodyCancel,
+	      channelId: call.dataset.channelId,
+	      senderId: #{show $ fromSqlKey uid},
+	      recipientId: call.dataset.recipientId,
+	      videor: false,
+	      audior: false,
+	      videos: false,
+	      audios: false
+	    })
+	  }).then((result) => {
+	    dlgOutgoingCall.close();
+	    window.location.reload();
+	  }).catch(
+	    (err) => console.error(err);
+	  );
+	  
+	});
+
+	navigator.serviceWorker.addEventListener('message', function (message) {
+	  
+	  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+	    
+	    dlgOutgoingCall.close();
+	    
+	    const params = new URLSearchParams({
+	      channel: message.data.channelId,
+	      backlink: '@{CallsR uid}',
+	      videor: message.data.videor,
+	      audior: message.data.audior,
+	      videos: message.data.videos,
+	      audios: message.data.audios
+	    });
+
+	    window.location.href = `${call.dataset.videoroom}?${params}`;
+	    
+	  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+
+	    dlgOutgoingCall.close();
+	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).show();
+	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).addEventListener('closed', () => {
+	      window.location.reload();
+	    });
+	    
+	  }
+	  
+	});
+	
+	dlgOutgoingCall.show();
+      }
+    ).catch(
+      (err) => { console.error(err); }
+    );
+    
+  });
+});

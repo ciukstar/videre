@@ -64,13 +64,67 @@
 
             <div slot=actions>
 
-              <md-outlined-button type=button>
+              <md-outlined-button.app-button-call type=button data-i=#{i} #idButtonAuioCall#{i}
+                data-message-type=#{show PushMsgTypeAudioCall}
+                data-title=_{MsgAppName}
+                data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                data-channel-id=#{show $ fromSqlKey cid}
+                data-recipient-id=#{show $ fromSqlKey rid}
+                data-audior
+                data-audios
+                data-videoroom=@{VideoR $ OutgoingR uid rid}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                 <md-icon slot=icon>call
                 _{MsgAudio}
 
-              <md-filled-button type=button>
+              <md-filled-button.app-button-call type=button data-i=#{i} #idButtonVideoCall#{i}
+                data-message-type=#{show PushMsgTypeVideoCall}
+                data-title=_{MsgAppName}
+                data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                data-channel-id=#{show $ fromSqlKey cid}
+                data-recipient-id=#{show $ fromSqlKey rid}
+                data-videor 
+                data-videos
+                data-videoroom=@{VideoR $ OutgoingR uid rid}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                
                 <md-icon slot=icon>videocam
                 _{MsgVideoCall}
+
+          <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+            <div slot=headline>
+              _{MsgOutgoingCall} ...
+
+            <div slot=content>
+              <figure>
+                <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+              <md-icon>double_arrow
+
+              <figure>
+                <img src=@{AccountPhotoR rid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+
+            <div slot=actions>
+              <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
+                <md-icon slot=icon>call_end
+                _{MsgCancel}
+
+
+          <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
+            <div slot=headline>
+              _{MsgCallDeclined}
+
+            <div slot=content>
+              <p.body-large>
+                $maybe name <- name
+                  _{MsgCalleeDeclinedTheCall name}
+                $nothing
+                  _{MsgCalleeDeclinedTheCall email}
+
+            <div slot=actions>
+              <md-text-button type=button
+                onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+                _{MsgClose}
                 
 
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
