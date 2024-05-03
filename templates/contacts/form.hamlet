@@ -12,7 +12,7 @@
   <div slot=headline>
     _{MsgSubscribeToNotifications}
 
-  <p.body-medium slot=content>
+  <p.body-medium slot=content ##{idDialogSubscribeContent}>
     _{MsgAllowToBeNotified}.
 
   <div slot=actions>

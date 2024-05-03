@@ -535,6 +535,7 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe extra = 
     (authR, authV) <- mopt hiddenField "" Nothing
     (usersR,usersV) <- mreq (usersFieldList (option <$> options)) "" Nothing
 
+    idDialogSubscribeContent <- newIdent
     idButtonSubmitNoSubscription <- newIdent
     idButtonSubmitWithSubscription <- newIdent
 

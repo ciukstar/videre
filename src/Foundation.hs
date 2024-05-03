@@ -56,11 +56,13 @@ import System.Directory (doesFileExist)
 import System.IO (readFile')
 
 import Text.Blaze.Html.Renderer.Utf8 (renderHtml)
+import Text.Cassius (cassiusFile)
 import Text.Email.Validate (emailAddress, localPart)
 import Text.Hamlet ( hamletFile )
 import Text.Jasmine ( minifym )
-import Text.Shakespeare.Text (stext)
+import Text.Julius (juliusFile)
 import Text.Printf (printf)
+import Text.Shakespeare.Text (stext)
 
 import VideoRoom.Data (Route(IncomingR, PushMessageR))
 
@@ -98,8 +100,6 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
-import Text.Cassius (cassiusFile)
-import Text.Julius (juliusFile)
 
 
 -- | A convenient synonym for creating forms.
