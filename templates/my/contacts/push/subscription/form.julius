@@ -17,8 +17,8 @@ document.getElementById(#{fvId v}).onchange = function (e) {
             userVisibleOnly: true, applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
           }).then(function (subscription) {
 	    
-	    if (subscription) { 
-	      const subscr = JSON.parse(JSON.stringify(subscription));
+	    if (subscription) {
+	      const subscr = JSON.parse( JSON.stringify(subscription) );
 	      subscr.subscriber = #{rawJS subscriberId};
 	      subscr.publisher = #{rawJS publisherId};
 	      

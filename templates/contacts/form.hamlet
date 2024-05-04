@@ -4,6 +4,7 @@
 ^{fvInput endpointV}
 ^{fvInput p256dhV}
 ^{fvInput authV}
+^{fvInput locationV}
 
 ^{fvInput usersV}
 

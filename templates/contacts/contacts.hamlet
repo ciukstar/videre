@@ -1,6 +1,6 @@
 
 <header.app-top-app-bar.background>
-  <md-icon-button type=link href=@{MyContactsR uid}>
+  <md-icon-button type=link href=#{backlink}>
     <md-icon>arrow_back
 
   <h1.title-large>
@@ -19,7 +19,7 @@
         _{MsgNoRegisteredUsersYet}
   $else
 
-    <form method=post action=@{ContactsR uid} enctype=#{et} ##{idFormPostContacts}>
+    <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
       ^{fw}
 
         

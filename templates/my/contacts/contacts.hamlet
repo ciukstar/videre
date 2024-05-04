@@ -52,8 +52,9 @@
         <md-divider>
         
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{ContactsR uid}>
-    <md-icon slot=icon>add
+    $with backlink <- rndr $ MyContactsR uid
+      <a href=@?{(ContactsR uid,[("backlink",backlink)])}>
+      <md-icon slot=icon>add
 
 $forall (status,msg) <- filter ((/=) statusError . fst) msgs
   <aside.app-snackbar.shape-small.elevation-1

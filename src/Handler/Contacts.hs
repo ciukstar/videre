@@ -123,7 +123,10 @@ import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
-    ( YesodVideo (getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute, getAppSettings)
+    ( YesodVideo
+      ( getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute
+      , getAppSettings
+      )
     , Route (OutgoingR)
     )
 import VideoRoom.Data (Route (PushMessageR))
@@ -141,12 +144,12 @@ import Yesod.Core
     , ToWidget (toWidget), getMessageRender
     )
 import Yesod.Core.Handler
-    ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
+    ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON, getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
-    , Option (optionInternalValue, optionExternalValue, optionDisplay)
+    , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField
     )
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost, mopt)
 import Yesod.Core.Json (parseCheckJsonBody, returnJson)
@@ -157,6 +160,7 @@ import Yesod.Form.Types
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
+import Yesod.Form.Input (runInputGet, ireq)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -186,7 +190,8 @@ getCalleesR uid = do
 
         orderBy [desc (e ^. UserId)]
         return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (s, s')))) )
-    
+
+    rndr <- getUrlRender
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgContacts
@@ -437,6 +442,7 @@ getMyContactsR uid = do
         orderBy [desc (e ^. UserId)]
         return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
 
+    rndr <- getUrlRender
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
@@ -449,7 +455,7 @@ getMyContactsR uid = do
 
 postContactsR :: UserId -> Handler Html
 postContactsR uid = do
-
+    
     users <- runDB $ select $ do
         x <- from $ table @User
         where_ $ x ^. UserId !=. val uid
@@ -464,42 +470,45 @@ postContactsR uid = do
     case mVAPIDKeys of
       Just vapidKeys -> do
 
-        ((fr,fw),et) <- runFormPost $ formContacts uid users vapidKeys idFormPostContacts idDialogSubscribe
+          ((fr,fw),et) <- runFormPost $ formContacts
+              uid users vapidKeys idFormPostContacts idDialogSubscribe Nothing
 
-        case fr of
-          FormSuccess (contacts, subscription) -> do
-              now <- liftIO getCurrentTime
-              forM_ contacts $ \(Entity eid _) -> do
-                  _ <- runDB $ upsert (Contact uid eid now) []
-                  case subscription of
-                    Just (endpoint,p256dh,auth) ->  do
-                        _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
-                            (PushSubscription uid eid endpoint p256dh auth)
-                            [ PushSubscriptionP256dh =. p256dh
-                            , PushSubscriptionAuth =. auth
-                            ]
-                        return ()
-                    Nothing -> return ()
-              addMessageI statusSuccess MsgNewContactsAdded
-              redirect $ MyContactsR uid
-          FormFailure errs -> defaultLayout $ do
-              setTitleI MsgContacts
-              forM_ errs $ \err -> addMessage statusError (toHtml err)
-              msgs <- getMessages
-              idFabAdd <- newIdent
-              $(widgetFile "contacts/contacts")
-          FormMissing -> defaultLayout $ do
-              setTitleI MsgContacts
-              addMessageI statusError MsgInvalidFormData
-              msgs <- getMessages
-              idFabAdd <- newIdent
-              $(widgetFile "contacts/contacts")
+          case fr of
+            FormSuccess (contacts, subscription, location) -> do
+                now <- liftIO getCurrentTime
+                forM_ contacts $ \(Entity eid _) -> do
+                    _ <- runDB $ upsert (Contact uid eid now) []
+                    case subscription of
+                      Just (endpoint,p256dh,auth) ->  do
+                          _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
+                              (PushSubscription uid eid endpoint p256dh auth)
+                              [ PushSubscriptionP256dh =. p256dh
+                              , PushSubscriptionAuth =. auth
+                              ]
+                          return ()
+                      Nothing -> return ()
+                addMessageI statusSuccess MsgNewContactsAdded
+                redirect location
+            FormFailure errs -> defaultLayout $ do
+                setTitleI MsgContacts
+                forM_ errs $ \err -> addMessage statusError (toHtml err)
+                msgs <- getMessages
+                idFabAdd <- newIdent
+                backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
+                $(widgetFile "contacts/contacts")
+            FormMissing -> defaultLayout $ do
+                setTitleI MsgContacts
+                addMessageI statusError MsgInvalidFormData
+                msgs <- getMessages
+                idFabAdd <- newIdent
+                backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
+                $(widgetFile "contacts/contacts")
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
 getContactsR :: UserId -> Handler Html
 getContactsR uid = do
-
+    
     users <- runDB $ select $ do
         x <- from $ table @User
         where_ $ x ^. UserId !=. val uid
@@ -508,13 +517,15 @@ getContactsR uid = do
 
     idFormPostContacts <- newIdent
     idDialogSubscribe <- newIdent
+    backlink <- runInputGet $ ireq urlField "backlink"
 
     mVAPIDKeys <- getVAPIDKeys
 
     case mVAPIDKeys of
       Just vapidKeys -> do
 
-          (fw,et) <- generateFormPost $ formContacts uid users vapidKeys idFormPostContacts idDialogSubscribe
+          (fw,et) <- generateFormPost $ formContacts
+              uid users vapidKeys idFormPostContacts idDialogSubscribe (Just backlink)
 
           msgs <- getMessages
           defaultLayout $ do
@@ -526,13 +537,14 @@ getContactsR uid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text
-             -> Form ([Entity User], Maybe (Text,Text,Text))
-formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe extra = do
+formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Maybe Text
+             -> Form ([Entity User], Maybe (Text,Text,Text),Text)
+formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe backlink extra = do
 
     (endpointR, endpointV) <- mopt hiddenField "" Nothing
     (p256dhR, p256dhV) <- mopt hiddenField "" Nothing
     (authR, authV) <- mopt hiddenField "" Nothing
+    (locationR, locationV) <- mreq hiddenField "" backlink
     (usersR,usersV) <- mreq (usersFieldList (option <$> options)) "" Nothing
 
     idDialogSubscribeContent <- newIdent
@@ -541,7 +553,7 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe extra = 
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
 
-    return ( (,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR)
+    return ( (,,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR) <*> locationR
            , $(widgetFile "contacts/form")
            )
   where
