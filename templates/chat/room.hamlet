@@ -42,23 +42,24 @@
 
     $forall (day,messages) <- chats
       <time.day-bubble.body-small datetime=#{show day}>#{show day}
-      $forall Entity _ (Chat userId _ time msg _ _ _) <- messages
+      $forall (Value userId, _, Value time, Value msg, Value callType, Value media) <- messages
         <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
-          <span>#{msg}
+          <span.bubble-content>
+            $if media
+              $case callType
+                $of CallTypeVideo
+                  <md-icon style="vertical-align:bottom">videocam
+                  _{MsgVideoCall}
+                $of CallTypeAudio
+                  <md-icon style="vertical-align:bottom">call
+                  _{MsgAudioCall}
+            $else
+              #{msg}
           <span.bubble-status-line>
             <time.time-bubble.body-small datetime=#{show time}>
             <i.icon>done_all
           <span.bubble-tail-out>
             <span.bubble-tail>
-
-    $forall (Entity _ (Call _ _ start end ctype status), Entity uid _) <- calls
-      <p.bubble.body-medium :sid == uid:.right.user :sid /= uid:.left.interlocutor>
-        <span>_{MsgVideoCall}
-        <span.bubble-status-line>
-          <time.time-bubble.body-small datetime=#{show start}>
-          <i.icon>done_all
-        <span.bubble-tail-out>
-          <span.bubble-tail>
       
 
   <form ##{idMessageForm}>

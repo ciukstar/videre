@@ -28,9 +28,9 @@ import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
-    , (^.), (==.), (=.), (&&.), (||.), (:&)((:&))
-    , just, Value (unValue), Entity (entityVal), not_, innerJoin, on
+    ( selectOne, from, table, where_, val, update, set, select
+    , (^.), (==.), (=.)
+    , just, Value (unValue, Value), Entity (entityVal), not_, unionAll_, orderBy, desc
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
@@ -64,15 +64,17 @@ import Model
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription), secretVolumeVapid, apiInfoVapid
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , ContactId, Token, Store, Call (Call), Contact (Contact)
+    , ContactId, Token, Store, Call
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeMessage
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
       )
+    , CallType (CallTypeAudio, CallTypeVideo)
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
-      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, ContactId, CallCaller, CallCallee
+      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher
+      , CallCaller, CallCallee, CallType, CallStart, ChatMessage
       )
     )
 
@@ -172,7 +174,7 @@ getChatRoomR sid rid cid = do
         x <- from $ table @PushSubscription
         where_ $ x ^. PushSubscriptionSubscriber ==. val rid
         return x )
-        
+
 
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatStatus =. val ChatMessageStatusRead]
@@ -182,22 +184,56 @@ getChatRoomR sid rid cid = do
 
     webSockets (chatApp sid rid cid)
 
-    chats <- liftHandler $ M.toList . groupByKey (\(Entity _ (Chat _ _ t _ _ _ _)) -> utctDay t) <$> runDB ( select $ do
-        x <- from $ table @Chat
-        where_ $ ( (x ^. ChatUser ==. val sid)
-                   &&. (x ^. ChatInterlocutor ==. val rid)
-                 ) ||. ( (x ^. ChatUser ==. val rid)
-                         &&. (x ^. ChatInterlocutor ==. val sid)
+    chats <- liftHandler $ groupByDay <$> runDB ( select $ do
+        (uid,iid,time,msg,ctype,media) <- from $
+            ( do
+                  x <- from $ ( do
+                                    x <- from $ table @Chat
+                                    where_ $ x ^. ChatUser ==. val sid
+                                    where_ $ x ^. ChatInterlocutor ==. val rid
+                                    return x
+                              )
+                       `unionAll_`
+                       ( do
+                             x <- from $ table @Chat
+                             where_ $ x ^. ChatInterlocutor ==. val sid
+                             where_ $ x ^. ChatUser ==. val rid
+                             return x
                        )
-        orderBy [desc (x ^. ChatCreated)]
-        return x )
-
-    calls <- liftHandler $ runDB $ select $ do
-        x :& c <- from $ table @Call
-            `innerJoin` table @User `on` (\(x :& u) -> (x ^. CallCaller ==. u ^. UserId) ||. (x ^. CallCallee ==. u ^. UserId))
-        where_ $ x ^. CallCallee ==. val sid ||. x ^. CallCaller ==. val sid
-        return (x,c)
-
+                  return ( x ^. ChatUser
+                         , x ^. ChatInterlocutor
+                         , x ^. ChatCreated
+                         , x ^. ChatMessage
+                         , val CallTypeAudio
+                         , val False
+                         )
+                    )
+            `unionAll_`
+            ( do
+                  x <- from $ ( do
+                                    x <- from $ table @Call
+                                    where_ $ x ^. CallCaller ==. val sid
+                                    where_ $ x ^. CallCallee ==. val rid
+                                    return x
+                              )
+                      `unionAll_`
+                      ( do
+                            x <- from $ table @Call
+                            where_ $ x ^. CallCallee ==. val sid
+                            where_ $ x ^. CallCaller ==. val rid
+                            return x
+                      )
+                  return ( x ^. CallCaller
+                         , x ^. CallCallee
+                         , x ^. CallStart
+                         , val ("Media call" :: Text)
+                         , x ^. CallType
+                         , val True
+                         )
+            )
+        orderBy [desc time]
+        return (uid,iid,time,msg,ctype,media) )
+    
     toParent <- getRouteToParent
 
     let channel = fromSqlKey cid
@@ -225,6 +261,8 @@ getChatRoomR sid rid cid = do
 
     where
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
+
+      groupByDay = M.toList . groupByKey (\(_, _, Value t, _, _, _) -> utctDay t)
 
 
 chatApp :: YesodChat m
