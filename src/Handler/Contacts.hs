@@ -30,7 +30,7 @@ import ChatRoom
 import ChatRoom.Data (Route (ChatRoomR))
 
 import Control.Applicative (liftA3)
-import Control.Monad (join, forM_)
+import Control.Monad (join, forM_, forM)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Aeson (toJSON)
@@ -46,8 +46,8 @@ import Data.Time.Format.ISO8601 (iso8601Show)
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy, desc, leftJoin, on, just
     , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.), (||.)
-    , Value (unValue), innerJoin, val, where_, selectOne, max_
-    , subSelectMaybe, delete
+    , Value (unValue), innerJoin, val, where_, selectOne
+    , delete, unionAll_
     )
 import Database.Persist
     ( Entity (Entity), entityVal, entityKey, upsertBy, (=.)
@@ -75,7 +75,7 @@ import Foundation.Data
       , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
       , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
       , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
-      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
+      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio, MsgAudioCall
       )
     )
 
@@ -83,7 +83,7 @@ import Material3 (md3mreq, md3switchField)
 
 import Model
     ( statusError, statusSuccess
-    , UserId, User (User, userName), UserPhoto, Chat (Chat)
+    , UserId, User (User, userName), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , PushMsgType
@@ -101,7 +101,7 @@ import Model
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
-      , CallStart
+      , CallStart, ChatMessage, CallType
       )
     )
 
@@ -405,42 +405,71 @@ getMyContactsR uid = do
 
     endpoint <- lookupGetParam "endpoint"
 
-    entries <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
-
-        x :& e :& h :& c :& s :& s' <- from $ table @Contact
+    contacts <- (second (second (first (join . unValue))) <$>) <$> runDB ( select $ do
+        x :& u :& p :& s :& a <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            `leftJoin` table @Chat `on`
-            (
-                \(x :& _ :& _ :& c) -> ( (just (x ^. ContactEntry) ==. c ?. ChatUser)
-                                         &&.
-                                         (just (x ^. ContactOwner) ==. c ?. ChatInterlocutor)
-                                       )
-                &&.
-                c ?. ChatCreated ==. subSelectMaybe ( do
-                                                           y <- from $ table @Chat
-                                                           where_ $ just (y ^. ChatUser) ==. c ?. ChatUser
-                                                           where_ $ just (y ^. ChatInterlocutor) ==. c ?. ChatInterlocutor
-                                                           return $ max_ (y ^. ChatCreated)
-                                                     )
-            )
             `leftJoin` table @PushSubscription `on`
             (
-                \(_ :& e :& _ :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
+                \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
 
                                             &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
                                             &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
             )
             `leftJoin` table @PushSubscription `on`
             (
-                \(_ :& e :& _ :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
+                \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
                 
                                             &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
             )
         where_ $ x ^. ContactOwner ==. val uid
+        return (x, (u, (p ?. UserPhotoAttribution, (s, a)))) )
 
-        orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (c, (s, s'))))) )
+    entries <- forM contacts $ \(c,(i@(Entity iid _),p)) -> do
+        x <- (bimap unValue (bimap unValue (bimap unValue unValue)) <$>) <$> runDB ( selectOne $ do
+            y@(time, (_, (_, _))) <- from $ ( do
+                    z <- from $ ( do
+                                      chat <- from $ table @Chat
+                                      where_ $ chat ^. ChatUser ==. val uid
+                                      where_ $ chat ^. ChatInterlocutor ==. val iid
+                                      return chat
+                                )
+                         `unionAll_` ( do
+                                           chat <- from $ table @Chat
+                                           where_ $ chat ^. ChatUser ==. val iid
+                                           where_ $ chat ^. ChatInterlocutor ==. val uid
+                                           return chat
+                                     )
+                    return ( z ^. ChatCreated
+                           , (z ^. ChatMessage
+                             , ( val CallTypeAudio
+                               , val False
+                               )
+                             )
+                           ) )
+                `unionAll_` ( do
+                    z <- from $ ( do
+                                      call <- from $ table @Call
+                                      where_ $ call ^. CallCaller ==. val uid
+                                      where_ $ call ^. CallCallee ==. val iid
+                                      return call
+                                )
+                         `unionAll_` ( do
+                                           call <- from $ table @Call
+                                           where_ $ call ^. CallCaller ==. val iid
+                                           where_ $ call ^. CallCallee ==. val uid
+                                           return call
+                                     )
+                    return ( z ^. CallStart
+                           , ( val ("Media call" :: Text)
+                             , ( z ^. CallType
+                               , val True
+                               )
+                             )
+                           ) )
+            orderBy [desc time]
+            return y )
+        return (c,(i,(p,x)))
 
     rndr <- getUrlRender
     msgs <- getMessages

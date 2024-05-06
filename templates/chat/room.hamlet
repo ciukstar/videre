@@ -102,16 +102,3 @@
   <div slot=actions>
     <md-text-button type=button onclick="document.getElementById('#{idDialogCallDeclined}').close()">
       _{MsgClose}
-
-      
-<md-dialog ##{idDialogVideoSessionEnded}>
-  <div slot=headline>
-    Call Ended
-
-  <form slot=content method=dialog>
-    <p.body-large>Call Ended ...
-
-  <div slot=actions>
-    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogVideoSessionEnded}').close()">
-      <md-icon slot=icon>close
-      Close

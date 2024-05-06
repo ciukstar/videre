@@ -255,7 +255,6 @@ getChatRoomR sid rid cid = do
         idDialogOutgoingCall <- newIdent
         idButtonOutgoingCallCancel <- newIdent
         idDialogCallDeclined <- newIdent
-        idDialogVideoSessionEnded <- newIdent
 
         $(widgetFile "chat/room")
 
