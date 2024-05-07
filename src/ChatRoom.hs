@@ -347,6 +347,7 @@ chatApp userId interlocutorId contactId = do
                                  subscriptions <- liftHandler $ runDB $ select $ do
                                      x <- from $ table @PushSubscription
                                      where_ $ x ^. PushSubscriptionSubscriber ==. val iid
+                                     where_ $ x ^. PushSubscriptionPublisher ==. val uid
                                      return x
 
                                  sender <- liftHandler $ runDB $ selectOne $ do

@@ -112,7 +112,7 @@ import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
 import Settings.StaticFiles
     ( img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-    ) 
+    )
 
 import System.IO (readFile')
 
@@ -161,6 +161,7 @@ import Yesod.Form.Types
 import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
 import Yesod.Form.Input (runInputGet, ireq)
+import Data.List (sortBy)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -170,7 +171,7 @@ getCalleesR uid = do
 
     callees <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
 
-        x :& e :& h :& s :& s' <- from $ table @Contact
+        x :& e :& h :& s :& a <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
             `leftJoin` table @PushSubscription `on`
@@ -182,14 +183,14 @@ getCalleesR uid = do
             )
             `leftJoin` table @PushSubscription `on`
             (
-                \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
-                
-                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
+                \(_ :& e :& _ :& _ :& a) -> ( just (e ^. UserId) ==. a ?. PushSubscriptionSubscriber )
+
+                                            &&. ( a ?. PushSubscriptionPublisher ==. just (val uid) )
             )
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (s, s')))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (s, a)))) )
 
     rndr <- getUrlRender
     msgs <- getMessages
@@ -203,7 +204,7 @@ getCalleesR uid = do
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
-    
+
     calls <- (second (first (bimap (second (join . unValue)) (second (join . unValue)))) <$>) <$> runDB ( select $ do
 
         x :& caller :& callerPhoto :& callee :& calleePhoto :& c <- from $ table @Call
@@ -220,9 +221,9 @@ getCallsR uid = do
                      ( c ^. ContactOwner ==. val uid )
                        &&. ( (c ^. ContactEntry ==. x ^. CallCaller) ||. (c ^. ContactEntry ==. x ^. CallCallee) )
                  )
-            
+
         where_ ( x ^. CallCaller ==. val uid ||. x ^. CallCallee ==. val uid )
-        
+
         orderBy [desc (x ^. CallStart)]
         return (x, (((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution)), c)) )
 
@@ -231,9 +232,9 @@ getCallsR uid = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgCalls
-        
+
         idFabAdd <- newIdent
-        
+
         toWidget $(cassiusFile "static/css/app-snackbar.cassius")
         toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "calls/calls")
@@ -289,7 +290,7 @@ formSubscribe vapidKeys sid pid cid notif extra = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val pid
         return (x ^. UserName, x ^. UserEmail) )
-    
+
     (r,v) <- md3mreq md3switchField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
@@ -346,12 +347,12 @@ getContactR :: UserId -> UserId -> ContactId -> Handler Html
 getContactR sid pid cid = do
 
     endpoint <- lookupGetParam "endpoint"
-    
+
     contact <- (second (first (join . unValue)) <$>) <$> runDB ( selectOne $ do
         x :& e :& h :& s :& s' <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            
+
             `leftJoin` table @PushSubscription `on`
             (
                 \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
@@ -362,7 +363,7 @@ getContactR sid pid cid = do
             `leftJoin` table @PushSubscription `on`
             (
                 \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
-                
+
                                             &&. ( s' ?. PushSubscriptionPublisher ==. just (val sid) )
             )
         where_ $ x ^. ContactId ==. val cid
@@ -388,7 +389,7 @@ getContactR sid pid cid = do
           defaultLayout $ do
               setTitleI MsgViewContact
               idDialogRemove <- newIdent
-    
+
               toWidget $(cassiusFile "static/css/app-snackbar.cassius")
               toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "my/contacts/contact")
@@ -418,14 +419,14 @@ getMyContactsR uid = do
             )
             `leftJoin` table @PushSubscription `on`
             (
-                \(_ :& e :& _ :& _ :& s') -> ( just (e ^. UserId) ==. s' ?. PushSubscriptionSubscriber )
-                
-                                            &&. ( s' ?. PushSubscriptionPublisher ==. just (val uid) )
+                \(_ :& e :& _ :& _ :& a) -> ( just (e ^. UserId) ==. a ?. PushSubscriptionSubscriber )
+
+                                            &&. ( a ?. PushSubscriptionPublisher ==. just (val uid) )
             )
         where_ $ x ^. ContactOwner ==. val uid
         return (x, (u, (p ?. UserPhotoAttribution, (s, a)))) )
 
-    entries <- forM contacts $ \(c,(i@(Entity iid _),p)) -> do
+    entries <- (sortDescByTime <$>) <$> forM contacts $ \(c,(i@(Entity iid _),p)) -> do
         x <- (bimap unValue (bimap unValue (bimap unValue unValue)) <$>) <$> runDB ( selectOne $ do
             y@(time, (_, (_, _))) <- from $ ( do
                     z <- from $ ( do
@@ -480,11 +481,19 @@ getMyContactsR uid = do
         toWidget $(cassiusFile "static/css/app-snackbar.cassius")
         toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "my/contacts/contacts")
+  where
+      sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
+                                  (Just (t1,_), Just (t2,_)) -> compare t2 t1
+                                  (Just _, Nothing) -> LT
+                                  (Nothing, Just _) -> GT
+                                  (Nothing, Nothing) -> compare cid1 cid2
+                                  
+                              )
 
 
 postContactsR :: UserId -> Handler Html
 postContactsR uid = do
-    
+
     users <- runDB $ select $ do
         x <- from $ table @User
         where_ $ x ^. UserId !=. val uid
@@ -537,7 +546,7 @@ postContactsR uid = do
 
 getContactsR :: UserId -> Handler Html
 getContactsR uid = do
-    
+
     users <- runDB $ select $ do
         x <- from $ table @User
         where_ $ x ^. UserId !=. val uid

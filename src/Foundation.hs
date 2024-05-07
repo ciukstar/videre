@@ -229,7 +229,7 @@ instance Yesod App where
 
     isAuthorized (ChatR _) _ = isAuthenticated
 
-    
+
     isAuthorized (CalleesR uid) _ = isAuthenticatedSelf uid
     isAuthorized (CallsR uid) _ = isAuthenticatedSelf uid
 
@@ -588,14 +588,14 @@ instance YesodAuthEmail App where
 
         (fw,et) <- liftHandler $ generateFormPost formEmailLogin
         msgs <- getMessages
-        
+
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
-        
+
         toWidget $(cassiusFile "static/css/app-snackbar.cassius")
         toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "auth/email")
-        
+
       where
           formEmailLogin :: Form (Text,Text)
           formEmailLogin extra = do
