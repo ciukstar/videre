@@ -1,3 +1,5 @@
+RefreshPage: Actualizează pagina
+Refresh: Actualizează
 EntityCall: Entitatea „Apel”
 CallCanceled: Apel anulat
 SelectCalleeToCall: Selectați un apelat din listă pentru a apela

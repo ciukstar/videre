@@ -1,3 +1,5 @@
+RefreshPage: Обновить страницу
+Refresh: Обновить
 EntityCall: Сущность «Вызов»
 CallCanceled: Вызов отменен
 SelectCalleeToCall: Выберите абонента из списка, чтобы позвонить

@@ -7,6 +7,7 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Handler.Contacts
@@ -24,20 +25,22 @@ module Handler.Contacts
 import ChatRoom
     ( YesodChat
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
-      , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute
+      , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute, getAppSettings
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
 
 import Control.Applicative (liftA3)
+import Control.Lens ((.~), (?~))
 import Control.Monad (join, forM_, forM)
 import Control.Monad.IO.Class (liftIO)
 
-import Data.Aeson (toJSON)
+import Data.Aeson (toJSON, object)
 import qualified Data.Aeson as A
     ( object, Value (Bool), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.Maybe (fromMaybe)
+import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Text (pack, unpack, Text)
 import Data.Time.Clock (getCurrentTime)
@@ -75,7 +78,8 @@ import Foundation.Data
       , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
       , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
       , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
-      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio, MsgAudioCall
+      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
+      , MsgAudioCall, MsgRefreshPage, MsgRefresh
       )
     )
 
@@ -88,7 +92,7 @@ import Model
     , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , PushMsgType
       ( PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel
-      , PushMsgTypeDecline, PushMsgTypeAccept
+      , PushMsgTypeDecline, PushMsgTypeAccept, PushMsgTypeRefresh
       )
     , StoreType
       ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
@@ -101,14 +105,17 @@ import Model
       , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
-      , CallStart, ChatMessage, CallType
+      , CallStart, ChatMessage, CallType, PushSubscriptionId
       )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
 import Network.HTTP.Types.Status (status400)
 
-import Settings (widgetFile, AppSettings (appRtcPeerConnectionConfig))
+import Settings
+    ( widgetFile, AppSettings (appRtcPeerConnectionConfig, appSuperuser)
+    , Superuser (Superuser, superuserUsername)
+    )
 import Settings.StaticFiles
     ( img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
@@ -132,8 +139,9 @@ import VideoRoom
 import VideoRoom.Data (Route (PushMessageR))
 
 import Web.WebPush
-    ( VAPIDKeys, vapidPublicKeyBytes, readVAPIDKeys
-    , VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), vapidPublicKeyBytes
+    , readVAPIDKeys, mkPushNotification, pushMessage, sendPushNotification
+    , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic), pushUrgency, PushUrgency (PushUrgencyLow)
     )
 
 import Widgets (widgetMenu, widgetUser)
@@ -144,7 +152,8 @@ import Yesod.Core
     , ToWidget (toWidget), getMessageRender
     )
 import Yesod.Core.Handler
-    ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON, getUrlRender
+    ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
+    , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Fields
@@ -487,7 +496,7 @@ getMyContactsR uid = do
                                   (Just _, Nothing) -> LT
                                   (Nothing, Just _) -> GT
                                   (Nothing, Nothing) -> compare cid1 cid2
-                                  
+
                               )
 
 
@@ -518,12 +527,44 @@ postContactsR uid = do
                     _ <- runDB $ upsert (Contact uid eid now) []
                     case subscription of
                       Just (endpoint,p256dh,auth) ->  do
-                          _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
+                          Entity sid _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
                               (PushSubscription uid eid endpoint p256dh auth)
                               [ PushSubscriptionP256dh =. p256dh
                               , PushSubscriptionAuth =. auth
                               ]
-                          return ()
+
+                          subscriptions <- runDB $ select $ do
+                              x <- from $ table @PushSubscription
+                              where_ $ x ^. PushSubscriptionId !=. val sid
+                              return x
+
+                          Superuser {..} <- appSuperuser . appSettings <$> getYesod
+
+                          manager <- appHttpManager <$> getYesod
+
+                          msgr <- getMessageRender
+
+                          forM_ subscriptions $ \(Entity _ (PushSubscription sid' pid' endpoint' p256dh' auth')) -> do
+                              let notification = mkPushNotification endpoint' p256dh' auth'
+                                      & pushMessage .~ object
+                                          [ "messageType" A..= PushMsgTypeRefresh
+                                          , "title" A..= msgr MsgRefresh
+                                          , "body" A..= msgr MsgRefreshPage
+                                          , "senderId" A..= pid'
+                                          , "recipientId" A..= sid'
+                                          ]
+                                      & pushSenderEmail .~ superuserUsername
+                                      & pushExpireInSeconds .~ 60
+                                      & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeRefresh)
+                                      & pushUrgency ?~ PushUrgencyLow
+
+                              result <- sendPushNotification vapidKeys manager notification
+
+                              case result of
+                                Left ex -> do
+                                    liftIO $ print ex
+                                Right () -> return ()
+                              return ()
                       Nothing -> return ()
                 addMessageI statusSuccess MsgNewContactsAdded
                 redirect location
@@ -662,3 +703,6 @@ instance YesodChat App where
 
     getVideoOutgoingRoute :: UserId -> UserId -> Handler (Route App)
     getVideoOutgoingRoute sid rid = return $ VideoR $ OutgoingR sid rid
+
+    getAppSettings :: Handler AppSettings
+    getAppSettings = getYesod >>= \app -> return $ appSettings app

@@ -10,6 +10,7 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
@@ -68,6 +69,7 @@ import Model
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeMessage
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
+      , PushMsgTypeRefresh
       )
     , CallType (CallTypeAudio, CallTypeVideo)
     , EntityField
@@ -82,7 +84,7 @@ import UnliftIO.Concurrent (forkIO, threadDelay)
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
-import Settings (widgetFile)
+import Settings (widgetFile, Superuser (Superuser, superuserUsername), AppSettings (appSuperuser))
 import Settings.StaticFiles
     ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_FILL0_wght400_GRAD0_opsz24_svg
@@ -129,6 +131,7 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getVideoPushRoute :: HandlerFor m (Route m)
     getVideoOutgoingRoute :: UserId -> UserId -> HandlerFor m (Route m)
+    getAppSettings :: HandlerFor m AppSettings
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
@@ -233,7 +236,7 @@ getChatRoomR sid rid cid = do
             )
         orderBy [desc time]
         return (uid,iid,time,msg,ctype,media) )
-    
+
     toParent <- getRouteToParent
 
     let channel = fromSqlKey cid
@@ -360,6 +363,7 @@ chatApp userId interlocutorId contactId = do
                                  urlr <- getUrlRender
                                  msgr <- getMessageRender
                                  tpr <- getRouteToParent
+                                 Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
 
                                  forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth)) -> do
                                      photor <- liftHandler $ getAccountPhotoRoute pid
@@ -377,14 +381,14 @@ chatApp userId interlocutorId contactId = do
                                                  , "senderPhoto" .= urlr photor
                                                  , "recipientId" .= sid
                                                  ]
-                                             & pushSenderEmail .~ ("ciukstar@gmail.com" :: Text)
+                                             & pushSenderEmail .~ superuserUsername
                                              & pushExpireInSeconds .~ 60 * 60
                                              & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeMessage)
 
                                      manager <- liftHandler getAppHttpManager
 
                                      result <- sendPushNotification vapidKeys manager notification
-
+                                     
                                      case result of
                                        Left ex -> do
                                            liftIO $ print ex

@@ -12,3 +12,12 @@ Array.from(
     }
   );
 });
+
+
+navigator.serviceWorker.addEventListener('message', function (message) {
+
+  if (message.data.messageType === #{show PushMsgTypeRefresh}) {
+    window.location.reload();
+  }
+
+});

@@ -1,3 +1,5 @@
+RefreshPage: Refresh page
+Refresh: Refresh
 EntityCall: Call
 CallCanceled: Call canceled
 SelectCalleeToCall: Select a callee from the list to call

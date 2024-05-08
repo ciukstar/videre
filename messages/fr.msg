@@ -1,3 +1,5 @@
+RefreshPage: Actualiser la page
+Refresh: Actualiser
 EntityCall: L'entité « Appel »
 CallCanceled: Appel annulé
 SelectCalleeToCall: Sélectionnez un appelé dans la liste à appeler
