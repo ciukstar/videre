@@ -47,6 +47,10 @@ Un compte superutilisateur est défini au moment du déploiement. Le superutilis
 * [Bing SEO](https://www.bing.com/webmasters)
 
   ```$YESOD_MS_VALIDATE```
+  
+* [Yandex SEO](https://webmaster.yandex.com/welcome)
+
+  ```$YESOD_YANDEX_VERIFICATION```
 
 ## Entités de base
 

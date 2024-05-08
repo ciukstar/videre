@@ -38,6 +38,7 @@ import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
 
 data Seo = Seo { seoGoogleSiteVerification :: Maybe Text
                , seoMsvalidate :: Maybe Text
+               , seoYandexVerification :: Maybe Text
                }
 
 data Superuser = Superuser { superuserUsername :: Text
@@ -111,6 +112,7 @@ instance FromJSON Seo where
     parseJSON = withObject "Seo" $ \o -> do
         seoGoogleSiteVerification <- o .: "google-site-verification"
         seoMsvalidate <- o .: "msvalidate"
+        seoYandexVerification <- o .: "yandex-verification"
         return Seo {..}
 
 

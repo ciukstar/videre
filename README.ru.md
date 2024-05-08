@@ -47,6 +47,10 @@
 * [Bing SEO](https://www.bing.com/webmasters)
 
   ```$YESOD_MS_VALIDATE```
+  
+* [Yandex SEO](https://webmaster.yandex.com/welcome)
+
+  ```$YESOD_YANDEX_VERIFICATION```
 
 ## Основные сущности
 

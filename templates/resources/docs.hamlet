@@ -80,6 +80,10 @@
         <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
         <div>
           <code.body-small>&dollar;YESOD_MS_VALIDATE
+      <li.body-large>
+        <a href="https://webmaster.yandex.com/welcome" target=_blank>Yandex SEO
+        <div>
+          <code.body-small>&dollar;YESOD_YANDEX_VERIFICATION
 
   <section>
     <h2.headline-medium>_{MsgBasicEntities}
