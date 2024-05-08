@@ -21,6 +21,8 @@ import Foundation.Data
       )
     )
 
+import Model (User (User))
+
 import Settings (widgetFile)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))

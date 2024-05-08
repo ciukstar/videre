@@ -21,20 +21,22 @@
       <md-menu-item href=@{CallsR uid} :curr == Just (CallsR uid):selected>
         _{MsgCalls}
 
-    <details.app-submenu #idDetailsData
-      :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open
-      ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
-      <summary>
-        <md-menu-item>
-          <div>
-            _{MsgData}
-            <md-icon.app-expand-icon slot=icon>expand_more
-          
-      <md-menu-item href=@{DataR UsersR} :curr == Just (DataR UsersR):selected>
-        _{MsgUsers}
-          
-      <md-menu-item href=@{DataR TokensR} :curr == Just (DataR TokensR):selected>
-        _{MsgTokens}
+    $maybe Entity _ (User _ _ _ _ _ _ super admin) <- user
+      $if super || admin
+        <details.app-submenu #idDetailsData
+          :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open
+          ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
+          <summary>
+            <md-menu-item>
+              <div>
+                _{MsgData}
+                <md-icon.app-expand-icon slot=icon>expand_more
+
+          <md-menu-item href=@{DataR UsersR} :curr == Just (DataR UsersR):selected>
+            _{MsgUsers}
+
+          <md-menu-item href=@{DataR TokensR} :curr == Just (DataR TokensR):selected>
+            _{MsgTokens}
 
     <details.app-submenu #idDetailsResources
       :elem curr [Just DocsR]:open
