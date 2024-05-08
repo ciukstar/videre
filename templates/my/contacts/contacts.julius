@@ -7,8 +7,8 @@ Array.from(
       year: 'numeric',
       month: 'short',
       day: 'numeric',
-      hour: "numeric",
-      minute: "numeric"
+      hour: 'numeric',
+      minute: 'numeric'
     }
   );
 });
@@ -17,7 +17,7 @@ Array.from(
 navigator.serviceWorker.addEventListener('message', function (message) {
 
   if (message.data.messageType === #{show PushMsgTypeRefresh}) {
-    window.location.reload();
+    document.getElementById(`idBadgePhoto${message.data.senderId}`)?.remove();
   }
 
 });

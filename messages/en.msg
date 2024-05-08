@@ -1,3 +1,4 @@
+UserIsNowAvailable user@Text: User #{user} is now available. You can call or chat with him.
 RefreshPage: Refresh page
 Refresh: Refresh
 EntityCall: Call

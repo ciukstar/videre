@@ -84,7 +84,10 @@ import UnliftIO.Concurrent (forkIO, threadDelay)
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
-import Settings (widgetFile, Superuser (Superuser, superuserUsername), AppSettings (appSuperuser))
+import Settings
+    ( widgetFile, Superuser (Superuser, superuserUsername)
+    , AppSettings (appSuperuser)
+    )
 import Settings.StaticFiles
     ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_FILL0_wght400_GRAD0_opsz24_svg

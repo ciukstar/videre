@@ -1,3 +1,4 @@
+UserIsNowAvailable user: Utilizatorul #{user} este acum disponibil. Puteți suna sau discuta cu el.
 RefreshPage: Actualizează pagina
 Refresh: Actualizează
 EntityCall: Entitatea „Apel”

@@ -31,9 +31,11 @@
             $maybe _ <- subscription
               $maybe _ <- accessible
               $nothing
-                <md-icon.pone-disabled>phone_disabled
+                <md-icon.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
+                  phone_disabled
             $nothing
-              <md-icon.notifications-disabled>notifications_off
+              <md-icon.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
+                notifications_off
           <div slot=headline>
             $maybe name <- name
               #{name}

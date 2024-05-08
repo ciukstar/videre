@@ -27,7 +27,7 @@
               $maybe _ <- subscription
                 $maybe _ <- accessible
                 $nothing
-                  <md-icon.pone-disabled>phone_disabled
+                  <md-icon.phone-disabled>phone_disabled
               $nothing
                 <md-icon.notifications-disabled>notifications_off
             <div slot=headline>

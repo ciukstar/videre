@@ -25,7 +25,7 @@ main
         position: relative
         img.user-photo
             clip-path: circle(50%)
-        .pone-disabled, .notifications-disabled
+        .phone-disabled, .notifications-disabled
             position: absolute
             top: 0
             right: -0.5rem

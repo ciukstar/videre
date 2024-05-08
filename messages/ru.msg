@@ -1,3 +1,4 @@
+UserIsNowAvailable user: Пользователь #{user} теперь доступен. Вы можете позвонить или пообщаться с ним.
 RefreshPage: Обновить страницу
 Refresh: Обновить
 EntityCall: Сущность «Вызов»

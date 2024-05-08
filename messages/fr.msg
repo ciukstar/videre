@@ -1,3 +1,4 @@
+UserIsNowAvailable user: L'utilisateur #{user} est maintenant disponible. Vous pouvez l'appeler ou discuter avec lui.
 RefreshPage: Actualiser la page
 Refresh: Actualiser
 EntityCall: L'entité « Appel »

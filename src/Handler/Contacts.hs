@@ -39,6 +39,7 @@ import Data.Aeson (toJSON, object)
 import qualified Data.Aeson as A
     ( object, Value (Bool), Result( Success, Error ), (.=) )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
+import Data.List (sortBy)
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -79,7 +80,7 @@ import Foundation.Data
       , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
       , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
       , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
-      , MsgAudioCall, MsgRefreshPage, MsgRefresh
+      , MsgAudioCall, MsgUserIsNowAvailable
       )
     )
 
@@ -87,7 +88,7 @@ import Material3 (md3mreq, md3switchField)
 
 import Model
     ( statusError, statusSuccess
-    , UserId, User (User, userName), UserPhoto, Chat
+    , UserId, User (User, userName, userEmail), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , PushMsgType
@@ -119,6 +120,7 @@ import Settings
 import Settings.StaticFiles
     ( img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
+    , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
     )
 
 import System.IO (readFile')
@@ -141,11 +143,13 @@ import VideoRoom.Data (Route (PushMessageR))
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), vapidPublicKeyBytes
     , readVAPIDKeys, mkPushNotification, pushMessage, sendPushNotification
-    , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic), pushUrgency, PushUrgency (PushUrgencyLow)
+    , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic)
+    , pushUrgency, PushUrgency (PushUrgencyLow)
     )
 
 import Widgets (widgetMenu, widgetUser)
 
+import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
@@ -156,6 +160,7 @@ import Yesod.Core.Handler
     , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
+import Yesod.Form.Input (runInputGet, ireq)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
     , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField
@@ -167,10 +172,8 @@ import Yesod.Form.Types
     , FormResult (FormSuccess, FormFailure, FormMissing)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
-import Yesod.Persist.Core (YesodPersist(runDB))
 import Yesod.Static (StaticRoute)
-import Yesod.Form.Input (runInputGet, ireq)
-import Data.List (sortBy)
+import Yesod.Persist.Core (YesodPersist(runDB))
 
 
 getCalleesR :: UserId -> Handler Html
@@ -539,19 +542,23 @@ postContactsR uid = do
                               return x
 
                           Superuser {..} <- appSuperuser . appSettings <$> getYesod
-
                           manager <- appHttpManager <$> getYesod
 
                           msgr <- getMessageRender
+                          urlr <- getUrlRender
+                          user <- maybeAuth
 
-                          forM_ subscriptions $ \(Entity _ (PushSubscription sid' pid' endpoint' p256dh' auth')) -> do
+                          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint' p256dh' auth')) -> do
                               let notification = mkPushNotification endpoint' p256dh' auth'
                                       & pushMessage .~ object
                                           [ "messageType" A..= PushMsgTypeRefresh
-                                          , "title" A..= msgr MsgRefresh
-                                          , "body" A..= msgr MsgRefreshPage
-                                          , "senderId" A..= pid'
-                                          , "recipientId" A..= sid'
+                                          , "title" A..= msgr MsgAppName
+                                          , "icon" A..= urlr (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                          , "image" A..= (urlr . AccountPhotoR . entityKey <$> user)
+                                          , "body" A..= ( msgr . MsgUserIsNowAvailable .
+                                                          (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                                        )
+                                          , "senderId" A..= uid
                                           ]
                                       & pushSenderEmail .~ superuserUsername
                                       & pushExpireInSeconds .~ 60
