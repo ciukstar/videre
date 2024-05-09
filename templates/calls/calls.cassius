@@ -33,6 +33,9 @@ main
             background: red
             clip-path: circle(50%)
 
+    div[slot=headline], div[slot=supporting-text]
+        white-space: nowrap
+
     .app-outgoing-call
 
         div[slot=content]

@@ -1,3 +1,4 @@
+NewMessageFrom user@Text: New message from Julian
 UserIsNowAvailable user@Text: User #{user} is now available. You can call or chat with him.
 RefreshPage: Refresh page
 Refresh: Refresh

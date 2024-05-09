@@ -12,6 +12,13 @@ self.onpush = function (e) {
     return [focused.length < 1, message];
     
   }).then(([notify, message]) => {
+
+    const ations = (
+      message.messageType === #{show PushMsgTypeAudioCall}
+	|| message.messageType === #{show PushMsgTypeVideoCall}
+    )
+	  ? [{ action: 'decline', title: #{msgr MsgDecline} }]
+	  : []
     
     return !notify
       ? Promise.resolve()
@@ -21,10 +28,9 @@ self.onpush = function (e) {
         renotify: true,
         icon: message.icon,
         body: message.body,
-        image: message.senderPhoto,
+        image: message.image,
 	data: message,
-	actions: message.messageType === #{show PushMsgTypeAudioCall} || message.messageType === #{show PushMsgTypeVideoCall}
-	  ? [{ action: 'decline', title: #{msgr MsgDecline} }] : []
+	actions: actions
       });
     
   });

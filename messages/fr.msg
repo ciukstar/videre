@@ -1,3 +1,4 @@
+NewMessageFrom user: Nouveau message de #{user}
 UserIsNowAvailable user: L'utilisateur #{user} est maintenant disponible. Vous pouvez l'appeler ou discuter avec lui.
 RefreshPage: Actualiser la page
 Refresh: Actualiser

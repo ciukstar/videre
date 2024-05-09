@@ -33,7 +33,7 @@ main
             background: red
             clip-path: circle(50%)
 
-    div[slot=supporting-text]
+    div[slot=headline], div[slot=supporting-text]
         white-space: nowrap
 
     .app-attribution

@@ -124,7 +124,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
   if (message.data.messageType === #{show PushMsgTypeMessage}) {
     
-    document.getElementById(#{idImgSenderPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idImgSenderPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
     document.getElementById(#{idNotificationBody}).textContent = message.data.body;
     document.getElementById(#{idButtonReplyNotification}).href = message.data.reply;
@@ -139,13 +139,13 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
   } else if (message.data.messageType === #{show PushMsgTypeVideoCall}) {
     
-    document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
     document.getElementById(#{idDialogIncomingVideoCall}).show();
 
   } else if (message.data.messageType === #{show PushMsgTypeAudioCall}) {
     
-    document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.senderPhoto;
+    document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;
     document.getElementById(#{idDialogIncomingAudioCall}).show();
 

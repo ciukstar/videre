@@ -648,7 +648,7 @@ instance YesodAuthEmail App where
               <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto} style="clip-path:circle(50%)">
             <div slot=headline>
               #{email}
-            <div slot=supporting-text>
+            <div slot=supporting-text style="white-space:nowrap;max-width:50vw">
               $maybe name <- name
                 #{name}
             <div slot=supporting-text style="text-transform:uppercase">

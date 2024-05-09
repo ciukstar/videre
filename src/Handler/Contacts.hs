@@ -321,6 +321,10 @@ postContactRemoveR uid rid cid = do
     case fr of
       FormSuccess () -> do
           runDB $ P.delete cid
+          runDB $ delete $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionPublisher ==. val rid
+              where_ $ x ^. PushSubscriptionSubscriber ==. val uid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ MyContactsR uid
       _otherwise -> do
@@ -661,10 +665,10 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe backlink
                       <img slot=start src=@{AccountPhotoR (entityKey $ optionInternalValue opt)}
                         width=56 height=56 loading=lazy style="clip-path:circle(50%)">
 
-                      <div slot=headline>
+                      <div slot=headline style="white-space:nowrap">
                         $maybe name <- userName $ entityVal $ optionInternalValue opt
                           #{name}
-                      <div slot=supporting-text>
+                      <div slot=supporting-text style="white-space:nowrap">
                         #{optionDisplay opt}
 
                       <md-checkbox touch-target=wrapper slot=end onclick="event.stopPropagation()"

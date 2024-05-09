@@ -53,7 +53,7 @@ import Foundation.Data
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
       , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
       , MsgCancel, MsgClose, MsgAppName, MsgCallCanceledByCaller
-      , MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom
+      , MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom 
       )
     )
 
@@ -103,7 +103,8 @@ import Text.Read (readMaybe)
 import Web.WebPush
     ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
-    , sendPushNotification, pushTopic, PushTopic (PushTopic)
+    , sendPushNotification, pushTopic, PushTopic (PushTopic), pushUrgency
+    , PushUrgency (PushUrgencyLow)
     )
 
 import Yesod.Core
@@ -373,20 +374,21 @@ chatApp userId interlocutorId contactId = do
                                      let notification = mkPushNotification endpoint p256dh auth
                                              & pushMessage .~ object
                                                  [ "messageType" .= PushMsgTypeMessage
-                                                 , "title" .= msgr MsgNewMessage
+                                                 , "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
                                                  , "icon" .= urlr iconr
+                                                 , "image" .= urlr photor
                                                  , "body" .= message
                                                  , "reply" .= urlr (tpr $ ChatRoomR sid pid contactId)
                                                  , "senderId" .= pid
-                                                 , "senderName" .= ( (userName . entityVal <$> sender)
-                                                                     <|> (Just . userEmail . entityVal <$> sender)
+                                                 , "senderName" .= (
+                                                       (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender
                                                                    )
-                                                 , "senderPhoto" .= urlr photor
                                                  , "recipientId" .= sid
                                                  ]
                                              & pushSenderEmail .~ superuserUsername
-                                             & pushExpireInSeconds .~ 60 * 60
+                                             & pushExpireInSeconds .~ 30 * 60
                                              & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeMessage)
+                                             & pushUrgency ?~ PushUrgencyLow
 
                                      manager <- liftHandler getAppHttpManager
 

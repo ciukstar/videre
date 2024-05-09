@@ -144,10 +144,10 @@ getOutgoingR sid rid = do
 
     videos <- runInputGet (ireq boolField "videos")
     audios <- runInputGet (ireq boolField "audios")
-    
+
     let visibilityVideoR = if videor then "visible" else "hidden" :: Text
     let visibilityPlaceholderR = if videor then "hidden" else "visible" :: Text
-    
+
     let visibilityVideoS = if videos then "visible" else "hidden" :: Text
     let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
 
@@ -191,16 +191,16 @@ getIncomingR = do
 
     (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
     (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
-    
+
     videor <- runInputGet (ireq boolField "videor")
     audior <- runInputGet (ireq boolField "audior")
 
     videos <- runInputGet (ireq boolField "videos")
     audios <- runInputGet (ireq boolField "audios")
-    
+
     let visibilityVideoR = if videor then "visible" else "hidden" :: Text
     let visibilityPlaceholderR = if videor then "hidden" else "visible" :: Text
-    
+
     let visibilityVideoS = if videos then "visible" else "hidden" :: Text
     let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
 
@@ -302,11 +302,11 @@ postPushMessageR = do
 
     case details of
       Just vapidKeysMinDetails -> do
-          
+
           let vapidKeys = readVAPIDKeys vapidKeysMinDetails
 
           Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
-          
+
           now <- liftIO getCurrentTime
 
           call <- case messageType of
@@ -332,6 +332,7 @@ postPushMessageR = do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "title" .= messageTitle
                                                 , "icon" .= icon
+                                                , "image" .= (urlRender . toParent . PhotoR $ sid)
                                                 , "body" .= messageBody
                                                 , "messageType" .= messageType
                                                 , "channelId" .= channelId
@@ -339,7 +340,6 @@ postPushMessageR = do
                                                 , "senderName" .= ( (userName . entityVal <$> sender)
                                                                     <|> (Just . userEmail . entityVal <$> sender)
                                                                   )
-                                                , "senderPhoto" .= (urlRender . toParent . PhotoR $ sid)
                                                 , "recipientId" .= rid
                                                 , "videor" .= videor
                                                 , "audior" .= audior
@@ -359,33 +359,33 @@ postPushMessageR = do
                       liftIO $ print ex
                   Right () -> do
                       case (messageType, callId) of
-                        
+
                         (Just PushMsgTypeAccept, Just cid) ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [CallStatus =. just (val CallStatusAccepted)]
                             where_ $ x ^. CallId ==. val cid
-                            
+
                         (Just PushMsgTypeDecline, Just cid) ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [CallStatus =. just (val CallStatusDeclined)]
                             where_ $ x ^. CallId ==. val cid
-                            
+
                         (Just PushMsgTypeEndSession, Just cid) ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [ CallStatus =. just (val CallStatusEnded)
                                   , CallEnd =. just (val now)
                                   ]
                             where_ $ x ^. CallId ==. val cid
-                            
+
                         (Just PushMsgTypeCancel, Just cid) ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [ CallStatus =. just (val CallStatusCanceled)
                                   , CallEnd =. just (val now)
                                   ]
                             where_ $ x ^. CallId ==. val cid
-                            
+
                         _otherwise -> return ()
-                          
+
                       return ()
 
       Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
