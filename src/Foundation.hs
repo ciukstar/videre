@@ -100,6 +100,8 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import Web.WebPush (VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys, vapidPublicKeyBytes)
+import Text.Read (readMaybe)
 
 
 -- | A convenient synonym for creating forms.
@@ -211,13 +213,44 @@ instance Yesod App where
             backlink <- fromMaybe HomeR <$> getCurrentRoute
             calleeName <- resolveName <$> maybeAuth
 
-            $(widgetFile "default-layout")
+            mVAPIDKeys <- liftHandler getVAPIDKeys
+
+            case mVAPIDKeys of
+              Just vapidKeys -> do
+                  let applicationServerKey = vapidPublicKeyBytes vapidKeys
+                  $(widgetFile "default-layout")
+              Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
         lang <- fromMaybe "en" . headMay <$> languages
 
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
       where
           resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
+
+          getVAPIDKeys :: Handler (Maybe VAPIDKeys)
+          getVAPIDKeys = do
+
+              storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+                  x <- from $ table @Token
+                  where_ $ x ^. TokenApi E.==. val apiInfoVapid
+                  return (x ^. TokenId, x ^. TokenStore) )
+
+              let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+              details <- case storeType of
+                Just (_, StoreTypeGoogleSecretManager) -> do
+                    liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+                Just (tid, StoreTypeDatabase) -> do
+                    ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+                        x <-from $ table @Store
+                        where_ $ x ^. StoreToken E.==. val tid
+                        return $ x ^. StoreVal )
+
+                Just (_,StoreTypeSession) -> return Nothing
+                Nothing -> return Nothing
+
+              return $ readVAPIDKeys <$> details
 
     -- The page to be redirected to when authentication is required.
     authRoute :: App -> Maybe (Route App)
@@ -232,6 +265,10 @@ instance Yesod App where
 
     isAuthorized (CalleesR uid) _ = isAuthenticatedSelf uid
     isAuthorized (CallsR uid) _ = isAuthenticatedSelf uid
+
+    
+
+    isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
     isAuthorized (PushSubscriptionsR sid _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid

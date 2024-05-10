@@ -1,3 +1,4 @@
+Answer: Răspunde
 NewMessageFrom user: Mesaj nou de la #{user}
 UserIsNowAvailable user: Utilizatorul #{user} este acum disponibil. Puteți suna sau discuta cu el.
 RefreshPage: Actualizează pagina

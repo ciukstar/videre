@@ -165,7 +165,8 @@ statusError :: Text
 statusError = "error"
 
 
-
-
 ultDestKey :: Text
 ultDestKey = "_ULT"
+
+keyWebPushSubscriptionEndpoint :: Text
+keyWebPushSubscriptionEndpoint = "WEB_PUSH_SUBSCRIPTION_ENDPOINT"

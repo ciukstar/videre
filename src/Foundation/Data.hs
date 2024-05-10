@@ -19,7 +19,7 @@ import Model
     ( UserId, ContactId
     , PushMsgType
       ( PushMsgTypeDecline, PushMsgTypeIgnore, PushMsgTypeAudioCall
-      , PushMsgTypeVideoCall
+      , PushMsgTypeVideoCall, PushMsgTypeMessage
       )
     )
 

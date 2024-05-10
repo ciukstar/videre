@@ -13,12 +13,18 @@ self.onpush = function (e) {
     
   }).then(([notify, message]) => {
 
-    const ations = (
-      message.messageType === #{show PushMsgTypeAudioCall}
-	|| message.messageType === #{show PushMsgTypeVideoCall}
-    )
-	  ? [{ action: 'decline', title: #{msgr MsgDecline} }]
-	  : []
+    let actions;
+    if (message.messageType === #{show PushMsgTypeAudioCall} || message.messageType === #{show PushMsgTypeVideoCall}) {
+      actions = [ { action: 'decline', title: #{msgr MsgDecline} },
+		  { action: 'accept', title: #{msgr MsgAnswer} }
+		];
+    } else if (message.messageType === #{show PushMsgTypeMessage}) {
+      actions = [ { action: 'ignore', title: #{msgr MsgIgnore} },
+		  { action: 'reply', title: #{msgr MsgReply} }
+		];
+    } else {
+      actions = [];
+    }
     
     return !notify
       ? Promise.resolve()
@@ -130,4 +136,10 @@ self.addEventListener('fetch', function (e) {
 
   }
 
+});
+
+self.addEventListener('pushsubscriptionchange', (event) => {
+
+  console.log('pushsubscriptionchange: event.oldSubscription: ', JSON.stringify(event.oldSubscription));
+  
 });

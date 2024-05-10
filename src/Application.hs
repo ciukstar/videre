@@ -62,7 +62,7 @@ import System.Log.FastLogger
 import Handler.Contacts
     ( getContactsR, postContactsR, getMyContactsR, postContactRemoveR
     , getContactR, postPushSubscriptionsR, deletePushSubscriptionsR
-    , getCallsR, getCalleesR
+    , getCallsR, getCalleesR, putPushSubscriptionEndpointR
     )
 
 import Handler.Accounts
@@ -93,7 +93,7 @@ import Foundation.Data
       , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
       , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR, ServiceWorkerR
-      , CallsR, CalleesR
+      , CallsR, CalleesR, PushSubscriptionEndpointR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR

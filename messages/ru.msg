@@ -1,3 +1,4 @@
+Answer: Ответить
 NewMessageFrom user: Новое сообщение от #{user}
 UserIsNowAvailable user: Пользователь #{user} теперь доступен. Вы можете позвонить или пообщаться с ним.
 RefreshPage: Обновить страницу

@@ -24,6 +24,8 @@ document.getElementById(#{idButtonSubmitWithSubscription}).onclick = (e) => {
 	  document.getElementById(#{fvId authV}).value = subscr.keys.auth;
 	  document.getElementById(#{idFormPostContacts}).submit();
 	  
+	  localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
+	  
 	}).catch((err) => {
 	  
 	  registration.pushManager.getSubscription().then((subscription) => {
@@ -38,6 +40,8 @@ document.getElementById(#{idButtonSubmitWithSubscription}).onclick = (e) => {
 		document.getElementById(#{fvId p256dhV}).value = subscr.keys.p256dh;
 		document.getElementById(#{fvId authV}).value = subscr.keys.auth;
 		document.getElementById(#{idFormPostContacts}).submit();
+
+		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
 		
 	      });
 	    });

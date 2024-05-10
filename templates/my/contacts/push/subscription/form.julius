@@ -11,10 +11,11 @@ document.getElementById(#{fvId v}).onchange = function (e) {
       
       if (permission === 'granted') {
 	
-        navigator.serviceWorker.ready.then(function (registration) {
+        navigator.serviceWorker.ready.then((registration) => {
 
 	  registration.pushManager.subscribe({
-            userVisibleOnly: true, applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+            userVisibleOnly: true,
+	    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
           }).then(function (subscription) {
 	    
 	    if (subscription) {
@@ -26,7 +27,8 @@ document.getElementById(#{fvId v}).onchange = function (e) {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(subscr)
-	      }).then(function (response) {
+	      }).then((response) => {
+		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
 		window.location.href = '@{ContactR sid pid cid}';
 	      });
 	    }

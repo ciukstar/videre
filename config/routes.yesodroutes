@@ -5,6 +5,9 @@
 
 /chat ChatR ChatRoom getChatRoom
 
+
+/push/subscription/endpoint PushSubscriptionEndpointR PUT
+
 /subscribers/#UserId/publishers/#UserId PushSubscriptionsR POST DELETE
 
 /callees/#UserId CalleesR GET

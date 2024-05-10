@@ -20,6 +20,7 @@ module Handler.Contacts
   , deletePushSubscriptionsR
   , getCallsR
   , getCalleesR
+  , putPushSubscriptionEndpointR
   ) where
 
 import ChatRoom
@@ -48,16 +49,17 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
 import Database.Esqueleto.Experimental
-    ( select, from, table, orderBy, desc, leftJoin, on, just
+    ( select, from, table, orderBy, desc, leftJoin, on, just, update, set
     , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.), (||.)
     , Value (unValue), innerJoin, val, where_, selectOne
     , delete, unionAll_
     )
+import Database.Esqueleto.Experimental as E ((=.))
 import Database.Persist
-    ( Entity (Entity), entityVal, entityKey, upsertBy, (=.)
+    ( Entity (Entity), entityVal, entityKey, upsertBy
     , PersistUniqueWrite (upsert)
     )
-import qualified Database.Persist as P ( PersistStoreWrite (delete) )
+import qualified Database.Persist as P ( PersistStoreWrite (delete), (=.) )
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation (Form)
@@ -87,7 +89,7 @@ import Foundation.Data
 import Material3 (md3mreq, md3switchField)
 
 import Model
-    ( statusError, statusSuccess
+    ( statusError, statusSuccess, keyWebPushSubscriptionEndpoint
     , UserId, User (User, userName, userEmail), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
@@ -160,10 +162,10 @@ import Yesod.Core.Handler
     , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
-import Yesod.Form.Input (runInputGet, ireq)
+import Yesod.Form.Input (runInputGet, ireq, runInputPost)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
-    , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField
+    , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField, textField
     )
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost, mopt)
 import Yesod.Core.Json (parseCheckJsonBody, returnJson)
@@ -252,6 +254,21 @@ getCallsR uid = do
         $(widgetFile "calls/calls")
 
 
+putPushSubscriptionEndpointR :: Handler ()
+putPushSubscriptionEndpointR = do    
+    endpoint <- runInputPost $ ireq urlField "endpoint"
+    p256dh <- runInputPost $ ireq textField "p256dh"
+    auth <- runInputPost $ ireq textField "auth"
+    oldEndpoint <- runInputPost $ ireq urlField "oldendpoint"
+
+    runDB $ update $ \x -> do
+        set x [ PushSubscriptionEndpoint E.=. val endpoint
+              , PushSubscriptionP256dh E.=. val p256dh
+              , PushSubscriptionAuth E.=. val auth
+              ]
+        where_ $ x ^. PushSubscriptionEndpoint ==. val oldEndpoint
+
+
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
 deletePushSubscriptionsR sid pid = do
 
@@ -281,8 +298,8 @@ postPushSubscriptionsR sid pid = do
 
       A.Success ps@(PushSubscription _ _ psEndpoint psKeyP256dh psKeyAuth) -> do
           _ <- runDB $ upsertBy (UniquePushSubscription sid pid psEndpoint) ps
-               [ PushSubscriptionP256dh =. psKeyP256dh
-               , PushSubscriptionAuth =. psKeyAuth
+               [ PushSubscriptionP256dh P.=. psKeyP256dh
+               , PushSubscriptionAuth P.=. psKeyAuth
                ]
           addMessageI statusSuccess MsgSubscriptionSucceeded
           returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
@@ -536,8 +553,8 @@ postContactsR uid = do
                       Just (endpoint,p256dh,auth) ->  do
                           Entity sid _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
                               (PushSubscription uid eid endpoint p256dh auth)
-                              [ PushSubscriptionP256dh =. p256dh
-                              , PushSubscriptionAuth =. auth
+                              [ PushSubscriptionP256dh P.=. p256dh
+                              , PushSubscriptionAuth P.=. auth
                               ]
 
                           subscriptions <- runDB $ select $ do
