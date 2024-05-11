@@ -37,6 +37,14 @@ Un compte superutilisateur est défini au moment du déploiement. Le superutilis
     ```$YESOD_GOOGLE_CLIENT_ID```
   * Secret client  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
+	
+* Communication en temps réel pour le Web: [L'API WebRTC](https://developer.mozilla.org/fr/docs/Web/API/WebRTC_API)
+
+  * Configuration  
+    ```$YESOD_RTC_PEER_CONNECTION_CONFIG```  
+    La configuration peut être fournie sous la forme d'une représentation textuelle d'un objet JSON comme décrit dans le [Constructeur RTCPeerConnection()](https://developer.mozilla.org/fr/docs/Web/API/RTCPeerConnection/RTCPeerConnection).  
+
+    Principalement utilisé pour spécifier les serveurs STUN et TURN.
 
 ## Optimisation du moteur de recherche
 

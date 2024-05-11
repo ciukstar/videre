@@ -38,6 +38,14 @@
   * Секрет клиента  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
 
+* Коммуникации по сети в реальном времени: [WebRTC API](https://developer.mozilla.org/ru/docs/Web/API/WebRTC_API)  
+
+  * Конфигурация  
+    ```$YESOD_RTC_PEER_CONNECTION_CONFIG```  
+    Конфигурация может быть предоставлена в виде текстового представления объекта JSON, как описано в [конструкторе RTCPeerConnection()](https://developer.mozilla.org/ru/docs/Web/API/RTCPeerConnection/RTCPeerConnection).  
+
+    В основном используется для указания серверов STUN и TURN.
+
 ## Поисковая оптимизация
 
 * [Google SEO](https://search.google.com/search-console)

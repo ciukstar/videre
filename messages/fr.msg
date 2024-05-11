@@ -1,3 +1,5 @@
+WebRealTimeCommunication: Communication en temps réel pour le Web
+Configuration: Configuration
 Answer: Répondre
 NewMessageFrom user: Nouveau message de #{user}
 UserIsNowAvailable user: L'utilisateur #{user} est maintenant disponible. Vous pouvez l'appeler ou discuter avec lui.
@@ -206,3 +208,7 @@ Doc014: L'abonnement peut être vérifié ou renouvelé à partir de l'élément
 Doc015 href: <a href=#{href} target=_blank>Les notifications Web Push</a> sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.
 
 Doc016: L'entité « Appel » représente les appels sortants et entrants vers l'utilisateur.
+
+Doc017 link: La configuration peut être fournie sous la forme d'une représentation textuelle d'un objet JSON comme décrit dans le <a href=#{link} target=_blank>Constructeur RTCPeerConnection()</a>.
+
+Doc018: Principalement utilisé pour spécifier les serveurs STUN et TURN.

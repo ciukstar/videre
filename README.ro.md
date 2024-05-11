@@ -38,6 +38,14 @@ Un cont de superutilizator este definit în momentul implementării. Superutiliz
   * Secretul clientului  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
 
+* Web Real-Time Communication: [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
+
+  * Configurare  
+    ```$YESOD_RTC_PEER_CONNECTION_CONFIG```  
+    Configurația poate fi furnizată ca o reprezentare textuală a unui obiect JSON, așa cum este descris în [RTCPeerConnection() constructor](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection).  
+
+    Folosit în principal pentru a specifica serverele STUN și TURN.
+
 ## Optimizare motor de căutare
 
 * [Google SEO](https://search.google.com/search-console)

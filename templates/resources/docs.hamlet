@@ -68,6 +68,19 @@
             _{MsgClientSecret}
           <dd.body-small>
             <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
+      <li.body-large>
+        _{MsgWebRealTimeCommunication}:
+        <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API" target=_blank>
+          WebRTC API
+        <dl>
+          <dt.label-large>
+            _{MsgConfiguration}
+          <dd.body-small>
+            <code>&dollar;YESOD_RTC_PEER_CONNECTION_CONFIG
+            <p.body-small>
+              #{t $ MsgDoc017 "https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection"}
+            <p.body-small>
+              _{MsgDoc018}
 
   <section>
     <h2.headline-medium>_{MsgSearchEngineOptimization}

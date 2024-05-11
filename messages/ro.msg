@@ -1,3 +1,5 @@
+WebRealTimeCommunication: Web Real-Time Communication
+Configuration: Configurare
 Answer: Răspunde
 NewMessageFrom user: Mesaj nou de la #{user}
 UserIsNowAvailable user: Utilizatorul #{user} este acum disponibil. Puteți suna sau discuta cu el.
@@ -207,3 +209,7 @@ Doc014: Abonamentul poate fi verificat sau reînnoit din elementul de meniu „V
 Doc015 href: <a href=#{href} target=_blank>Notificările Web Push</a> sunt folosite pentru a notifica un apelat despre un apel video/audio primit. De asemenea, este folosit pentru a încheia sesiunea video/audio.
 
 Doc016: Entitatea „Apel” reprezintă apelurile efectuate și primite către utilizator.
+
+Doc017 link: Configurația poate fi furnizată ca o reprezentare textuală a unui obiect JSON, așa cum este descris în <a href=#{link} target=_blank>RTCPeerConnection() constructor</a>.
+
+Doc018: Folosit în principal pentru a specifica serverele STUN și TURN.

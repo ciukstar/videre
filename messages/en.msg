@@ -1,3 +1,5 @@
+WebRealTimeCommunication: Web Real-Time Communication
+Configuration: Configuration
 Answer: Answer
 NewMessageFrom user@Text: New message from Julian
 UserIsNowAvailable user@Text: User #{user} is now available. You can call or chat with him.
@@ -207,3 +209,7 @@ Doc014: The subscription can be checked or renewed from the “View contact” m
 Doc015 href@Text: <a href=#{href} target=_blank>Web Push Notifications</a> are used to notify a callee of an incoming video/audio call. It is also used to end the video/audio session.
 
 Doc016: The entity Call represents outgoing and incoming calls to the currently logged in user.
+
+Doc017 link@Text: The configuration can be provided as a textual representation of a JSON object as described in <a href=#{link} target=_blank>RTCPeerConnection() constructor</a>.
+
+Doc018: Mainly used to specify STUN and TURN servers.
