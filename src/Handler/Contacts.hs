@@ -44,7 +44,7 @@ import Data.List (sortBy)
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
-import Data.Text (pack, unpack, Text)
+import Data.Text (pack, Text)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
@@ -62,7 +62,7 @@ import Database.Persist
 import qualified Database.Persist as P ( PersistStoreWrite (delete), (=.) )
 import Database.Persist.Sql (fromSqlKey)
 
-import Foundation (Form)
+import Foundation (Form, getVAPIDKeys)
 import Foundation.Data
     ( Handler, App (appHttpManager, appSettings)
     , Route
@@ -92,22 +92,20 @@ import Model
     ( statusError, statusSuccess, keyWebPushSubscriptionEndpoint
     , UserId, User (User, userName, userEmail), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
-    , Token, Store, Call (Call), CallType (CallTypeAudio, CallTypeVideo)
+    , Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , PushMsgType
       ( PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel
       , PushMsgTypeDecline, PushMsgTypeAccept, PushMsgTypeRefresh
       )
-    , StoreType
-      ( StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession )
-    , apiInfoVapid, secretVolumeVapid, Unique (UniquePushSubscription)
+    , Unique (UniquePushSubscription)
     , CallStatus
       ( CallStatusAccepted, CallStatusDeclined, CallStatusCanceled, CallStatusEnded )
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
-      , PushSubscriptionEndpoint, TokenApi, TokenId, TokenStore, StoreToken
+      , PushSubscriptionEndpoint
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
-      , StoreVal, ChatUser, UserName, UserEmail, CallCaller, CallCallee
+      , ChatUser, UserName, UserEmail, CallCaller, CallCallee
       , CallStart, ChatMessage, CallType, PushSubscriptionId
       )
     )
@@ -125,12 +123,9 @@ import Settings.StaticFiles
     , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
     )
 
-import System.IO (readFile')
-
 import Text.Cassius (cassiusFile)
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS), juliusFile)
-import Text.Read (readMaybe)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
@@ -143,8 +138,8 @@ import VideoRoom
 import VideoRoom.Data (Route (PushMessageR))
 
 import Web.WebPush
-    ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), vapidPublicKeyBytes
-    , readVAPIDKeys, mkPushNotification, pushMessage, sendPushNotification
+    ( VAPIDKeys, vapidPublicKeyBytes
+    , mkPushNotification, pushMessage, sendPushNotification
     , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic)
     , pushUrgency, PushUrgency (PushUrgencyLow)
     )
@@ -347,33 +342,6 @@ postContactRemoveR uid rid cid = do
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
           redirect $ ContactR uid rid cid
-
-
-getVAPIDKeys :: Handler (Maybe VAPIDKeys)
-getVAPIDKeys = do
-
-    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
-
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
-
-    return $ readVAPIDKeys <$> details
-
 
 
 getContactR :: UserId -> UserId -> ContactId -> Handler Html

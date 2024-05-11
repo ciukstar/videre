@@ -63,8 +63,14 @@ import Text.Jasmine ( minifym )
 import Text.Julius (juliusFile)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
+import Text.Read (readMaybe)
 
 import VideoRoom.Data (Route(IncomingR, PushMessageR))
+
+import Web.WebPush
+    ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys
+    , vapidPublicKeyBytes
+    )
 
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
@@ -100,8 +106,6 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
-import Web.WebPush (VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys, vapidPublicKeyBytes)
-import Text.Read (readMaybe)
 
 
 -- | A convenient synonym for creating forms.
@@ -226,31 +230,7 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
       where
           resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
-
-          getVAPIDKeys :: Handler (Maybe VAPIDKeys)
-          getVAPIDKeys = do
-
-              storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-                  x <- from $ table @Token
-                  where_ $ x ^. TokenApi E.==. val apiInfoVapid
-                  return (x ^. TokenId, x ^. TokenStore) )
-
-              let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-              details <- case storeType of
-                Just (_, StoreTypeGoogleSecretManager) -> do
-                    liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-                Just (tid, StoreTypeDatabase) -> do
-                    ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-                        x <-from $ table @Store
-                        where_ $ x ^. StoreToken E.==. val tid
-                        return $ x ^. StoreVal )
-
-                Just (_,StoreTypeSession) -> return Nothing
-                Nothing -> return Nothing
-
-              return $ readVAPIDKeys <$> details
+          
 
     -- The page to be redirected to when authentication is required.
     authRoute :: App -> Maybe (Route App)
@@ -342,6 +322,46 @@ instance Yesod App where
 
     makeLogger :: App -> IO Logger
     makeLogger = return . appLogger
+
+
+getServiceWorkerR :: Handler TypedContent
+getServiceWorkerR = do
+    
+    rndr <- getUrlRenderParams
+    msgr <- getMessageRender
+    mVAPIDKeys <- getVAPIDKeys
+
+    case mVAPIDKeys of
+      Just vapidKeys -> do
+          let applicationServerKey = vapidPublicKeyBytes vapidKeys
+          return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
+      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+      
+
+getVAPIDKeys :: Handler (Maybe VAPIDKeys)
+getVAPIDKeys = do
+
+    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi E.==. val apiInfoVapid
+        return (x ^. TokenId, x ^. TokenStore) )
+
+    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
+
+    details <- case storeType of
+      Just (_, StoreTypeGoogleSecretManager) -> do
+          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
+
+      Just (tid, StoreTypeDatabase) -> do
+          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+              x <-from $ table @Store
+              where_ $ x ^. StoreToken E.==. val tid
+              return $ x ^. StoreVal )
+
+      Just (_,StoreTypeSession) -> return Nothing
+      Nothing -> return Nothing
+
+    return $ readVAPIDKeys <$> details
 
 
 isAuthenticatedSelf :: UserId -> Handler AuthResult

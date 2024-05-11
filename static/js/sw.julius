@@ -139,7 +139,65 @@ self.addEventListener('fetch', function (e) {
 });
 
 self.addEventListener('pushsubscriptionchange', (event) => {
-
-  console.log('pushsubscriptionchange: event.oldSubscription: ', JSON.stringify(event.oldSubscription));
+  
+  Notification.requestPermission().then(function (permission) {
+    
+    if (permission === 'granted') {
+      
+      registration.pushManager.subscribe({
+	userVisibleOnly: true,
+	applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+      }).then((subscription) => {
+	
+	const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+	const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+	
+	fetch('@{PushSubscriptionEndpointR}', {
+	  method: 'PUT',
+	  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	  body: new URLSearchParams({
+	    endpoint: newSubscr.endpoint,
+	    p256dh: newSubscr.keys.p256dh,
+	    auth: newSubscr.keys.auth,
+	    oldendpoint: oldSubscr.endpoint
+	  })
+	}).then((response) => {
+	  localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+	});
+	
+      }).catch((err) => {
+	
+	registration.pushManager.getSubscription().then((subscription) => {
+	  subscription.unsubscribe().then((sccess) => {
+	    registration.pushManager.subscribe({
+	      userVisibleOnly: true,
+	      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+	    }).then((subscription) => {
+	
+	      const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+	      const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+	      
+	      fetch('@{PushSubscriptionEndpointR}', {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+		body: new URLSearchParams({
+		  endpoint: newSubscr.endpoint,
+		  p256dh: newSubscr.keys.p256dh,
+		  auth: newSubscr.keys.auth,
+		  oldendpoint: oldSubscr.endpoint
+		})
+	      }).then((response) => {
+		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+	      });
+	      
+	    });
+	  });
+	});
+	
+      });
+      
+    }
+    
+  });
   
 });

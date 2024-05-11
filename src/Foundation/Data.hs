@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE ViewPatterns #-}
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeApplications #-}
 
 module Foundation.Data where
 
@@ -17,24 +18,15 @@ import Import.NoFoundation
 
 import Model
     ( UserId, ContactId
-    , PushMsgType
-      ( PushMsgTypeDecline, PushMsgTypeIgnore, PushMsgTypeAudioCall
-      , PushMsgTypeVideoCall, PushMsgTypeMessage
-      )
     )
 
-import Settings.StaticFiles (img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg)
-
-import Text.Julius (juliusFile)
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))
 
-import VideoRoom.Data (VideoRoom, Route (PushMessageR))
+import VideoRoom.Data (VideoRoom)
+
 
 import Yesod.Auth (Auth, getAuth)
 import Yesod.Core (mkMessage, renderRoute)
-import Yesod.Core.Content
-    ( TypedContent (TypedContent), toContent, typeJavascript )
-import Yesod.Core.Handler (HandlerFor, getUrlRenderParams, getMessageRender)
 import Yesod.Core.Types (Logger)
 
 
@@ -69,11 +61,4 @@ mkMessage "App" "messages" "en"
 -- type Widget = WidgetFor App ()
 mkYesodData "App" $(parseRoutesFile "config/routes.yesodroutes")
 
-
-getServiceWorkerR :: HandlerFor App TypedContent
-getServiceWorkerR = do
-    
-    rndr <- getUrlRenderParams
-    msgr <- getMessageRender
-
-    return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
+          
