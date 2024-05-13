@@ -184,13 +184,10 @@ getOutgoingR sid rid = do
 getIncomingR :: (Yesod m, YesodVideo m)
              => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
              => (RenderMessage m AppMessage, RenderMessage m FormMessage)
-             => SubHandlerFor VideoRoom m Html
-getIncomingR = do
+             => UserId -> UserId -> SubHandlerFor VideoRoom m Html
+getIncomingR sid rid = do
 
     let polite = True
-
-    (sid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "senderId")
-    (rid :: UserId) <- toSqlKey <$> runInputGet (ireq intField "recipientId")
 
     videor <- runInputGet (ireq boolField "videor")
     audior <- runInputGet (ireq boolField "audior")
@@ -335,6 +332,7 @@ postPushMessageR = do
                                                 , "image" .= (urlRender . toParent . PhotoR $ sid)
                                                 , "body" .= messageBody
                                                 , "messageType" .= messageType
+                                                , "target" .= urlRender (toParent $ IncomingR rid sid)
                                                 , "channelId" .= channelId
                                                 , "senderId" .= sid
                                                 , "senderName" .= ( (userName . entityVal <$> sender)

@@ -65,7 +65,7 @@ import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 import Text.Read (readMaybe)
 
-import VideoRoom.Data (Route(IncomingR, PushMessageR))
+import VideoRoom.Data (Route(PushMessageR))
 
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys
@@ -230,7 +230,7 @@ instance Yesod App where
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
       where
           resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
-          
+
 
     -- The page to be redirected to when authentication is required.
     authRoute :: App -> Maybe (Route App)
@@ -246,7 +246,7 @@ instance Yesod App where
     isAuthorized (CalleesR uid) _ = isAuthenticatedSelf uid
     isAuthorized (CallsR uid) _ = isAuthenticatedSelf uid
 
-    
+
 
     isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
@@ -326,17 +326,21 @@ instance Yesod App where
 
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
-    
+
     rndr <- getUrlRenderParams
     msgr <- getMessageRender
     mVAPIDKeys <- getVAPIDKeys
+
+    calleeName <- resolveName <$> maybeAuth
 
     case mVAPIDKeys of
       Just vapidKeys -> do
           let applicationServerKey = vapidPublicKeyBytes vapidKeys
           return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
-      
+  where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
+
 
 getVAPIDKeys :: Handler (Maybe VAPIDKeys)
 getVAPIDKeys = do

@@ -38,5 +38,5 @@ mkYesodSubData "VideoRoom" [parseRoutes|
 /ws/#ChanId/#Bool         WebSoketR    GET
 /api/push                 PushMessageR POST
 /outgoing/#UserId/#UserId OutgoingR    GET
-/incoming                 IncomingR    GET
+/incoming/#UserId/#UserId IncomingR    GET
 |]

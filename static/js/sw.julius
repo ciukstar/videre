@@ -15,12 +15,12 @@ self.onpush = function (e) {
 
     let actions;
     if (message.messageType === #{show PushMsgTypeAudioCall} || message.messageType === #{show PushMsgTypeVideoCall}) {
-      actions = [ { action: 'decline', title: #{msgr MsgDecline} },
-		  { action: 'accept', title: #{msgr MsgAnswer} }
+      actions = [ { action: 'declineCall', title: #{msgr MsgDecline} },
+		  { action: 'acceptCall', title: #{msgr MsgAnswer} }
 		];
-    } else if (message.messageType === #{show PushMsgTypeMessage}) {
-      actions = [ { action: 'ignore', title: #{msgr MsgIgnore} },
-		  { action: 'reply', title: #{msgr MsgReply} }
+    } else if (message.messageType === #{show PushMsgTypeChat}) {
+      actions = [ { action: 'ignoreChat', title: #{msgr MsgIgnore} },
+		  { action: 'replyChat', title: #{msgr MsgReply} }
 		];
     } else {
       actions = [];
@@ -48,9 +48,9 @@ self.onpush = function (e) {
 
 self.addEventListener('notificationclick', (e) => {
 
-  e.notification.close();
-
-  if (e.action === 'decline') {
+  if (e.action === 'declineCall') {
+    
+    e.notification.close();
     
     fetch('@{VideoR PushMessageR}', {
       method: 'POST',
@@ -67,23 +67,175 @@ self.addEventListener('notificationclick', (e) => {
 	audior: e.notification.data.audior,
 	videos: e.notification.data.videos,
 	audios: e.notification.data.audios,
-	callId: e.notification.data.audios
+	callId: e.notification.data.callId
       })
     });
     
+  } else if (e.action === 'acceptCall') {
+    
+    e.notification.close();
+    
+    const promise = self.clients.matchAll(
+      { type: 'window', includeUncontrolled: true }
+    ).then((clients) => {
+      
+      return [clients.filter((client) => client.url === e.notification.data.target), clients];
+      
+    }).then(([targets, clients]) => {
+
+      if (targets.length > 0) {
+	
+	targets[0].focus().then((client) => {
+	  fetch('@{VideoR PushMessageR}', {
+	    method: 'POST',
+	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	    body: new URLSearchParams({
+              messageType: #{show PushMsgTypeAccept},
+	      title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
+	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+              channelId: e.notification.data.channelId,
+              senderId: e.notification.data.recipientId,
+              recipientId: e.notification.data.senderId,
+	      videor: e.notification.data.videor,
+	      audior: e.notification.data.audior,
+	      videos: e.notification.data.videos,
+	      audios: e.notification.data.audios,
+	      callId: e.notification.data.callId,
+	      backlink: client.url
+	    })
+	  });
+	  
+	  const params = new URLSearchParams({
+	    channel: e.notification.data.channelId,
+	    videor: e.notification.data.videor,
+	    audior: e.notification.data.audior,
+	    videos: e.notification.data.videos,
+	    audios: e.notification.data.audios,
+	    backlink: client.url
+	  });
+
+	  return client.navigate(`${e.notification.data.target}?${params}`);
+
+	});
+	
+      } else if (clients.length > 0) {
+	clients[0].focus().then((client) => {
+	  
+	  fetch('@{VideoR PushMessageR}', {
+	    method: 'POST',
+	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	    body: new URLSearchParams({
+              messageType: #{show PushMsgTypeAccept},
+	      title: #{msgr MsgAppName},
+              icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
+	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+              channelId: e.notification.data.channelId,
+              senderId: e.notification.data.recipientId,
+              recipientId: e.notification.data.senderId,
+	      videor: e.notification.data.videor,
+	      audior: e.notification.data.audior,
+	      videos: e.notification.data.videos,
+	      audios: e.notification.data.audios,
+	      callId: e.notification.data.callId,
+	      backlink: client.url
+	    })
+	  });
+	  
+	  const params = new URLSearchParams({
+	    channel: e.notification.data.channelId,
+	    videor: e.notification.data.videor,
+	    audior: e.notification.data.audior,
+	    videos: e.notification.data.videos,
+	    audios: e.notification.data.audios,
+	    backlink: client.url
+	  });
+
+	  return client.navigate(`${e.notification.data.target}?${params}`);
+	  
+	});
+
+      } else {
+	
+	fetch('@{VideoR PushMessageR}', {
+	  method: 'POST',
+	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	  body: new URLSearchParams({
+            messageType: #{show PushMsgTypeAccept},
+	    title: #{msgr MsgAppName},
+            icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
+	    body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+            channelId: e.notification.data.channelId,
+            senderId: e.notification.data.recipientId,
+            recipientId: e.notification.data.senderId,
+	    videor: e.notification.data.videor,
+	    audior: e.notification.data.audior,
+	    videos: e.notification.data.videos,
+	    audios: e.notification.data.audios,
+	    callId: e.notification.data.callId,
+	    backlink: self.location.origin
+	  })
+	});
+	
+	const params = new URLSearchParams({
+	  channel: e.notification.data.channelId,
+	  videor: e.notification.data.videor,
+	  audior: e.notification.data.audior,
+	  videos: e.notification.data.videos,
+	  audios: e.notification.data.audios,
+	  backlink: self.location.origin
+	});
+
+	return self.clients.openWindow(`${e.notification.data.target}?${params}`);
+	  
+      }
+      
+    });
+
+    e.waitUntil(promise);
+    
+  } else if (e.action === 'ignoreChat') {
+    
+    e.notification.close();
+    
+  } else if (e.action === 'replyChat') {
+    
+    e.notification.close();
+    
+    const promise = self.clients.matchAll(
+      { type: 'window', includeUncontrolled: true }
+    ).then((clients) => {
+      
+      return [clients.filter((client) => client.url === e.notification.data.target), clients];
+      
+    }).then(([targets, clients]) => {
+
+      return targets.length > 0
+	? targets[0].focus().then((client) => client.navigate(e.notification.data.target))
+	: ( clients.length > 0
+	    ? clients[0].focus().then((client) => client.navigate(e.notification.data.target))
+	    : self.clients.openWindow(e.notification.data.target)
+	  );
+      
+    });
+
+    e.waitUntil(promise);
+    
   } else {
+    
+    e.notification.close();
   
     const promise = self.clients.matchAll(
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
 
       return clients.length > 0
-	? clients[0].focus().then(
-	  (client) => { client.postMessage(e.notification.data); }
-	)
-	: self.clients.openWindow(self.location.origin).then(
-	  (client) => { client.postMessage(e.notification.data); }
-	);
+	? clients[0].focus().then((client) => {
+	  client.postMessage(e.notification.data);
+	})
+	: self.clients.openWindow(self.location.origin).then((client) => {
+	  client.postMessage(e.notification.data);
+	});
       
     });
 

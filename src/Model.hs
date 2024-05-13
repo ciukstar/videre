@@ -67,7 +67,7 @@ instance ToJSON CallType where
     toJSON = String . pack . show
 
 
-data PushMsgType = PushMsgTypeMessage | PushMsgTypeRefresh | PushMsgTypeVideoCall
+data PushMsgType = PushMsgTypeChat | PushMsgTypeRefresh | PushMsgTypeVideoCall
                  | PushMsgTypeAudioCall | PushMsgTypeAccept | PushMsgTypeDecline
                  | PushMsgTypeCancel | PushMsgTypeIgnore | PushMsgTypeEndSession
     deriving (Eq, Show, Read)

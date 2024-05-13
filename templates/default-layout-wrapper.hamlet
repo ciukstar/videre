@@ -13,6 +13,7 @@ $doctype 5
     <meta name="viewport" content="width=device-width,initial-scale=1">
 
     <link rel=icon type="image/x-icon" href=@{FaviconR}>
+    <link rel=icon type="image/svg+xml" href=@{StaticR img_video_chat_FILL0_wght400_GRAD0_opsz144_svg}>
     <link rel=manifest href=@{WebAppManifestR}>
 
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">

@@ -53,7 +53,7 @@ import Foundation.Data
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
       , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
       , MsgCancel, MsgClose, MsgAppName, MsgCallCanceledByCaller
-      , MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom 
+      , MsgIncomingAudioCallFrom, MsgIncomingVideoCallFrom
       )
     )
 
@@ -67,7 +67,7 @@ import Model
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , ContactId, Token, Store, Call
     , PushMsgType
-      ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeMessage
+      ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
       , PushMsgTypeRefresh
       )
@@ -104,7 +104,7 @@ import Web.WebPush
     ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
     , sendPushNotification, pushTopic, PushTopic (PushTopic), pushUrgency
-    , PushUrgency (PushUrgencyLow)
+    , PushUrgency (PushUrgencyLow, PushUrgencyHigh)
     )
 
 import Yesod.Core
@@ -373,12 +373,12 @@ chatApp userId interlocutorId contactId = do
                                      photor <- liftHandler $ getAccountPhotoRoute pid
                                      let notification = mkPushNotification endpoint p256dh auth
                                              & pushMessage .~ object
-                                                 [ "messageType" .= PushMsgTypeMessage
-                                                 , "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
+                                                 [ "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
                                                  , "icon" .= urlr iconr
                                                  , "image" .= urlr photor
                                                  , "body" .= message
-                                                 , "reply" .= urlr (tpr $ ChatRoomR sid pid contactId)
+                                                 , "messageType" .= PushMsgTypeChat
+                                                 , "target" .= urlr (tpr $ ChatRoomR sid pid contactId)
                                                  , "senderId" .= pid
                                                  , "senderName" .= (
                                                        (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender
@@ -387,13 +387,13 @@ chatApp userId interlocutorId contactId = do
                                                  ]
                                              & pushSenderEmail .~ superuserUsername
                                              & pushExpireInSeconds .~ 30 * 60
-                                             & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeMessage)
-                                             & pushUrgency ?~ PushUrgencyLow
+                                             & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeChat)
+                                             & pushUrgency ?~ PushUrgencyHigh
 
                                      manager <- liftHandler getAppHttpManager
 
                                      result <- sendPushNotification vapidKeys manager notification
-                                     
+
                                      case result of
                                        Left ex -> do
                                            liftIO $ print ex
