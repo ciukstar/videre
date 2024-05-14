@@ -213,3 +213,5 @@ Doc016: The entity Call represents outgoing and incoming calls to the currently 
 Doc017 link@Text: The configuration can be provided as a textual representation of a JSON object as described in <a href=#{link} target=_blank>RTCPeerConnection() constructor</a>.
 
 Doc018: Mainly used to specify STUN and TURN servers.
+
+Doc019: The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.

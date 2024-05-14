@@ -71,7 +71,10 @@
 
 <md-dialog ##{idDialogMissedCall}>
   <div slot=headline>
-    _{MsgMissedCall}
+    <span style="flex:1">_{MsgMissedCall}
+    <md-icon-button type=button title=_{MsgClose}
+      onclick="document.getElementById('#{idDialogMissedCall}').close()">
+      <md-icon>close
 
   <form slot=content method=dialog>
     <p.body-large>
@@ -79,6 +82,5 @@
       <span ##{idMissedCallCaller}>
 
   <div slot=actions>
-    <md-filled-button has-icon type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
-      <md-icon slot=icon>close
+    <md-text-button type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
       _{MsgClose}

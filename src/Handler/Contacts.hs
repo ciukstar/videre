@@ -133,7 +133,7 @@ import VideoRoom
       ( getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute
       , getAppSettings
       )
-    , Route (OutgoingR)
+    , Route (RoomR)
     )
 import VideoRoom.Data (Route (PushMessageR))
 
@@ -694,11 +694,11 @@ instance YesodChat App where
     getStaticRoute :: StaticRoute -> Handler (Route App)
     getStaticRoute = return . StaticR
 
-    getVideoPushRoute :: Handler (Route App)
-    getVideoPushRoute = return $ VideoR PushMessageR
+    getVideoPushRoute :: UserId -> ContactId -> UserId -> Handler (Route App)
+    getVideoPushRoute sid cid rid = return $ VideoR $ PushMessageR sid cid rid
 
-    getVideoOutgoingRoute :: UserId -> UserId -> Handler (Route App)
-    getVideoOutgoingRoute sid rid = return $ VideoR $ OutgoingR sid rid
+    getVideoOutgoingRoute :: UserId -> ContactId -> UserId -> Bool -> Handler (Route App)
+    getVideoOutgoingRoute sid cid rid polite = return $ VideoR $ RoomR sid cid rid polite
 
     getAppSettings :: Handler AppSettings
     getAppSettings = getYesod >>= \app -> return $ appSettings app

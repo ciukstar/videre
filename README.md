@@ -81,7 +81,7 @@ The subscription can be checked or renewed from the “View contact” menu item
 The entity Call represents outgoing and incoming calls to the currently logged in user.
 
 ### Chat
-...
+The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.
 
 ## ER Diagram
 

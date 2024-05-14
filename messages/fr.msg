@@ -11,7 +11,7 @@ SelectCalleeToCall: Sélectionnez un appelé dans la liste à appeler
 YouHaveNotMadeAnyCallsYet: Vous n'avez pas encore passé d'appels
 Chats: Discussions
 Calls: Appels
-EntityChat: L'entité "Chat"
+EntityChat: L'entité « Chat »
 PushSubscription: Abonnement push
 BasicEntities: Entités de base
 Overview: Aperçu
@@ -207,8 +207,10 @@ Doc014: L'abonnement peut être vérifié ou renouvelé à partir de l'élément
 
 Doc015 href: <a href=#{href} target=_blank>Les notifications Web Push</a> sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.
 
-Doc016: L'entité « Appel » représente les appels sortants et entrants vers l'utilisateur.
+Doc016: L'entité Appel représente les appels sortants et entrants vers l'utilisateur.
 
 Doc017 link: La configuration peut être fournie sous la forme d'une représentation textuelle d'un objet JSON comme décrit dans le <a href=#{link} target=_blank>Constructeur RTCPeerConnection()</a>.
 
 Doc018: Principalement utilisé pour spécifier les serveurs STUN et TURN.
+
+Doc019: L'entité Chat représente les messages échangés entre deux utilisateurs. Par défaut, les messages de chat sont échangés et stockés à l'aide du protocole WebSockets. La messagerie peer-to-peer sans stockage intermédiaire est prévue pour les prochaines versions.

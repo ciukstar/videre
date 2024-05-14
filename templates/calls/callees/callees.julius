@@ -5,7 +5,7 @@ Array.from(
 ).forEach((call) => {
   call.addEventListener('click', (e) => {
 
-    fetch('@{VideoR PushMessageR}', {
+    fetch(call.dataset.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -13,9 +13,6 @@ Array.from(
 	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
 	title: call.dataset.title,
 	body: call.dataset.body,
-	channelId: call.dataset.channelId,
-	senderId: #{show $ fromSqlKey uid},
-	recipientId: call.dataset.recipientId,
 	videor: 'videor' in call.dataset,
 	audior: true,
 	videos: 'videos' in call.dataset,
@@ -29,7 +26,7 @@ Array.from(
 	
 	document.getElementById(`idButtonOutgoingCallCancel${call.dataset.i}`).addEventListener('click', (e) => {
 
-	  fetch('@{VideoR PushMessageR}', {
+	  fetch(call.dataset.targetPush, {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
@@ -37,9 +34,6 @@ Array.from(
 	      title: call.dataset.title,
 	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: call.dataset.bodyCancel,
-	      channelId: call.dataset.channelId,
-	      senderId: #{show $ fromSqlKey uid},
-	      recipientId: call.dataset.recipientId,
 	      videor: false,
 	      audior: false,
 	      videos: false,
@@ -61,7 +55,6 @@ Array.from(
 	    dlgOutgoingCall.close();
 	    
 	    const params = new URLSearchParams({
-	      channel: message.data.channelId,
 	      backlink: '@{CallsR uid}',
 	      videor: message.data.videor,
 	      audior: message.data.audior,
@@ -69,7 +62,7 @@ Array.from(
 	      audios: message.data.audios
 	    });
 
-	    window.location.href = `${call.dataset.videoroom}?${params}`;
+	    window.location.href = `${call.dataset.targetRoom}?${params}`;
 	    
 	  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
 

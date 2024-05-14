@@ -1,6 +1,6 @@
 
 <header.app-top-app-bar.background>
-  <md-icon-button type=link href=@{ChatR $ ChatRoomR sid pid cid}>
+  <md-icon-button type=link href=@{ChatR $ ChatRoomR sid cid pid}>
     <md-icon>arrow_back
 
   <h1.title-large>

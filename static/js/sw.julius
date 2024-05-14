@@ -52,7 +52,7 @@ self.addEventListener('notificationclick', (e) => {
     
     e.notification.close();
     
-    fetch('@{VideoR PushMessageR}', {
+    fetch(e.notification.data.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -60,9 +60,6 @@ self.addEventListener('notificationclick', (e) => {
 	title: #{msgr MsgAppName},
 	icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
 	body: #{msgr MsgCallDeclined},
-	channelId: e.notification.data.channelId,
-	senderId: e.notification.data.recipientId,
-	recipientId: e.notification.data.senderId,
 	videor: e.notification.data.videor,
 	audior: e.notification.data.audior,
 	videos: e.notification.data.videos,
@@ -79,14 +76,14 @@ self.addEventListener('notificationclick', (e) => {
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
       
-      return [clients.filter((client) => client.url === e.notification.data.target), clients];
+      return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
       
     }).then(([targets, clients]) => {
 
       if (targets.length > 0) {
 	
 	targets[0].focus().then((client) => {
-	  fetch('@{VideoR PushMessageR}', {
+	  fetch(e.notification.data.targetPush, {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
@@ -94,9 +91,6 @@ self.addEventListener('notificationclick', (e) => {
 	      title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-              channelId: e.notification.data.channelId,
-              senderId: e.notification.data.recipientId,
-              recipientId: e.notification.data.senderId,
 	      videor: e.notification.data.videor,
 	      audior: e.notification.data.audior,
 	      videos: e.notification.data.videos,
@@ -107,7 +101,6 @@ self.addEventListener('notificationclick', (e) => {
 	  });
 	  
 	  const params = new URLSearchParams({
-	    channel: e.notification.data.channelId,
 	    videor: e.notification.data.videor,
 	    audior: e.notification.data.audior,
 	    videos: e.notification.data.videos,
@@ -115,14 +108,14 @@ self.addEventListener('notificationclick', (e) => {
 	    backlink: client.url
 	  });
 
-	  return client.navigate(`${e.notification.data.target}?${params}`);
+	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
 
 	});
 	
       } else if (clients.length > 0) {
 	clients[0].focus().then((client) => {
 	  
-	  fetch('@{VideoR PushMessageR}', {
+	  fetch(e.notification.data.targetPush, {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
@@ -130,9 +123,6 @@ self.addEventListener('notificationclick', (e) => {
 	      title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-              channelId: e.notification.data.channelId,
-              senderId: e.notification.data.recipientId,
-              recipientId: e.notification.data.senderId,
 	      videor: e.notification.data.videor,
 	      audior: e.notification.data.audior,
 	      videos: e.notification.data.videos,
@@ -143,7 +133,6 @@ self.addEventListener('notificationclick', (e) => {
 	  });
 	  
 	  const params = new URLSearchParams({
-	    channel: e.notification.data.channelId,
 	    videor: e.notification.data.videor,
 	    audior: e.notification.data.audior,
 	    videos: e.notification.data.videos,
@@ -151,13 +140,13 @@ self.addEventListener('notificationclick', (e) => {
 	    backlink: client.url
 	  });
 
-	  return client.navigate(`${e.notification.data.target}?${params}`);
+	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
 	  
 	});
 
       } else {
 	
-	fetch('@{VideoR PushMessageR}', {
+	fetch(e.notification.data.targetPush, {
 	  method: 'POST',
 	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	  body: new URLSearchParams({
@@ -165,9 +154,6 @@ self.addEventListener('notificationclick', (e) => {
 	    title: #{msgr MsgAppName},
             icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	    body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-            channelId: e.notification.data.channelId,
-            senderId: e.notification.data.recipientId,
-            recipientId: e.notification.data.senderId,
 	    videor: e.notification.data.videor,
 	    audior: e.notification.data.audior,
 	    videos: e.notification.data.videos,
@@ -178,7 +164,6 @@ self.addEventListener('notificationclick', (e) => {
 	});
 	
 	const params = new URLSearchParams({
-	  channel: e.notification.data.channelId,
 	  videor: e.notification.data.videor,
 	  audior: e.notification.data.audior,
 	  videos: e.notification.data.videos,
@@ -186,7 +171,7 @@ self.addEventListener('notificationclick', (e) => {
 	  backlink: self.location.origin
 	});
 
-	return self.clients.openWindow(`${e.notification.data.target}?${params}`);
+	return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
 	  
       }
       
@@ -206,15 +191,15 @@ self.addEventListener('notificationclick', (e) => {
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
       
-      return [clients.filter((client) => client.url === e.notification.data.target), clients];
+      return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
       
     }).then(([targets, clients]) => {
 
       return targets.length > 0
-	? targets[0].focus().then((client) => client.navigate(e.notification.data.target))
+	? targets[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
 	: ( clients.length > 0
-	    ? clients[0].focus().then((client) => client.navigate(e.notification.data.target))
-	    : self.clients.openWindow(e.notification.data.target)
+	    ? clients[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
+	    : self.clients.openWindow(e.notification.data.targetRoom)
 	  );
       
     });
@@ -247,7 +232,7 @@ self.addEventListener('notificationclick', (e) => {
 
 
 self.addEventListener('notificationclose', (e) => {
-  fetch('@{VideoR PushMessageR}', {
+  fetch(e.notification.data.targetPush, {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -255,9 +240,6 @@ self.addEventListener('notificationclose', (e) => {
       title: #{msgr MsgAppName},
       icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
       body: #{msgr MsgCallDeclined},
-      channelId: e.notification.data.channelId,
-      senderId: e.notification.data.recipientId,
-      recipientId: e.notification.data.senderId,
       videor: e.notification.data.videor,
       audior: e.notification.data.audior,
       videos: e.notification.data.videos,

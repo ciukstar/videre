@@ -1,5 +1,5 @@
 
-let ws = new WebSocket('@{toParent $ WebSoketR channelId polite}'.replace("http:", "ws:").replace("https:", "wss:"));
+let ws = new WebSocket('@{toParent $ WebSoketR cid polite}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 let pc = new RTCPeerConnection(#{config});
 
@@ -208,7 +208,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 [#{idButtonExitSession}, #{idButtonEndSession}].forEach((x) => {
   document.getElementById(x).addEventListener('click', (e) => {
-    fetch('@{toParent PushMessageR}', {
+    fetch('@{toParent $ PushMessageR sid cid rid}', {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
@@ -216,9 +216,8 @@ navigator.serviceWorker.addEventListener('message', function (message) {
         icon: '@{iconCallEnd}',
         body: #{msgr $ MsgInterlocutorEndedSession interlocutorName},
         messageType: #{show PushMsgTypeEndSession},
-        channelId: #{show channel},
-        senderId: #{show $ fromSqlKey sid},
-        recipientId: #{show $ fromSqlKey rid},
+	targetRoom: '@{toParent $ RoomR rid cid sid True}',
+	targetPush: '@{toParent $ PushMessageR rid cid sid}',
         videor: #{rawJS videor},
         audior: #{rawJS audior},
         videos: #{rawJS videos},

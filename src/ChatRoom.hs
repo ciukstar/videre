@@ -104,7 +104,7 @@ import Web.WebPush
     ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
     , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
     , sendPushNotification, pushTopic, PushTopic (PushTopic), pushUrgency
-    , PushUrgency (PushUrgencyLow, PushUrgencyHigh)
+    , PushUrgency (PushUrgencyHigh)
     )
 
 import Yesod.Core
@@ -133,8 +133,8 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
     getContactRoute :: UserId -> UserId -> ContactId -> HandlerFor m (Route m)
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
-    getVideoPushRoute :: HandlerFor m (Route m)
-    getVideoOutgoingRoute :: UserId -> UserId -> HandlerFor m (Route m)
+    getVideoPushRoute :: UserId -> ContactId -> UserId -> HandlerFor m (Route m)
+    getVideoOutgoingRoute :: UserId -> ContactId -> UserId -> Bool -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
 
 
@@ -155,8 +155,8 @@ postAcknowledgeR = do
         where_ $ x ^. ChatId ==. val cid
 
 
-getChatRoomR :: UserId -> UserId -> ContactId -> ChatHandler Html
-getChatRoomR sid rid cid = do
+getChatRoomR :: UserId -> ContactId -> UserId -> ChatHandler Html
+getChatRoomR sid cid rid = do
 
     backlink <- liftHandler $ getBacklink sid rid
     photos <- liftHandler $ getAccountPhotoRoute sid
@@ -164,8 +164,8 @@ getChatRoomR sid rid cid = do
     contact  <- liftHandler $ getContactRoute sid rid cid
     icon <- liftHandler $ getStaticRoute img_call_FILL0_wght400_GRAD0_opsz24_svg
     iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-    video <- liftHandler getVideoPushRoute
-    outgoing <- liftHandler $ getVideoOutgoingRoute sid rid
+    video <- liftHandler $ getVideoPushRoute sid cid rid
+    outgoing <- liftHandler $ getVideoOutgoingRoute sid cid rid False
 
     interlocutor <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -242,8 +242,6 @@ getChatRoomR sid rid cid = do
         return (uid,iid,time,msg,ctype,media) )
 
     toParent <- getRouteToParent
-
-    let channel = fromSqlKey cid
 
     callerName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
         x <- from $ table @User
@@ -378,7 +376,7 @@ chatApp userId interlocutorId contactId = do
                                                  , "image" .= urlr photor
                                                  , "body" .= message
                                                  , "messageType" .= PushMsgTypeChat
-                                                 , "target" .= urlr (tpr $ ChatRoomR sid pid contactId)
+                                                 , "targetRoom" .= urlr (tpr $ ChatRoomR sid contactId pid)
                                                  , "senderId" .= pid
                                                  , "senderName" .= (
                                                        (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender

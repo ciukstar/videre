@@ -49,11 +49,11 @@
                   :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                   :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
-                  data-channel-id=#{show $ fromSqlKey cid}
                   data-recipient-id=#{show $ fromSqlKey caller}
                   :CallTypeVideo == ctype:data-videor
                   :CallTypeVideo == ctype:data-videos
-                  data-videoroom=@{VideoR $ OutgoingR uid caller}
+                  data-target-room=@{VideoR $ RoomR uid cid caller False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid caller}
                   data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                   <md-icon>
                     $case ctype
@@ -152,11 +152,11 @@
                   :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                   :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
-                  data-channel-id=#{show $ fromSqlKey cid}
                   data-recipient-id=#{show $ fromSqlKey callee}
                   :CallTypeVideo == ctype:data-videor
                   :CallTypeVideo == ctype:data-videos
-                  data-videoroom=@{VideoR $ OutgoingR uid callee}
+                  data-target-room=@{VideoR $ RoomR uid cid callee False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid callee}
                   data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                   <md-icon>
                     $case ctype

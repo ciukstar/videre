@@ -208,8 +208,10 @@ Doc014: Abonamentul poate fi verificat sau reînnoit din elementul de meniu „V
 
 Doc015 href: <a href=#{href} target=_blank>Notificările Web Push</a> sunt folosite pentru a notifica un apelat despre un apel video/audio primit. De asemenea, este folosit pentru a încheia sesiunea video/audio.
 
-Doc016: Entitatea „Apel” reprezintă apelurile efectuate și primite către utilizator.
+Doc016: Entitatea Apel reprezintă apelurile efectuate și primite către utilizator.
 
 Doc017 link: Configurația poate fi furnizată ca o reprezentare textuală a unui obiect JSON, așa cum este descris în <a href=#{link} target=_blank>RTCPeerConnection() constructor</a>.
 
 Doc018: Folosit în principal pentru a specifica serverele STUN și TURN.
+
+Doc019: Entitatea Chat reprezintă mesajele schimbate între doi utilizatori. În mod implicit, mesajele de chat sunt schimbate și stocate folosind protocolul WebSockets. Mesageria peer-to-peer fără stocare intermediară este planificată pentru versiunile viitoare.

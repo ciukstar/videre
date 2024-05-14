@@ -87,7 +87,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
     [#{idButtonAudioCallDecline}, #{idDialogIncomingAudioCall}]
   ].forEach(([buttonId, dialogId]) => {
     document.getElementById(buttonId).onclick = function (event) {
-      fetch('@{VideoR PushMessageR}', {
+      fetch(message.data.targetPush, {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	body: new URLSearchParams({
@@ -95,9 +95,6 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
 	  body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
-          channelId: message.data.channelId,
-          senderId: message.data.recipientId,
-          recipientId: message.data.senderId,
 	  videor: false,
 	  audior: false,
 	  videos: message.data.videos,
@@ -114,7 +111,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
     [#{idButtonAudioCallAcceptVideo}, #{idDialogIncomingAudioCall}, { audio: true, video: true }]
   ].forEach(([buttonId, dialogId, { audio, video }]) => {
     document.getElementById(buttonId).onclick = (event) => {
-      fetch('@{VideoR PushMessageR}', {
+      fetch(message.data.targetPush, {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	body: new URLSearchParams({
@@ -122,9 +119,6 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	  body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-          channelId: message.data.channelId,
-          senderId: message.data.recipientId,
-          recipientId: message.data.senderId,
 	  videor: video,
 	  audior: audio,
 	  videos: message.data.videos,
@@ -136,7 +130,6 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	document.getElementById(dialogId).close();
 
 	const params = new URLSearchParams({
-          channel: message.data.channelId,
 	  videor: message.data.videor,
 	  audior: message.data.audior,
 	  videos: video,
@@ -144,7 +137,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           backlink: '@{backlink}'
 	});
 
-	window.location.href = `${message.data.target}?${params}`;
+	window.location.href = `${message.data.targetRoom}?${params}`;
 
       });
     };
@@ -154,7 +147,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
     [#{idButtonAudioCallAccept}, #{idDialogIncomingAudioCall}]
   ].forEach(([buttonId, dialogId]) => {
     document.getElementById(buttonId).onclick = (event) => {
-      fetch('@{VideoR PushMessageR}', {
+      fetch(message.data.targetPush, {
 	method: 'POST',
 	headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	body: new URLSearchParams({
@@ -162,9 +155,6 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	  title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	  body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-          channelId: message.data.channelId,
-          senderId: message.data.recipientId,
-          recipientId: message.data.senderId,
 	  videor: message.data.videor,
 	  audior: message.data.audior,
 	  videos: message.data.videos,
@@ -176,7 +166,6 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 	document.getElementById(dialogId).close();
 
 	const params = new URLSearchParams({
-          channel: message.data.channelId,
 	  videor: message.data.videor,
 	  audior: message.data.audior,
 	  videos: message.data.videos,
@@ -184,7 +173,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           backlink: '@{backlink}'
 	});
 
-	window.location.href = `${message.data.target}?${params}`;
+	window.location.href = `${message.data.targetRoom}?${params}`;
 
       });
     };
@@ -199,7 +188,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idImgSenderPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
     document.getElementById(#{idNotificationBody}).textContent = message.data.body;
-    document.getElementById(#{idButtonReplyNotification}).href = message.data.target;
+    document.getElementById(#{idButtonReplyNotification}).href = message.data.targetRoom;
     document.getElementById(#{idDialogChatNotification}).show();
 
   } else if (message.data.messageType === #{show PushMsgTypeCancel}) {

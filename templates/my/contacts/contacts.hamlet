@@ -25,7 +25,7 @@
     
     <md-list>
       $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(subscription,accessible)),content))) <- entries
-        <md-list-item type=link href=@{ChatR $ ChatRoomR uid rid cid}>
+        <md-list-item type=link href=@{ChatR $ ChatRoomR uid cid rid}>
           <div slot=start>
             <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
             $maybe _ <- subscription

@@ -23,5 +23,5 @@ newtype ChatRoom = ChatRoom (TVar (M.Map (S.Set UserId) (TChan Text, Int)))
 
 mkYesodSubData "ChatRoom" [parseRoutes|
 /acknowledge                     AcknowledgeR POST
-/#UserId/#UserId/#ContactId/room ChatRoomR    GET
+/room/#UserId/#ContactId/#UserId ChatRoomR    GET
 |]

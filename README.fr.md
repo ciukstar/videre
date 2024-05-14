@@ -78,10 +78,10 @@ L'abonnement peut être vérifié ou renouvelé à partir de l'élément de menu
 [Les notifications Web Push](https://developer.mozilla.org/fr/docs/Web/API/Push_API) sont utilisées pour informer un appelé d'un appel vidéo/audio entrant. Il est également utilisé pour terminer la session vidéo/audio.
 
 ### L'entité « Appel »
-L'entité « Appel » représente les appels sortants et entrants vers l'utilisateur.
+L'entité Appel représente les appels sortants et entrants vers l'utilisateur.
 
-### L'entité "Chat"
-...
+### L'entité « Chat »
+L'entité Chat représente les messages échangés entre deux utilisateurs. Par défaut, les messages de chat sont échangés et stockés à l'aide du protocole WebSockets. La messagerie peer-to-peer sans stockage intermédiaire est prévue pour les prochaines versions.
 
 ## Diagramme ER
 

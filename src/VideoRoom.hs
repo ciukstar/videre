@@ -68,7 +68,7 @@ import Model
       ( UserId, TokenApi, TokenId, TokenStore
       , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
-      )
+      ), ContactId
     )
 
 import Network.HTTP.Client (Manager)
@@ -94,7 +94,7 @@ import Text.Shakespeare.Text (st)
 import VideoRoom.Data
     ( resourcesVideoRoom, channelMapTVar
     , VideoRoom (VideoRoom), ChanId (ChanId)
-    , Route (WebSoketR, PushMessageR, IncomingR, OutgoingR, PhotoR)
+    , Route (WebSoketR, PushMessageR, RoomR, PhotoR)
     )
 
 import Web.WebPush
@@ -128,15 +128,12 @@ class YesodVideo m where
     getAppSettings :: HandlerFor m AppSettings
 
 
-getOutgoingR :: (Yesod m, YesodVideo m)
-             => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => (RenderMessage m AppMessage, RenderMessage m FormMessage)
-             => UserId -> UserId -> SubHandlerFor VideoRoom m Html
-getOutgoingR sid rid = do
+getRoomR :: (Yesod m, YesodVideo m)
+         => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
+         => (RenderMessage m AppMessage, RenderMessage m FormMessage)
+         => UserId -> ContactId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
+getRoomR sid cid rid polite = do
 
-    let polite = False
-
-    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
     backlink <- runInputGet (ireq urlField "backlink")
 
     videor <- runInputGet (ireq boolField "videor")
@@ -150,59 +147,6 @@ getOutgoingR sid rid = do
 
     let visibilityVideoS = if videos then "visible" else "hidden" :: Text
     let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
-
-    toParent <- getRouteToParent
-
-    config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
-
-    interlocutorName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
-        x <- from $ table @User
-        where_ $ x ^. UserId ==. val rid
-        return x )
-
-    msgr <- getMessageRender
-    iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-
-    liftHandler $ defaultLayout $ do
-        idButtonExitSession <- newIdent
-        idWrapperVideoRemote <- newIdent
-        idVideoRemote <- newIdent
-        idImgVideoRemotePlaceholder <- newIdent
-        idWrapperVideoSelf <- newIdent
-        idVideoSelf <- newIdent
-        idImgVideoSelfPlaceholder <- newIdent
-        idButtonSwitchVideocam <- newIdent
-        idButtonVideoSwitch <- newIdent
-        idButtonAudioSwitch <- newIdent
-        idButtonEndSession <- newIdent
-        idDialogCallEnded <- newIdent
-        $(widgetFile "video/session")
-  where
-      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
-
-
-getIncomingR :: (Yesod m, YesodVideo m)
-             => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => (RenderMessage m AppMessage, RenderMessage m FormMessage)
-             => UserId -> UserId -> SubHandlerFor VideoRoom m Html
-getIncomingR sid rid = do
-
-    let polite = True
-
-    videor <- runInputGet (ireq boolField "videor")
-    audior <- runInputGet (ireq boolField "audior")
-
-    videos <- runInputGet (ireq boolField "videos")
-    audios <- runInputGet (ireq boolField "audios")
-
-    let visibilityVideoR = if videor then "visible" else "hidden" :: Text
-    let visibilityPlaceholderR = if videor then "hidden" else "visible" :: Text
-
-    let visibilityVideoS = if videos then "visible" else "hidden" :: Text
-    let visibilityPlaceholderS = if videos then "hidden" else "visible" :: Text
-
-    channelId@(ChanId channel) <- ChanId <$> runInputGet (ireq intField "channel")
-    backlink <- runInputGet (ireq urlField "backlink")
 
     toParent <- getRouteToParent
 
@@ -235,22 +179,19 @@ getIncomingR sid rid = do
 
 
 getWebSoketR :: (Yesod m, YesodPersist m, YesodPersistBackend m ~ SqlBackend)
-             => ChanId -> Bool -> SubHandlerFor VideoRoom m ()
-getWebSoketR channelId polite = webSockets (wsApp channelId polite)
+             => ContactId -> Bool -> SubHandlerFor VideoRoom m ()
+getWebSoketR cid polite = webSockets (wsApp cid polite)
 
 
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
                  => (RenderMessage m FormMessage, RenderMessage m AppMessage)
-                 => SubHandlerFor VideoRoom m ()
-postPushMessageR = do
+                 => UserId -> ContactId -> UserId -> SubHandlerFor VideoRoom m ()
+postPushMessageR sid cid rid = do
 
     messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<) <$> lookupPostParam "messageType"
     messageTitle <- runInputPost $ iopt textField "title"
     icon <- lookupPostParam "icon"
-    channelId <- ChanId <$> runInputPost (ireq intField "channelId")
-    sid <- toSqlKey <$> runInputPost (ireq intField "senderId")
-    rid <- toSqlKey <$> runInputPost (ireq intField "recipientId")
 
     videor <- runInputPost $ ireq boolField "videor"
     audior <- runInputPost $ ireq boolField "audior"
@@ -332,8 +273,8 @@ postPushMessageR = do
                                                 , "image" .= (urlRender . toParent . PhotoR $ sid)
                                                 , "body" .= messageBody
                                                 , "messageType" .= messageType
-                                                , "target" .= urlRender (toParent $ IncomingR rid sid)
-                                                , "channelId" .= channelId
+                                                , "targetRoom" .= urlRender (toParent $ RoomR rid cid sid True)
+                                                , "targetPush" .= urlRender (toParent $ PushMessageR rid cid sid)
                                                 , "senderId" .= sid
                                                 , "senderName" .= ( (userName . entityVal <$> sender)
                                                                     <|> (Just . userEmail . entityVal <$> sender)
@@ -358,29 +299,29 @@ postPushMessageR = do
                   Right () -> do
                       case (messageType, callId) of
 
-                        (Just PushMsgTypeAccept, Just cid) ->
+                        (Just PushMsgTypeAccept, Just cid') ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [CallStatus =. just (val CallStatusAccepted)]
-                            where_ $ x ^. CallId ==. val cid
+                            where_ $ x ^. CallId ==. val cid'
 
-                        (Just PushMsgTypeDecline, Just cid) ->
+                        (Just PushMsgTypeDecline, Just cid') ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [CallStatus =. just (val CallStatusDeclined)]
-                            where_ $ x ^. CallId ==. val cid
+                            where_ $ x ^. CallId ==. val cid'
 
-                        (Just PushMsgTypeEndSession, Just cid) ->
+                        (Just PushMsgTypeEndSession, Just cid') ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [ CallStatus =. just (val CallStatusEnded)
                                   , CallEnd =. just (val now)
                                   ]
-                            where_ $ x ^. CallId ==. val cid
+                            where_ $ x ^. CallId ==. val cid'
 
-                        (Just PushMsgTypeCancel, Just cid) ->
+                        (Just PushMsgTypeCancel, Just cid') ->
                             liftHandler $ runDB $ update $ \x -> do
                             set x [ CallStatus =. just (val CallStatusCanceled)
                                   , CallEnd =. just (val now)
                                   ]
-                            where_ $ x ^. CallId ==. val cid
+                            where_ $ x ^. CallId ==. val cid'
 
                         _otherwise -> return ()
 
@@ -399,23 +340,23 @@ userLeftChannel Nothing = Nothing
 userLeftChannel (Just (writeChan,numUsers)) = Just (writeChan,numUsers - 1)
 
 
-wsApp :: ChanId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
-wsApp channelId polite = do
+wsApp :: ContactId -> Bool -> WebSocketsT (SubHandlerFor VideoRoom m) ()
+wsApp cid polite = do
 
     VideoRoom {..} <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
 
-    let maybeChan = M.lookup channelId channelMap
+    let maybeChan = M.lookup cid channelMap
 
     (chan,peer) <- atomically $ case maybeChan of
       Nothing -> do
           chan <- newTQueue
           peer <- newTQueue
-          writeTVar channelMapTVar $ M.insert channelId ((chan,peer),1) channelMap
+          writeTVar channelMapTVar $ M.insert cid ((chan,peer),1) channelMap
           return (chan,peer)
       Just (chan,_) -> do
-          writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
+          writeTVar channelMapTVar $ M.alter userJoinedChannel cid channelMap
           return chan
 
     (e :: Either SomeException ()) <- try $ race_
@@ -429,7 +370,7 @@ wsApp channelId polite = do
     case e of
       Left _ -> do
           m <- readTVarIO channelMapTVar
-          let newChannelMap = M.alter userLeftChannel channelId m
+          let newChannelMap = M.alter userLeftChannel cid m
           atomically $ writeTVar channelMapTVar newChannelMap
       Right () -> return ()
 

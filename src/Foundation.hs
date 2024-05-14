@@ -65,8 +65,6 @@ import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 import Text.Read (readMaybe)
 
-import VideoRoom.Data (Route(PushMessageR))
-
 import Web.WebPush
     ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys
     , vapidPublicKeyBytes

@@ -68,11 +68,11 @@
                 data-message-type=#{show PushMsgTypeAudioCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
-                data-channel-id=#{show $ fromSqlKey cid}
                 data-recipient-id=#{show $ fromSqlKey rid}
                 data-audior
                 data-audios
-                data-videoroom=@{VideoR $ OutgoingR uid rid}
+                data-target-room=@{VideoR $ RoomR uid cid rid False}
+                data-target-push=@{VideoR $ PushMessageR uid cid rid}
                 data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                 <md-icon slot=icon>call
                 _{MsgAudio}
@@ -81,11 +81,11 @@
                 data-message-type=#{show PushMsgTypeVideoCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
-                data-channel-id=#{show $ fromSqlKey cid}
                 data-recipient-id=#{show $ fromSqlKey rid}
                 data-videor 
                 data-videos
-                data-videoroom=@{VideoR $ OutgoingR uid rid}
+                data-target-room=@{VideoR $ RoomR uid cid rid False}
+                data-target-push=@{VideoR $ PushMessageR uid cid rid}
                 data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                 
                 <md-icon slot=icon>videocam
