@@ -1,5 +1,12 @@
-name:    videre
-version: "0.0.0"
+name:       videre
+version:    "0.1.0"
+synopsis:   Instant messaging, video chat, audio calls
+category:   Application
+author:     Sergiu Starciuc <ciukstar@gmail.com>
+maintainer: Sergiu Starciuc <ciukstar@gmail.com>
+license:    MIT
+github:     ciukstar/videre
+homepage:   https://videre-2pg7fq7tgq-de.a.run.app/resources/docs
 
 dependencies:
 
