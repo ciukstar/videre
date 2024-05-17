@@ -141,7 +141,7 @@ import Web.WebPush
     ( VAPIDKeys, vapidPublicKeyBytes
     , mkPushNotification, pushMessage, sendPushNotification
     , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic)
-    , pushUrgency, PushUrgency (PushUrgencyLow)
+    , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
 import Widgets (widgetMenu, widgetUser)
@@ -550,9 +550,9 @@ postContactsR uid = do
                                           , "senderId" A..= uid
                                           ]
                                       & pushSenderEmail .~ superuserUsername
-                                      & pushExpireInSeconds .~ 60
+                                      & pushExpireInSeconds .~ 30 * 60
                                       & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeRefresh)
-                                      & pushUrgency ?~ PushUrgencyLow
+                                      & pushUrgency ?~ PushUrgencyHigh
 
                               result <- sendPushNotification vapidKeys manager notification
 

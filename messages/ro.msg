@@ -1,3 +1,6 @@
+TheUserSubscriptions: Abonamentele Utilizatorului
+NoSubscriptionsYet: Încă nu există abonamente
+Subscriptions: Abonamente
 WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configurare
 Answer: Răspunde

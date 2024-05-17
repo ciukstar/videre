@@ -74,6 +74,8 @@ import Handler.Home (getHomeR)
 
 import Handler.Resources ( getDocsR )
 
+import Handler.Subscriptions (getSubscriptionsR, getUserSubscriptionsR)
+
 import Handler.Tokens
     ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
     , postTokensVapidR, postTokensVapidClearR
@@ -98,7 +100,7 @@ import Foundation.Data
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR
        , TokensGoogleapisClearR, TokensGoogleapisHookR, TokensR, UserPhotoR
-       , UserDeleR, UserEditR, UserR
+       , UserDeleR, UserEditR, UserR, SubscriptionsR, UserSubscriptionsR
        )
     )
 

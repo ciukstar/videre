@@ -13,11 +13,11 @@ import Foundation.Data
     ( Widget
     , Route
       ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR )
-    , DataR (UsersR, TokensR)
+    , DataR (UsersR, TokensR, SubscriptionsR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
-      , MsgCalls, MsgContacts
+      , MsgCalls, MsgContacts, MsgSubscriptions
       )
     )
 

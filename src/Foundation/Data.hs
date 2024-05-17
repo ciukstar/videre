@@ -17,7 +17,7 @@ import Import.NoFoundation
     ( Static, Manager, AppSettings, parseRoutesFile, mkYesodData)
 
 import Model
-    ( UserId, ContactId
+    ( UserId, ContactId, PushSubscriptionId
     )
 
 import Text.Shakespeare.I18N (RenderMessage (renderMessage))

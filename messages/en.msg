@@ -1,3 +1,6 @@
+TheUserSubscriptions: User Subscriptions
+NoSubscriptionsYet: No subscriptions yet
+Subscriptions: Subscriptions
 WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configuration
 Answer: Answer

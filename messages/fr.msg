@@ -1,3 +1,6 @@
+TheUserSubscriptions: Les Abonnements de l'Utilisateur
+NoSubscriptionsYet: Aucun abonnement pour l'instant
+Subscriptions: Abonnements
 WebRealTimeCommunication: Communication en temps réel pour le Web
 Configuration: Configuration
 Answer: Répondre

@@ -40,14 +40,17 @@
 
 /data DataR:
 
-    /tokens/vapid/clear TokensVapidClearR      POST
-    /tokens/vapid       TokensVapidR           POST
-    /tokens/clear       TokensGoogleapisClearR POST
-    /tokens/hook        TokensGoogleapisHookR  GET
-    /tokens             TokensR                GET POST
+    /subscriptions/#UserId UserSubscriptionsR GET
+    /subscriptions 	   SubscriptionsR     GET
 
     /users/#UserId/photo UserPhotoR  GET
     /users/#UserId/dele  UserDeleR   POST
     /users/#UserId/edit  UserEditR   GET
     /users/#UserId       UserR       GET POST
     /users               UsersR      GET
+
+    /tokens/vapid/clear TokensVapidClearR      POST
+    /tokens/vapid       TokensVapidR           POST
+    /tokens/clear       TokensGoogleapisClearR POST
+    /tokens/hook        TokensGoogleapisHookR  GET
+    /tokens             TokensR                GET POST

@@ -24,7 +24,7 @@
     $maybe Entity _ (User _ _ _ _ _ _ super admin) <- user
       $if super || admin
         <details.app-submenu #idDetailsData
-          :elem curr [Just (DataR UsersR), Just (DataR TokensR)]:open
+          :elem curr [Just (DataR UsersR), Just (DataR TokensR), Just (DataR SubscriptionsR)]:open
           ontoggle="this.querySelector('.app-expand-icon').textContent = this.open ? 'expand_less' : 'expand_more'">
           <summary>
             <md-menu-item>
@@ -34,6 +34,9 @@
 
           <md-menu-item href=@{DataR UsersR} :curr == Just (DataR UsersR):selected>
             _{MsgUsers}
+            
+          <md-menu-item href=@{DataR SubscriptionsR} :curr == Just (DataR SubscriptionsR):selected>
+            _{MsgSubscriptions}
 
           <md-menu-item href=@{DataR TokensR} :curr == Just (DataR TokensR):selected>
             _{MsgTokens}

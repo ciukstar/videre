@@ -261,6 +261,10 @@ instance Yesod App where
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _) _ = return Authorized
 
+
+    isAuthorized (DataR (UserSubscriptionsR _)) _ = isAdmin
+    isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin
+
     isAuthorized (DataR TokensVapidClearR) _ = isAdmin
     isAuthorized (DataR TokensVapidR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin

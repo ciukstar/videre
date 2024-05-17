@@ -1,3 +1,6 @@
+TheUserSubscriptions: Подписки пользователя
+NoSubscriptionsYet: Подписок пока нет
+Subscriptions: Подписки
 WebRealTimeCommunication: Коммуникации по сети в реальном времени
 Configuration: Конфигурация
 Answer: Ответить
