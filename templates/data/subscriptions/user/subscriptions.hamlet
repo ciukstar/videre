@@ -7,9 +7,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
       
   $maybe (Entity uid (User email _ _ _ _ name _ _),attrib) <- user
     
@@ -25,10 +23,31 @@
           $nothing
             #{email}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1
-    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-    <md-elevation>
-    <span.body-medium>#{msg}
-    <md-icon-button type=button>
-      <md-icon>close
+  $if null subscriptions
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoSubscriptionsYet}
+  $else
+    <md-list>
+      $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (Entity _ (User email _ _ _ _ name _ _),attrib)) <- subscriptions
+        <md-list-item type=link href=@{DataR $ UserSubscriptionR uid sid}>
+          <img slot=start src=@{DataR $ UserPhotoR pid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+          <div slot=headline style="white-space:nowrap">
+            $maybe name <- name
+              #{name}
+            $nothing
+              #{email}
+          <div slot=supporting-text style="white-space:nowrap">
+            #{endpoint}
+          $maybe ua <- ua
+            <div slot=supporting-text style="white-space:nowrap">
+              #{ua}
+          <md-icon slot=end>arrow_forward_ios
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper.body-small>
+              #{attrib}
+        <md-divider>
+          
+^{widgetSnackbar msgs}

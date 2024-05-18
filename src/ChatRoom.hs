@@ -351,8 +351,8 @@ chatApp userId interlocutorId contactId = do
 
                                  subscriptions <- liftHandler $ runDB $ select $ do
                                      x <- from $ table @PushSubscription
-                                     where_ $ x ^. PushSubscriptionSubscriber ==. val iid
                                      where_ $ x ^. PushSubscriptionPublisher ==. val uid
+                                     where_ $ x ^. PushSubscriptionSubscriber ==. val iid
                                      return x
 
                                  sender <- liftHandler $ runDB $ selectOne $ do
@@ -367,7 +367,7 @@ chatApp userId interlocutorId contactId = do
                                  tpr <- getRouteToParent
                                  Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
 
-                                 forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth)) -> do
+                                 forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth _)) -> do
                                      photor <- liftHandler $ getAccountPhotoRoute pid
                                      let notification = mkPushNotification endpoint p256dh auth
                                              & pushMessage .~ object

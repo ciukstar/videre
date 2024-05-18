@@ -35,6 +35,7 @@ import Data.ByteString (ByteString)
 import Data.Eq (Eq ((==)))
 import Data.Ord (Ord)
 import Data.Function ((.), ($))
+import Data.Maybe (Maybe (Nothing))
 import Data.String (String)
 import Data.Text (Text, pack)
 import Data.Time.Calendar (Day)
@@ -122,7 +123,7 @@ instance FromJSON PushSubscription where
         keys <- v .: "keys"
         keyP256dh <- keys .: "p256dh"
         keyAuth <- keys .: "auth"
-        return $ PushSubscription subscriber publisher endpoint keyP256dh keyAuth
+        return $ PushSubscription subscriber publisher endpoint keyP256dh keyAuth Nothing
 
 
 instance Eq User where

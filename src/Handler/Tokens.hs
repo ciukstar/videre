@@ -58,6 +58,7 @@ import Foundation.Data
     )
 
 import Material3 (md3radioField, md3emailField)
+
 import Model
     ( gmailAccessToken, gmailRefreshToken, apiInfoGoogle
     , StoreType
@@ -82,19 +83,17 @@ import System.IO (readFile')
 
 import Text.Blaze.Html (preEscapedToHtml, toHtml)
 import Text.Hamlet (Html)
-import Text.Cassius (cassiusFile)
-import Text.Julius (juliusFile)
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (st)
 
 import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails))
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
     , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
-    , addMessage, setUltDestCurrent, newIdent, lookupSession, ToWidget (toWidget)
+    , addMessage, setUltDestCurrent, newIdent, lookupSession
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
 import Yesod.Core.Widget (setTitleI)
@@ -203,8 +202,6 @@ postTokensVapidClearR = do
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
               formTokensVapidClear <- newIdent
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "data/tokens/tokens")
 
 
@@ -480,8 +477,6 @@ postTokensGoogleapisClearR = do
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
               formTokensVapidClear <- newIdent
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "data/tokens/tokens")
 
 
@@ -534,8 +529,6 @@ postTokensR = do
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
               formTokensVapidClear <- newIdent
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "data/tokens/tokens")
 
 
@@ -564,8 +557,6 @@ getTokensR = do
         formTokensGmailClear <- newIdent
         formTokensVapid <- newIdent
         formTokensVapidClear <- newIdent
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "data/tokens/tokens")
 
 

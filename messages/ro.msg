@@ -1,3 +1,6 @@
+UserAgent: Agent utilizator
+Endpoint: Punctul final
+Subscription: Abonament
 TheUserSubscriptions: Abonamentele Utilizatorului
 NoSubscriptionsYet: Încă nu există abonamente
 Subscriptions: Abonamente

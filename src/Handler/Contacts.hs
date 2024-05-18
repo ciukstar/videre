@@ -45,6 +45,7 @@ import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Text (pack, Text)
+import Data.Text.Encoding (decodeUtf8)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
@@ -106,7 +107,7 @@ import Model
       , PushSubscriptionEndpoint
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , ChatUser, UserName, UserEmail, CallCaller, CallCallee
-      , CallStart, ChatMessage, CallType, PushSubscriptionId
+      , CallStart, ChatMessage, CallType, PushSubscriptionId, PushSubscriptionUserAgent
       )
     )
 
@@ -123,9 +124,8 @@ import Settings.StaticFiles
     , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
     )
 
-import Text.Cassius (cassiusFile)
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS), juliusFile)
+import Text.Julius (RawJS(rawJS))
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
@@ -144,13 +144,13 @@ import Web.WebPush
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
-    , ToWidget (toWidget), getMessageRender
+    , getMessageRender, lookupHeader
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
@@ -206,8 +206,6 @@ getCalleesR uid = do
     defaultLayout $ do
         setTitleI MsgContacts
         idFabAdd <- newIdent
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "calls/callees/callees")
 
 
@@ -241,11 +239,7 @@ getCallsR uid = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgCalls
-
         idFabAdd <- newIdent
-
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "calls/calls")
 
 
@@ -291,10 +285,12 @@ postPushSubscriptionsR sid pid = do
     result <- parseCheckJsonBody
     case result of
 
-      A.Success ps@(PushSubscription _ _ psEndpoint psKeyP256dh psKeyAuth) -> do
+      A.Success ps@(PushSubscription _ _ psEndpoint psKeyP256dh psKeyAuth _) -> do
+          ua <- (decodeUtf8 <$>) <$> lookupHeader "User-Agent"
           _ <- runDB $ upsertBy (UniquePushSubscription sid pid psEndpoint) ps
                [ PushSubscriptionP256dh P.=. psKeyP256dh
                , PushSubscriptionAuth P.=. psKeyAuth
+               , PushSubscriptionUserAgent P.=. ua
                ]
           addMessageI statusSuccess MsgSubscriptionSucceeded
           returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
@@ -390,9 +386,6 @@ getContactR sid pid cid = do
           defaultLayout $ do
               setTitleI MsgViewContact
               idDialogRemove <- newIdent
-
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
@@ -479,8 +472,6 @@ getMyContactsR uid = do
     defaultLayout $ do
         setTitleI MsgAppName
         idFabAdd <- newIdent
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "my/contacts/contacts")
   where
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
@@ -519,10 +510,12 @@ postContactsR uid = do
                     _ <- runDB $ upsert (Contact uid eid now) []
                     case subscription of
                       Just (endpoint,p256dh,auth) ->  do
+                          ua <- (decodeUtf8 <$>) <$> lookupHeader "User-Agent"
                           Entity sid _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
-                              (PushSubscription uid eid endpoint p256dh auth)
+                              (PushSubscription uid eid endpoint p256dh auth ua)
                               [ PushSubscriptionP256dh P.=. p256dh
                               , PushSubscriptionAuth P.=. auth
+                              , PushSubscriptionUserAgent P.=. ua
                               ]
 
                           subscriptions <- runDB $ select $ do
@@ -537,7 +530,7 @@ postContactsR uid = do
                           urlr <- getUrlRender
                           user <- maybeAuth
 
-                          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint' p256dh' auth')) -> do
+                          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint' p256dh' auth' _)) -> do
                               let notification = mkPushNotification endpoint' p256dh' auth'
                                       & pushMessage .~ object
                                           [ "messageType" A..= PushMsgTypeRefresh
@@ -606,8 +599,6 @@ getContactsR uid = do
           defaultLayout $ do
               setTitleI MsgContacts
               idFabAdd <- newIdent
-              toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-              toWidget $(juliusFile "static/js/app-snackbar.julius")
               $(widgetFile "contacts/contacts")
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 

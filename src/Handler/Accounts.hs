@@ -15,6 +15,7 @@ module Handler.Accounts
   ) where
 
 import Control.Monad (void)
+
 import Database.Persist
     ( Entity(Entity, entityVal), PersistUniqueWrite (upsert))
 import qualified Database.Persist as P ((=.))
@@ -22,11 +23,14 @@ import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set
     , (^.), (==.), (=.), Value (unValue)
     )
+
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+
 import Material3 ( md3textField, md3mopt, md3dayField )
+
 import Model
-    ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
+    ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
       , UserInfoUser, UserInfoBirthDate, UserSuperuser
@@ -55,9 +59,9 @@ import Settings.StaticFiles
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
     )
 
-import Text.Cassius (cassiusFile)
-import Text.Julius (juliusFile)
 import Text.Hamlet (Html)
+
+import Widgets (widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
@@ -67,7 +71,7 @@ import Yesod.Core
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
-import Yesod.Core.Widget (setTitleI, toWidget)
+import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
@@ -136,8 +140,6 @@ getAccountInfoR uid = do
     defaultLayout $ do
         setTitleI MsgPersonalInfo
         idPanelInfo <- newIdent
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
         $(widgetFile "accounts/info/info")
 
 

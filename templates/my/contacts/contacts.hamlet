@@ -10,9 +10,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   $if null entries
     <figure style="text-align:center">
@@ -69,10 +67,4 @@
       <a href=@?{(ContactsR uid,[("backlink",backlink)])}>
       <md-icon slot=icon>add
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1
-    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-    <md-elevation>
-    <span.body-medium>#{msg}
-    <md-icon-button type=button>
-      <md-icon>close
+^{widgetSnackbar msgs}

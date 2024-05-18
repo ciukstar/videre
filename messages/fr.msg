@@ -1,3 +1,6 @@
+UserAgent: Agent utilisateur
+Endpoint: Point de terminaison
+Subscription: Abonnement
 TheUserSubscriptions: Les Abonnements de l'Utilisateur
 NoSubscriptionsYet: Aucun abonnement pour l'instant
 Subscriptions: Abonnements

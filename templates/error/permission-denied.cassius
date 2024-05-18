@@ -3,7 +3,7 @@ header
   height: var(--top-app-bar-height,64px)
   display: flex
   align-items: center
-  gap: 1rem
+  gap: 0.5rem
   padding: 0 1rem
 
 main

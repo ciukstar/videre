@@ -262,6 +262,9 @@ instance Yesod App where
     isAuthorized (AccountPhotoR _) _ = return Authorized
 
 
+    
+    isAuthorized (DataR (UserSubscriptionDeleR _ _)) _ = isAdmin
+    isAuthorized (DataR (UserSubscriptionR _ _)) _ = isAdmin
     isAuthorized (DataR (UserSubscriptionsR _)) _ = isAdmin
     isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin
 
@@ -539,8 +542,8 @@ instance YesodAuthEmail App where
         authLayout $ do
             setTitleI PasswordResetTitle
             idFormForgotPassword <- newIdent
-            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-            toWidget $(juliusFile "static/js/app-snackbar.julius")
+            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
+            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/forgot")
       where
           formForgotPassword :: Form Text
@@ -563,8 +566,8 @@ instance YesodAuthEmail App where
             idFormSetPassWrapper <- newIdent
             idFormSetPass <- newIdent
             (fw,et) <- liftHandler $ generateFormPost formSetPassword
-            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-            toWidget $(juliusFile "static/js/app-snackbar.julius")
+            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
+            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/password")
       where
           formSetPassword :: Form (Text,Text,Text)
@@ -614,8 +617,8 @@ instance YesodAuthEmail App where
         msgs <- getMessages
         selectRep $ provideRep $ authLayout $ do
             setTitleI ConfirmationEmailSentTitle
-            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-            toWidget $(juliusFile "static/js/app-snackbar.julius")
+            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
+            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/confirmation")
 
     registerHandler :: AuthHandler App Html
@@ -627,8 +630,8 @@ instance YesodAuthEmail App where
             setTitleI RegisterLong
             formRegisterWrapper <- newIdent
             formRegister <- newIdent
-            toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-            toWidget $(juliusFile "static/js/app-snackbar.julius")
+            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
+            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/register")
       where
           formRegEmailForm :: Form Text
@@ -655,8 +658,8 @@ instance YesodAuthEmail App where
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
 
-        toWidget $(cassiusFile "static/css/app-snackbar.cassius")
-        toWidget $(juliusFile "static/js/app-snackbar.julius")
+        toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
+        toWidget $(juliusFile "templates/widgets/snackbar.julius")
         $(widgetFile "auth/email")
 
       where

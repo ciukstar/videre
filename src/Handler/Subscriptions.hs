@@ -1,9 +1,12 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Handler.Subscriptions
   ( getSubscriptionsR
   , getUserSubscriptionsR
+  , getUserSubscriptionR
+  , postUserSubscriptionDeleR
   ) where
 
 import Control.Monad (join)
@@ -13,18 +16,24 @@ import Data.Bifunctor (second, Bifunctor (bimap))
 import Database.Esqueleto.Experimental
     ( selectOne, select, from, table, leftJoin, on, just, orderBy, desc, unValue
     , (:&)((:&)), (^.), (==.), (?.), (>.)
-    , SqlExpr, Value (Value), subSelectCount, where_, val, innerJoin
+    , SqlExpr, Value, subSelectCount, where_, val, innerJoin
     )
 import Database.Persist (Entity (Entity))
+import qualified Database.Persist as P (delete)
 
-import Foundation ()
+import Foundation (Form)
 import Foundation.Data
     ( Handler
     , Route (DataR)
-    , DataR (UserPhotoR, SubscriptionsR, UserSubscriptionsR)
+    , DataR
+      ( UserPhotoR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR
+      , UserSubscriptionDeleR
+      )
     , AppMessage
-      ( MsgSubscriptions, MsgNoSubscriptionsYet, MsgTheUserSubscriptions, MsgBack
-      , MsgPhoto
+      ( MsgSubscriptions, MsgNoSubscriptionsYet, MsgTheUserSubscriptions
+      , MsgBack, MsgPhoto, MsgSubscription, MsgEndpoint, MsgUserAgent, MsgDele
+      , MsgDeleteAreYouSure, MsgConfirmPlease, MsgCancel, MsgInvalidFormData
+      , MsgRecordDeleted
       )
     )
 
@@ -34,6 +43,7 @@ import Model
     , UserId, User (User), UserPhoto
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, PushSubscriptionPublisher
+      , PushSubscriptionSubscriber, PushSubscriptionId
       )
     )
     
@@ -41,12 +51,56 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser)
+import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
 
-import Yesod.Core (Yesod(defaultLayout))
+import Yesod.Core (Yesod(defaultLayout), whamlet, addMessageI, redirect)
 import Yesod.Core.Handler (getMessages)
 import Yesod.Core.Widget (setTitleI)
+import Yesod.Form (FormResult(FormSuccess))
+import Yesod.Form.Functions (generateFormPost, runFormPost)
 import Yesod.Persist.Core (YesodPersist(runDB))
+
+
+postUserSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html
+postUserSubscriptionDeleR uid sid = do
+    ((fr,fw),et) <- runFormPost formUserSubscriptionDelete
+    case fr of
+      FormSuccess () -> do
+          _ <- runDB $ P.delete sid
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ DataR $ UserSubscriptionsR uid
+      _otherwise -> do     
+
+          subscription <- runDB $ selectOne $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionId ==. val sid
+              return x
+        
+          addMessageI statusError MsgInvalidFormData
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgSubscriptions
+              $(widgetFile "data/subscriptions/user/subscription")
+              
+
+
+getUserSubscriptionR :: UserId -> PushSubscriptionId -> Handler Html
+getUserSubscriptionR uid sid = do
+
+    subscription <- runDB $ selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionId ==. val sid
+        return x
+    
+    (fw,et) <- generateFormPost formUserSubscriptionDelete
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSubscriptions
+        $(widgetFile "data/subscriptions/user/subscription")
+
+
+formUserSubscriptionDelete :: Form ()
+formUserSubscriptionDelete extra = return (pure () ,[whamlet|^{extra}|])
 
 
 getUserSubscriptionsR :: UserId -> Handler Html
@@ -58,6 +112,13 @@ getUserSubscriptionsR uid = do
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. UserId ==. val uid
         return (x, h ?. UserPhotoAttribution) )
+
+    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& u :& h <- from $ table @PushSubscription
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+        where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+        return (x, (u, h ?. UserPhotoAttribution)) )
     
     msgs <- getMessages
     defaultLayout $ do
@@ -75,7 +136,7 @@ getSubscriptionsR = do
         let count :: SqlExpr (Value Int)
             count = subSelectCount $ do
                 ps <- from $ table @PushSubscription
-                where_ $ ps ^. PushSubscriptionPublisher ==. x ^. UserId
+                where_ $ ps ^. PushSubscriptionSubscriber ==. x ^. UserId
 
         where_ $ count >. val 0
             

@@ -9,9 +9,7 @@
 
 <main>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.body-medium>
-      #{status}. #{msg}
+  ^{widgetBanner msgs}
 
   <section>
     <h2.headline-medium>_{MsgAppName}
@@ -145,10 +143,4 @@
     <p.body-medium>#{t $ MsgDoc005 "https://github.com/ciukstar/videre/issues"}
       
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1
-    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-    <md-elevation>
-    <span.body-medium>#{msg}
-    <md-icon-button type=button>
-      <md-icon>close
+^{widgetSnackbar msgs}

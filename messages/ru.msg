@@ -1,3 +1,6 @@
+UserAgent: Пользовательский агент
+Endpoint: Конечная точка
+Subscription: Подписка
 TheUserSubscriptions: Подписки пользователя
 NoSubscriptionsYet: Подписок пока нет
 Subscriptions: Подписки

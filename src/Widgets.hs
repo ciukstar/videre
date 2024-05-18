@@ -4,6 +4,8 @@
 module Widgets
   ( widgetMenu
   , widgetUser
+  , widgetBanner
+  , widgetSnackbar
   ) where
 
 import Database.Persist (Entity (Entity))
@@ -21,12 +23,24 @@ import Foundation.Data
       )
     )
 
-import Model (User (User))
+import Model (statusError, statusSuccess, User (User))
 
 import Settings (widgetFile)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
 import Yesod.Core.Handler (getCurrentRoute)
+import Data.Text (Text)
+import Text.Hamlet (Html)
+
+
+widgetBanner :: [(Text, Html)] -> Widget
+widgetBanner msgs = do
+    $(widgetFile "widgets/banner")
+
+
+widgetSnackbar :: [(Text, Html)] -> Widget
+widgetSnackbar msgs = do
+    $(widgetFile "widgets/snackbar")
 
 
 widgetMenu :: Widget

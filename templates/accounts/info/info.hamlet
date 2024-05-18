@@ -24,9 +24,7 @@
 
   <div ##{idPanelInfo} role=tabpanel aria-labelledby=tabInfo>
 
-    $forall (status,msg) <- filter ((==) statusError . fst) msgs
-      <div.app-banner.error.body-medium>
-        #{status}. #{msg}
+    ^{widgetBanner msgs}
         
     $maybe Entity _ (UserInfo _ bday) <- info
       <dl>
@@ -45,10 +43,4 @@
           <md-filled-button type=submit>_{MsgSave}
 
 
-    $forall (status,msg) <- filter ((/=) statusError . fst) msgs
-      <aside.app-snackbar.shape-small.elevation-1
-        :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-        <md-elevation>
-        <span.body-medium>#{msg}
-        <md-icon-button type=button>
-          <md-icon>close
+    ^{widgetSnackbar msgs}

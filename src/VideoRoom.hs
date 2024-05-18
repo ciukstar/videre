@@ -266,7 +266,7 @@ postPushMessageR sid cid rid = do
                                                             })
             _otherwise -> return Nothing
 
-          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth)) -> do
+          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth _)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "title" .= messageTitle
                                                 , "icon" .= icon

@@ -1,3 +1,6 @@
+UserAgent: User agent
+Endpoint: Endpoint
+Subscription: Subscription
 TheUserSubscriptions: User Subscriptions
 NoSubscriptionsYet: No subscriptions yet
 Subscriptions: Subscriptions

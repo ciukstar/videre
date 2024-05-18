@@ -2,14 +2,6 @@
 -- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
 
-PushSubscription
-    subscriber UserId OnDeleteCascade
-    publisher UserId OnDeleteCascade
-    endpoint Text
-    p256dh Text
-    auth Text
-    UniquePushSubscription subscriber publisher endpoint
-
 Chat json
     user UserId OnDeleteCascade
     interlocutor UserId
@@ -26,6 +18,15 @@ Call
     end UTCTime Maybe
     type CallType
     status CallStatus Maybe
+
+PushSubscription
+    subscriber UserId OnDeleteCascade
+    publisher UserId OnDeleteCascade
+    endpoint Text
+    p256dh Text
+    auth Text
+    userAgent Text Maybe
+    UniquePushSubscription subscriber publisher endpoint
 
 Contact
     owner UserId OnDeleteCascade

@@ -13,16 +13,12 @@ header
     flex-direction: row
     justify-content: flex-start
     align-items: center
-    gap: 1rem
+    gap: 0.5rem
     
 main
 
   ##{idPanelInfo}
     margin: 2rem
-    
-    .error
-      align-self: stretch
-      padding: 1rem
       
     form
       display: flex
