@@ -8,7 +8,7 @@ WebRealTimeCommunication: Communication en temps réel pour le Web
 Configuration: Configuration
 Answer: Répondre
 NewMessageFrom user: Nouveau message de #{user}
-UserIsNowAvailable user: L'utilisateur #{user} est maintenant disponible. Vous pouvez l'appeler ou discuter avec lui.
+UserIsNowAvailable user: #{user} est maintenant disponible
 RefreshPage: Actualiser la page
 Refresh: Actualiser
 EntityCall: L'entité « Appel »

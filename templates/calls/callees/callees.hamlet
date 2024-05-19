@@ -17,16 +17,15 @@
         _{MsgNoRegisteredUsersYet}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (subscription, accessible)))) <- callees
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (ns, na)))) <- callees
         $with i <- fromSqlKey cid
           <md-list-item type=button onclick="document.getElementById('idDialogDetails#{i}').show()">
             <div slot=start>
               <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-              $maybe _ <- subscription
-                $maybe _ <- accessible
-                $nothing
+              $if ns > 0
+                $if na < 1
                   <md-icon.phone-disabled>phone_disabled
-              $nothing
+              $else
                 <md-icon.notifications-disabled>notifications_off
             <div slot=headline>
               $maybe name <- name

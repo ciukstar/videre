@@ -52,10 +52,10 @@ import Data.Time.Format.ISO8601 (iso8601Show)
 import Database.Esqueleto.Experimental
     ( select, from, table, orderBy, desc, leftJoin, on, just, update, set
     , (^.), (?.), (==.), (:&) ((:&)), (&&.), (!=.), (||.)
-    , Value (unValue), innerJoin, val, where_, selectOne
-    , delete, unionAll_
+    , Value (unValue), innerJoin, val, where_, selectOne, delete, unionAll_
+    , SqlExpr
     )
-import Database.Esqueleto.Experimental as E ((=.))
+import Database.Esqueleto.Experimental as E ((=.), subSelectCount)
 import Database.Persist
     ( Entity (Entity), entityVal, entityKey, upsertBy
     , PersistUniqueWrite (upsert)
@@ -107,7 +107,7 @@ import Model
       , PushSubscriptionEndpoint
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , ChatUser, UserName, UserEmail, CallCaller, CallCallee
-      , CallStart, ChatMessage, CallType, PushSubscriptionId, PushSubscriptionUserAgent
+      , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent
       )
     )
 
@@ -178,28 +178,29 @@ getCalleesR uid = do
 
     endpoint <- lookupGetParam "endpoint"
 
-    callees <- (bimap unValue (second (first (join . unValue))) <$>) <$> runDB ( select $ do
+    callees <- (bimap unValue (second (bimap (join . unValue) (bimap unValue unValue))) <$>) <$> runDB ( select $ do
 
-        x :& e :& h :& s :& a <- from $ table @Contact
+        x :& e :& h <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
+            
+        let subscriptions :: SqlExpr (Value Int)
+            subscriptions = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactOwner
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactEntry
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
 
-                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
-                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
-            )
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& _ :& a) -> ( just (e ^. UserId) ==. a ?. PushSubscriptionSubscriber )
-
-                                            &&. ( a ?. PushSubscriptionPublisher ==. just (val uid) )
-            )
+        let accessible :: SqlExpr (Value Int)
+            accessible = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
+                
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (s, a)))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, accessible)))) )
 
     rndr <- getUrlRender
     msgs <- getMessages
@@ -400,25 +401,26 @@ getMyContactsR uid = do
 
     endpoint <- lookupGetParam "endpoint"
 
-    contacts <- (second (second (first (join . unValue))) <$>) <$> runDB ( select $ do
-        x :& u :& p :& s :& a <- from $ table @Contact
+    contacts <- (second (second (bimap (join . unValue) (bimap unValue unValue))) <$>) <$> runDB ( select $ do
+        x :& u :& p <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& s) -> ( just (e ^. UserId) ==. s ?. PushSubscriptionPublisher )
 
-                                            &&. ( s ?. PushSubscriptionSubscriber ==. just (val uid) )
-                                            &&. ( s ?. PushSubscriptionEndpoint ==. val endpoint )
-            )
-            `leftJoin` table @PushSubscription `on`
-            (
-                \(_ :& e :& _ :& _ :& a) -> ( just (e ^. UserId) ==. a ?. PushSubscriptionSubscriber )
+        let subscriptions :: SqlExpr (Value Int)
+            subscriptions = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactOwner
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactEntry
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
 
-                                            &&. ( a ?. PushSubscriptionPublisher ==. just (val uid) )
-            )
+        let accessible :: SqlExpr (Value Int)
+            accessible = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
+            
         where_ $ x ^. ContactOwner ==. val uid
-        return (x, (u, (p ?. UserPhotoAttribution, (s, a)))) )
+        return (x, (u, (p ?. UserPhotoAttribution, (subscriptions, accessible)))) )
 
     entries <- (sortDescByTime <$>) <$> forM contacts $ \(c,(i@(Entity iid _),p)) -> do
         x <- (bimap unValue (bimap unValue (bimap unValue unValue)) <$>) <$> runDB ( selectOne $ do
@@ -511,17 +513,22 @@ postContactsR uid = do
                     case subscription of
                       Just (endpoint,p256dh,auth) ->  do
                           ua <- (decodeUtf8 <$>) <$> lookupHeader "User-Agent"
-                          Entity sid _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
+                          _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
                               (PushSubscription uid eid endpoint p256dh auth ua)
                               [ PushSubscriptionP256dh P.=. p256dh
                               , PushSubscriptionAuth P.=. auth
                               , PushSubscriptionUserAgent P.=. ua
                               ]
 
-                          subscriptions <- runDB $ select $ do
+                          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
                               x <- from $ table @PushSubscription
-                              where_ $ x ^. PushSubscriptionId !=. val sid
-                              return x
+                              where_ $ x ^. PushSubscriptionPublisher ==. val uid
+                              where_ $ x ^. PushSubscriptionSubscriber ==. val eid
+                              return ( x ^. PushSubscriptionEndpoint
+                                     , ( x ^. PushSubscriptionP256dh
+                                       , x ^. PushSubscriptionAuth
+                                       )
+                                     ) )
 
                           Superuser {..} <- appSuperuser . appSettings <$> getYesod
                           manager <- appHttpManager <$> getYesod
@@ -530,7 +537,7 @@ postContactsR uid = do
                           urlr <- getUrlRender
                           user <- maybeAuth
 
-                          forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint' p256dh' auth' _)) -> do
+                          forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
                               let notification = mkPushNotification endpoint' p256dh' auth'
                                       & pushMessage .~ object
                                           [ "messageType" A..= PushMsgTypeRefresh

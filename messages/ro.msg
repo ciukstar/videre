@@ -8,7 +8,7 @@ WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configurare
 Answer: Răspunde
 NewMessageFrom user: Mesaj nou de la #{user}
-UserIsNowAvailable user: Utilizatorul #{user} este acum disponibil. Puteți suna sau discuta cu el.
+UserIsNowAvailable user: #{user} este acum disponibil
 RefreshPage: Actualizează pagina
 Refresh: Actualizează
 EntityCall: Entitatea „Apel”

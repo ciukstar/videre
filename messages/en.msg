@@ -8,7 +8,7 @@ WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configuration
 Answer: Answer
 NewMessageFrom user@Text: New message from Julian
-UserIsNowAvailable user@Text: User #{user} is now available. You can call or chat with him.
+UserIsNowAvailable user@Text: #{user} is now available
 RefreshPage: Refresh page
 Refresh: Refresh
 EntityCall: Call

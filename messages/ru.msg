@@ -8,7 +8,7 @@ WebRealTimeCommunication: Коммуникации по сети в реальн
 Configuration: Конфигурация
 Answer: Ответить
 NewMessageFrom user: Новое сообщение от #{user}
-UserIsNowAvailable user: Пользователь #{user} теперь доступен. Вы можете позвонить или пообщаться с ним.
+UserIsNowAvailable user: Пользователь #{user} теперь доступен
 RefreshPage: Обновить страницу
 Refresh: Обновить
 EntityCall: Сущность «Вызов»

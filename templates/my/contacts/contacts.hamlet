@@ -22,16 +22,15 @@
   $else
     
     <md-list>
-      $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(subscription,accessible)),content))) <- entries
+      $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,na)),content))) <- entries
         <md-list-item type=link href=@{ChatR $ ChatRoomR uid cid rid}>
           <div slot=start>
             <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-            $maybe _ <- subscription
-              $maybe _ <- accessible
-              $nothing
+            $if ns > 0
+              $if na < 1
                 <md-icon.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
                   phone_disabled
-            $nothing
+            $else
               <md-icon.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
                 notifications_off
           <div slot=headline>
