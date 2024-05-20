@@ -68,6 +68,8 @@ import Handler.Contacts
 import Handler.Accounts
     ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
     , postAccountR, getAccountInfoR, getAccountInfoEditR, postAccountInfoR
+    , getAccountSubscriptionsR, getAccountSubscriptionR
+    , postAccountSubscriptionDeleR
     )
     
 import Handler.Home (getHomeR)
@@ -98,13 +100,14 @@ import Foundation.Data
       , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
       , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR, ServiceWorkerR
-      , CallsR, CalleesR, PushSubscriptionEndpointR
+      , CallsR, CalleesR, PushSubscriptionEndpointR, AccountSubscriptionsR
+      , AccountSubscriptionR, AccountSubscriptionDeleR
       )
     ,  DataR
-       ( UsersR, TokensVapidClearR, TokensVapidR
-       , TokensGoogleapisClearR, TokensGoogleapisHookR, TokensR, UserPhotoR
-       , UserDeleR, UserEditR, UserR, SubscriptionsR, UserSubscriptionsR
-       , UserSubscriptionR, UserSubscriptionDeleR
+       ( UsersR, TokensVapidClearR, TokensVapidR, TokensGoogleapisClearR
+       , TokensGoogleapisHookR, TokensR, UserPhotoR, UserDeleR, UserEditR
+       , UserR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR
+       , UserSubscriptionDeleR
        )
     )
 

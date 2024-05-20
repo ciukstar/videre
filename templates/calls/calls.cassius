@@ -42,12 +42,14 @@ main
             figure
                 margin: 0
                 padding: 0
-
+                flex: 1
+                text-align: center
                 img
                     clip-path: circle(50%)
 
             md-icon
                 --md-icon-size: 48px
+                flex: 1
 
         .app-outgoing-call-cancel
             --md-sys-color-primary: red

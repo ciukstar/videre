@@ -1,3 +1,4 @@
+UserAppearsToBeUnavailable user: #{user}, похоже, недоступна
 UserAgent: Пользовательский агент
 Endpoint: Конечная точка
 Subscription: Подписка

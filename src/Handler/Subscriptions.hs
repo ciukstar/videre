@@ -106,7 +106,6 @@ formUserSubscriptionDelete extra = return (pure () ,[whamlet|^{extra}|])
 getUserSubscriptionsR :: UserId -> Handler Html
 getUserSubscriptionsR uid = do
 
-
     user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)

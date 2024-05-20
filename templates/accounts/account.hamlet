@@ -12,12 +12,16 @@
       
 <main>
   
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{AccountR uid}' : '@{AccountInfoR uid}'">
-    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true>
-      _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=panelInfo>
-      _{MsgPersonalInfo}
+  <md-tabs aria-label=Tabs>
+    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgAccount}
+    <md-primary-tab #tabInfo aria-controls=panelInfo onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountInfoR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgPersonalInfo}
+    <md-primary-tab #tabSubscriptions aria-controls=panelSubscriptions onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountSubscriptionsR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgSubscriptions}
 
   <div ##{idPanelAccount} role=tabpanel aria-labelledby=tabAccount>
     <figure>
@@ -36,3 +40,5 @@
     <md-text-button href=@{AuthR LogoutR}>_{MsgSignOut}
 
   <div #panelInfo role=tabpanel aria-labelledby=tabInfo hidden>
+
+  <div #panelSubscriptions role=tabpanel aria-labelledby=tabSubscriptions hidden>

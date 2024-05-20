@@ -55,7 +55,7 @@ import Database.Esqueleto.Experimental
     , Value (unValue), innerJoin, val, where_, selectOne, delete, unionAll_
     , SqlExpr
     )
-import Database.Esqueleto.Experimental as E ((=.), subSelectCount)
+import Database.Esqueleto.Experimental as E ((=.), subSelectCount, Value (Value))
 import Database.Persist
     ( Entity (Entity), entityVal, entityKey, upsertBy
     , PersistUniqueWrite (upsert)
@@ -83,7 +83,7 @@ import Foundation.Data
       , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
       , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
       , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
-      , MsgAudioCall, MsgUserIsNowAvailable
+      , MsgAudioCall, MsgUserIsNowAvailable, MsgUserAppearsToBeUnavailable
       )
     )
 
@@ -212,7 +212,9 @@ getCalleesR uid = do
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
-
+    
+    endpoint <- lookupGetParam "endpoint"
+    
     calls <- (second (first (bimap (second (join . unValue)) (second (join . unValue)))) <$>) <$> runDB ( select $ do
 
         x :& caller :& callerPhoto :& callee :& calleePhoto :& c <- from $ table @Call
@@ -229,11 +231,28 @@ getCallsR uid = do
                      ( c ^. ContactOwner ==. val uid )
                        &&. ( (c ^. ContactEntry ==. x ^. CallCaller) ||. (c ^. ContactEntry ==. x ^. CallCallee) )
                  )
+            
+        let subscriptions :: SqlExpr (Value Int)
+            subscriptions = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCaller
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
+        let accessible :: SqlExpr (Value Int)
+            accessible = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
 
         where_ ( x ^. CallCaller ==. val uid ||. x ^. CallCallee ==. val uid )
 
         orderBy [desc (x ^. CallStart)]
-        return (x, (((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution)), c)) )
+        return ( x
+               , ( ((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution))
+                 , (c,(subscriptions,accessible))
+                 )
+               ) )
 
     msgr <- getMessageRender
     msgs <- getMessages

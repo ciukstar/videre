@@ -13,12 +13,16 @@
       
 <main>
 
-  <md-tabs aria-label=Tabs
-    onchange="window.location.href = event.target.activeTabIndex === 0 ? '@{AccountR uid}' : '@{AccountInfoR uid}'">
-    <md-primary-tab #tabAccount aria-controls=panelAccount>
-      _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=#{idPanelInfo} active=true>
-      _{MsgPersonalInfo}
+  <md-tabs aria-label=Tabs>
+    <md-primary-tab #tabAccount aria-controls=panelAccount onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgAccount}
+    <md-primary-tab #tabInfo aria-controls=#{idPanelInfo} active=true onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountInfoR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgPersonalInfo}
+    <md-primary-tab #tabSubscriptions aria-controls=panelSubscriptions onclick="this.querySelector('a[href]').click()">
+      <a href=@{AccountSubscriptionsR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
+        _{MsgSubscriptions}
 
   <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
 
@@ -42,5 +46,6 @@
           <md-text-button type=button href=@{HomeR}>_{MsgCancel}
           <md-filled-button type=submit>_{MsgSave}
 
-
     ^{widgetSnackbar msgs}
+
+  <div #panelSubscriptions role=tabpanel aria-labelledby=tabSubscriptions hidden>

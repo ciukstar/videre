@@ -1,3 +1,4 @@
+UserAppearsToBeUnavailable user: #{user} pare să fie indisponibilă
 UserAgent: Agent utilizator
 Endpoint: Punctul final
 Subscription: Abonament

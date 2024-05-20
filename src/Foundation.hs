@@ -254,6 +254,10 @@ instance Yesod App where
     isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (ContactsR uid) _ = isAuthenticatedSelf uid
 
+    
+    isAuthorized (AccountSubscriptionDeleR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountSubscriptionR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountSubscriptionsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountInfoR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountR uid) _ = isAuthenticatedSelf uid

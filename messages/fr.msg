@@ -1,3 +1,4 @@
+UserAppearsToBeUnavailable user: #{user} semble indisponible
 UserAgent: Agent utilisateur
 Endpoint: Point de terminaison
 Subscription: Abonnement

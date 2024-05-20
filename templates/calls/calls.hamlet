@@ -21,7 +21,7 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),c)) <- calls
+      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,(ns,na)))) <- calls
         $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
@@ -99,6 +99,13 @@
 
                   <figure>
                     <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    $with (Value subscribed, Value accessible) <- (((>) 0) <$> ns, ((>) 0) <$> na)
+                      $if not (subscribed && accessible)
+                        <figcaption.body-small>
+                          $maybe name <- name
+                            _{MsgUserAppearsToBeUnavailable name}
+                          $nothing
+                            _{MsgUserAppearsToBeUnavailable email}
 
                 <div slot=actions>
                   <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
@@ -201,6 +208,13 @@
 
                   <figure>
                     <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    $with (Value subscribed, Value accessible) <- (((>) 0) <$> ns, ((>) 0) <$> na)
+                      $if not (subscribed && accessible)
+                        <figcaption.body-small>
+                          $maybe name <- name
+                            _{MsgUserAppearsToBeUnavailable name}
+                          $nothing
+                            _{MsgUserAppearsToBeUnavailable email}
 
                 <div slot=actions>
                   <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>

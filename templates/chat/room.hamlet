@@ -34,7 +34,7 @@
       <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
         <md-menu-item href=@{contact}>
           <div slot=headline>_{MsgViewContact}
-    
+
 
 <main>
 
@@ -60,7 +60,7 @@
             <i.icon>done_all
           <span.bubble-tail-out>
             <span.bubble-tail>
-      
+
 
   <form ##{idMessageForm}>
     <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
@@ -80,6 +80,13 @@
 
     <figure>
       <img src=@{photor} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+      $if not (subscribed && accessible)
+        <figcaption.body-small>
+          $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
+            $maybe name <- name
+              _{MsgUserAppearsToBeUnavailable name}
+            $nothing
+              _{MsgUserAppearsToBeUnavailable email}
 
   <div slot=actions>
     <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>

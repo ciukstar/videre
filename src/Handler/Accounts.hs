@@ -12,20 +12,25 @@ module Handler.Accounts
   , getAccountInfoR
   , getAccountInfoEditR
   , postAccountInfoR
+  , getAccountSubscriptionsR
+  , getAccountSubscriptionR
+  , postAccountSubscriptionDeleR
   ) where
 
-import Control.Monad (void)
+import Control.Monad (void, join)
 
-import Database.Persist
-    ( Entity(Entity, entityVal), PersistUniqueWrite (upsert))
-import qualified Database.Persist as P ((=.))
-import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, update, set
-    , (^.), (==.), (=.), Value (unValue)
-    )
-
+import Data.Bifunctor (Bifunctor(second))
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
+
+import Database.Persist
+    ( Entity(Entity, entityVal), PersistUniqueWrite (upsert) )
+import qualified Database.Persist as P ((=.), PersistStoreWrite (delete))
+import Database.Esqueleto.Experimental
+    ( select, selectOne, from, table, where_, val, update, set
+    , (^.), (?.), (==.), (=.), (:&)((:&))
+    , Value (unValue), just, innerJoin, leftJoin, on
+    )
 
 import Material3 ( md3textField, md3mopt, md3dayField )
 
@@ -33,23 +38,28 @@ import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
-      , UserInfoUser, UserInfoBirthDate, UserSuperuser
+      , UserInfoUser, UserInfoBirthDate, UserSuperuser, PushSubscriptionPublisher
+      , PushSubscriptionSubscriber, UserPhotoAttribution, PushSubscriptionId
       )
-    , User (User, userName)
-    , UserInfo (UserInfo, userInfoBirthDate)
+    , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
+    , PushSubscription (PushSubscription), PushSubscriptionId, statusError
     )
 
-import Foundation ()
+import Foundation (Form)
 import Foundation.Data
     ( Handler, Widget
     , Route
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
-      , AccountInfoR, AccountInfoEditR
+      , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
+      , AccountSubscriptionR, AccountSubscriptionDeleR
       )
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
       , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
       , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
+      , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
+      , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
+      , MsgInvalidFormData, MsgRecordDeleted
       )
     )
 
@@ -79,6 +89,64 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Persist (YesodPersist(runDB))
+
+
+postAccountSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html
+postAccountSubscriptionDeleR uid sid = do
+    ((fr,fw),et) <- runFormPost formAccountSubscriptionDelete
+    case fr of
+      FormSuccess () -> do
+          _ <- runDB $ P.delete sid
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ AccountSubscriptionsR uid
+      _otherwise -> do     
+
+          subscription <- runDB $ selectOne $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionId ==. val sid
+              return x
+        
+          addMessageI statusError MsgInvalidFormData
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgSubscriptions
+              $(widgetFile "accounts/subscriptions/subscription")
+
+
+getAccountSubscriptionR :: UserId -> PushSubscriptionId -> Handler Html
+getAccountSubscriptionR uid sid = do
+
+    subscription <- runDB $ selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionId ==. val sid
+        return x
+    
+    (fw,et) <- generateFormPost formAccountSubscriptionDelete
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSubscription 
+        $(widgetFile "accounts/subscriptions/subscription")
+
+
+formAccountSubscriptionDelete :: Form ()
+formAccountSubscriptionDelete extra = return (pure () ,[whamlet|^{extra}|])
+
+
+getAccountSubscriptionsR :: UserId -> Handler Html
+getAccountSubscriptionsR uid = do
+
+    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& u :& h <- from $ table @PushSubscription
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+        where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+        return (x, (u, h ?. UserPhotoAttribution)) )
+        
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSubscriptions
+        idPanelSubscriptions <- newIdent
+        $(widgetFile "accounts/subscriptions/subscriptions")
 
 
 postAccountInfoR :: UserId -> Handler Html

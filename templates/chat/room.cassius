@@ -116,18 +116,20 @@ main
 
     div[slot=content]
         display: flex
-        align-items: center
+        align-items: baseline
         justify-content: space-around
 
         figure
             margin: 0
             padding: 0
-            
+            flex: 1
+            text-align: center
             img
                 clip-path: circle(50%)
 
         md-icon
             --md-icon-size: 48px
+            flex: 1
 
     ##{idButtonOutgoingCallCancel}
         --md-sys-color-primary: red

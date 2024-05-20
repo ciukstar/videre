@@ -1,0 +1,45 @@
+
+<header.background>
+  <md-icon-button type=link href=@{AccountSubscriptionsR uid} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgSubscription}
+
+  <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
+    onclick="document.getElementById('idDialogDelete').show()">
+    <md-icon>delete
+
+<md-dialog #idDialogDelete>
+  <div slot=headline>
+    _{MsgConfirmPlease}
+  <div slot=content>
+    _{MsgDeleteAreYouSure}
+  <div slot=actions>
+    <md-text-button type=button onclick="document.getElementById('idDialogDelete').close()">
+      _{MsgCancel}
+    <form slot=content method=post action=@{AccountSubscriptionDeleR uid sid} enctype=#{et}>
+      ^{fw}
+      <md-filled-button type=submit>
+        _{MsgDele}
+
+<main>
+
+  ^{widgetBanner msgs}
+      
+  $maybe Entity _ (PushSubscription _ _ endpoint _ _ ua) <- subscription
+    <dl>
+      <dt.label-large>
+        _{MsgEndpoint}
+      <dd>
+        <code.body-small>
+          #{endpoint}
+        
+      <dt.label-large>
+        _{MsgUserAgent}
+      <dd>
+        $maybe ua <- ua
+          <code.body-small>
+            #{ua}
+
+^{widgetSnackbar msgs}

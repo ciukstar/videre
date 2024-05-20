@@ -1,3 +1,4 @@
+UserAppearsToBeUnavailable user@Text: #{user} appears to be unavailable
 UserAgent: User agent
 Endpoint: Endpoint
 Subscription: Subscription

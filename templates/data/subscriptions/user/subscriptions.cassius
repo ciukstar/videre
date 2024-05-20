@@ -15,7 +15,7 @@ main
     figure
         text-align: center
 
-  md-list
+    md-list
       .app-attribution
           position: relative
           margin: 0
