@@ -17,7 +17,7 @@ module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
-    , Route (ChatRoomR, AcknowledgeR)
+    , Route (ChatRoomR, AcknowledgeR, ChatChannelR)
     )
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -29,9 +29,9 @@ import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, update, set, select
-    , (^.), (==.), (=.)
-    , just, Value (unValue, Value), Entity (entityVal), not_, unionAll_, orderBy, desc
+    ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
+    , (^.), (==.), (!=.), (=.)
+    , just, Value (unValue, Value), Entity (entityVal), not_, unionAll_
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
@@ -40,7 +40,8 @@ import Data.Aeson (object, (.=))
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
-import qualified Data.Map as M ( Map, lookup, insert, alter, fromListWith, toList )
+import qualified Data.Map as M
+    ( Map, lookup, insert, alter, fromListWith, toList )
 import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Set as S
 import Data.Text (Text, pack, unpack)
@@ -53,17 +54,20 @@ import Foundation.Data
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
       , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
       , MsgCancel, MsgClose, MsgCallCanceledByCaller, MsgIncomingAudioCallFrom
-      , MsgAppName, MsgIncomingVideoCallFrom, MsgUserAppearsToBeUnavailable
+      , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
+      , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
+      , MsgSubscribe
       )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
 
 import Model
-    ( UserId, User (User, userName, userEmail), statusError
+    ( statusError, paramWebPushSubscriptionEndpoint, secretVolumeVapid, apiInfoVapid
+    , UserId, User (User, userName, userEmail)
     , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
-    , PushSubscription (PushSubscription), secretVolumeVapid, apiInfoVapid
+    , PushSubscription (PushSubscription)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , ContactId, Token, Store, Call
     , PushMsgType
@@ -75,8 +79,8 @@ import Model
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
-      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher
-      , CallCaller, CallCallee, CallType, CallStart, ChatMessage
+      , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallType
+      , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint
       )
     )
 
@@ -112,6 +116,7 @@ import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
     , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
+    , lookupGetParam, lookupGetParams, YesodRequest (reqGetParams), getRequest
     )
 import Yesod.Core.Handler
     ( getUrlRender, getRouteToParent, addMessageI
@@ -156,6 +161,10 @@ postAcknowledgeR = do
         where_ $ x ^. ChatId ==. val cid
 
 
+getChatChannelR :: UserId -> ContactId -> UserId -> ChatHandler ()
+getChatChannelR sid cid rid = webSockets (chatApp sid rid cid)
+
+
 getChatRoomR :: UserId -> ContactId -> UserId -> ChatHandler Html
 getChatRoomR sid cid rid = do
 
@@ -169,29 +178,44 @@ getChatRoomR sid cid rid = do
     video <- liftHandler $ getVideoPushRoute sid cid rid
     outgoing <- liftHandler $ getVideoOutgoingRoute sid cid rid False
 
+    user <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val sid
+        return x
+
+    endpoint <- liftHandler $ lookupGetParam paramWebPushSubscriptionEndpoint
+
+    subscribed <- liftHandler $ isJust <$> runDB ( selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionSubscriber ==. val sid
+        where_ $ x ^. PushSubscriptionPublisher ==. val rid
+        where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
+        return x )
+
     interlocutor <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val rid
         return x
 
-    subscribed <- liftHandler $ isJust <$> runDB ( selectOne $ do
-        x <- from $ table @PushSubscription
-        where_ $ x ^. PushSubscriptionPublisher ==. val sid
-        return x )
-
     accessible <- liftHandler $ isJust <$> runDB ( selectOne $ do
         x <- from $ table @PushSubscription
         where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+        where_ $ x ^. PushSubscriptionPublisher ==. val sid
+        where_ $ just (x ^. PushSubscriptionEndpoint) !=. val endpoint
         return x )
-
+    
+    loop <- liftHandler $ isJust <$> runDB ( selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+        where_ $ x ^. PushSubscriptionPublisher ==. val sid
+        where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
+        return x )
 
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatStatus =. val ChatMessageStatusRead]
         where_ $ x ^. ChatInterlocutor ==. val sid
         where_ $ x ^. ChatUser ==. val rid
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
-
-    webSockets (chatApp sid rid cid)
 
     chats <- liftHandler $ groupByDay <$> runDB ( select $ do
         (uid,iid,time,msg,ctype,media) <- from $

@@ -1,16 +1,16 @@
 
 self.onpush = function (e) {
-  
+
   const message = e.data.json();
 
   const promise = self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((cs) => {
 
     const focused = cs.filter((client) => client.focused);
-    
+
     focused.forEach((client) => { client.postMessage(message); });
-    
+
     return [focused.length < 1, message];
-    
+
   }).then(([notify, message]) => {
 
     let actions;
@@ -25,7 +25,7 @@ self.onpush = function (e) {
     } else {
       actions = [];
     }
-    
+
     return !notify
       ? Promise.resolve()
       : self.registration.showNotification(message.title, {
@@ -38,20 +38,20 @@ self.onpush = function (e) {
 	data: message,
 	actions: actions
       });
-    
+
   });
-  
+
   e.waitUntil(promise);
-  
+
 };
 
 
 self.addEventListener('notificationclick', (e) => {
 
   if (e.action === 'declineCall') {
-    
+
     e.notification.close();
-    
+
     fetch(e.notification.data.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -67,21 +67,21 @@ self.addEventListener('notificationclick', (e) => {
 	callId: e.notification.data.callId
       })
     });
-    
+
   } else if (e.action === 'acceptCall') {
-    
+
     e.notification.close();
-    
+
     const promise = self.clients.matchAll(
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
-      
+
       return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
-      
+
     }).then(([targets, clients]) => {
 
       if (targets.length > 0) {
-	
+
 	targets[0].focus().then((client) => {
 	  fetch(e.notification.data.targetPush, {
 	    method: 'POST',
@@ -99,7 +99,7 @@ self.addEventListener('notificationclick', (e) => {
 	      backlink: client.url
 	    })
 	  });
-	  
+
 	  const params = new URLSearchParams({
 	    videor: e.notification.data.videor,
 	    audior: e.notification.data.audior,
@@ -111,10 +111,10 @@ self.addEventListener('notificationclick', (e) => {
 	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
 
 	});
-	
+
       } else if (clients.length > 0) {
 	clients[0].focus().then((client) => {
-	  
+
 	  fetch(e.notification.data.targetPush, {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -131,7 +131,7 @@ self.addEventListener('notificationclick', (e) => {
 	      backlink: client.url
 	    })
 	  });
-	  
+
 	  const params = new URLSearchParams({
 	    videor: e.notification.data.videor,
 	    audior: e.notification.data.audior,
@@ -141,11 +141,11 @@ self.addEventListener('notificationclick', (e) => {
 	  });
 
 	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
-	  
+
 	});
 
       } else {
-	
+
 	fetch(e.notification.data.targetPush, {
 	  method: 'POST',
 	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -162,7 +162,7 @@ self.addEventListener('notificationclick', (e) => {
 	    backlink: self.location.origin
 	  })
 	});
-	
+
 	const params = new URLSearchParams({
 	  videor: e.notification.data.videor,
 	  audior: e.notification.data.audior,
@@ -172,27 +172,27 @@ self.addEventListener('notificationclick', (e) => {
 	});
 
 	return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
-	  
+
       }
-      
+
     });
 
     e.waitUntil(promise);
-    
+
   } else if (e.action === 'ignoreChat') {
-    
+
     e.notification.close();
-    
+
   } else if (e.action === 'replyChat') {
-    
+
     e.notification.close();
-    
+
     const promise = self.clients.matchAll(
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
-      
+
       return [clients.filter((client) => client.url === e.notification.data.targetRoom), clients];
-      
+
     }).then(([targets, clients]) => {
 
       return targets.length > 0
@@ -201,15 +201,15 @@ self.addEventListener('notificationclick', (e) => {
 	    ? clients[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
 	    : self.clients.openWindow(e.notification.data.targetRoom)
 	  );
-      
+
     });
 
     e.waitUntil(promise);
-    
+
   } else {
-    
+
     e.notification.close();
-  
+
     const promise = self.clients.matchAll(
       { type: 'window', includeUncontrolled: true }
     ).then((clients) => {
@@ -221,13 +221,13 @@ self.addEventListener('notificationclick', (e) => {
 	: self.clients.openWindow(self.location.origin).then((client) => {
 	  client.postMessage(e.notification.data);
 	});
-      
+
     });
 
     e.waitUntil(promise);
-    
+
   }
-  
+
 });
 
 
@@ -251,20 +251,26 @@ self.addEventListener('notificationclose', (e) => {
 
 
 self.addEventListener('fetch', function (e) {
+
+  let url = new URL(e.request.url);
+  let endpointNeeded = e.request.method === 'GET'
+      && url.origin === self.location.origin
+      && !e.request.url.includes('/static/')
+      && !e.request.url.includes('/photo')
+      && !e.request.url.includes('/manifest.json');
   
-  if (e.request.method === 'GET' && (e.request.url.includes('my/contacts/') || e.request.url.includes('callees/'))) {
+  if (endpointNeeded) {
 
     e.respondWith(
       self.registration.pushManager.getSubscription().then(function (subscription) {
-	
+
 	if (!subscription) {
 	  return fetch(e.request);
 	} else {	  
-	  let url = new URL(e.request.url);
-	  url.searchParams.set('endpoint', subscription.endpoint);	  
-	  return fetch(url);
+	  url.searchParams.set(#{paramWebPushSubscriptionEndpoint}, subscription.endpoint);
+	  return fetch(url.href);
 	}
-	
+
       })
     );
 
@@ -273,19 +279,19 @@ self.addEventListener('fetch', function (e) {
 });
 
 self.addEventListener('pushsubscriptionchange', (event) => {
-  
+
   Notification.requestPermission().then(function (permission) {
-    
+
     if (permission === 'granted') {
-      
+
       registration.pushManager.subscribe({
 	userVisibleOnly: true,
 	applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
       }).then((subscription) => {
-	
+
 	const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
 	const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
-	
+
 	fetch('@{PushSubscriptionEndpointR}', {
 	  method: 'PUT',
 	  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -298,19 +304,19 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 	}).then((response) => {
 	  localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
 	});
-	
+
       }).catch((err) => {
-	
+
 	registration.pushManager.getSubscription().then((subscription) => {
 	  subscription.unsubscribe().then((sccess) => {
 	    registration.pushManager.subscribe({
 	      userVisibleOnly: true,
 	      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
 	    }).then((subscription) => {
-	
+
 	      const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
 	      const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
-	      
+
 	      fetch('@{PushSubscriptionEndpointR}', {
 		method: 'PUT',
 		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -323,15 +329,15 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 	      }).then((response) => {
 		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
 	      });
-	      
+
 	    });
 	  });
 	});
-	
+
       });
-      
+
     }
-    
+
   });
-  
+
 });

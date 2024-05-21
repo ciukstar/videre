@@ -30,15 +30,16 @@
   
   <figure>
     <img src=@{AccountPhotoR pid} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
-    $maybe (_, (_, (subscription, accessible))) <- contact
-      $maybe _ <- subscription
-        $maybe _ <- accessible
-        $nothing
-          <md-icon.phone-disabled>phone_disabled
-      $nothing
+    $maybe (_, (_, (subscriptions, (loops, accessible)))) <- contact
+      $if subscriptions < 1
         <md-icon.notifications-disabled>notifications_off
+      $elseif loops > 0
+        <md-icon.call-loop>repeat
+      $elseif accessible < 1
+        <md-icon.phone-disabled>phone_disabled
+        
     <figcaption>
-      $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, _))) <- contact
+      $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, (_, _)))) <- contact
         $maybe attribution <- attrib
           <div.body-small>
             ^{attribution}
@@ -50,9 +51,8 @@
   <form method=post action=@{ContactR sid pid cid} enctype=#{et2}>
     ^{fw2}
 
-  $maybe (Entity _ (User email _ _ _ _ name _ _), (_, (subscription, accessible))) <- contact
-    $maybe _ <- subscription
-    $nothing
+  $maybe (Entity _ (User email _ _ _ _ name _ _), (_, (ns, (nl,na)))) <- contact
+    $if ns < 1
       <dl>
         <dt>
           <md-icon.notifications-disabled>notifications_off
@@ -63,8 +63,20 @@
             _{MsgYouAreNotSubscribedToNotificationsFrom email}
       
 
-    $maybe _ <- accessible
-    $nothing
+    $if nl > 0
+      <dl>
+        <dt>
+          <md-icon.call-loop>repeat
+        <dd.body-small>
+          $maybe name <- name
+            _{MsgUserSubscribedOnThisDevice name}
+          $nothing
+            _{MsgUserSubscribedOnThisDevice email}
+
+      <md-text-button type=button>
+        _{MsgCancelThisSubscription}
+      
+    $elseif na < 1
       <dl>
         <dt>
           <md-icon.phone-disabled>phone_disabled

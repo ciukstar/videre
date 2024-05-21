@@ -22,6 +22,7 @@ import Yesod.Core.Dispatch (mkYesodSubData, parseRoutes)
 newtype ChatRoom = ChatRoom (TVar (M.Map (S.Set UserId) (TChan Text, Int)))
 
 mkYesodSubData "ChatRoom" [parseRoutes|
-/acknowledge                     AcknowledgeR POST
-/room/#UserId/#ContactId/#UserId ChatRoomR    GET
+/acknowledge                             AcknowledgeR POST
+/room/#UserId/#ContactId/#UserId/channel ChatChannelR GET
+/room/#UserId/#ContactId/#UserId         ChatRoomR    GET
 |]

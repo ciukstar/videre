@@ -18,13 +18,13 @@
     <div style="position:relative">
       <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
         <md-icon>video_call
-      $if not (subscribed && accessible)
+      $if (||) ((||) (not subscribed) (not accessible)) loop
         <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
 
     <div style="position:relative">
       <md-filled-icon-button type=button aria-label=_{MsgAudioCall} ##{idButtonAudioCall}>
         <md-icon>call
-      $if not (subscribed && accessible)
+      $if (||) ((||) (not subscribed) (not accessible)) loop
         <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
 
     <span style="position:relaive">
@@ -72,15 +72,31 @@
   <div slot=headline>
     _{MsgOutgoingCall} ...
 
-  <div slot=content>
+  <div slot=content>        
     <figure>
       <img src=@{photos} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+      $if not subscribed
+        <figcaption.body-small>
+          $maybe Entity _ (User email _ _ _ _ name _ _) <- user
+            $maybe name <- name
+              _{MsgUserYouSeemsUnsubscribed name}
+            $nothing
+              _{MsgUserYouSeemsUnsubscribed email}
 
-    <md-icon>double_arrow
+    <figure>
+      <md-icon>
+        $if loop
+          repeat
+        $else
+          double_arrow
+      $if loop
+        <figcaption.body-small>
+          _{MsgCallerCalleeSubscriptionLoopWarning}
+      
 
     <figure>
       <img src=@{photor} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-      $if not (subscribed && accessible)
+      $if not accessible
         <figcaption.body-small>
           $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
             $maybe name <- name
@@ -89,6 +105,11 @@
               _{MsgUserAppearsToBeUnavailable email}
 
   <div slot=actions>
+  
+    $if not subscribed
+      <md-text-button type=link href=@{contact}>
+        _{MsgSubscribe}
+      
     <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
       <md-icon slot=icon>call_end
       _{MsgCancel}

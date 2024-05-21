@@ -1,3 +1,7 @@
+CancelThisSubscription: Annuler cet abonnement
+UserSubscribedOnThisDevice user: L'utilisateur #{user} est abonné sur cet appareil
+CallerCalleeSubscriptionLoopWarning: Il semble que l'appelé soit également abonné sur cet appareil
+UserYouSeemsUnsubscribed user: #{user} (vous) semble désabonnée
 UserAppearsToBeUnavailable user: #{user} semble indisponible
 UserAgent: Agent utilisateur
 Endpoint: Point de terminaison

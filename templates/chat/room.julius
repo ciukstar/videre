@@ -18,7 +18,7 @@ Array.from(
 const output = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
-const conn = new WebSocket(document.URL.replace("http:", "ws:").replace("https:", "wss:"));
+const conn = new WebSocket('@{toParent $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 output.scrollTop = output.scrollHeight;
 

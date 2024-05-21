@@ -18,21 +18,24 @@ main
 
     display: flex
     flex-direction: column
-    align-items: center
+    align-items: flex-start
 
     figure
         position: relative
+        margin-left: auto
+        margin-right: auto
         text-align: center
         img
             clip-path: circle(50%)
 
-        .phone-disabled, .notifications-disabled
+        .phone-disabled, .notifications-disabled, .call-loop
             position: absolute
             top: 0
             right: 0
     dl
         display: flex
-    .phone-disabled, .notifications-disabled
+        align-items: center
+    .phone-disabled, .notifications-disabled, .call-loop
         color: white
         background: red
         clip-path: circle(50%)

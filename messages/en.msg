@@ -1,3 +1,7 @@
+CancelThisSubscription: Cancel this subscription
+UserSubscribedOnThisDevice user@Text: #{user} is subscribed on this device
+CallerCalleeSubscriptionLoopWarning: It seems that the callee is also subscribed on this device
+UserYouSeemsUnsubscribed user@Text: #{user} (you) seems unsubscribed
 UserAppearsToBeUnavailable user@Text: #{user} appears to be unavailable
 UserAgent: User agent
 Endpoint: Endpoint

@@ -1,3 +1,7 @@
+CancelThisSubscription: Anulați acest abonament
+UserSubscribedOnThisDevice user: Utilizatorul #{user} este abonat pe acest dispozitiv
+CallerCalleeSubscriptionLoopWarning: Se pare că și apelatul este abonat pe acest dispozitiv
+UserYouSeemsUnsubscribed user: #{user} (tu) pare dezabonată
 UserAppearsToBeUnavailable user: #{user} pare să fie indisponibilă
 UserAgent: Agent utilizator
 Endpoint: Punctul final

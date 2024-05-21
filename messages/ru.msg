@@ -1,3 +1,7 @@
+CancelThisSubscription: Отменить эту подписку
+UserSubscribedOnThisDevice user: Пользователь #{user} подписан на этом устройстве.
+CallerCalleeSubscriptionLoopWarning: Кажется, вызываемый абонент тоже подписан на этом устройстве
+UserYouSeemsUnsubscribed user: #{user} (Вы), похоже, отписались от подписки
 UserAppearsToBeUnavailable user: #{user}, похоже, недоступна
 UserAgent: Пользовательский агент
 Endpoint: Конечная точка
