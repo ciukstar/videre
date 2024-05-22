@@ -21,7 +21,7 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,(ns,na)))) <- calls
+      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,(ns,(nl,na))))) <- calls
         $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
@@ -94,13 +94,29 @@
                 <div slot=content>
                   <figure>
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    $with (Value subscriptions) <- ns
+                      $if subscriptions < 1
+                        <figcaption.body-small>
+                          $maybe name <- name
+                            _{MsgUserYouSeemsUnsubscribed name}
+                          $nothing
+                            _{MsgUserYouSeemsUnsubscribed email}
 
-                  <md-icon>double_arrow
+                  <figure>
+                    $with (Value loops) <- nl
+                      <md-icon>
+                        $if loops > 0
+                          repeat
+                        $else
+                          double_arrow
+                      $if loops > 0
+                        <figcaption.body-small>
+                          _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
                     <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value subscribed, Value accessible) <- (((>) 0) <$> ns, ((>) 0) <$> na)
-                      $if not (subscribed && accessible)
+                    $with (Value accessible) <- na
+                      $if accessible < 1
                         <figcaption.body-small>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}
@@ -134,6 +150,7 @@
                   <div.app-attribution-wrapper.body-small>
                     #{attrib}
           $else
+            
             $with (Entity _ (User email _ _ _ _ name _ _), attrib) <- (calleeE, attribCallee)
               <md-list-item.app-call type=text #idItemCall#{i}>
                 
@@ -203,13 +220,30 @@
                 <div slot=content>
                   <figure>
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    $with (Value subscriptions) <- ns
+                      $if subscriptions < 1
+                        <figcaption.body-small>
+                          $with Entity _ (User email _ _ _ _ name _ _) <- callerE
+                            $maybe name <- name
+                              _{MsgUserYouSeemsUnsubscribed name}
+                            $nothing
+                              _{MsgUserYouSeemsUnsubscribed email}
 
-                  <md-icon>double_arrow
+                  <figure>
+                    $with (Value loops) <- nl
+                      <md-icon>
+                        $if loops > 0
+                          repeat
+                        $else
+                          double_arrow
+                      $if loops > 0
+                        <figcaption.body-small>
+                          _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
                     <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value subscribed, Value accessible) <- (((>) 0) <$> ns, ((>) 0) <$> na)
-                      $if not (subscribed && accessible)
+                    $with (Value accessible) <- na
+                      $if accessible < 1
                         <figcaption.body-small>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}

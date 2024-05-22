@@ -5,6 +5,8 @@ Array.from(
 ).forEach((call) => {
   call.addEventListener('click', (e) => {
 
+    e.stopPropagation();
+
     fetch(call.dataset.targetPush, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },

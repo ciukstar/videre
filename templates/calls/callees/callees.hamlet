@@ -17,23 +17,60 @@
         _{MsgNoRegisteredUsersYet}
   $else
     <md-list>
-      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (ns, na)))) <- callees
+      $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (ns, (nl, na))))) <- callees
         $with i <- fromSqlKey cid
-          <md-list-item type=button onclick="document.getElementById('idDialogDetails#{i}').show()">
+          <md-list-item type=text onclick="document.getElementById('idDialogDetails#{i}').show()">
             <div slot=start>
               <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-              $if ns > 0
-                $if na < 1
-                  <md-icon.phone-disabled>phone_disabled
-              $else
+              $if ns < 1
                 <md-icon.notifications-disabled>notifications_off
+              $elseif nl > 0
+                <md-icon.call-loop>repeat
+              $elseif na < 1
+                <md-icon.phone-disabled>phone_disabled
+                
             <div slot=headline>
               $maybe name <- name
                 #{name}
               $nothing
                 #{email}
-            <md-icon-button slot=end>
+                
+            <md-icon-button slot=end #buttonContactItemAnchor#{i}
+              onclick="document.getElementById('menuContactItemMenu#{i}').open = !document.getElementById('menuContactItemMenu#{i}').open; event.stopImmediatePropagation()">
               <md-icon>more_horiz
+            <md-menu positioning=popover skip-restore-focus=true anchor=buttonContactItemAnchor#{i} #menuContactItemMenu#{i}>
+            
+              <md-menu-item.app-button-call type=menuitem data-i=#{i}
+                data-message-type=#{show PushMsgTypeVideoCall}
+                data-title=_{MsgAppName}
+                data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                data-recipient-id=#{show $ fromSqlKey rid}
+                data-videor 
+                data-videos
+                data-target-room=@{VideoR $ RoomR uid cid rid False}
+                data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                <md-icon slot=start>videocam
+                <div slot=headline>_{MsgVideoCall}
+                
+              <md-menu-item.app-button-call type=menuitem data-i=#{i} #idButtonAuioCall#{i}
+                data-message-type=#{show PushMsgTypeAudioCall}
+                data-title=_{MsgAppName}
+                data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                data-recipient-id=#{show $ fromSqlKey rid}
+                data-audior
+                data-audios
+                data-target-room=@{VideoR $ RoomR uid cid rid False}
+                data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                <md-icon slot=start>call
+                <div slot=headline>_{MsgAudioCall}
+
+              <md-menu-item type=link href=@?{(ContactR uid rid cid,[(paramBacklink, rndr $ CalleesR uid)])}
+                onclick="event.stopPropagation()">
+                <md-icon slot=start>contacts
+                <div slot=headline>_{MsgViewContact}
+              
           $maybe attrib <- attrib
             <div.app-attribution>
               <div.app-attribution-wrapper.body-small>

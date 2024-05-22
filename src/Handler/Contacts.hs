@@ -86,7 +86,7 @@ import Foundation.Data
       , MsgIncomingAudioCallFrom, MsgVideoCall, MsgIncomingVideoCallFrom
       , MsgCallCanceledByCaller, MsgAudioCall, MsgUserIsNowAvailable
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
-      , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
+      , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet, MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
       )
     )
 
@@ -112,7 +112,7 @@ import Model
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , ChatUser, UserName, UserEmail, CallCaller, CallCallee
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent
-      )
+      ), paramBacklink
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -182,12 +182,12 @@ getCalleesR uid = do
 
     endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
 
-    callees <- (bimap unValue (second (bimap (join . unValue) (bimap unValue unValue))) <$>) <$> runDB ( select $ do
+    callees <- (unwrap <$>) <$> runDB ( select $ do
 
         x :& e :& h <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
-            
+
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
@@ -195,16 +195,24 @@ getCalleesR uid = do
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactEntry
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
 
+        let loops :: SqlExpr (Value Int)
+            loops = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
         let accessible :: SqlExpr (Value Int)
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
-                
+                where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
+
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, accessible)))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
     rndr <- getUrlRender
     msgs <- getMessages
@@ -212,14 +220,16 @@ getCalleesR uid = do
         setTitleI MsgContacts
         idFabAdd <- newIdent
         $(widgetFile "calls/callees/callees")
+  where
+      unwrap = bimap unValue (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))))
 
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
-    
+
     endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
     
-    calls <- (second (first (bimap (second (join . unValue)) (second (join . unValue)))) <$>) <$> runDB ( select $ do
+    calls <- (unwrap <$>) <$> runDB ( select $ do
 
         x :& caller :& callerPhoto :& callee :& calleePhoto :& c <- from $ table @Call
             `innerJoin` table @User
@@ -235,7 +245,7 @@ getCallsR uid = do
                      ( c ^. ContactOwner ==. val uid )
                        &&. ( (c ^. ContactEntry ==. x ^. CallCaller) ||. (c ^. ContactEntry ==. x ^. CallCallee) )
                  )
-            
+
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
                 y <- from $ table @PushSubscription
@@ -243,18 +253,26 @@ getCallsR uid = do
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
 
+        let loops :: SqlExpr (Value Int)
+            loops = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
         let accessible :: SqlExpr (Value Int)
             accessible = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
+                where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
 
         where_ ( x ^. CallCaller ==. val uid ||. x ^. CallCallee ==. val uid )
 
         orderBy [desc (x ^. CallStart)]
         return ( x
                , ( ((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution))
-                 , (c,(subscriptions,accessible))
+                 , (c,(subscriptions,(loops, accessible)))
                  )
                ) )
 
@@ -265,10 +283,12 @@ getCallsR uid = do
         setTitleI MsgCalls
         idFabAdd <- newIdent
         $(widgetFile "calls/calls")
+  where
+      unwrap = second (first (bimap (second (join . unValue)) (second (join . unValue))))
 
 
 putPushSubscriptionEndpointR :: Handler ()
-putPushSubscriptionEndpointR = do    
+putPushSubscriptionEndpointR = do
     endpoint <- runInputPost $ ireq urlField paramWebPushSubscriptionEndpoint
     p256dh <- runInputPost $ ireq textField "p256dh"
     auth <- runInputPost $ ireq textField "auth"
@@ -284,6 +304,7 @@ putPushSubscriptionEndpointR = do
 
 postPushSubscriptionsDeleR :: UserId -> ContactId -> UserId -> Handler Html
 postPushSubscriptionsDeleR sid cid pid = do
+    backlink <- runInputGet $ ireq urlField paramBacklink
     ((fr,_),_) <- runFormPost $ formSubscriptionDelete Nothing
     case fr of
       FormSuccess endpoint -> do
@@ -292,10 +313,10 @@ postPushSubscriptionsDeleR sid cid pid = do
               where_ $ x ^. PushSubscriptionSubscriber ==. val sid
               where_ $ x ^. PushSubscriptionPublisher ==. val pid
               where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
-          redirect $ ContactR pid sid cid
+          redirect (ContactR pid sid cid,[(paramBacklink, backlink)])
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
-          redirect $ ContactR pid sid cid
+          redirect (ContactR pid sid cid,[(paramBacklink, backlink)])
 
 
 formSubscriptionDelete :: Maybe Text -> Form Text
@@ -347,8 +368,8 @@ postPushSubscriptionsR sid pid = do
           sendStatusJSON status400 (A.object [ "msg" A..= msg ])
 
 
-formSubscribe :: VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
-formSubscribe vapidKeys sid pid cid notif extra = do
+formSubscribe :: Text -> VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
+formSubscribe backlink vapidKeys sid pid cid notif extra = do
 
     let subscriberId = pack $ show (fromSqlKey sid)
     let publisherId = pack $ show (fromSqlKey pid)
@@ -372,6 +393,7 @@ formSubscribe vapidKeys sid pid cid notif extra = do
 
 postContactRemoveR :: UserId -> UserId -> ContactId -> Handler Html
 postContactRemoveR uid rid cid = do
+    backlink <- runInputGet $ ireq urlField paramBacklink
     ((fr,_),_) <- runFormPost formContactRemove
     case fr of
       FormSuccess () -> do
@@ -384,18 +406,19 @@ postContactRemoveR uid rid cid = do
           redirect $ MyContactsR uid
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
-          redirect $ ContactR uid rid cid
+          redirect (ContactR uid rid cid,[(paramBacklink, backlink)])
 
 
 getContactR :: UserId -> UserId -> ContactId -> Handler Html
 getContactR sid pid cid = do
-    
+
+    backlink <- runInputGet $ ireq urlField paramBacklink
     endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
 
     contact <- (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))) <$>) <$> runDB ( selectOne $ do
         x :& e :& h <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
-            `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)        
+            `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
 
         let subscriptions :: SqlExpr (Value Int)
             subscriptions = subSelectCount $ do
@@ -417,7 +440,7 @@ getContactR sid pid cid = do
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
-            
+
         where_ $ x ^. ContactId ==. val cid
         return (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible)))) )
 
@@ -434,7 +457,7 @@ getContactR sid pid cid = do
               return x )
 
           (fw3,et3) <- generateFormPost $ formSubscriptionDelete endpoint
-          (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid cid permission
+          (fw2,et2) <- generateFormPost $ formSubscribe backlink vapidKeys sid pid cid permission
 
           (fw,et) <- generateFormPost formContactRemove
 
@@ -481,7 +504,7 @@ getMyContactsR uid = do
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. ContactEntry
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. ContactOwner
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
-            
+
         where_ $ x ^. ContactOwner ==. val uid
         return (x, (u, (p ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 

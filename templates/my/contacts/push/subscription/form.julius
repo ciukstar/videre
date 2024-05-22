@@ -35,7 +35,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
 		body: JSON.stringify(subscr)
 	      }).then((response) => {
 		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
-		window.location.href = '@{ContactR sid pid cid}';
+		window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
 	      });
 	    }
 	    
@@ -61,7 +61,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription)      
         }).then(function (result) {
-	  window.location.href = '@{ContactR sid pid cid}';
+	  window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
 	});
 	
       });

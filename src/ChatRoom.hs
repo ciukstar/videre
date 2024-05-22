@@ -63,7 +63,8 @@ import Foundation.Data
 import Network.HTTP.Client.Conduit (Manager)
 
 import Model
-    ( statusError, paramWebPushSubscriptionEndpoint, secretVolumeVapid, apiInfoVapid
+    ( statusError, secretVolumeVapid, apiInfoVapid
+    , paramWebPushSubscriptionEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
     , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
@@ -116,7 +117,7 @@ import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
     , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
-    , lookupGetParam, lookupGetParams, YesodRequest (reqGetParams), getRequest
+    , lookupGetParam, getSubCurrentRoute
     )
 import Yesod.Core.Handler
     ( getUrlRender, getRouteToParent, addMessageI
@@ -266,8 +267,10 @@ getChatRoomR sid cid rid = do
             )
         orderBy [desc time]
         return (uid,iid,time,msg,ctype,media) )
-
+    
     toParent <- getRouteToParent
+    curr <- (toParent <$>) <$> getSubCurrentRoute
+    rndr <- getUrlRender
 
     callerName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
         x <- from $ table @User

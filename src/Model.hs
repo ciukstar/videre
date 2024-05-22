@@ -169,6 +169,9 @@ statusError = "error"
 ultDestKey :: Text
 ultDestKey = "_ULT"
 
+paramBacklink :: Text
+paramBacklink = "backlink"
+
 paramWebPushSubscriptionEndpoint :: Text
 paramWebPushSubscriptionEndpoint = "endpoint"
 

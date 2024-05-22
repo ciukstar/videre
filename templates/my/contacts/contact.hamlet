@@ -1,6 +1,6 @@
 
 <header.app-top-app-bar.background>
-  <md-icon-button type=link href=@{ChatR $ ChatRoomR sid cid pid}>
+  <md-icon-button type=link href=#{backlink}>
     <md-icon>arrow_back
 
   <h1.title-large>
@@ -19,7 +19,7 @@
   <div slot=actions>
     <md-text-button type=button onclick="document.getElementById('#{idDialogRemove}').close()">
       _{MsgCancel}
-    <form slot=content method=post action=@{ContactRemoveR sid pid cid} enctype=#{et}>
+    <form slot=content method=post action=@?{(ContactRemoveR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et}>
       ^{fw}
       <md-filled-button type=submit>
         _{MsgRemove}
@@ -48,7 +48,7 @@
         <div.body-medium>#{email}
 
 
-  <form method=post action=@{ContactR sid pid cid} enctype=#{et2}>
+  <form method=post action=@?{(ContactR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et2}>
     ^{fw2}
 
   $maybe (Entity _ (User email _ _ _ _ name _ _), (_, (ns, (nl,na)))) <- contact
@@ -73,7 +73,7 @@
           $nothing
             _{MsgUserSubscribedOnThisDevice email}
 
-      <form method=post action=@{PushSubscriptionsDeleR pid cid sid} enctype=#{et3}>
+      <form method=post action=@?{(PushSubscriptionsDeleR pid cid sid,[(paramBacklink,backlink)])} enctype=#{et3}>
         ^{fw3}
         <md-text-button type=submit>
           _{MsgCancelThisSubscription}

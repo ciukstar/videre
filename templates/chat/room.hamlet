@@ -32,8 +32,9 @@
         onclick="document.getElementById('menuMore').open = !document.getElementById('menuMore').open">
         <md-icon>more_vert
       <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
-        <md-menu-item href=@{contact}>
-          <div slot=headline>_{MsgViewContact}
+        $maybe backlink <- rndr <$> curr
+          <md-menu-item href=@?{(contact,[(paramBacklink, backlink)])}>
+            <div slot=headline>_{MsgViewContact}
 
 
 <main>
@@ -107,8 +108,9 @@
   <div slot=actions>
   
     $if not subscribed
-      <md-text-button type=link href=@{contact}>
-        _{MsgSubscribe}
+      $maybe backlink <- rndr <$> curr
+        <md-text-button type=link href=@?{(contact,[(paramBacklink, backlink)])}>
+          _{MsgSubscribe}
       
     <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
       <md-icon slot=icon>call_end
