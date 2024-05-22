@@ -8,7 +8,8 @@
 
 /push/subscription/endpoint PushSubscriptionEndpointR PUT
 
-/subscribers/#UserId/publishers/#UserId PushSubscriptionsR POST DELETE
+/subscribers/#UserId/contacts/#ContactId/publishers/#UserId PushSubscriptionsDeleR POST
+/subscribers/#UserId/publishers/#UserId 		    PushSubscriptionsR     POST DELETE
 
 /callees/#UserId CalleesR GET
 /calls/#UserId   CallsR   GET

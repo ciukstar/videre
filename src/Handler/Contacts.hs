@@ -21,6 +21,7 @@ module Handler.Contacts
   , getCallsR
   , getCalleesR
   , putPushSubscriptionEndpointR
+  , postPushSubscriptionsDeleR
   ) where
 
 import ChatRoom
@@ -68,7 +69,8 @@ import Foundation.Data
     ( Handler, App (appHttpManager, appSettings)
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
-      , PushSubscriptionsR, StaticR, VideoR, CallsR, CalleesR
+      , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
+      , CalleesR
       )
     , AppMessage
       ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgCalls
@@ -78,13 +80,13 @@ import Foundation.Data
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
       , MsgRemove, MsgSubscriptionCanceled, MsgAllowToBeNotified, MsgNotNow
       , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
-      , MsgAllowToBeNotifiedBy, MsgUserHasNotAddedYouToHisContactListYet
-      , MsgYouAreNotSubscribedToNotificationsFrom, MsgSelectCalleeToCall
-      , MsgYouHaveNotMadeAnyCallsYet, MsgOutgoingCall, MsgCallDeclined, MsgClose
-      , MsgCalleeDeclinedTheCall, MsgIncomingAudioCallFrom, MsgVideoCall
-      , MsgIncomingVideoCallFrom , MsgCallCanceledByCaller, MsgAudio
-      , MsgAudioCall, MsgUserIsNowAvailable, MsgUserAppearsToBeUnavailable
-      , MsgUserSubscribedOnThisDevice, MsgCancelThisSubscription
+      , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
+      , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser
+      , MsgOutgoingCall, MsgCallDeclined, MsgClose, MsgCalleeDeclinedTheCall
+      , MsgIncomingAudioCallFrom, MsgVideoCall, MsgIncomingVideoCallFrom
+      , MsgCallCanceledByCaller, MsgAudioCall, MsgUserIsNowAvailable
+      , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
+      , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       )
     )
 
@@ -280,6 +282,28 @@ putPushSubscriptionEndpointR = do
         where_ $ x ^. PushSubscriptionEndpoint ==. val oldEndpoint
 
 
+postPushSubscriptionsDeleR :: UserId -> ContactId -> UserId -> Handler Html
+postPushSubscriptionsDeleR sid cid pid = do
+    ((fr,_),_) <- runFormPost $ formSubscriptionDelete Nothing
+    case fr of
+      FormSuccess endpoint -> do
+          runDB $ delete $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionSubscriber ==. val sid
+              where_ $ x ^. PushSubscriptionPublisher ==. val pid
+              where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
+          redirect $ ContactR pid sid cid
+      _otherwise -> do
+          addMessageI statusError MsgInvalidFormData
+          redirect $ ContactR pid sid cid
+
+
+formSubscriptionDelete :: Maybe Text -> Form Text
+formSubscriptionDelete endpoint extra = do
+    (endpointR, endpointV) <- mreq hiddenField "" endpoint
+    return (endpointR,[whamlet|^{extra} ^{fvInput endpointV}|])
+
+
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
 deletePushSubscriptionsR sid pid = do
 
@@ -409,6 +433,7 @@ getContactR sid pid cid = do
               where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
               return x )
 
+          (fw3,et3) <- generateFormPost $ formSubscriptionDelete endpoint
           (fw2,et2) <- generateFormPost $ formSubscribe vapidKeys sid pid cid permission
 
           (fw,et) <- generateFormPost formContactRemove

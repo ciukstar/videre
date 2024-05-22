@@ -63,6 +63,7 @@ import Handler.Contacts
     ( getContactsR, postContactsR, getMyContactsR, postContactRemoveR
     , getContactR, postPushSubscriptionsR, deletePushSubscriptionsR
     , getCallsR, getCalleesR, putPushSubscriptionEndpointR
+    , postPushSubscriptionsDeleR
     )
 
 import Handler.Accounts
@@ -101,7 +102,7 @@ import Foundation.Data
       , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
       , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR, ServiceWorkerR
       , CallsR, CalleesR, PushSubscriptionEndpointR, AccountSubscriptionsR
-      , AccountSubscriptionR, AccountSubscriptionDeleR
+      , AccountSubscriptionR, AccountSubscriptionDeleR, PushSubscriptionsDeleR
       )
     ,  DataR
        ( UsersR, TokensVapidClearR, TokensVapidR, TokensGoogleapisClearR

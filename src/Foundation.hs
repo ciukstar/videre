@@ -248,6 +248,7 @@ instance Yesod App where
 
     isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
+    isAuthorized (PushSubscriptionsDeleR _ _ pid) _ = isAuthenticatedSelf pid
     isAuthorized (PushSubscriptionsR sid _) _ = isAuthenticatedSelf sid
     isAuthorized (ContactRemoveR uid _ _) _ = isAuthenticatedSelf uid
     isAuthorized (ContactR uid _ _) _ = isAuthenticatedSelf uid

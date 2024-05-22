@@ -73,8 +73,10 @@
           $nothing
             _{MsgUserSubscribedOnThisDevice email}
 
-      <md-text-button type=button>
-        _{MsgCancelThisSubscription}
+      <form method=post action=@{PushSubscriptionsDeleR pid cid sid} enctype=#{et3}>
+        ^{fw3}
+        <md-text-button type=submit>
+          _{MsgCancelThisSubscription}
       
     $elseif na < 1
       <dl>
@@ -82,8 +84,8 @@
           <md-icon.phone-disabled>phone_disabled
         <dd.body-small>
           $maybe name <- name
-            _{MsgUserHasNotAddedYouToHisContactListYet name}
+            _{MsgYouAreNotYetInContactListOfUser name}
           $nothing
-            _{MsgUserHasNotAddedYouToHisContactListYet email}
+            _{MsgYouAreNotYetInContactListOfUser email}
 
 ^{widgetSnackbar msgs}

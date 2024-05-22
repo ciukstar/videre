@@ -27,7 +27,7 @@ PushSubscription: Abonnement push
 BasicEntities: Entités de base
 Overview: Aperçu
 YouAreNotSubscribedToNotificationsFrom user: Vous n'êtes pas abonné aux notifications de l'utilisateur #{user}
-UserHasNotAddedYouToHisContactListYet user: #{user} ne vous a pas encore ajouté à sa liste de contacts
+YouAreNotYetInContactListOfUser user: Vous n'êtes pas encore dans la liste de contacts de l'utilisateur #{user}
 AllowToBeNotifiedBy user: Autoriser l'utilisateur #{user} à vous envoyer des notifications sur les appels entrants
 Usage: Usage
 AuthenticationRequired: Authentification requise

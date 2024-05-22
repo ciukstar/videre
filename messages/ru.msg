@@ -27,7 +27,7 @@ PushSubscription: Push-подписка
 BasicEntities: Основные сущности
 Overview: Обзор
 YouAreNotSubscribedToNotificationsFrom user: Вы не подписаны на уведомления от пользователя #{user}
-UserHasNotAddedYouToHisContactListYet user: #{user} еще не добавил вас в свой список контактов
+YouAreNotYetInContactListOfUser user: Вас еще нет в списке контактов пользователя #{user}
 AllowToBeNotifiedBy user: Разрешить пользователю #{user} отправлять вам уведомления о входящих звонках
 Usage: Применение
 AuthenticationRequired: Требуется аутентификация

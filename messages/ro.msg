@@ -27,7 +27,7 @@ PushSubscription: Abonament push
 BasicEntities: Entităţile de bază
 Overview: Prezentare generală
 YouAreNotSubscribedToNotificationsFrom user: Nu sunteți abonat la notificările de la utilizatorul #{user}
-UserHasNotAddedYouToHisContactListYet user: #{user} nu v-a adăugat încă la lista lui de contacte
+YouAreNotYetInContactListOfUser user: Nu sunteți încă în lista de contacte a utilizatorului #{user}
 AllowToBeNotifiedBy user: Permiteți utilizatorului #{user} să vă trimită notificări despre apelurile primite
 Usage: Utilizare
 AuthenticationRequired: Este necesară autentificarea
