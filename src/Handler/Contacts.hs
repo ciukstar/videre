@@ -182,6 +182,11 @@ getCalleesR uid = do
 
     endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
 
+    caller <- runDB $ selectOne $ do
+        x <- from $ table @User
+        where_ $ x ^. UserId ==. val uid
+        return x
+
     callees <- (unwrap <$>) <$> runDB ( select $ do
 
         x :& e :& h <- from $ table @Contact
@@ -246,22 +251,43 @@ getCallsR uid = do
                        &&. ( (c ^. ContactEntry ==. x ^. CallCaller) ||. (c ^. ContactEntry ==. x ^. CallCallee) )
                  )
 
-        let subscriptions :: SqlExpr (Value Int)
-            subscriptions = subSelectCount $ do
-                y <- from $ table @PushSubscription
-                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCaller
-                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
-                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
-
-        let loops :: SqlExpr (Value Int)
-            loops = subSelectCount $ do
+        let subscriptions1 :: SqlExpr (Value Int)
+            subscriptions1 = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
                 where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
 
-        let accessible :: SqlExpr (Value Int)
-            accessible = subSelectCount $ do
+        let loops1 :: SqlExpr (Value Int)
+            loops1 = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCaller
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
+        let accessible1 :: SqlExpr (Value Int)
+            accessible1 = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCaller
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
+                where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
+
+        let subscriptions2 :: SqlExpr (Value Int)
+            subscriptions2 = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCaller
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCallee
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
+        let loops2 :: SqlExpr (Value Int)
+            loops2 = subSelectCount $ do
+                y <- from $ table @PushSubscription
+                where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
+                where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
+                where_ $ just (y ^. PushSubscriptionEndpoint) ==. val endpoint
+
+        let accessible2 :: SqlExpr (Value Int)
+            accessible2 = subSelectCount $ do
                 y <- from $ table @PushSubscription
                 where_ $ y ^. PushSubscriptionSubscriber ==. x ^. CallCallee
                 where_ $ y ^. PushSubscriptionPublisher ==. x ^. CallCaller
@@ -272,7 +298,7 @@ getCallsR uid = do
         orderBy [desc (x ^. CallStart)]
         return ( x
                , ( ((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution))
-                 , (c,(subscriptions,(loops, accessible)))
+                 , (c,((subscriptions1,(loops1, accessible1)),(subscriptions2,(loops2, accessible2))))
                  )
                ) )
 

@@ -1,3 +1,4 @@
+YouAreTryingToCallYourself: Вы пытаетесь позвонить самому себе
 CancelThisSubscription: Отменить эту подписку
 UserSubscribedOnThisDevice user: Пользователь #{user} подписан на этом устройстве.
 CallerCalleeSubscriptionLoopWarning: Кажется, вызываемый абонент тоже подписан на этом устройстве

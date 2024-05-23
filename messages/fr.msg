@@ -1,3 +1,4 @@
+YouAreTryingToCallYourself: Vous essayez de vous appeler
 CancelThisSubscription: Annuler cet abonnement
 UserSubscribedOnThisDevice user: L'utilisateur #{user} est abonné sur cet appareil
 CallerCalleeSubscriptionLoopWarning: Il semble que l'appelé soit également abonné sur cet appareil

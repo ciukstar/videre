@@ -1,3 +1,4 @@
+YouAreTryingToCallYourself: Se pare că efectuaţi apel către sine
 CancelThisSubscription: Anulați acest abonament
 UserSubscribedOnThisDevice user: Utilizatorul #{user} este abonat pe acest dispozitiv
 CallerCalleeSubscriptionLoopWarning: Se pare că și apelatul este abonat pe acest dispozitiv

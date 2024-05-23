@@ -32,22 +32,37 @@ main
     div[slot=headline], div[slot=supporting-text]
         white-space: nowrap
 
+    .app-details
+        div[slot=content]
+            figure.app-callee
+                text-align: center
+                img.user-photo
+                  clip-path: circle(50%)
+
+            dl
+                display: flex
+                align-items: center
+            .phone-disabled, .notifications-disabled, .call-loop
+                color: white
+                background: red
+                clip-path: circle(50%)
+
     .app-outgoing-call
 
         div[slot=content]
             display: flex
-            align-items: center
+            align-items: baseline
             justify-content: space-around
 
             figure
                 margin: 0
                 padding: 0
-
+                flex: 1
+                text-align: center
                 img
                     clip-path: circle(50%)
-
-            md-icon
-                --md-icon-size: 48px
+                md-icon
+                    --md-icon-size: 48px
 
         .app-outgoing-call-cancel
             --md-sys-color-primary: red
@@ -64,11 +79,6 @@ main
             bottom: 0
             left: 0.4rem
             font-size: 0.5rem
-
-    figure.app-callee
-        text-align: center
-        img.user-photo
-          clip-path: circle(50%)
         
     ##{idFabAdd}
         position: fixed

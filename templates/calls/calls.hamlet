@@ -21,7 +21,7 @@
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
-      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,(ns,(nl,na))))) <- calls
+      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,((ns1,(nl1,na1)),(ns2,(nl2,na2)))))) <- calls
         $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
@@ -94,7 +94,7 @@
                 <div slot=content>
                   <figure>
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value subscriptions) <- ns
+                    $with (Value subscriptions) <- ns1
                       $if subscriptions < 1
                         <figcaption.body-small>
                           $maybe name <- name
@@ -103,7 +103,7 @@
                             _{MsgUserYouSeemsUnsubscribed email}
 
                   <figure>
-                    $with (Value loops) <- nl
+                    $with (Value loops) <- nl1
                       <md-icon>
                         $if loops > 0
                           repeat
@@ -115,7 +115,7 @@
 
                   <figure>
                     <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value accessible) <- na
+                    $with (Value accessible) <- na1
                       $if accessible < 1
                         <figcaption.body-small>
                           $maybe name <- name
@@ -220,7 +220,7 @@
                 <div slot=content>
                   <figure>
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value subscriptions) <- ns
+                    $with (Value subscriptions) <- ns2
                       $if subscriptions < 1
                         <figcaption.body-small>
                           $with Entity _ (User email _ _ _ _ name _ _) <- callerE
@@ -230,7 +230,7 @@
                               _{MsgUserYouSeemsUnsubscribed email}
 
                   <figure>
-                    $with (Value loops) <- nl
+                    $with (Value loops) <- nl2
                       <md-icon>
                         $if loops > 0
                           repeat
@@ -242,7 +242,7 @@
 
                   <figure>
                     <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
-                    $with (Value accessible) <- na
+                    $with (Value accessible) <- na2
                       $if accessible < 1
                         <figcaption.body-small>
                           $maybe name <- name

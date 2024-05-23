@@ -96,6 +96,36 @@
                     <div.body-large>#{name}
                   <div.body-medium>#{email}
 
+              $if ns < 1
+                <dl>
+                  <dt>
+                    <md-icon.notifications-disabled>notifications_off
+                  <dd.body-small>
+                    $maybe name <- name
+                      _{MsgYouAreNotSubscribedToNotificationsFrom name}
+                    $nothing
+                      _{MsgYouAreNotSubscribedToNotificationsFrom email}
+
+              $if nl > 0
+                <dl>
+                  <dt>
+                    <md-icon.call-loop>repeat
+                  <dd.body-small>
+                    $maybe name <- name
+                      _{MsgUserSubscribedOnThisDevice name}
+                    $nothing
+                      _{MsgUserSubscribedOnThisDevice email}
+
+              $elseif na < 1
+                <dl>
+                  <dt>
+                    <md-icon.phone-disabled>phone_disabled
+                  <dd.body-small>
+                    $maybe name <- name
+                      _{MsgYouAreNotYetInContactListOfUser name}
+                    $nothing
+                      _{MsgYouAreNotYetInContactListOfUser email}
+
             <div slot=actions>
 
               <md-outlined-button.app-button-call type=button data-i=#{i} #idButtonAuioCall#{i}
@@ -132,11 +162,32 @@
             <div slot=content>
               <figure>
                 <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                $if ns < 1
+                  <figcaption.body-small>
+                    $maybe Entity _ (User email _ _ _ _ name _ _) <- caller
+                      $maybe name <- name
+                        _{MsgUserYouSeemsUnsubscribed name}
+                      $nothing
+                        _{MsgUserYouSeemsUnsubscribed email}
 
-              <md-icon>double_arrow
+              <figure>
+                <md-icon>
+                  $if nl > 0
+                    repeat
+                  $else
+                    double_arrow
+                $if nl > 0
+                  <figcaption.body-small>
+                    _{MsgCallerCalleeSubscriptionLoopWarning}
 
               <figure>
                 <img src=@{AccountPhotoR rid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                $if na < 1
+                  <figcaption.body-small>
+                    $maybe name <- name
+                      _{MsgUserAppearsToBeUnavailable name}
+                    $nothing
+                      _{MsgUserAppearsToBeUnavailable email}
 
             <div slot=actions>
               <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>

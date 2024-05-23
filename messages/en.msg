@@ -1,3 +1,4 @@
+YouAreTryingToCallYourself: You're trying to call yourself
 CancelThisSubscription: Cancel this subscription
 UserSubscribedOnThisDevice user@Text: #{user} is subscribed on this device
 CallerCalleeSubscriptionLoopWarning: It seems that the callee is also subscribed on this device
