@@ -28,10 +28,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Form
-    )
-import Foundation.Data
-    ( Handler, Widget
+    ( Handler, Form, Widget
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage

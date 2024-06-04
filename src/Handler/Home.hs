@@ -8,7 +8,7 @@ module Handler.Home (getHomeR) where
 
 import Database.Persist (Entity (Entity))
 
-import Foundation.Data
+import Foundation
     ( Handler
     , Route (AuthR, MyContactsR)
     , AppMessage

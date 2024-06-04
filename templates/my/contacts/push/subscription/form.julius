@@ -34,7 +34,7 @@ document.getElementById(#{fvId v}).onchange = function (e) {
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(subscr)
 	      }).then((response) => {
-		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
+		localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
 		window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
 	      });
 	    }

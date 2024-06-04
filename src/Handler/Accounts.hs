@@ -45,9 +45,8 @@ import Model
     , PushSubscription (PushSubscription), PushSubscriptionId, statusError
     )
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler, Widget
+import Foundation
+    ( Handler, Form, Widget
     , Route
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
       , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR

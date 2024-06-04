@@ -19,7 +19,7 @@ import Data.Maybe (Maybe (Nothing, Just))
 
 import Prelude ((*))
 
-import Foundation.Data
+import Foundation
     ( Handler
     , Route (HomeR, StaticR, FaviconR, DocsR)
     , AppMessage (MsgAppName, MsgMetaDescription, MsgTextChat, MsgContactList)

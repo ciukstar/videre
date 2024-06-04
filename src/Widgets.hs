@@ -10,8 +10,7 @@ module Widgets
 
 import Database.Persist (Entity (Entity))
 
-import Foundation ()
-import Foundation.Data
+import Foundation
     ( Widget
     , Route
       ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR )

@@ -42,7 +42,7 @@ import Data.Text (Text, unpack, pack)
 import Data.Text.Encoding (encodeUtf8)
 import Data.Time.Clock (getCurrentTime)
 
-import Foundation.Data
+import Foundation
     ( AppMessage
       ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
       , MsgEndSession, MsgAppName

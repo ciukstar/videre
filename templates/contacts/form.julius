@@ -30,7 +30,7 @@ document.getElementById(#{idButtonSubmitWithSubscription}).onclick = (e) => {
 	  document.getElementById(#{fvId authV}).value = subscr.keys.auth;
 	  document.getElementById(#{idFormPostContacts}).submit();
 	  
-	  localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
+	  localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
 	  
 	}).catch((err) => {
 	  
@@ -47,7 +47,7 @@ document.getElementById(#{idButtonSubmitWithSubscription}).onclick = (e) => {
 		document.getElementById(#{fvId authV}).value = subscr.keys.auth;
 		document.getElementById(#{idFormPostContacts}).submit();
 
-		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, subscr.endpoint);
+		localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
 		
 	      });
 	    });

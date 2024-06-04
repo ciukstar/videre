@@ -21,9 +21,8 @@ import Database.Esqueleto.Experimental
 import Database.Persist (Entity (Entity))
 import qualified Database.Persist as P (delete)
 
-import Foundation (Form)
-import Foundation.Data
-    ( Handler
+import Foundation
+    ( Handler, Form
     , Route (DataR)
     , DataR
       ( UserPhotoR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR

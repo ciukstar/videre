@@ -267,7 +267,7 @@ self.addEventListener('fetch', function (e) {
 	if (!subscription) {
 	  return fetch(e.request);
 	} else {	  
-	  url.searchParams.set(#{paramWebPushSubscriptionEndpoint}, subscription.endpoint);
+	  url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
 	  return fetch(url.href);
 	}
 
@@ -302,7 +302,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 	    oldendpoint: oldSubscr.endpoint
 	  })
 	}).then((response) => {
-	  localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+	  localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
 	});
 
       }).catch((err) => {
@@ -327,7 +327,7 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 		  oldendpoint: oldSubscr.endpoint
 		})
 	      }).then((response) => {
-		localStorage.setItem(#{keyWebPushSubscriptionEndpoint}, newSubscr.endpoint);
+		localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
 	      });
 
 	    });

@@ -172,8 +172,8 @@ ultDestKey = "_ULT"
 paramBacklink :: Text
 paramBacklink = "backlink"
 
-paramWebPushSubscriptionEndpoint :: Text
-paramWebPushSubscriptionEndpoint = "endpoint"
+paramEndpoint :: Text
+paramEndpoint = "endpoint"
 
-keyWebPushSubscriptionEndpoint :: Text
-keyWebPushSubscriptionEndpoint = "WEB_PUSH_SUBSCRIPTION_ENDPOINT"
+localStorageEndpoint :: Text
+localStorageEndpoint = "VIDERE_WEB_PUSH_SUBSCRIPTION_ENDPOINT"

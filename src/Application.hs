@@ -94,24 +94,6 @@ import Handler.Users
 
 import Handler.Common ( getFaviconR, getRobotsR, getSitemapR, getWebAppManifestR )
 
-import Foundation.Data
-    ( App(..), Handler, resourcesApp
-    , Route
-      ( DataR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
-      , PushSubscriptionsR, AccountInfoEditR, AccountInfoR, AccountEditR
-      , AccountPhotoR, AccountR, AccountsR, HomeR, StaticR, AuthR, FaviconR
-      , RobotsR, DocsR, SitemapR, WebAppManifestR, VideoR, ServiceWorkerR
-      , CallsR, CalleesR, PushSubscriptionEndpointR, AccountSubscriptionsR
-      , AccountSubscriptionR, AccountSubscriptionDeleR, PushSubscriptionsDeleR
-      )
-    ,  DataR
-       ( UsersR, TokensVapidClearR, TokensVapidR, TokensGoogleapisClearR
-       , TokensGoogleapisHookR, TokensR, UserPhotoR, UserDeleR, UserEditR
-       , UserR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR
-       , UserSubscriptionDeleR
-       )
-    )
-
 import System.Environment.Blank (getEnv)
 
 import VideoRoom ()

@@ -48,7 +48,7 @@ import Data.Text (Text, pack, unpack)
 import Data.Text.Lazy (toStrict)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
-import Foundation.Data
+import Foundation
     ( AppMessage
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
       , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
@@ -64,7 +64,7 @@ import Network.HTTP.Client.Conduit (Manager)
 
 import Model
     ( statusError, secretVolumeVapid, apiInfoVapid
-    , paramWebPushSubscriptionEndpoint, paramBacklink
+    , paramEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
     , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
@@ -184,7 +184,7 @@ getChatRoomR sid cid rid = do
         where_ $ x ^. UserId ==. val sid
         return x
 
-    endpoint <- liftHandler $ lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- liftHandler $ lookupGetParam paramEndpoint
 
     subscribed <- liftHandler $ isJust <$> runDB ( selectOne $ do
         x <- from $ table @PushSubscription

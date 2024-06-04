@@ -64,9 +64,8 @@ import Database.Persist
 import qualified Database.Persist as P ( PersistStoreWrite (delete), (=.) )
 import Database.Persist.Sql (fromSqlKey)
 
-import Foundation (Form, getVAPIDKeys)
-import Foundation.Data
-    ( Handler, App (appHttpManager, appSettings)
+import Foundation
+    ( Handler, Form, getVAPIDKeys, App (appHttpManager, appSettings)
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
@@ -86,7 +85,8 @@ import Foundation.Data
       , MsgIncomingAudioCallFrom, MsgVideoCall, MsgIncomingVideoCallFrom
       , MsgCallCanceledByCaller, MsgAudioCall, MsgUserIsNowAvailable
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
-      , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet, MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
+      , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
+      , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
       )
     )
 
@@ -94,7 +94,7 @@ import Material3 (md3mreq, md3switchField)
 
 import Model
     ( statusError, statusSuccess
-    , paramWebPushSubscriptionEndpoint, keyWebPushSubscriptionEndpoint
+    , paramEndpoint, localStorageEndpoint
     , UserId, User (User, userName, userEmail), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Call (Call), CallType (CallTypeAudio, CallTypeVideo)
@@ -180,7 +180,7 @@ import Yesod.Persist.Core (YesodPersist(runDB))
 getCalleesR :: UserId -> Handler Html
 getCalleesR uid = do
 
-    endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- lookupGetParam paramEndpoint
 
     caller <- runDB $ selectOne $ do
         x <- from $ table @User
@@ -232,7 +232,7 @@ getCalleesR uid = do
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
 
-    endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- lookupGetParam paramEndpoint
     
     calls <- (unwrap <$>) <$> runDB ( select $ do
 
@@ -315,7 +315,7 @@ getCallsR uid = do
 
 putPushSubscriptionEndpointR :: Handler ()
 putPushSubscriptionEndpointR = do
-    endpoint <- runInputPost $ ireq urlField paramWebPushSubscriptionEndpoint
+    endpoint <- runInputPost $ ireq urlField paramEndpoint
     p256dh <- runInputPost $ ireq textField "p256dh"
     auth <- runInputPost $ ireq textField "auth"
     oldEndpoint <- runInputPost $ ireq urlField "oldendpoint"
@@ -354,7 +354,7 @@ formSubscriptionDelete endpoint extra = do
 deletePushSubscriptionsR :: UserId -> UserId -> Handler A.Value
 deletePushSubscriptionsR sid pid = do
 
-    endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- lookupGetParam paramEndpoint
 
     case endpoint of
       Just x -> do
@@ -439,7 +439,7 @@ getContactR :: UserId -> UserId -> ContactId -> Handler Html
 getContactR sid pid cid = do
 
     backlink <- runInputGet $ ireq urlField paramBacklink
-    endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- lookupGetParam paramEndpoint
 
     contact <- (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))) <$>) <$> runDB ( selectOne $ do
         x :& e :& h <- from $ table @Contact
@@ -503,7 +503,7 @@ formContactRemove extra = return (FormSuccess (),[whamlet|#{extra}|])
 getMyContactsR :: UserId -> Handler Html
 getMyContactsR uid = do
 
-    endpoint <- lookupGetParam paramWebPushSubscriptionEndpoint
+    endpoint <- lookupGetParam paramEndpoint
 
     contacts <- (second (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue)))) <$>) <$> runDB ( select $ do
         x :& u :& p <- from $ table @Contact

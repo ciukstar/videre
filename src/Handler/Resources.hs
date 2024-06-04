@@ -3,7 +3,7 @@
 
 module Handler.Resources (getDocsR) where
 
-import Foundation.Data
+import Foundation
     ( Handler
     , Route (StaticR, HomeR, AuthR)
     , AppMessage
