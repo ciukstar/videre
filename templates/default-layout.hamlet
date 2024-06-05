@@ -27,10 +27,16 @@
   <div slot=headline>
     _{MsgIncomingVideoCall}
 
-  <form slot=content method=dialog>
+  <div slot=content>
 
     <figure ##{idFigureVideoCallerPhoto}>
-      <img ##{idImgVideoCallerPhoto} width=64 height=64>
+      <div.img-wrapper>
+      
+        <img ##{idImgVideoCallerPhoto} width=64 height=64>
+
+        <div.circle.one>
+        <div.circle.two>
+      
       <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
 
   <div slot=actions>

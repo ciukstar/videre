@@ -69,6 +69,14 @@
     margin-left: 25%
     margin-right: 25%
 
+@keyframes circle
+    from
+        transform: scale(1)
+        opacity: 1
+    to
+        transform: scale(1.6)
+        opacity: 0
+
 body
 
     font-family: Roboto, sans-serif;
@@ -86,8 +94,33 @@ body
 
         ##{idFigureVideoCallerPhoto}
             text-align: center
-            ##{idImgVideoCallerPhoto}
-                clip-path: circle(50%)
+
+            div.img-wrapper
+                position: relative
+                display: inline-flex
+
+                ##{idImgVideoCallerPhoto}
+                    position: relative
+                    z-index: 1
+                    clip-path: circle(50%)
+
+                .circle
+                    width: 58px
+                    height: 58px
+                    border-radius: 50%
+                    position: absolute
+                    top: calc(50% - 30px)
+                    left: calc(50% - 30px)
+                    box-shadow: 1px 1px 3px rgba(0,0,0,0.7)
+
+                .circle.one
+                    animation: circle 6s 2s infinite linear
+                    background: forestgreen
+
+                .circle.two
+                    animation: circle 6s 0s infinite linear
+                    background: dodgerblue
+              
 
         ##{idButtonVideoCallDecline}
           --md-sys-color-primary: red
