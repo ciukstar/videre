@@ -1,3 +1,5 @@
+Unselected: Non sélectionné
+Selected: Sélectionné
 YouAreTryingToCallYourself: Vous essayez de vous appeler
 CancelThisSubscription: Annuler cet abonnement
 UserSubscribedOnThisDevice user: L'utilisateur #{user} est abonné sur cet appareil

@@ -84,12 +84,13 @@
             $nothing
               _{MsgUserYouSeemsUnsubscribed email}
 
-    <figure>
-      <md-icon>
-        $if loop
-          repeat
-        $else
-          double_arrow
+    <figure.center>
+    
+      $if loop
+        <md-icon>repeat
+      $else
+        <md-icon.callarrow>double_arrow
+
       $if loop
         <figcaption.body-small>
           _{MsgCallerCalleeSubscriptionLoopWarning}

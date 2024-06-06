@@ -1,3 +1,5 @@
+Unselected: Neselectat
+Selected: Selectat
 YouAreTryingToCallYourself: Se pare că efectuaţi apel către sine
 CancelThisSubscription: Anulați acest abonament
 UserSubscribedOnThisDevice user: Utilizatorul #{user} este abonat pe acest dispozitiv

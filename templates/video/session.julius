@@ -121,9 +121,6 @@ navigator.mediaDevices.getUserMedia({
 
     e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user';
 
-    e.target.querySelector('md-icon').textContent =
-      e.target.dataset.facingMode === 'user' ? 'video_camera_back' : 'video_camera_front';
-
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
     ).forEach((sender) => { sender.track.stop(); });
@@ -151,7 +148,6 @@ navigator.mediaDevices.getUserMedia({
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
-      e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'videocam_off' : 'videocam';
 
       videoSelf.style.visibility = sender.track.enabled ? 'visible' : 'hidden';
       videoSelfPlaceholder.style.visibility = sender.track.enabled ? 'hidden' : 'visible';
@@ -167,7 +163,6 @@ navigator.mediaDevices.getUserMedia({
       (sender) => sender.track.kind === stream.getAudioTracks()[0].kind
     ).forEach((sender) => {
       sender.track.enabled = !sender.track.enabled;
-      e.target.querySelector('md-icon').textContent = sender.track.enabled ? 'mic_off' : 'mic';
       dchan.send(JSON.stringify({[sender.track.kind]: sender.track.enabled}));
     });
 

@@ -45,7 +45,7 @@ import Data.Time.Clock (getCurrentTime)
 import Foundation
     ( AppMessage
       ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
-      , MsgEndSession, MsgAppName
+      , MsgEndSession, MsgAppName, MsgSelected, MsgUnselected
       )
     )
 

@@ -14,10 +14,19 @@ header
     
     ##{idButtonSwitchVideocam}
         margin-left: auto
+            
+    ##{idButtonVideoSwitch}, ##{idButtonAudioSwitch}
+        --md-outlined-icon-button-selected-container-color: green
+        --md-outlined-icon-button-selected-outline-color: green
+        --md-outlined-icon-button-outline-color: red
+        --md-outlined-icon-button-hover-icon-color: red
+        --md-outlined-icon-button-focus-icon-color: red
+        --md-outlined-icon-button-pressed-icon-color: red
+        --md-outlined-icon-button-icon-color: red
 
     ##{idButtonEndSession}
         --md-sys-color-primary: red
-        --md-sys-color-on-primary: #FFFFFF
+        --md-sys-color-on-primary: white
     
 main
 

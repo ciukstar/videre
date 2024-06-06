@@ -77,12 +77,34 @@
         transform: scale(1.6)
         opacity: 0
 
+
 body
 
     font-family: Roboto, sans-serif;
     
     margin: 0
     padding: 0
+
+    div.img-wrapper
+        position: relative
+        display: inline-flex
+
+        .circle
+            width: 58px
+            height: 58px
+            border-radius: 50%
+            position: absolute
+            top: calc(50% - 30px)
+            left: calc(50% - 30px)
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.7)
+
+        .circle.one
+            animation: circle 6s 2s infinite linear
+            background: forestgreen
+
+        .circle.two
+            animation: circle 6s 0s infinite linear
+            background: dodgerblue
 
     ##{idDialogChatNotification}
         ##{idFigureSenderPhoto}
@@ -95,32 +117,9 @@ body
         ##{idFigureVideoCallerPhoto}
             text-align: center
 
-            div.img-wrapper
-                position: relative
-                display: inline-flex
-
-                ##{idImgVideoCallerPhoto}
-                    position: relative
-                    z-index: 1
-                    clip-path: circle(50%)
-
-                .circle
-                    width: 58px
-                    height: 58px
-                    border-radius: 50%
-                    position: absolute
-                    top: calc(50% - 30px)
-                    left: calc(50% - 30px)
-                    box-shadow: 1px 1px 3px rgba(0,0,0,0.7)
-
-                .circle.one
-                    animation: circle 6s 2s infinite linear
-                    background: forestgreen
-
-                .circle.two
-                    animation: circle 6s 0s infinite linear
-                    background: dodgerblue
-              
+            ##{idImgVideoCallerPhoto}
+                z-index: 1
+                clip-path: circle(50%)              
 
         ##{idButtonVideoCallDecline}
           --md-sys-color-primary: red
@@ -141,6 +140,7 @@ body
         ##{idFigureAudioCallerPhoto}
             text-align: center
             ##{idImgAudioCallerPhoto}
+                z-index: 1
                 clip-path: circle(50%)
 
         ##{idButtonAudioCallDecline}

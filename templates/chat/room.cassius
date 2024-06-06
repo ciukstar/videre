@@ -124,11 +124,32 @@ main
             padding: 0
             flex: 1
             text-align: center
+            
             img
                 clip-path: circle(50%)
+                
             md-icon
                 --md-icon-size: 48px
+                
+        figure.center
+            text-align: start
+            md-icon.callarrow
+                animation-name: callarrow
+                animation-duration: 3s
+                animation-delay: 0s
+                animation-iteration-count: infinite
+                animation-timing-function: steps(3, jump-end)
 
     ##{idButtonOutgoingCallCancel}
         --md-sys-color-primary: red
         --md-sys-color-on-primary: #FFFFFF
+
+
+@keyframes callarrow
+    from
+        margin-left: 0
+        opacity: 1
+
+    to
+        margin-left: 75%
+        opacity: 0

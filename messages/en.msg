@@ -1,3 +1,5 @@
+Unselected: Unselected
+Selected: Selected
 YouAreTryingToCallYourself: You're trying to call yourself
 CancelThisSubscription: Cancel this subscription
 UserSubscribedOnThisDevice user@Text: #{user} is subscribed on this device

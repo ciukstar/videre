@@ -3,22 +3,25 @@
   <md-icon-button href=#{backlink} aria-label=MsgBack ##{idButtonExitSession}>
     <md-icon>arrow_back
 
-  <md-outlined-icon-button has-icon ##{idButtonSwitchVideocam} data-facing-mode=user>
-    <md-icon>switch_video
+  <md-outlined-icon-button has-icon ##{idButtonSwitchVideocam} toggle selected data-facing-mode=user>
+    <md-icon slot=selected>video_camera_front
+    <md-icon>video_camera_back
 
-  <md-outlined-icon-button has-icon ##{idButtonVideoSwitch}>
-    <md-icon>
-      $if videos
-        videocam_off
-      $else
-        videocam
+  <md-outlined-icon-button has-icon ##{idButtonVideoSwitch} toggle :videos:selected
+    aria-label=_{MsgUnselected} aria-label-selected=_{MsgSelected}>
 
-  <md-outlined-icon-button has-icon ##{idButtonAudioSwitch}>
+    <md-icon slot=selected>videocam
+    <md-icon>videocam_off
+
+  <md-outlined-icon-button has-icon ##{idButtonAudioSwitch} toggle :audios:selected
+    aria-label=_{MsgUnselected} aria-label-selected=_{MsgSelected}>
+
+    <md-icon slot=selected>mic
     <md-icon>mic_off
 
   <md-filled-icon-button has-icon ##{idButtonEndSession}>
     <md-icon>call_end
-    
+
 
 <main>
 

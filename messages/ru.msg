@@ -1,3 +1,5 @@
+Unselected: Не выбрано
+Selected: Выбрано
 YouAreTryingToCallYourself: Вы пытаетесь позвонить самому себе
 CancelThisSubscription: Отменить эту подписку
 UserSubscribedOnThisDevice user: Пользователь #{user} подписан на этом устройстве.

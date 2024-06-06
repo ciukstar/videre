@@ -56,10 +56,16 @@
   <div slot=headline>
     _{MsgIncomingAudioCall}
 
-  <form slot=content method=dialog>
+  <div slot=content>
 
     <figure ##{idFigureAudioCallerPhoto}>
-      <img ##{idImgAudioCallerPhoto} width=64 height=64>
+      <div.img-wrapper>
+      
+        <img ##{idImgAudioCallerPhoto} width=64 height=64>
+
+        <div.circle.one>
+        <div.circle.two>
+      
       <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
 
   <div slot=actions>
