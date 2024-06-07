@@ -97,7 +97,7 @@ import Settings.StaticFiles
     ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-    , ringtones_bsnlofficer_3599c3405109693_mp3
+    , ringtones_outgoing_call_galaxy_ringtones_1_mp3
     )
 
 import System.IO (readFile')
@@ -175,7 +175,7 @@ getChatRoomR sid cid rid = do
     contact  <- liftHandler $ getContactRoute sid rid cid
     icon <- liftHandler $ getStaticRoute img_call_FILL0_wght400_GRAD0_opsz24_svg
     iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-    ringtone <- liftHandler $ getStaticRoute ringtones_bsnlofficer_3599c3405109693_mp3
+    ringtone <- liftHandler $ getStaticRoute ringtones_outgoing_call_galaxy_ringtones_1_mp3
     video <- liftHandler $ getVideoPushRoute sid cid rid
     outgoing <- liftHandler $ getVideoOutgoingRoute sid cid rid False
 
@@ -287,6 +287,7 @@ getChatRoomR sid cid rid = do
         idMessageInput <- newIdent
         idButtonSend <- newIdent
         idDialogOutgoingCall <- newIdent
+        idAudioOutgoingCallRingtone <- newIdent
         idButtonOutgoingCallCancel <- newIdent
         idDialogCallDeclined <- newIdent
 

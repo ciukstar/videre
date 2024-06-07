@@ -1,7 +1,7 @@
 
 ^{widget}
 
-<md-dialog ##{idDialogChatNotification} style="display:none">
+<md-dialog ##{idDialogChatNotification} style="visibility:hidden">
   <div slot=headline>
     _{MsgNewMessage}
 
@@ -23,7 +23,7 @@
       _{MsgReply}
 
 
-<md-dialog ##{idDialogIncomingVideoCall} style="display:none">
+<md-dialog ##{idDialogIncomingVideoCall} style="visibility:hidden">
   <div slot=headline>
     _{MsgIncomingVideoCall}
 
@@ -40,6 +40,9 @@
       <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
 
   <div slot=actions>
+  
+    <audio loop ##{idAudioIncomingVideoCallRingtone}>
+      <source src=@{StaticR ringtones_incoming_call_samsung_ringtones_1_mp3} type="audio/mpeg">
 
     <md-filled-icon-button ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end
@@ -52,7 +55,7 @@
       _{MsgAccept}
       
 
-<md-dialog ##{idDialogIncomingAudioCall} style="display:none">
+<md-dialog ##{idDialogIncomingAudioCall} style="visibility:hidden">
   <div slot=headline>
     _{MsgIncomingAudioCall}
 
@@ -69,6 +72,9 @@
       <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
 
   <div slot=actions>
+  
+    <audio loop ##{idAudioIncomingAudioCallRingtone}>
+      <source src=@{StaticR ringtones_incoming_call_samsung_ringtones_1_mp3} type="audio/mpeg">
 
     <md-filled-icon-button ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end
@@ -81,7 +87,7 @@
       _{MsgAccept}
 
 
-<md-dialog ##{idDialogMissedCall} style="display:none">
+<md-dialog ##{idDialogMissedCall} style="visibility:hidden">
   <div slot=headline>
     <span style="flex:1">_{MsgMissedCall}
     <md-icon-button type=button title=_{MsgClose}

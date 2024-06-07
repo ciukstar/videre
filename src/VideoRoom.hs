@@ -24,9 +24,9 @@ import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( select, selectOne, Value (unValue), from, table, where_, val, update, set
+    ( select, selectOne, Value (unValue), from, table, where_, val
     , (^.), (==.), (=.)
-    , just
+    , just, update, set
     )
 import Database.Persist
     ( Entity (Entity, entityVal), PersistStoreWrite (insert) )

@@ -220,5 +220,20 @@ window.addEventListener('load', (e) => {
   , #{idDialogIncomingVideoCall}
   , #{idDialogIncomingAudioCall}
   , #{idDialogMissedCall}    
-  ].forEach(x => { document.getElementById(x).style.removeProperty('display'); });
+  ].forEach(x => { document.getElementById(x).style.visibility = 'visible'; });
+});
+
+
+[ [ #{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone} ]
+, [ #{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone} ]
+].forEach(([dialog,ringtone]) => {
+  
+  document.getElementById(dialog).addEventListener('opened', (e) => {
+    document.getElementById(ringtone).play();
+  });
+  
+  document.getElementById(dialog).addEventListener('closed', (e) => {
+    document.getElementById(ringtone).pause();
+  });
+  
 });

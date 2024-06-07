@@ -180,3 +180,11 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   }
   
 });
+
+document.getElementById(#{idDialogOutgoingCall}).addEventListener('opened', (e) => {
+  document.getElementById(#{idAudioOutgoingCallRingtone}).play();
+});
+
+document.getElementById(#{idDialogOutgoingCall}).addEventListener('closed', (e) => {
+  document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
+});

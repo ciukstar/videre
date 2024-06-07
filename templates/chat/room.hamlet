@@ -73,7 +73,8 @@
   <div slot=headline>
     _{MsgOutgoingCall} ...
 
-  <div slot=content>        
+  <div slot=content>
+    
     <figure>
       <img src=@{photos} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
       $if not subscribed
@@ -107,6 +108,9 @@
               _{MsgUserAppearsToBeUnavailable email}
 
   <div slot=actions>
+  
+    <audio loop ##{idAudioOutgoingCallRingtone}>
+      <source src=@{ringtone} type="audio/mpeg">
   
     $if not subscribed
       $maybe backlink <- rndr <$> curr
