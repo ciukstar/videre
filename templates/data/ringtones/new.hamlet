@@ -1,0 +1,23 @@
+<header.background>
+  <md-icon-button href=@{DataR RingtonesR} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgRingtone}
+
+<main>
+
+  ^{widgetBanner msgs}
+
+  <form method=post action=@{DataR RingtonesR} enctype=#{et} novalidate>
+  
+    ^{fw}
+    
+    <div.actions>
+      <md-text-button type=link href=@{DataR RingtonesR}>
+        _{MsgCancel}
+        
+      <md-filled-button type=post>
+        _{MsgSave}
+          
+^{widgetSnackbar msgs}

@@ -1,3 +1,12 @@
+NoFileChosen: No file chosen
+SelectRingtone: Select ringtone
+UploadRingtone: Upload ringtone
+Default: Default
+Name: Name
+TheName: Name
+NoRingtonesYet: No ringtones yet
+Ringtone: Ringtone
+Ringtones: Ringtones
 Unselected: Unselected
 Selected: Selected
 YouAreTryingToCallYourself: You're trying to call yourself

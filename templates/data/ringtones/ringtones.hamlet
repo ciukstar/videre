@@ -1,0 +1,44 @@
+
+<header.primary>
+  ^{widgetMenu}
+
+  <h1.title-large>
+    _{MsgRingtones}
+
+  <div #idHeaderEnd>
+    ^{widgetUser}
+
+
+<main>
+
+  ^{widgetBanner msgs}
+
+  $if null ringtones
+    <figure style="text-align:center">
+      <span.on-secondary style="font-size:4rem">&varnothing;
+      <figcaption.body-large>
+        _{MsgNoRingtonesYet}
+  $else
+    <md-list>
+      $forall Entity tid (Ringtone name mime isDefault _) <- ringtones
+        <md-list-item type=link href=#>
+          <div slot=start>
+            <audio>
+              <source src=# type=#{mime}>
+              
+          <div slot=headline>
+            #{name}
+          <div slot=supporting-text style="white-space:nowrap">
+            $if isDefault
+              MsgDefault
+              
+          <md-icon slot=end>arrow_forward_ios
+          
+        <md-divider>
+        
+  <md-fab ##{idFabAdd} aria-label=_{MsgAdd} onclick="this.querySelector('a[href]').click()">
+    <a href=@{DataR RingtoneNewR}>
+    <md-icon slot=icon>add
+
+^{widgetSnackbar msgs}
+

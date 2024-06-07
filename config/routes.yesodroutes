@@ -50,6 +50,9 @@
     /subscriptions/#UserId                          UserSubscriptionsR    GET
     /subscriptions 	                            SubscriptionsR        GET
 
+    /forms/ringtones/new  RingtoneNewR GET
+    /ringtones            RingtonesR   GET
+
     /users/#UserId/photo UserPhotoR  GET
     /users/#UserId/dele  UserDeleR   POST
     /users/#UserId/edit  UserEditR   GET

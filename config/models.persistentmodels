@@ -1,6 +1,18 @@
 -- By default this file is used by `persistFileWith` in Model.hs (which is imported by Foundation.hs)
 -- Syntax for this file here: https://github.com/yesodweb/persistent/blob/master/docs/Persistent-entity-syntax.md
 
+Ringtone
+    name Text
+    mime Text
+    default Bool
+    audio ByteString
+    UniqueRingtone name
+
+UserRingtone
+    user UserId OnDeleteCascade
+    ringtone RingtoneId OnDeleteCascade
+    type Text
+    UniqueUserRingtone user ringtone type
 
 Chat json
     user UserId OnDeleteCascade

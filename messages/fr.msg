@@ -1,3 +1,12 @@
+NoFileChosen: Aucun fichier choisi
+SelectRingtone: Sélectionnez une sonnerie
+UploadRingtone: Charger une sonnerie
+Default: Défaut
+Name: Nom
+TheName: Nom
+NoRingtonesYet: Pas encore de sonneries
+Ringtone: Sonnerie
+Ringtones: Sonneries
 Unselected: Non sélectionné
 Selected: Sélectionné
 YouAreTryingToCallYourself: Vous essayez de vous appeler

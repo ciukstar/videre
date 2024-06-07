@@ -1,3 +1,12 @@
+NoFileChosen: Nu a fost ales niciun fișier
+SelectRingtone: Selectați un ton de apel
+UploadRingtone: Încărcați ton de apel
+Default: Implicit
+Name: Nume
+TheName: Numele
+NoRingtonesYet: Nu există tonuri de apel încă
+Ringtone: Ton de apel
+Ringtones: Tonuri de apel
 Unselected: Neselectat
 Selected: Selectat
 YouAreTryingToCallYourself: Se pare că efectuaţi apel către sine

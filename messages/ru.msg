@@ -1,3 +1,12 @@
+NoFileChosen: Файл не выбран
+SelectRingtone: Выбрать рингтон
+UploadRingtone: Загрузить рингтон
+Default: По умолчанию
+Name: Имя
+TheName: Наименование
+NoRingtonesYet: Рингтонов пока нет
+Ringtone: Рингтон
+Ringtones: Рингтоны
 Unselected: Не выбрано
 Selected: Выбрано
 YouAreTryingToCallYourself: Вы пытаетесь позвонить самому себе

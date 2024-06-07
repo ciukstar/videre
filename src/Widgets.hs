@@ -14,11 +14,11 @@ import Foundation
     ( Widget
     , Route
       ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR )
-    , DataR (UsersR, TokensR, SubscriptionsR)
+    , DataR (UsersR, TokensR, SubscriptionsR, RingtonesR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
-      , MsgCalls, MsgContacts, MsgSubscriptions
+      , MsgCalls, MsgContacts, MsgSubscriptions, MsgRingtones
       )
     )
 
