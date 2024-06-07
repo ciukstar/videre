@@ -69,7 +69,7 @@ import Foundation
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
-      , CalleesR
+      , CalleesR, HomeR
       )
     , AppMessage
       ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgCalls
@@ -135,7 +135,7 @@ import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 import VideoRoom
     ( YesodVideo
       ( getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute
-      , getAppSettings
+      , getAppSettings, getHomeRoute
       )
     , Route (RoomR)
     )
@@ -154,14 +154,14 @@ import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
-    , getMessageRender, lookupHeader
+    , getMessageRender, lookupHeader, getCurrentRoute
     )
 import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
     , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
-import Yesod.Form.Input (runInputGet, ireq, runInputPost)
+import Yesod.Form.Input (runInputGet, ireq, runInputPost, iopt)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
     , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField, textField
@@ -330,8 +330,12 @@ putPushSubscriptionEndpointR = do
 
 postPushSubscriptionsDeleR :: UserId -> ContactId -> UserId -> Handler Html
 postPushSubscriptionsDeleR sid cid pid = do
-    backlink <- runInputGet $ ireq urlField paramBacklink
+    
+    rndr <- getUrlRender
+    backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
+
     ((fr,_),_) <- runFormPost $ formSubscriptionDelete Nothing
+
     case fr of
       FormSuccess endpoint -> do
           runDB $ delete $ do
@@ -419,8 +423,12 @@ formSubscribe backlink vapidKeys sid pid cid notif extra = do
 
 postContactRemoveR :: UserId -> UserId -> ContactId -> Handler Html
 postContactRemoveR uid rid cid = do
-    backlink <- runInputGet $ ireq urlField paramBacklink
+    
+    rndr <- getUrlRender
+    backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
+
     ((fr,_),_) <- runFormPost formContactRemove
+
     case fr of
       FormSuccess () -> do
           runDB $ P.delete cid
@@ -438,7 +446,8 @@ postContactRemoveR uid rid cid = do
 getContactR :: UserId -> UserId -> ContactId -> Handler Html
 getContactR sid pid cid = do
 
-    backlink <- runInputGet $ ireq urlField paramBacklink
+    rndr <- getUrlRender
+    backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
     endpoint <- lookupGetParam paramEndpoint
 
     contact <- (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))) <$>) <$> runDB ( selectOne $ do
@@ -704,7 +713,8 @@ getContactsR uid = do
 
     idFormPostContacts <- newIdent
     idDialogSubscribe <- newIdent
-    backlink <- runInputGet $ ireq urlField "backlink"
+    rndr <- getUrlRender
+    backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
 
     mVAPIDKeys <- getVAPIDKeys
 
@@ -779,6 +789,11 @@ instance YesodVideo App where
 
     getAppHttpManager :: Handler Manager
     getAppHttpManager = getYesod <&> appHttpManager
+
+    getHomeRoute :: Handler Text
+    getHomeRoute = do
+        rndr <- getUrlRender
+        rndr . fromMaybe HomeR <$> getCurrentRoute 
 
     getStaticRoute :: StaticRoute -> Handler (Route App)
     getStaticRoute = return . StaticR

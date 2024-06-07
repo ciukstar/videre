@@ -50,8 +50,9 @@ import Foundation
     )
 
 import Model
-    ( UserId, User (User, userEmail, userName), apiInfoVapid, secretVolumeVapid
-    , PushSubscription (PushSubscription), Token
+    ( UserId, User (User, userEmail, userName)
+    , paramBacklink, apiInfoVapid, secretVolumeVapid
+    , PushSubscription (PushSubscription), ContactId, Token
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
     , Store, UserPhoto (UserPhoto)
     , Call (Call, callCaller, callCallee, callStart, callEnd, callType, callStatus)
@@ -68,7 +69,7 @@ import Model
       ( UserId, TokenApi, TokenId, TokenStore
       , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
-      ), ContactId
+      )
     )
 
 import Network.HTTP.Client (Manager)
@@ -114,7 +115,7 @@ import Yesod.Core.Content (TypedContent (TypedContent), toContent)
 import Yesod.Core.Handler (invalidArgsI, getUrlRender, getMessageRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Input (runInputGet, runInputPost, ireq, iopt)
-import Yesod.Form.Fields (boolField, intField, urlField, textField)
+import Yesod.Form.Fields (boolField, intField, textField)
 import Yesod.Persist.Core (runDB)
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
@@ -124,6 +125,7 @@ import Yesod.WebSockets
 class YesodVideo m where
     getRtcPeerConnectionConfig :: HandlerFor m (Maybe A.Value)
     getAppHttpManager :: HandlerFor m Manager
+    getHomeRoute :: HandlerFor m Text
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
 
@@ -134,7 +136,7 @@ getRoomR :: (Yesod m, YesodVideo m)
          => UserId -> ContactId -> UserId -> Bool -> SubHandlerFor VideoRoom m Html
 getRoomR sid cid rid polite = do
 
-    backlink <- runInputGet (ireq urlField "backlink")
+    backlink <- liftHandler $ getHomeRoute >>= \r -> fromMaybe r <$> runInputGet ( iopt textField paramBacklink )
 
     videor <- runInputGet (ireq boolField "videor")
     audior <- runInputGet (ireq boolField "audior")

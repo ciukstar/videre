@@ -1,7 +1,7 @@
 
 ^{widget}
 
-<md-dialog ##{idDialogChatNotification}>
+<md-dialog ##{idDialogChatNotification} style="display:none">
   <div slot=headline>
     _{MsgNewMessage}
 
@@ -23,7 +23,7 @@
       _{MsgReply}
 
 
-<md-dialog ##{idDialogIncomingVideoCall}>
+<md-dialog ##{idDialogIncomingVideoCall} style="display:none">
   <div slot=headline>
     _{MsgIncomingVideoCall}
 
@@ -52,7 +52,7 @@
       _{MsgAccept}
       
 
-<md-dialog ##{idDialogIncomingAudioCall}>
+<md-dialog ##{idDialogIncomingAudioCall} style="display:none">
   <div slot=headline>
     _{MsgIncomingAudioCall}
 
@@ -81,7 +81,7 @@
       _{MsgAccept}
 
 
-<md-dialog ##{idDialogMissedCall}>
+<md-dialog ##{idDialogMissedCall} style="display:none">
   <div slot=headline>
     <span style="flex:1">_{MsgMissedCall}
     <md-icon-button type=button title=_{MsgClose}
