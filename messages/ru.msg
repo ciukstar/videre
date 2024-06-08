@@ -1,3 +1,6 @@
+RingtoneNotFound: Рингтон не найден
+Type: Тип
+RecordAdded: Запись добавлена
 NoFileChosen: Файл не выбран
 SelectRingtone: Выбрать рингтон
 UploadRingtone: Загрузить рингтон

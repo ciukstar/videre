@@ -20,17 +20,15 @@
         _{MsgNoRingtonesYet}
   $else
     <md-list>
-      $forall Entity tid (Ringtone name mime isDefault _) <- ringtones
-        <md-list-item type=link href=#>
+      $forall Entity rid (Ringtone name mime _) <- ringtones
+        <md-list-item type=link href=@{DataR $ RingtoneR rid}>
           <div slot=start>
+            <md-icon>music_note
             <audio>
               <source src=# type=#{mime}>
               
-          <div slot=headline>
+          <div slot=headline style="white-space:nowrap">
             #{name}
-          <div slot=supporting-text style="white-space:nowrap">
-            $if isDefault
-              MsgDefault
               
           <md-icon slot=end>arrow_forward_ios
           

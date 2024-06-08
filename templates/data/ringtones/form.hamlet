@@ -11,8 +11,3 @@
 ^{fvInput audioV}
 
 ^{fvInput nameV}
-
-<div style="display:flex;align-items:center;gap:1rem">
-  ^{fvInput defaultV}
-  <label.body-large for=#{fvId defaultV}>
-    #{fvLabel defaultV}

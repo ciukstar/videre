@@ -82,7 +82,10 @@ import Handler.Subscriptions
     , postUserSubscriptionDeleR
     )
 
-import Handler.Ringtones ( getRingtonesR, getRingtoneNewR )
+import Handler.Ringtones
+    ( getRingtonesR, getRingtoneNewR, postRingtonesR, getRingtoneR
+    , getRingtoneAudioR
+    )
 
 import Handler.Tokens
     ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR

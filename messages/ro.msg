@@ -1,3 +1,6 @@
+RingtoneNotFound: Tonul de apel nu a fost găsit
+Type: Tip
+RecordAdded: Înregistrare adăugată
 NoFileChosen: Nu a fost ales niciun fișier
 SelectRingtone: Selectați un ton de apel
 UploadRingtone: Încărcați ton de apel

@@ -6,31 +6,36 @@
 module Handler.Ringtones
   ( getRingtonesR
   , getRingtoneNewR
+  , postRingtonesR
+  , getRingtoneR
+  , getRingtoneAudioR
   ) where
 
 import Data.Text (Text)
 
 import Database.Esqueleto.Experimental
-    ( select, from, table, orderBy, desc
-    , (^.)
+    ( select, selectOne, from, table, orderBy, desc, where_, val
+    , (^.), (==.)
     )
-import Database.Persist (Entity (Entity), entityVal)
+import Database.Persist
+    ( Entity (Entity), entityVal, PersistStoreWrite (insert_))
 
 import Foundation
     ( Handler, Form
     , Route (DataR)
-    , DataR (RingtoneNewR, RingtonesR)
+    , DataR (RingtoneNewR, RingtonesR, RingtonesR, RingtoneR, RingtoneAudioR)
     , AppMessage
       ( MsgRingtones, MsgNoRingtonesYet, MsgAdd, MsgRingtone, MsgBack
-      , MsgSave, MsgCancel, MsgTheName, MsgDefault, MsgAudio, MsgSelectRingtone
-      , MsgNoFileChosen
+      , MsgSave, MsgCancel, MsgTheName, MsgAudio, MsgSelectRingtone
+      , MsgNoFileChosen, MsgRecordAdded, MsgType, MsgRingtoneNotFound
+      , MsgDele, MsgEdit
       )
     )
     
-import Material3 (md3mreq, md3textField, md3switchField)
+import Material3 (md3mreq, md3textField)
 
 import Model
-    ( Ringtone (Ringtone, ringtoneName, ringtoneDefault)
+    ( statusSuccess, RingtoneId, Ringtone (Ringtone, ringtoneName)
     , EntityField (RingtoneId)
     )
 
@@ -41,17 +46,53 @@ import Text.Hamlet (Html)
 import Widgets (widgetBanner, widgetMenu, widgetSnackbar, widgetUser)
 
 import Yesod.Core
-    ( Yesod(defaultLayout), getMessages, newIdent, FileInfo
-    , SomeMessage (SomeMessage), getMessageRender
+    ( Yesod(defaultLayout), getMessages, newIdent, FileInfo (fileContentType)
+    , SomeMessage (SomeMessage), getMessageRender, addMessageI, redirect
+    , fileSourceByteString, TypedContent (TypedContent), invalidArgsI
+    , ToContent (toContent)
     )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form
-    ( FieldView (fvInput, fvLabel, fvId)
+    ( FieldView (fvInput, fvId)
+    , FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Form.Fields (fileField)
-import Yesod.Form.Functions (generateFormPost, mreq)
+import Yesod.Form.Functions (generateFormPost, runFormPost, mreq)
 import Yesod.Persist.Core (YesodPersist(runDB))
+import Data.Text.Encoding (encodeUtf8)
+
+
+getRingtoneR :: RingtoneId -> Handler Html
+getRingtoneR rid = do
+    
+    ringtone <- runDB $ selectOne $ do
+        x <- from $ table @Ringtone
+        where_ $ x ^. RingtoneId ==. val rid
+        return x
+
+    msgs <- getMessages    
+    defaultLayout $ do
+        setTitleI MsgRingtone
+        $(widgetFile "data/ringtones/ringtone")
+
+
+postRingtonesR :: Handler Html
+postRingtonesR = do
+    
+    ((fr,fw),et) <- runFormPost $ formRingtone Nothing
+
+    case fr of
+      FormSuccess (RingtoneForm name fi) -> do
+          bs <- fileSourceByteString fi
+          runDB $ insert_ $ Ringtone name (fileContentType fi) bs
+          addMessageI statusSuccess MsgRecordAdded
+          redirect $ DataR RingtonesR
+      _otherwise -> do
+          msgs <- getMessages
+          defaultLayout $ do
+              setTitleI MsgRingtone
+              $(widgetFile "data/ringtones/new")
 
 
 getRingtoneNewR :: Handler Html
@@ -65,7 +106,7 @@ getRingtoneNewR = do
         $(widgetFile "data/ringtones/new")
     
 
-data RingtoneForm = RingtoneForm Text Bool FileInfo
+data RingtoneForm = RingtoneForm Text FileInfo
 
 
 formRingtone :: Maybe (Entity Ringtone) -> Form RingtoneForm
@@ -79,19 +120,13 @@ formRingtone ringtone extra = do
         , fsAttrs = [("label", msgr MsgTheName)]
         } (ringtoneName . entityVal <$> ringtone)
         
-    (defaultR, defaultV) <- md3mreq md3switchField FieldSettings
-        { fsLabel = SomeMessage MsgDefault
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", msgr MsgDefault)]
-        } (ringtoneDefault . entityVal <$> ringtone)
-        
     (audioR, audioV) <- mreq fileField FieldSettings
         { fsLabel = SomeMessage MsgAudio
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("style","display:none")]
         } Nothing
     
-    let r = RingtoneForm <$> nameR <*> defaultR <*> audioR
+    let r = RingtoneForm <$> nameR <*> audioR
     let w = $(widgetFile "data/ringtones/form")
             
     return (r,w)
@@ -112,3 +147,16 @@ getRingtonesR = do
     defaultLayout $ do
         setTitleI MsgRingtones
         $(widgetFile "data/ringtones/ringtones")
+
+
+getRingtoneAudioR :: RingtoneId -> Handler TypedContent
+getRingtoneAudioR rid = do
+    
+    ringtone <- runDB $ selectOne $ do
+        x <- from $ table @Ringtone
+        where_ $ x ^. RingtoneId ==. val rid
+        return x
+    
+    case ringtone of
+      Just (Entity _ (Ringtone _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      Nothing -> invalidArgsI [MsgRingtoneNotFound]

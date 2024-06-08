@@ -1,3 +1,6 @@
+RingtoneNotFound: Sonnerie non trouvée
+Type: Type
+RecordAdded: Enregistrement ajouté
 NoFileChosen: Aucun fichier choisi
 SelectRingtone: Sélectionnez une sonnerie
 UploadRingtone: Charger une sonnerie

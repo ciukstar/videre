@@ -1,3 +1,6 @@
+RingtoneNotFound: Ringtone not found
+Type: Type
+RecordAdded: Record added
 NoFileChosen: No file chosen
 SelectRingtone: Select ringtone
 UploadRingtone: Upload ringtone
