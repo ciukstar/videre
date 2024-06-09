@@ -1,3 +1,9 @@
+IncomingChatMessage: Incoming chat message
+OutgoingChatMessage: Outgoing chat message
+DefaultSettings: Default settings
+AlreadyExists: Already exists
+SelectNewRingtoneFile: Select new ringtone file
+SelectRingtoneFile: Select ringtone file
 RingtoneNotFound: Ringtone not found
 Type: Type
 RecordAdded: Record added

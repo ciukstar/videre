@@ -1,3 +1,9 @@
+IncomingChatMessage: Mesaj de chat primit
+OutgoingChatMessage: Mesaj de chat de ieșire
+DefaultSettings: Setări implicite
+AlreadyExists: Deja exista
+SelectNewRingtoneFile: Selectați noul fișier de ton de apel
+SelectRingtoneFile: Selectați fișierul ton de apel
 RingtoneNotFound: Tonul de apel nu a fost găsit
 Type: Tip
 RecordAdded: Înregistrare adăugată

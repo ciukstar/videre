@@ -1,10 +1,10 @@
 
 document.getElementById(#{fvId audioV}).addEventListener('change', (e) => {
   const file = e.target.files[0];
-  const label = document.getElementById('idFileStatus');
+  const label = document.getElementById(#{idButtonUploadLabel});
   if (file) {
     label.textContent = file.name;
   } else {
-    label.textContent = label.dataset.content;
+    label.textContent = label.dataset.label;
   }
 }, false);

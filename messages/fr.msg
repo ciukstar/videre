@@ -1,3 +1,9 @@
+IncomingChatMessage: Message de chat entrant
+OutgoingChatMessage: Message de chat sortant
+DefaultSettings: Paramètres par défaut
+AlreadyExists: Existe déjà
+SelectNewRingtoneFile: Sélectionnez un nouveau fichier de sonnerie
+SelectRingtoneFile: Sélectionnez le fichier de sonnerie
 RingtoneNotFound: Sonnerie non trouvée
 Type: Type
 RecordAdded: Enregistrement ajouté

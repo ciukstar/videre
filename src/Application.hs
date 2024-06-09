@@ -84,7 +84,9 @@ import Handler.Subscriptions
 
 import Handler.Ringtones
     ( getRingtonesR, getRingtoneNewR, postRingtonesR, getRingtoneR
-    , getRingtoneAudioR
+    , getRingtoneAudioR, getRingtoneEditR, postRingtoneR
+    , postRingtoneDeleR, getRingtoneSettingsR, getRingtoneSettingNewR
+    , postRingtoneSettingsR
     )
 
 import Handler.Tokens

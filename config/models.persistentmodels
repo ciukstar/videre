@@ -7,6 +7,11 @@ UserRingtone
     type Text
     UniqueUserRingtone user ringtone type
 
+DefaultRingtone
+    ringtone RingtoneId OnDeleteCascade
+    type RingtoneType
+    UniueDefaultRingtone ringtone type
+
 Ringtone
     name Text
     mime Text

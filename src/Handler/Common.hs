@@ -21,7 +21,7 @@ import Prelude ((*))
 
 import Foundation
     ( Handler
-    , Route (HomeR, StaticR, FaviconR, DocsR)
+    , Route (HomeR, StaticR, DocsR)
     , AppMessage (MsgAppName, MsgMetaDescription, MsgTextChat, MsgContactList)
     )
     
@@ -94,7 +94,6 @@ getSitemapR :: Handler TypedContent
 getSitemapR = sitemap $ do
     yield $ SitemapUrl HomeR Nothing (Just Monthly) (Just 1.0)
     yield $ SitemapUrl DocsR Nothing (Just Monthly) (Just 1.0)
-    yield $ SitemapUrl FaviconR Nothing (Just Monthly) (Just 0.5)
 
 getFaviconR :: Handler TypedContent
 getFaviconR = do cacheSeconds $ 60 * 60 * 24 * 30 -- cache for a month

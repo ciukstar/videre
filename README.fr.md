@@ -83,6 +83,9 @@ L'entité Appel représente les appels sortants et entrants vers l'utilisateur.
 ### L'entité « Chat »
 L'entité Chat représente les messages échangés entre deux utilisateurs. Par défaut, les messages de chat sont échangés et stockés à l'aide du protocole WebSockets. La messagerie peer-to-peer sans stockage intermédiaire est prévue pour les prochaines versions.
 
+### Sonnerie
+...
+
 ## Diagramme ER
 
 ![Diagramme entité-relation](static/img/ERD_Videre.svg)

@@ -1,13 +1,17 @@
 
 #{extra}
 
-<md-outlined-button type=button onclick="document.getElementById('#{fvId audioV}').click()">
-  <md-icon slot=icon>library_music
-  _{MsgSelectRingtone}
-
-<p.body-small #idFileStatus data-content=_{MsgNoFileChosen}>
-  _{MsgNoFileChosen}
+<label.body-small for=#{fvId audioV}>
+  
+  <md-outlined-button type=button style="pointer-events:none;width:100%">
+    <md-icon slot=icon>library_music
+    <span ##{idButtonUploadLabel} data-label=_{MsgSelectRingtoneFile}>
+      _{MsgSelectRingtone}
+<div.body-small.on-error>
+  $maybe errs <- fvErrors audioV
+    #{errs}
 
 ^{fvInput audioV}
+    
 
 ^{fvInput nameV}

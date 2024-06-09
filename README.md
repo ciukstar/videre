@@ -83,6 +83,9 @@ The entity Call represents outgoing and incoming calls to the currently logged i
 ### Chat
 The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.
 
+### Ringtone
+...
+
 ## ER Diagram
 
 ![Entity Relationship Diagram](static/img/ERD_Videre.svg)

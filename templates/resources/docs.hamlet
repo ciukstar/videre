@@ -129,6 +129,11 @@
     <h2.headline-small>_{MsgEntityChat}
     <p>
       _{MsgDoc019}
+      
+  <section>
+    <h2.headline-small>_{MsgRingtone}
+    <p>
+      ...
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

@@ -83,6 +83,9 @@ Entitatea Apel reprezintă apelurile efectuate și primite către utilizator.
 ### Entitatea „Chat”
 Entitatea Chat reprezintă mesajele schimbate între doi utilizatori. În mod implicit, mesajele de chat sunt schimbate și stocate folosind protocolul WebSockets. Mesageria peer-to-peer fără stocare intermediară este planificată pentru versiunile viitoare.
 
+### Ton de apel
+...
+
 ## Diagrama ER
 
 ![Diagrama entitate - relație](static/img/ERD_Videre.svg)

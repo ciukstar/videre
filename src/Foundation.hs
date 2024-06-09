@@ -316,8 +316,13 @@ instance Yesod App where
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
     
+    isAuthorized (DataR RingtoneSettingNewR) _ = isAdmin
+    isAuthorized (DataR RingtoneSettingsR) _ = isAdmin
+    
     isAuthorized (DataR (RingtoneAudioR _)) _ = isAdmin
     isAuthorized (DataR (RingtoneR _)) _ = isAdmin
+    isAuthorized (DataR (RingtoneDeleR _)) _ = isAdmin
+    isAuthorized (DataR (RingtoneEditR _)) _ = isAdmin
     isAuthorized (DataR RingtoneNewR) _ = isAdmin
     isAuthorized r@(DataR RingtonesR) _ = setUltDest r >> isAdmin
     

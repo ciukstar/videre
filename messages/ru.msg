@@ -1,3 +1,9 @@
+IncomingChatMessage: Входящее сообщение чата
+OutgoingChatMessage: Исходящее сообщение чата
+DefaultSettings: Настройки по умолчанию
+AlreadyExists: Уже существует
+SelectNewRingtoneFile: Выбрать новый файл рингтона
+SelectRingtoneFile: Выберите файл рингтона
 RingtoneNotFound: Рингтон не найден
 Type: Тип
 RecordAdded: Запись добавлена

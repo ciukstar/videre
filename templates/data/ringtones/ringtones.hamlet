@@ -8,7 +8,6 @@
   <div #idHeaderEnd>
     ^{widgetUser}
 
-
 <main>
 
   ^{widgetBanner msgs}
@@ -19,20 +18,35 @@
       <figcaption.body-large>
         _{MsgNoRingtonesYet}
   $else
-    <md-list>
-      $forall Entity rid (Ringtone name mime _) <- ringtones
-        <md-list-item type=link href=@{DataR $ RingtoneR rid}>
-          <div slot=start>
-            <md-icon>music_note
-            <audio>
-              <source src=# type=#{mime}>
-              
-          <div slot=headline style="white-space:nowrap">
-            #{name}
-              
-          <md-icon slot=end>arrow_forward_ios
+
+    <md-tabs aria-label=Tabs>
+      <md-primary-tab #tabRingtones aria-controls=#{idPanelRingtones} active=true 
+        onclick="this.querySelector('a[href]').click()">
+        
+        <a href=@{DataR RingtonesR} style="color:inherit;text-decoration:inherit;cursor:inherit">
+          _{MsgRingtones}
           
-        <md-divider>
+      <md-primary-tab #tabSettings aria-controls=panelSettings onclick="this.querySelector('a[href]').click()">
+        <a href=@{DataR RingtoneSettingsR} style="color:inherit;text-decoration:inherit;cursor:inherit">
+          _{MsgDefaultSettings}
+
+    <div ##{idPanelRingtones} role=tabpanel aria-labelledby=tabRingtones>
+      <md-list>
+        $forall Entity rid (Ringtone name mime _) <- ringtones
+          <md-list-item type=link href=@{DataR $ RingtoneR rid}>
+            <div slot=start>
+              <md-icon>music_note
+
+            <div slot=headline style="white-space:nowrap">
+              #{name}
+            <div slot=supporting-text style="white-space:nowrap">
+              #{mime}
+
+            <md-icon slot=end>arrow_forward_ios
+
+          <md-divider>
+
+    <div #panelSettings role=tabpanel aria-labelledby=tabSettings hidden>
         
   <md-fab ##{idFabAdd} aria-label=_{MsgAdd} onclick="this.querySelector('a[href]').click()">
     <a href=@{DataR RingtoneNewR}>

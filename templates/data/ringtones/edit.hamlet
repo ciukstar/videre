@@ -1,5 +1,5 @@
 <header.background>
-  <md-icon-button href=@{DataR RingtonesR} aria-label=_{MsgBack}>
+  <md-icon-button href=@{DataR $ RingtoneR rid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
   <h1.title-large>
@@ -9,12 +9,12 @@
 
   ^{widgetBanner msgs}
 
-  <form method=post action=@{DataR RingtonesR} enctype=#{et}>
+  <form method=post action=@{DataR $ RingtoneR rid} enctype=#{et}>
   
     ^{fw}
     
     <div.actions>
-      <md-text-button type=link href=@{DataR RingtonesR} formnovalidate>
+      <md-text-button type=link href=@{DataR $ RingtoneR rid} formnovalidate>
         _{MsgCancel}
         
       <md-filled-button type=post>

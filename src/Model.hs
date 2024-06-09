@@ -49,6 +49,12 @@ import Text.Show (Show (show))
 import Text.Hamlet (Html)
 
 
+data RingtoneType = RingtoneTypeCallOutgoing | RingtoneTypeCallIncoming
+                  | RingtoneTypeChatOutgoing | RingtoneTypeChatIncoming
+    deriving (Eq, Show, Read)
+derivePersistField "RingtoneType"
+
+
 data CallStatus = CallStatusAccepted | CallStatusDeclined
                 | CallStatusCanceled | CallStatusEnded
     deriving (Eq, Show, Read)
