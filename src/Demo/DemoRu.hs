@@ -24,6 +24,12 @@ import Model
     , Token (Token, tokenApi, tokenStore)
     , Store (Store, storeToken, storeKey, storeVal)
     , StoreType (StoreTypeDatabase, StoreTypeGoogleSecretManager)
+    , Ringtone (ringtoneName, Ringtone, ringtoneMime, ringtoneAudio)
+    , DefaultRingtone (DefaultRingtone, defaultRingtoneRingtone, defaultRingtoneType)
+    , RingtoneType
+      ( RingtoneTypeCallOutgoing, RingtoneTypeCallIncoming, RingtoneTypeChatOutgoing
+      , RingtoneTypeChatIncoming
+      )
     )
 
 import Text.Hamlet (shamlet)
@@ -53,6 +59,43 @@ fillDemoRu appSettings = do
         insert_ Token { tokenApi = apiInfoVapid
                       , tokenStore = StoreTypeGoogleSecretManager
                       }
+
+
+    ringtone1 <- insert Ringtone { ringtoneName = "Рингтон исходящего вызова"
+                                 , ringtoneMime = "audio/mpeg"
+                                 , ringtoneAudio = $(embedFile "demo/outgoing_call_galaxy_ringtones_1.mp3")
+                                 }
+
+    ringtone2 <- insert Ringtone { ringtoneName = "Рингтон входящего вызова"
+                                 , ringtoneMime = "audio/mpeg"
+                                 , ringtoneAudio = $(embedFile "demo/incoming_call_samsung_ringtones_1.mp3")
+                                 }
+
+    ringtone3 <- insert Ringtone { ringtoneName = "Рингтон для исходящего чата"
+                                 , ringtoneMime = "audio/mpeg"
+                                 , ringtoneAudio = $(embedFile "demo/outgoing_message_ringtone_1.mp3")
+                                 }
+
+    ringtone4 <- insert Ringtone { ringtoneName = "Входящий рингтон чата"
+                                 , ringtoneMime = "audio/mpeg"
+                                 , ringtoneAudio = $(embedFile "demo/incoming_message_ringtone_1.mp3")
+                                 }
+
+    insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone1
+                            , defaultRingtoneType = RingtoneTypeCallOutgoing
+                            }
+
+    insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone2
+                            , defaultRingtoneType = RingtoneTypeCallIncoming
+                            }
+
+    insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone3
+                            , defaultRingtoneType = RingtoneTypeChatOutgoing
+                            }
+
+    insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone4
+                            , defaultRingtoneType = RingtoneTypeChatIncoming
+                            }
     
     pass1 <- liftIO $ saltPass "bulanovalm"
     let user1 = User { userEmail = "bulanovalm@mail.ru"

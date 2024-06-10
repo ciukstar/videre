@@ -27,38 +27,44 @@
     <div #panelRingtones role=tabpanel aria-labelledby=tabRingtones hidden>
 
     <div ##{idPanelSettings} role=tabpanel aria-labelledby=tabSettings>
-      <md-list>
-        $forall (Entity did (DefaultRingtone _ typ), Entity _ (Ringtone name _ _)) <- defaults
-          <md-list-item type=link href=#>
-            <div slot=start>
-              <md-icon>
+      $if null defaults
+        <figure style="text-align:center">
+          <span.on-secondary style="font-size:4rem">&varnothing;
+          <figcaption.body-large>
+            _{MsgNoDefaultRingtonesSetYet}
+      $else
+        <md-list>
+          $forall (Entity did (DefaultRingtone _ typ), Entity _ (Ringtone name _ _)) <- defaults
+            <md-list-item type=link href=@{DataR $ RingtoneSettingR did}>
+              <div slot=start>
+                <md-icon>
+                  $case typ
+                    $of RingtoneTypeCallOutgoing
+                      call_made
+                    $of RingtoneTypeCallIncoming
+                      call_received
+                    $of RingtoneTypeChatOutgoing
+                      outgoing_mail
+                    $of RingtoneTypeChatIncoming
+                      mark_email_read
+
+              <div slot=headline style="white-space:nowrap">
                 $case typ
                   $of RingtoneTypeCallOutgoing
-                    call_made
+                    _{MsgOutgoingCall}
                   $of RingtoneTypeCallIncoming
-                    call_received
+                    _{MsgIncomingCall}
                   $of RingtoneTypeChatOutgoing
-                    outgoing_mail
+                    _{MsgOutgoingChatMessage}
                   $of RingtoneTypeChatIncoming
-                    mark_email_read
+                    _{MsgIncomingChatMessage}
 
-            <div slot=headline style="white-space:nowrap">
-              $case typ
-                $of RingtoneTypeCallOutgoing
-                  _{MsgOutgoingCall}
-                $of RingtoneTypeCallIncoming
-                  _{MsgIncomingCall}
-                $of RingtoneTypeChatOutgoing
-                  _{MsgOutgoingChatMessage}
-                $of RingtoneTypeChatIncoming
-                  _{MsgIncomingChatMessage}
-              
-            <div slot=supporting-text style="white-space:nowrap">
-              #{name}
+              <div slot=supporting-text style="white-space:nowrap">
+                #{name}
 
-            <md-icon slot=end>arrow_forward_ios
+              <md-icon slot=end>arrow_forward_ios
 
-          <md-divider>
+            <md-divider>
     
         
   <md-fab ##{idFabAdd} aria-label=_{MsgAdd} onclick="this.querySelector('a[href]').click()">

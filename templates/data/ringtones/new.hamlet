@@ -9,15 +9,15 @@
 
   ^{widgetBanner msgs}
 
-  <form method=post action=@{DataR RingtonesR} enctype=#{et}>
+  <form method=post action=@{DataR RingtonesR} enctype=#{et} ##{idFormRingtone}>
   
     ^{fw}
-    
-    <div.actions>
-      <md-text-button type=link href=@{DataR RingtonesR} formnovalidate>
-        _{MsgCancel}
-        
-      <md-filled-button type=post>
-        _{MsgSave}
+
+  <div.actions>
+    <md-text-button type=link href=@{DataR RingtonesR}>
+      _{MsgCancel}
+
+    <md-filled-button type=submit form=#{idFormRingtone}>
+      _{MsgSave}
           
 ^{widgetSnackbar msgs}

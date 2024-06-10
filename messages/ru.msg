@@ -1,3 +1,5 @@
+NoDefaultRingtonesSetYet: Рингтоны по умолчанию еще не установлены
+DefaultRingtone: Рингтон по умолчанию
 IncomingChatMessage: Входящее сообщение чата
 OutgoingChatMessage: Исходящее сообщение чата
 DefaultSettings: Настройки по умолчанию

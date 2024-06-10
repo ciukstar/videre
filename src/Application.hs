@@ -86,7 +86,7 @@ import Handler.Ringtones
     ( getRingtonesR, getRingtoneNewR, postRingtonesR, getRingtoneR
     , getRingtoneAudioR, getRingtoneEditR, postRingtoneR
     , postRingtoneDeleR, getRingtoneSettingsR, getRingtoneSettingNewR
-    , postRingtoneSettingsR
+    , postRingtoneSettingsR, getRingtoneSettingR, postRingtoneSettingDeleR
     )
 
 import Handler.Tokens

@@ -1,3 +1,5 @@
+NoDefaultRingtonesSetYet: Les sonneries par défaut n'ont pas encore été définies
+DefaultRingtone: Sonnerie par défaut
 IncomingChatMessage: Message de chat entrant
 OutgoingChatMessage: Message de chat sortant
 DefaultSettings: Paramètres par défaut

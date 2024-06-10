@@ -50,8 +50,11 @@
     /subscriptions/#UserId                          UserSubscriptionsR    GET
     /subscriptions 	                            SubscriptionsR        GET
 
-    /forms/ringtones/settings/new RingtoneSettingNewR GET
-    /ringtones/settings/defaults  RingtoneSettingsR   GET POST
+    
+    /forms/ringtones/settings/#DefaultRingtoneId/dele RingtoneSettingDeleR POST
+    /forms/ringtones/settings/new                     RingtoneSettingNewR  GET
+    /ringtones/settings/defaults/#DefaultRingtoneId   RingtoneSettingR     GET
+    /ringtones/settings/defaults           	      RingtoneSettingsR    GET POST
     
     /forms/ringtone/#RingtoneId/dele RingtoneDeleR     POST
     /forms/ringtone/#RingtoneId/edit RingtoneEditR     GET

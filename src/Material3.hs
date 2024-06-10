@@ -25,9 +25,13 @@ module Material3
   ) where
 
 
+import Data.Foldable (find)
 import qualified Data.List.Safe as LS (head, tail)
 import Data.Text (Text, pack, splitOn)
 import Data.Text.Lazy (toStrict)
+import Data.Time.Calendar (Day)
+import Data.Time (TimeOfDay, LocalTime)
+import Data.Time.Format.ISO8601 (iso8601Show)
 
 import qualified Text.Blaze.Html.Renderer.String as S (renderHtml)
 import qualified Text.Blaze.Html.Renderer.Text as T (renderHtml)
@@ -50,9 +54,6 @@ import Yesod.Form.Types
     , FieldSettings (fsId, fsName, fsAttrs)
     , FieldView (fvErrors), MForm, FormResult
     )
-import Data.Time.Calendar (Day)
-import Data.Time (TimeOfDay, LocalTime)
-import Data.Time.Format.ISO8601 (iso8601Show)
 
 
 md3checkboxesFieldList :: (Eq a, RenderMessage m msg) => [(msg,a)] -> Field (HandlerFor m) [a]
@@ -89,10 +90,9 @@ md3selectField :: (Eq a, RenderMessage m FormMessage) => HandlerFor m (OptionLis
 md3selectField options = (selectField options)
     { fieldView = \theId name attrs x req -> do
           opts <- olOptions <$> handlerToWidget options
-          let sel (Left _) _ = False
-              sel (Right y) opt = optionInternalValue opt == y
+              
           [whamlet|
-<md-filled-select ##{theId} *{attrs} :req:required name=#{name}>
+<md-filled-select ##{theId} *{attrs} :req:required name=#{name} value=#{either id (get opts) x}>
   $forall opt <- opts
     $with parts <- splitOn tsep $ optionDisplay opt
       <md-select-option value=#{optionExternalValue opt} :sel x opt:selected>
@@ -104,6 +104,13 @@ md3selectField options = (selectField options)
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }
+
+  where    
+    sel (Left _) _ = False
+    sel (Right y) opt = optionInternalValue opt == y
+
+    get :: (Eq a) => [Option a] -> a -> Text
+    get os a = maybe "undefied" optionExternalValue $ find (\o -> optionInternalValue o == a) os          
 
 
 md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a

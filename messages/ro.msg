@@ -1,3 +1,5 @@
+NoDefaultRingtonesSetYet: Tonurile de apel implicite nu au fost încă setate
+DefaultRingtone: Ton de apel implicit
 IncomingChatMessage: Mesaj de chat primit
 OutgoingChatMessage: Mesaj de chat de ieșire
 DefaultSettings: Setări implicite

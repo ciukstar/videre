@@ -1,3 +1,5 @@
+NoDefaultRingtonesSetYet: Default ringtones have not yet been set
+DefaultRingtone: Default ringtone
 IncomingChatMessage: Incoming chat message
 OutgoingChatMessage: Outgoing chat message
 DefaultSettings: Default settings

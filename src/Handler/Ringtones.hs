@@ -15,7 +15,12 @@ module Handler.Ringtones
   , getRingtoneSettingsR
   , getRingtoneSettingNewR
   , postRingtoneSettingsR
+  , getRingtoneSettingR
+  , postRingtoneSettingDeleR
   ) where
+
+
+import Data.Bifunctor (Bifunctor(bimap))
 
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
@@ -36,6 +41,7 @@ import Foundation
     , DataR
       ( RingtoneNewR, RingtonesR, RingtonesR, RingtoneR, RingtoneAudioR
       , RingtoneEditR, RingtoneDeleR, RingtoneSettingsR, RingtoneSettingNewR
+      , RingtoneSettingR, RingtoneSettingDeleR
       )
     , AppMessage
       ( MsgRingtones, MsgNoRingtonesYet, MsgAdd, MsgRingtone, MsgBack
@@ -43,7 +49,9 @@ import Foundation
       , MsgRecordAdded, MsgType, MsgRingtoneNotFound, MsgDele, MsgEdit
       , MsgSelectRingtoneFile, MsgRecordEdited, MsgRecordDeleted
       , MsgInvalidFormData, MsgDeleteAreYouSure, MsgConfirmPlease
-      , MsgAlreadyExists, MsgDefaultSettings, MsgOutgoingCall, MsgIncomingCall, MsgOutgoingChatMessage, MsgIncomingChatMessage
+      , MsgAlreadyExists, MsgDefaultSettings, MsgOutgoingCall
+      , MsgIncomingCall, MsgOutgoingChatMessage, MsgIncomingChatMessage
+      , MsgDefaultRingtone, MsgNoDefaultRingtonesSetYet
       )
     )
     
@@ -51,12 +59,15 @@ import Material3 (md3mreq, md3textField, md3selectField)
 
 import Model
     ( statusSuccess, statusError, RingtoneId, Ringtone (Ringtone, ringtoneName)
-    , DefaultRingtone (DefaultRingtone)
+    , DefaultRingtoneId, DefaultRingtone (DefaultRingtone)
     , RingtoneType
       ( RingtoneTypeCallOutgoing, RingtoneTypeCallIncoming
       , RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming
       )
-    , EntityField (RingtoneId, RingtoneName, DefaultRingtoneRingtone)
+    , EntityField
+      ( RingtoneId, RingtoneName, DefaultRingtoneRingtone, DefaultRingtoneType
+      , DefaultRingtoneId
+      )
     )
 
 import Settings (widgetFile)
@@ -80,7 +91,43 @@ import Yesod.Form
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, runFormPost, mreq, mopt)
 import Yesod.Persist.Core (YesodPersist(runDB))
-import Data.Bifunctor (Bifunctor(bimap))
+
+
+postRingtoneSettingDeleR :: DefaultRingtoneId -> Handler Html
+postRingtoneSettingDeleR did = do
+
+    ((fr,_),_) <- runFormPost formRingtoneSettingDelete
+
+    case fr of
+      FormSuccess () -> do
+          runDB $ delete did
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ DataR RingtoneSettingsR
+      _otherwise -> do
+          addMessageI statusError MsgInvalidFormData
+          redirect $ DataR $ RingtoneSettingR did
+    
+
+
+getRingtoneSettingR :: DefaultRingtoneId -> Handler Html
+getRingtoneSettingR did = do
+
+    setting <- runDB $ selectOne $ do
+        x :& r <- from $ table @DefaultRingtone
+            `innerJoin` table @Ringtone `on` (\(x :& r) -> x ^. DefaultRingtoneRingtone ==. r ^. RingtoneId) 
+        where_ $ x ^. DefaultRingtoneId ==. val did
+        return (x,r)
+
+    (fw,et) <- generateFormPost formRingtoneSettingDelete
+    
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgDefaultRingtone
+        $(widgetFile "data/ringtones/settings/setting")
+
+
+formRingtoneSettingDelete :: Form ()
+formRingtoneSettingDelete extra = return (pure (), [whamlet|#{extra}|])
 
 
 postRingtoneSettingsR :: Handler Html
@@ -97,6 +144,7 @@ postRingtoneSettingsR = do
           msgs <- getMessages  
           defaultLayout $ do
               setTitleI MsgDefaultSettings
+              idFormRingtoneDefault <- newIdent
               $(widgetFile "data/ringtones/settings/new")
 
 
@@ -108,6 +156,7 @@ getRingtoneSettingNewR = do
     msgs <- getMessages  
     defaultLayout $ do
         setTitleI MsgDefaultSettings
+        idFormRingtoneDefault <- newIdent
         $(widgetFile "data/ringtones/settings/new")
 
 
@@ -127,7 +176,7 @@ formRingtoneDefault setting extra = do
         , fsAttrs = [("label",msgr MsgRingtone)]
         } Nothing
 
-    (typeR,typeV) <- md3mreq (md3selectField (optionsPairs types)) FieldSettings
+    (typeR,typeV) <- md3mreq (uniqueTypeSelectField types) FieldSettings
         { fsLabel = SomeMessage MsgType
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",msgr MsgType)]
@@ -143,6 +192,22 @@ formRingtoneDefault setting extra = do
               , (MsgIncomingChatMessage, RingtoneTypeChatIncoming)
               ]
 
+      uniqueTypeSelectField :: [(AppMessage,RingtoneType)] -> Field Handler RingtoneType
+      uniqueTypeSelectField xs = checkM uniqueType (md3selectField (optionsPairs xs))
+
+      uniqueType :: RingtoneType -> Handler (Either AppMessage RingtoneType)
+      uniqueType typ = do
+          x <- runDB $ selectOne $ do
+              x <- from $ table @DefaultRingtone
+              where_ $ x ^. DefaultRingtoneType ==. val typ
+              return x
+          return $ case x of
+            Nothing -> Right typ
+            Just (Entity sid _) -> case setting of
+              Nothing -> Left MsgAlreadyExists
+              Just (Entity sid' _) | sid == sid' -> Right typ
+                                   | otherwise -> Left MsgAlreadyExists
+      
 
 getRingtoneSettingsR :: Handler Html
 getRingtoneSettingsR = do
@@ -300,6 +365,7 @@ postRingtonesR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgRingtone
+              idFormRingtone <- newIdent
               $(widgetFile "data/ringtones/new")
 
 
@@ -311,6 +377,7 @@ getRingtoneNewR = do
     msgs <- getMessages    
     defaultLayout $ do
         setTitleI MsgRingtone
+        idFormRingtone <- newIdent
         $(widgetFile "data/ringtones/new")
     
 

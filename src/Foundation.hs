@@ -316,7 +316,9 @@ instance Yesod App where
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
 
-    
+
+    isAuthorized (DataR (RingtoneSettingDeleR _)) _ = isAdmin
+    isAuthorized (DataR (RingtoneSettingR _)) _ = isAdmin
     isAuthorized (DataR RingtoneSettingNewR) _ = isAdmin
     isAuthorized (DataR RingtoneSettingsR) _ = isAdmin
     
