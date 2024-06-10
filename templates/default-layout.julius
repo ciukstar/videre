@@ -1,77 +1,80 @@
 
 
 navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((registration) => {
-  registration.addEventListener('updatefound', (event) => {
-    
-    const endpoint = localStorage.getItem(#{localStorageEndpoint});
+  registration.addEventListener('updatefound', function (event) {
 
-    if (endpoint) {
-      
-      registration.pushManager.getSubscription().then(function (subscription) {
-        
-        if (!subscription) {
+    if (#{authenicated}) {
+      const endpoint = localStorage.getItem(#{localStorageEndpoint});
+
+      if (endpoint) {
+	
+	registration.pushManager.getSubscription().then(function (subscription) {
           
-          Notification.requestPermission().then(function (permission) {
+          if (!subscription) {
             
-            if (permission === 'granted') {
+            Notification.requestPermission().then(function (permission) {
               
-              registration.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-              }).then((subscription) => {
-                
-                const subscr = JSON.parse(JSON.stringify(subscription));
-                
-                fetch('@{PushSubscriptionEndpointR}', {
-                  method: 'PUT',
-                  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                  body: new URLSearchParams({
-                    endpoint: subscr.endpoint,
-                    p256dh: subscr.keys.p256dh,
-                    auth: subscr.keys.auth,
-                    oldendpoint: endpoint
-                  })
-                }).then((response) => {
-                  localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
-                });
-                
-              }).catch((err) => {
-                
-                registration.pushManager.getSubscription().then((subscription) => {
-                  subscription.unsubscribe().then((sccess) => {
-                    registration.pushManager.subscribe({
-                      userVisibleOnly: true,
-                      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-                    }).then((subscription) => {
-                      
-                      const subscr = JSON.parse(JSON.stringify(subscription));
-                      
-                      fetch('@{PushSubscriptionEndpointR}', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                        body: new URLSearchParams({
-                          endpoint: subscr.endpoint,
-                          p256dh: subscr.keys.p256dh,
-                          auth: subscr.keys.auth,
-                          oldendpoint: endpoint
-                        })
-                      }).then((response) => {
-                        localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+              if (permission === 'granted') {
+		
+		registration.pushManager.subscribe({
+                  userVisibleOnly: true,
+                  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+		}).then((subscription) => {
+                  
+                  const subscr = JSON.parse(JSON.stringify(subscription));
+                  
+                  fetch('@{PushSubscriptionEndpointR}', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({
+                      endpoint: subscr.endpoint,
+                      p256dh: subscr.keys.p256dh,
+                      auth: subscr.keys.auth,
+                      oldendpoint: endpoint
+                    })
+                  }).then((response) => {
+                    localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+                  });
+                  
+		}).catch((err) => {
+                  
+                  registration.pushManager.getSubscription().then((subscription) => {
+                    subscription.unsubscribe().then((sccess) => {
+                      registration.pushManager.subscribe({
+			userVisibleOnly: true,
+			applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+                      }).then((subscription) => {
+			
+			const subscr = JSON.parse(JSON.stringify(subscription));
+			
+			fetch('@{PushSubscriptionEndpointR}', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                          body: new URLSearchParams({
+                            endpoint: subscr.endpoint,
+                            p256dh: subscr.keys.p256dh,
+                            auth: subscr.keys.auth,
+                            oldendpoint: endpoint
+                          })
+			}).then((response) => {
+                          localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+			});
+			
                       });
-                      
                     });
                   });
-                });
-                
-              });
+                  
+		});
+		
+              }
               
-            }
+            });
             
-          });
-          
-        }
-      });
-      
+          }
+	});
+	
+      }
+
     }
     
   });

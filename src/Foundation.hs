@@ -11,7 +11,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Foundation where
 
@@ -21,6 +20,7 @@ import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
 
+import qualified Data.Aeson as A (Value (Bool))
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import Data.Kind (Type)
 import qualified Data.CaseInsensitive as CI
@@ -256,6 +256,7 @@ instance Yesod App where
             case mVAPIDKeys of
               Just vapidKeys -> do
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
+                  authenicated <- A.Bool . isJust <$> maybeAuth
                   $(widgetFile "default-layout")
               Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 

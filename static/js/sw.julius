@@ -257,6 +257,7 @@ self.addEventListener('fetch', function (e) {
       && url.origin === self.location.origin
       && !e.request.url.includes('/static/')
       && !e.request.url.includes('/photo')
+      && !e.request.url.includes('/auth')
       && !e.request.url.includes('/manifest.json');
   
   if (endpointNeeded) {
