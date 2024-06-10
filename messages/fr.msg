@@ -1,3 +1,6 @@
+Notifications: Notifications
+UserSettings: Paramètres utilisateur
+Settings: Paramètres
 NoDefaultRingtonesSetYet: Les sonneries par défaut n'ont pas encore été définies
 DefaultRingtone: Sonnerie par défaut
 IncomingChatMessage: Message de chat entrant

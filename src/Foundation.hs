@@ -68,8 +68,8 @@ import Text.Read (readMaybe)
 import VideoRoom.Data (VideoRoom)
 
 import Web.WebPush
-    ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails), readVAPIDKeys
-    , vapidPublicKeyBytes
+    ( VAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
+    , readVAPIDKeys, vapidPublicKeyBytes
     )
 
 import Yesod.Default.Util   (addStaticContentExternal)
@@ -292,7 +292,7 @@ instance Yesod App where
     isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (ContactsR uid) _ = isAuthenticatedSelf uid
 
-    
+    isAuthorized (AccountSettingsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionDeleR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionsR uid) _ = isAuthenticatedSelf uid

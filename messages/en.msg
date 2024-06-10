@@ -1,3 +1,6 @@
+Notifications: Notifications
+UserSettings: User settings
+Settings: Settings
 NoDefaultRingtonesSetYet: Default ringtones have not yet been set
 DefaultRingtone: Default ringtone
 IncomingChatMessage: Incoming chat message

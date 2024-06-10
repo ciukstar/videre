@@ -13,12 +13,14 @@ import Database.Persist (Entity (Entity))
 import Foundation
     ( Widget
     , Route
-      ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR )
+      ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR
+      , AccountSettingsR
+      )
     , DataR (UsersR, TokensR, SubscriptionsR, RingtonesR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
-      , MsgCalls, MsgContacts, MsgSubscriptions, MsgRingtones
+      , MsgCalls, MsgContacts, MsgSubscriptions, MsgRingtones, MsgSettings
       )
     )
 

@@ -15,6 +15,7 @@ module Handler.Accounts
   , getAccountSubscriptionsR
   , getAccountSubscriptionR
   , postAccountSubscriptionDeleR
+  , getAccountSettingsR
   ) where
 
 import Control.Monad (void, join)
@@ -35,14 +36,14 @@ import Database.Esqueleto.Experimental
 import Material3 ( md3textField, md3mopt, md3dayField )
 
 import Model
-    ( UserId, UserPhoto (UserPhoto), statusSuccess
+    ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
+    , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
+    , PushSubscriptionId, PushSubscription (PushSubscription)
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
       , UserInfoUser, UserInfoBirthDate, UserSuperuser, PushSubscriptionPublisher
       , PushSubscriptionSubscriber, UserPhotoAttribution, PushSubscriptionId
       )
-    , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
-    , PushSubscription (PushSubscription), PushSubscriptionId, statusError
     )
 
 import Foundation
@@ -58,7 +59,8 @@ import Foundation
       , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
       , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
       , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
-      , MsgInvalidFormData, MsgRecordDeleted
+      , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
+      , MsgNotifications
       )
     )
 
@@ -88,6 +90,15 @@ import Yesod.Form.Types
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Persist (YesodPersist(runDB))
+
+
+getAccountSettingsR :: UserId -> Handler Html
+getAccountSettingsR uid = do
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSubscription
+        idPanelRingtones <- newIdent
+        $(widgetFile "accounts/settings/settings")
 
 
 postAccountSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html

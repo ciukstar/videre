@@ -1,3 +1,6 @@
+Notifications: Уведомления
+UserSettings: Настройки пользователя
+Settings: Настройки
 NoDefaultRingtonesSetYet: Рингтоны по умолчанию еще не установлены
 DefaultRingtone: Рингтон по умолчанию
 IncomingChatMessage: Входящее сообщение чата
