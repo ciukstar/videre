@@ -133,7 +133,9 @@
   <section>
     <h2.headline-small>_{MsgRingtone}
     <p>
-      ...
+      #{t $ MsgDoc020 (r $ DataR RingtonesR)}
+    <p>
+      _{MsgDoc021}
     
   <section>
     <h2.headline-medium>_{MsgErDiagram}

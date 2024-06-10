@@ -84,7 +84,10 @@ The entity Call represents outgoing and incoming calls to the currently logged i
 The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.
 
 ### Ringtone
-...
+
+New ringtones can be added by an administrator in the ["Ringtones"](https://videre-2pg7fq7tgq-de.a.run.app/data/ringtones) section of the "Data" menu.
+
+An administrator can also set default ringtones for each call type, outgoing or incoming call.
 
 ## ER Diagram
 

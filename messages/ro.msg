@@ -249,3 +249,7 @@ Doc017 link: Configurația poate fi furnizată ca o reprezentare textuală a unu
 Doc018: Folosit în principal pentru a specifica serverele STUN și TURN.
 
 Doc019: Entitatea Chat reprezintă mesajele schimbate între doi utilizatori. În mod implicit, mesajele de chat sunt schimbate și stocate folosind protocolul WebSockets. Mesageria peer-to-peer fără stocare intermediară este planificată pentru versiunile viitoare.
+
+Doc020 link: Tonuri de apel noi pot fi adăugate de un administrator în secțiunea <a href=#{link} target=_blank>„Tonuri de apel”</a> din meniul „Date”.
+
+Doc021: Un administrator poate seta, de asemenea, tonuri de apel implicite pentru fiecare tip de apel, apel de ieșire sau de intrare.

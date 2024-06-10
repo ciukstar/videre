@@ -5,7 +5,8 @@ module Handler.Resources (getDocsR) where
 
 import Foundation
     ( Handler
-    , Route (StaticR, HomeR, AuthR)
+    , Route (StaticR, HomeR, AuthR, DataR)
+    , DataR (RingtonesR)
     , AppMessage
       ( MsgAppDocumentation, MsgAppDescription, MsgErDiagram, MsgDocumentation
       , MsgAppName, MsgIssueTracking, MsgSourceCode, MsgSuperuser, MsgUsername
@@ -16,7 +17,7 @@ import Foundation
       , MsgDoc001, MsgDoc002, MsgDoc003, MsgDoc004, MsgDoc005, MsgDoc006
       , MsgDoc007, MsgDoc008, MsgDoc009, MsgDoc010, MsgDoc011, MsgDoc012
       , MsgDoc013, MsgDoc014, MsgDoc015, MsgDoc016, MsgDoc017, MsgDoc018
-      , MsgDoc019
+      , MsgDoc019, MsgDoc020, MsgDoc021
       )
     )
 

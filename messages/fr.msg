@@ -248,3 +248,7 @@ Doc017 link: La configuration peut être fournie sous la forme d'une représenta
 Doc018: Principalement utilisé pour spécifier les serveurs STUN et TURN.
 
 Doc019: L'entité Chat représente les messages échangés entre deux utilisateurs. Par défaut, les messages de chat sont échangés et stockés à l'aide du protocole WebSockets. La messagerie peer-to-peer sans stockage intermédiaire est prévue pour les prochaines versions.
+
+Doc020 link: De nouvelles sonneries peuvent être ajoutées par un administrateur dans la section <a href=#{link} target=_blank>« Sonneries »</a> du menu « Données ».
+
+Doc021: Un administrateur peut également définir des sonneries par défaut pour chaque type d'appel, appel sortant ou entrant.

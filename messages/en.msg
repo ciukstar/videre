@@ -249,3 +249,7 @@ Doc017 link@Text: The configuration can be provided as a textual representation 
 Doc018: Mainly used to specify STUN and TURN servers.
 
 Doc019: The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.
+
+Doc020 link@Text: New ringtones can be added by an administrator in the <a href=#{link} target=_blank>"Ringtones"</a> section of the "Data" menu.
+
+Doc021: An administrator can also set default ringtones for each call type, outgoing or incoming call.
