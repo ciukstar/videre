@@ -1,3 +1,4 @@
+Postpone: Reporter
 YouHaveNotSetAnyRingtonesYet: Vous n'avez pas encore défini de sonneries
 Notifications: Notifications
 UserSettings: Paramètres utilisateur
@@ -83,7 +84,8 @@ EndSession: Terminer la séance
 Allow: Permettre
 Subscribe: Abonnez-vous
 NotNow: Pas maintenant
-AllowToBeNotified: Permet d'être averti des appels vidéo entrants, des appels audio et des messages
+AllowToBeNotifiedBySelectedUsers: Autoriser à recevoir des notifications pour les appels vidéo entrants, les appels audio et les messages des utilisateurs sélectionnés
+AllowToBeNotified: Autoriser à recevoir des notifications pour les appels vidéo entrants, les appels audio et les messages
 FailedToCancelSubscription: Échec de l'annulation de l'abonnement
 SubscriptionCanceled: Abonnement annulé
 SubscriptionFailed: L'abonnement a échoué

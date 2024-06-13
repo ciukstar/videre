@@ -61,25 +61,35 @@ fillDemoFr appSettings = do
                       }
 
 
-    ringtone1 <- insert Ringtone { ringtoneName = "Sonnerie d'appel sortant"
+    ringtone1 <- insert Ringtone { ringtoneName = "Cool sortant"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_call_galaxy_ringtones_1.mp3")
                                  }
 
-    ringtone2 <- insert Ringtone { ringtoneName = "Sonnerie d'appel entrant"
+    ringtone2 <- insert Ringtone { ringtoneName = "Cool entrant"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_call_samsung_ringtones_1.mp3")
                                  }
 
-    ringtone3 <- insert Ringtone { ringtoneName = "Sonnerie de chat sortant"
+    ringtone3 <- insert Ringtone { ringtoneName = "Chat sortant"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_message_ringtone_1.mp3")
                                  }
 
-    ringtone4 <- insert Ringtone { ringtoneName = "Sonnerie de chat entrant"
+    ringtone4 <- insert Ringtone { ringtoneName = "Chat entrant"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_message_ringtone_1.mp3")
                                  }
+
+    insert_ Ringtone { ringtoneName = "Au-dessus de l'horizon"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/over_the_horizon_ringtone.mp3")
+                     }
+
+    insert_ Ringtone { ringtoneName = "Flûte Roja"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/roja_flute_ringtone.mp3")
+                     }
 
     insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone1
                             , defaultRingtoneType = RingtoneTypeCallOutgoing

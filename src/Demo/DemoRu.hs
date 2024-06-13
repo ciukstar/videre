@@ -61,25 +61,35 @@ fillDemoRu appSettings = do
                       }
 
 
-    ringtone1 <- insert Ringtone { ringtoneName = "Рингтон исходящего вызова"
+    ringtone1 <- insert Ringtone { ringtoneName = "Крутой исходящий"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_call_galaxy_ringtones_1.mp3")
                                  }
 
-    ringtone2 <- insert Ringtone { ringtoneName = "Рингтон входящего вызова"
+    ringtone2 <- insert Ringtone { ringtoneName = "Входящий крутой"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_call_samsung_ringtones_1.mp3")
                                  }
 
-    ringtone3 <- insert Ringtone { ringtoneName = "Рингтон для исходящего чата"
+    ringtone3 <- insert Ringtone { ringtoneName = "Исходящий чат"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_message_ringtone_1.mp3")
                                  }
 
-    ringtone4 <- insert Ringtone { ringtoneName = "Входящий рингтон чата"
+    ringtone4 <- insert Ringtone { ringtoneName = "Входящий чат"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_message_ringtone_1.mp3")
                                  }
+
+    insert_ Ringtone { ringtoneName = "За горизонтом"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/over_the_horizon_ringtone.mp3")
+                     }
+
+    insert_ Ringtone { ringtoneName = "Рожа Флейта"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/roja_flute_ringtone.mp3")
+                     }
 
     insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone1
                             , defaultRingtoneType = RingtoneTypeCallOutgoing

@@ -1,3 +1,4 @@
+Postpone: Откладывать
 YouHaveNotSetAnyRingtonesYet: Вы еще не установили мелодии звонка
 Notifications: Уведомления
 UserSettings: Настройки пользователя
@@ -83,7 +84,8 @@ EndSession: Завершить сеанс
 Allow: Разрешить
 Subscribe: Подписаться
 NotNow: Не сейчас
-AllowToBeNotified: Разрешить получать уведомления о входящих видеозвонках, аудиовызовах и сообщениях
+AllowToBeNotifiedBySelectedUsers: Разрешить получать уведомления о входящих видеозвонках, аудиозвонках и сообщениях от выбранных пользователей
+AllowToBeNotified: Разрешить получать уведомления о входящих видеозвонках, аудиозвонках и сообщениях
 FailedToCancelSubscription: Не удалось отменить подписку
 SubscriptionCanceled: Подписка отменена
 SubscriptionFailed: Подписка не удалась

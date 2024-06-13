@@ -41,6 +41,6 @@
 
       <dt.label-large>_{MsgAudio}
       <dd>
-        <audio controls src=@{DataR $ RingtoneAudioR rid}>
+        <audio controls src=@{DataR $ RingtoneAudioR rid} preload=none>
           
 ^{widgetSnackbar msgs}

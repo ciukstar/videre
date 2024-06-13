@@ -1,3 +1,4 @@
+Postpone: Amână
 YouHaveNotSetAnyRingtonesYet: Încă nu ați setat niciun ton de apel
 Notifications: Notificări
 UserSettings: Setări utilizator
@@ -83,7 +84,8 @@ EndSession: Termină sesiunea
 Allow: Permite
 Subscribe: Abonați-vă
 NotNow: Nu acum
-AllowToBeNotified: Permiteți să fiți notificat despre apelurile video, apelurile audio și mesajele primite
+AllowToBeNotifiedBySelectedUsers: Permiteți să primiți notificări pentru apelurile video primite, apelurile audio și mesajele de la utilizatorii selectați
+AllowToBeNotified: Permiteți să primiți notificări pentru apelurile video, apelurile audio și mesajele primite
 FailedToCancelSubscription: Anularea abonamentului a eșuat
 SubscriptionCanceled: Abonamentul a fost anulat
 SubscriptionFailed: Abonamentul a eșuat

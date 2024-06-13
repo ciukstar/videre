@@ -68,6 +68,13 @@
       <md-filled-icon-button type=submit slot=trailing-icon disabled ##{idButtonSend}>
         <md-icon>send
 
+  <audio ##{idAudioOutgoingChat} preload=none>
+    $with (ringtone, mime) <- outgoingChatRingtoneR
+      <source src=@{ringtone} type=#{mime}>
+
+  <audio ##{idAudioIncomingChat} preload=none>
+    $with (ringtone, mime) <- incomingChatRingtoneR
+      <source src=@{ringtone} type=#{mime}>
 
 <md-dialog ##{idDialogOutgoingCall}>
   <div slot=headline>
@@ -109,8 +116,9 @@
 
   <div slot=actions>
   
-    <audio loop ##{idAudioOutgoingCallRingtone}>
-      <source src=@{ringtone} type="audio/mpeg">
+    <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
+      $with (ringtone, mime) <- outgoingCallRingtoneR
+        <source src=@{ringtone} type=#{mime}>
   
     $if not subscribed
       $maybe backlink <- rndr <$> curr

@@ -9,7 +9,7 @@
 
           <md-icon>play_arrow
           <md-icon slot=selected>pause
-          <audio>
+          <audio preload=none>
             <source type=#{ringtoneMime $ entityVal $ optionInternalValue opt}
                     src=@{UserRingtoneAudioR uid (entityKey $ optionInternalValue opt)}>
 

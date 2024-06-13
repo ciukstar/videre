@@ -227,7 +227,8 @@ window.addEventListener('load', (e) => {
 });
 
 
-[ [ #{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone} ]
+[ [ #{idDialogChatNotification}, #{idAudioIncomingChatRingtone} ]
+, [ #{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone} ]
 , [ #{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone} ]
 ].forEach(([dialog,ringtone]) => {
   

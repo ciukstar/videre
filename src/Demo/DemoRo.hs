@@ -61,25 +61,35 @@ fillDemoRo appSettings = do
                       }
 
 
-    ringtone1 <- insert Ringtone { ringtoneName = "Ton de apel de ieșire"
+    ringtone1 <- insert Ringtone { ringtoneName = "Ieșire cool"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_call_galaxy_ringtones_1.mp3")
                                  }
 
-    ringtone2 <- insert Ringtone { ringtoneName = "Ton de apel pentru apeluri primite"
+    ringtone2 <- insert Ringtone { ringtoneName = "Vine cool"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_call_samsung_ringtones_1.mp3")
                                  }
 
-    ringtone3 <- insert Ringtone { ringtoneName = "Ton de apel pentru chat de ieșire"
+    ringtone3 <- insert Ringtone { ringtoneName = "Chat ieșire"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_message_ringtone_1.mp3")
                                  }
 
-    ringtone4 <- insert Ringtone { ringtoneName = "Ton de apel pentru chat primit"
+    ringtone4 <- insert Ringtone { ringtoneName = "Chat primit"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_message_ringtone_1.mp3")
                                  }
+
+    insert_ Ringtone { ringtoneName = "Peste Orizont"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/over_the_horizon_ringtone.mp3")
+                     }
+
+    insert_ Ringtone { ringtoneName = "Flaut Roja"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/roja_flute_ringtone.mp3")
+                     }
 
     insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone1
                             , defaultRingtoneType = RingtoneTypeCallOutgoing

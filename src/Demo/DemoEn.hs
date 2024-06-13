@@ -61,25 +61,35 @@ fillDemoEn appSettings = do
                       }
 
 
-    ringtone1 <- insert Ringtone { ringtoneName = "Outgoing Call Ringtone"
+    ringtone1 <- insert Ringtone { ringtoneName = "Cool Outgoing"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_call_galaxy_ringtones_1.mp3")
                                  }
 
-    ringtone2 <- insert Ringtone { ringtoneName = "Incoming Call Ringtone"
+    ringtone2 <- insert Ringtone { ringtoneName = "Incoming Cool"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_call_samsung_ringtones_1.mp3")
                                  }
 
-    ringtone3 <- insert Ringtone { ringtoneName = "Outgoing Chat Ringtone"
+    ringtone3 <- insert Ringtone { ringtoneName = "Chat Outgoing"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/outgoing_message_ringtone_1.mp3")
                                  }
 
-    ringtone4 <- insert Ringtone { ringtoneName = "Incoming Chat Ringtone"
+    ringtone4 <- insert Ringtone { ringtoneName = "Incoming Chat"
                                  , ringtoneMime = "audio/mpeg"
                                  , ringtoneAudio = $(embedFile "demo/incoming_message_ringtone_1.mp3")
                                  }
+
+    insert_ Ringtone { ringtoneName = "Over The Horizon"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/over_the_horizon_ringtone.mp3")
+                     }
+
+    insert_ Ringtone { ringtoneName = "Roja Flute"
+                     , ringtoneMime = "audio/mpeg"
+                     , ringtoneAudio = $(embedFile "demo/roja_flute_ringtone.mp3")
+                     }
 
     insert_ DefaultRingtone { defaultRingtoneRingtone = ringtone1
                             , defaultRingtoneType = RingtoneTypeCallOutgoing

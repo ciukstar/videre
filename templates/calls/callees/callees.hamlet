@@ -15,6 +15,8 @@
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
       <figcaption.body-large>
         _{MsgNoRegisteredUsersYet}
+        <p.body-small>
+          _{MsgYouMightWantToAddAFew}
   $else
     <md-list>
       $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (ns, (nl, na))))) <- callees
@@ -170,8 +172,8 @@
                       $nothing
                         _{MsgUserYouSeemsUnsubscribed email}
 
-              <figure>
-                <md-icon>
+              <figure.center>
+                <md-icon.callarrow>
                   $if nl > 0
                     repeat
                   $else
@@ -211,7 +213,7 @@
                 onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
                 _{MsgClose}
         
-    <audio loop ##{idAudioOutgoingCallRingtone}>
+    <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
       $with (ringtone,mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
                 

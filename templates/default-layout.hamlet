@@ -12,6 +12,10 @@
       <figcaption.body-large ##{idFigcaptionSenderInfo}>
 
     <p.body-medium ##{idNotificationBody}>
+  
+    <audio loop ##{idAudioIncomingChatRingtone} preload=none>
+      $with (ringtone, mime) <- incomingChatRingtone
+        <source src=@{ringtone} type=#{mime}>
 
   <div slot=actions>
 
@@ -38,12 +42,12 @@
         <div.circle.two>
       
       <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
-
-  <div slot=actions>
   
-    <audio loop ##{idAudioIncomingVideoCallRingtone}>
+    <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
         <source src=@{ringtone} type=#{mime}>
+
+  <div slot=actions>
 
     <md-filled-icon-button ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end
@@ -71,12 +75,12 @@
         <div.circle.two>
       
       <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
-
-  <div slot=actions>
   
-    <audio loop ##{idAudioIncomingAudioCallRingtone}>
+    <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
         <source src=@{ringtone} type=#{mime}>
+
+  <div slot=actions>
 
     <md-filled-icon-button ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end

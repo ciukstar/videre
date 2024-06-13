@@ -28,6 +28,7 @@ input.addEventListener('input',function (e) {
 
 
 conn.onmessage = function (e) {
+  
   const data = JSON.parse(e.data);
   const bubble = document.createElement('p');
   const bubbleStatusLine = document.createElement('span');
@@ -60,11 +61,15 @@ conn.onmessage = function (e) {
   output.scrollTop = output.scrollHeight;
 
   if (data.user === #{rawJS $ pack $ show $ fromSqlKey rid}) {
+    
     fetch(`@{toParent AcknowledgeR}`, {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({"cid": data.cid})
     });
+    
+    setTimeout(() => { document.getElementById(#{idAudioIncomingChat}).play(); }, 0);
+    
   }
   
 };
@@ -76,10 +81,11 @@ conn.onerror = function (e) {
 form.addEventListener("submit", function(e) {
   conn.send( input.value );
   input.value = "";
-  var btnSubmit = this.querySelector('md-filled-icon-button');
+  const btnSubmit = this.querySelector('md-filled-icon-button');
   btnSubmit.disabled = true;
   input.focus();
   e.preventDefault();
+  setTimeout(() => document.getElementById(#{idAudioOutgoingChat}).play(), 0);
 });
 
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {

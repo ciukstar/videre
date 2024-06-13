@@ -1,3 +1,4 @@
+Postpone: Postpone
 YouHaveNotSetAnyRingtonesYet: You haven't set any ringtones yet
 Notifications: Notifications
 UserSettings: User settings
@@ -83,7 +84,8 @@ EndSession: End session
 Allow: Allow
 Subscribe: Subscribe
 NotNow: Not now
-AllowToBeNotified: Allow to be notified about incoming video calls, audio calls and messages
+AllowToBeNotifiedBySelectedUsers: Allow to receive notifications for incoming video calls, audio calls and messages from selected users
+AllowToBeNotified: Allow to receive notifications for incoming video calls, audio calls and messages
 FailedToCancelSubscription: Failed to cancel subscription
 SubscriptionCanceled: Subscription canceled
 SubscriptionFailed: Subscription failed

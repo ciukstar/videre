@@ -78,12 +78,17 @@ import Model
       , PushMsgTypeRefresh
       )
     , CallType (CallTypeAudio, CallTypeVideo)
+    , RingtoneId, UserRingtone, DefaultRingtone
+    , RingtoneType
+      ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming)
     , EntityField
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
       , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallType
-      , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint, RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType, DefaultRingtoneRingtone
-      ), RingtoneId, RingtoneType (RingtoneTypeCallOutgoing), UserRingtone (UserRingtone), DefaultRingtone (DefaultRingtone)
+      , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint
+      , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType
+      , DefaultRingtoneType, DefaultRingtoneRingtone
+      )
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -99,6 +104,8 @@ import Settings.StaticFiles
     , img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     , ringtones_outgoing_call_galaxy_ringtones_1_mp3
+    , ringtones_outgoing_message_ringtone_1_mp3
+    , ringtones_incoming_message_ringtone_1_mp3
     )
 
 import System.IO (readFile')
@@ -279,24 +286,62 @@ getChatRoomR sid cid rid = do
         where_ $ x ^. UserId ==. val sid
         return x )
 
-    userRingtone <- liftHandler $ runDB $ selectOne $ do
-        x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
-            `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
-        where_ $ t ^. UserRingtoneUser ==. val sid
-        where_ $ t ^. UserRingtoneType ==. val RingtoneTypeCallOutgoing
-        return x
+    outgoingCallRingtoneR <- liftHandler $ do
+        userRingtone <- liftHandler $ runDB $ selectOne $ do
+            x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
+                `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+            where_ $ t ^. UserRingtoneUser ==. val sid
+            where_ $ t ^. UserRingtoneType ==. val RingtoneTypeCallOutgoing
+            return x
+        case userRingtone of
+          Just (Entity tid (Ringtone _ mime _)) -> getUserRingtoneAudioRoute sid tid >>= \r -> return (r, mime)
+          Nothing -> do
+              defaultRingtone <- liftHandler $ runDB $ selectOne $ do
+                    x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                        `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                    where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeCallOutgoing
+                    return x
+              case defaultRingtone of
+                Just (Entity did (Ringtone _ mime _)) -> getDefaultRingtoneAudioRoute did >>= \r -> return (r, mime)
+                Nothing -> getStaticRoute ringtones_outgoing_call_galaxy_ringtones_1_mp3 >>= \r -> return (r, "audio/mpeg")
 
-    ringtone <- liftHandler $ case userRingtone of
-      Just (Entity tid _) -> getUserRingtoneAudioRoute sid tid
-      Nothing -> do
-          defaultRingtone <- liftHandler $ runDB $ selectOne $ do
-                x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
-                    `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
-                where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeCallOutgoing
-                return x
-          case defaultRingtone of
-            Just (Entity did _) -> getDefaultRingtoneAudioRoute did
-            Nothing -> getStaticRoute ringtones_outgoing_call_galaxy_ringtones_1_mp3
+    incomingChatRingtoneR <- liftHandler $ do
+        userRingtone <- liftHandler $ runDB $ selectOne $ do
+            x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
+                `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+            where_ $ t ^. UserRingtoneUser ==. val sid
+            where_ $ t ^. UserRingtoneType ==. val RingtoneTypeChatIncoming
+            return x
+        case userRingtone of
+          Just (Entity tid (Ringtone _ mime _)) -> getUserRingtoneAudioRoute sid tid >>= \r -> return (r, mime)
+          Nothing -> do
+              defaultRingtone <- liftHandler $ runDB $ selectOne $ do
+                    x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                        `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                    where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeChatIncoming
+                    return x
+              case defaultRingtone of
+                Just (Entity did (Ringtone _ mime _)) -> getDefaultRingtoneAudioRoute did >>= \r -> return (r, mime)
+                Nothing -> getStaticRoute ringtones_incoming_message_ringtone_1_mp3 >>= \r -> return (r, "audio/mpeg")
+
+    outgoingChatRingtoneR <- liftHandler $ do
+        userRingtone <- liftHandler $ runDB $ selectOne $ do
+            x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
+                `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+            where_ $ t ^. UserRingtoneUser ==. val sid
+            where_ $ t ^. UserRingtoneType ==. val RingtoneTypeChatOutgoing
+            return x
+        case userRingtone of
+          Just (Entity tid (Ringtone _ mime _)) -> getUserRingtoneAudioRoute sid tid >>= \r -> return (r, mime)
+          Nothing -> do
+              defaultRingtone <- liftHandler $ runDB $ selectOne $ do
+                    x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                        `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                    where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeChatOutgoing
+                    return x
+              case defaultRingtone of
+                Just (Entity did (Ringtone _ mime _)) -> getDefaultRingtoneAudioRoute did >>= \r -> return (r, mime)
+                Nothing -> getStaticRoute ringtones_outgoing_message_ringtone_1_mp3 >>= \r -> return (r, "audio/mpeg")
 
     msgr <- getMessageRender
     liftHandler $ defaultLayout $ do
@@ -307,6 +352,8 @@ getChatRoomR sid cid rid = do
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
+        idAudioOutgoingChat <- newIdent
+        idAudioIncomingChat <- newIdent
         idDialogOutgoingCall <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
         idButtonOutgoingCallCancel <- newIdent

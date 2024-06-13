@@ -224,6 +224,7 @@ instance Yesod App where
             idImgSenderPhoto <- newIdent
             idFigcaptionSenderInfo <- newIdent
             idNotificationBody <- newIdent
+            idAudioIncomingChatRingtone <- newIdent
             idButtonIgnoreNotification <- newIdent
             idButtonReplyNotification <- newIdent
 
@@ -252,6 +253,39 @@ instance Yesod App where
             calleeName <- resolveName <$> maybeAuth
 
             mVAPIDKeys <- liftHandler getVAPIDKeys
+
+            incomingChatRingtone <- do
+                user <- maybeAuth
+                case user of
+                  Just (Entity uid _) -> liftHandler $ do
+                      userIcomingCallRingtone <- runDB $ selectOne $ do
+                          x :& t <- from $ table @Ringtone `E.innerJoin` table @UserRingtone
+                              `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. UserRingtoneRingtone)
+                          where_ $ t ^. UserRingtoneUser E.==. val uid
+                          where_ $ t ^. UserRingtoneType E.==. val RingtoneTypeChatIncoming
+                          return x
+                      case userIcomingCallRingtone of
+                        Just (Entity rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid rid, mime)
+                        Nothing -> do
+                            defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
+                                x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
+                                    `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. DefaultRingtoneRingtone)
+                                where_ $ t ^. DefaultRingtoneType E.==. val RingtoneTypeChatIncoming
+                                return x
+                            case defaultIcomingCallRingtone of
+                              Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
+                              Nothing -> return (StaticR ringtones_incoming_message_ringtone_1_mp3, "audio/mpeg")
+                            
+                  Nothing -> do
+                      defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
+                          x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
+                              `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. DefaultRingtoneRingtone)
+                          where_ $ t ^. DefaultRingtoneType E.==. val RingtoneTypeChatIncoming
+                          return x
+                      case defaultIcomingCallRingtone of
+                        Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
+                        Nothing -> return (StaticR ringtones_incoming_message_ringtone_1_mp3, "audio/mpeg")
+
 
             incomingCallRingtone <- do
                 user <- maybeAuth

@@ -78,8 +78,8 @@ import Foundation
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
-      , MsgRemove, MsgSubscriptionCanceled, MsgAllowToBeNotified, MsgNotNow
-      , MsgAllow, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
+      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe
+      , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
       , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser
       , MsgOutgoingCall, MsgCallDeclined, MsgClose, MsgCalleeDeclinedTheCall
@@ -88,6 +88,7 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
+      , MsgAllowToBeNotifiedBySelectedUsers
       )
     )
 

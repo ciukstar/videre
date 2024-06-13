@@ -102,9 +102,9 @@
                           $nothing
                             _{MsgUserYouSeemsUnsubscribed email}
 
-                  <figure>
+                  <figure.center>
                     $with (Value loops) <- nl1
-                      <md-icon>
+                      <md-icon.callarrow>
                         $if loops > 0
                           repeat
                         $else
@@ -230,9 +230,9 @@
                             $nothing
                               _{MsgUserYouSeemsUnsubscribed email}
 
-                  <figure>
+                  <figure.center>
                     $with (Value loops) <- nl2
-                      <md-icon>
+                      <md-icon.callarrow>
                         $if loops > 0
                           repeat
                         $else
@@ -281,7 +281,7 @@
           
         <md-divider>
         
-    <audio loop ##{idAudioOutgoingCallRingtone}>
+    <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
       $with (ringtone, mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
         

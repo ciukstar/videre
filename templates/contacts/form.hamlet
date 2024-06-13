@@ -11,16 +11,20 @@
 
 <md-dialog ##{idDialogSubscribe}>
   <div slot=headline>
-    _{MsgSubscribeToNotifications}
-
+    <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+      _{MsgSubscribeToNotifications}
+    <md-icon-button type=button title=_{MsgClose}
+      onclick="document.getElementById('#{idDialogSubscribe}').close()">
+      <md-icon>close
+    
   <p.body-medium slot=content ##{idDialogSubscribeContent}>
-    _{MsgAllowToBeNotified}.
+    _{MsgAllowToBeNotifiedBySelectedUsers}.
 
   <div slot=actions>
 
     <md-text-button type=button ##{idButtonSubmitNoSubscription}>
-      _{MsgNotNow}
+      _{MsgPostpone}
 
     <md-filled-button has-icon type=button ##{idButtonSubmitWithSubscription}>
       <md-icon slot=icon>check
-      _{MsgAllow}
+      _{MsgSubscribe}
