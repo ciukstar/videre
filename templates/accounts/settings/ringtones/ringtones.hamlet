@@ -1,0 +1,53 @@
+
+<header.background>
+  <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgUserSettings}
+      
+<main>
+
+  <md-tabs aria-label=Tabs>
+    <md-primary-tab #tabRingtones aria-controls=#{idPanelRingtones} active=true>        
+      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+      _{MsgRingtones}
+
+    <md-primary-tab #tabNotifications aria-controls=panelNotifications>        
+      <a href=@{AccountNotificationsR uid}>
+      _{MsgNotifications}
+
+  <md-tabs>
+    <md-secondary-tab :typ == RingtoneTypeCallOutgoing:active=true>
+      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+      _{MsgOutgoingCall}
+
+    <md-secondary-tab :typ == RingtoneTypeCallIncoming:active=true>
+      <a href=@{AccountRingtonesR uid RingtoneTypeCallIncoming}>
+      _{MsgIncomingCall}
+
+    <md-secondary-tab :typ == RingtoneTypeChatOutgoing:active=true>
+      <a href=@{AccountRingtonesR uid RingtoneTypeChatOutgoing}>
+      _{MsgOutgoingChat}
+
+    <md-secondary-tab :typ == RingtoneTypeChatIncoming:active=true>
+      <a href=@{AccountRingtonesR uid RingtoneTypeChatIncoming}>
+      _{MsgIncomingChat}
+
+  <div ##{idPanelRingtones} role=tabpanel aria-labelledby=tabRingtones>
+
+    ^{widgetBanner msgs}
+
+    $if null ringtones
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&#x1F4C2;
+        <figcaption.body-large>
+          _{MsgYouHaveNotSetAnyRingtonesYet}
+    $else
+      <form method=post action=@{AccountRingtonesR uid typ} enctype=#{et}>
+        ^{fw}
+          
+    ^{widgetSnackbar msgs}
+
+
+  <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>

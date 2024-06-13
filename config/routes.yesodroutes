@@ -20,7 +20,10 @@
 /contacts/#UserId    		       	       ContactsR      GET POST
 
 
-/accounts/#UserId/settings AccountSettingsR GET
+/accounts/#UserId/ringtones/#RingtoneId/audio UserRingtoneAudioR    GET
+/accounts/#UserId/notifications               AccountNotificationsR GET
+/accounts/#UserId/ringtones/#RingtoneType     AccountRingtonesR     GET POST
+/ringtones/#RingtoneId/audio                  DefaultRingtoneAudioR GET
 
 /accounts/#UserId/subscriptions/#PushSubscriptionId/dele AccountSubscriptionDeleR POST
 /accounts/#UserId/subscriptions/#PushSubscriptionId 	 AccountSubscriptionR     GET

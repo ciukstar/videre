@@ -1,3 +1,4 @@
+YouHaveNotSetAnyRingtonesYet: You haven't set any ringtones yet
 Notifications: Notifications
 UserSettings: User settings
 Settings: Settings
@@ -5,6 +6,8 @@ NoDefaultRingtonesSetYet: Default ringtones have not yet been set
 DefaultRingtone: Default ringtone
 IncomingChatMessage: Incoming chat message
 OutgoingChatMessage: Outgoing chat message
+IncomingChat: Incoming chat
+OutgoingChat: Outgoing chat
 DefaultSettings: Default settings
 AlreadyExists: Already exists
 SelectNewRingtoneFile: Select new ringtone file
@@ -256,3 +259,5 @@ Doc019: The Chat entity represents messages exchanged between two users. By defa
 Doc020 link@Text: New ringtones can be added by an administrator in the <a href=#{link} target=_blank>"Ringtones"</a> section of the "Data" menu.
 
 Doc021: An administrator can also set default ringtones for each call type, outgoing or incoming call.
+
+Doc022: Users can change their preferred ringtones in their account settings.

@@ -1,3 +1,4 @@
+YouHaveNotSetAnyRingtonesYet: Vous n'avez pas encore défini de sonneries
 Notifications: Notifications
 UserSettings: Paramètres utilisateur
 Settings: Paramètres
@@ -5,6 +6,8 @@ NoDefaultRingtonesSetYet: Les sonneries par défaut n'ont pas encore été défi
 DefaultRingtone: Sonnerie par défaut
 IncomingChatMessage: Message de chat entrant
 OutgoingChatMessage: Message de chat sortant
+IncomingChat: Chat entrant
+OutgoingChat: Chat sortant
 DefaultSettings: Paramètres par défaut
 AlreadyExists: Existe déjà
 SelectNewRingtoneFile: Sélectionnez un nouveau fichier de sonnerie
@@ -255,3 +258,5 @@ Doc019: L'entité Chat représente les messages échangés entre deux utilisateu
 Doc020 link: De nouvelles sonneries peuvent être ajoutées par un administrateur dans la section <a href=#{link} target=_blank>« Sonneries »</a> du menu « Données ».
 
 Doc021: Un administrateur peut également définir des sonneries par défaut pour chaque type d'appel, appel sortant ou entrant.
+
+Doc022: Les utilisateurs peuvent modifier leurs sonneries préférées dans les paramètres de leur compte.

@@ -14,7 +14,7 @@ import Foundation
     ( Widget
     , Route
       ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR
-      , AccountSettingsR
+      , AccountRingtonesR
       )
     , DataR (UsersR, TokensR, SubscriptionsR, RingtonesR)
     , AppMessage
@@ -24,7 +24,10 @@ import Foundation
       )
     )
 
-import Model (statusError, statusSuccess, User (User))
+import Model
+    (statusError, statusSuccess
+    , User (User), RingtoneType (RingtoneTypeCallOutgoing)
+    )
 
 import Settings (widgetFile)
 

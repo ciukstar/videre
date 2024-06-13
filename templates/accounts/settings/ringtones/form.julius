@@ -1,0 +1,18 @@
+
+Array.from(
+  document.querySelectorAll('md-switch[slot=end]')
+).forEach((x) => {
+  x.addEventListener('change', function (e) {
+    
+    if (e.target.selected) {
+      Array.from(
+	document.querySelectorAll('md-switch[slot=end][selected]')
+      ).filter((y) => y != e.target).forEach((y) => {
+	y.selected = false;
+      });
+    }
+
+    e.target.form.submit();
+    
+  });
+});

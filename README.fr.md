@@ -88,6 +88,8 @@ De nouvelles sonneries peuvent être ajoutées par un administrateur dans la sec
 
 Un administrateur peut également définir des sonneries par défaut pour chaque type d'appel, appel sortant ou entrant.
 
+Les utilisateurs peuvent modifier leurs sonneries préférées dans les paramètres de leur compte.
+
 ## Diagramme ER
 
 ![Diagramme entité-relation](static/img/ERD_Videre.svg)

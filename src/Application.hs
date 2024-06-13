@@ -70,7 +70,8 @@ import Handler.Accounts
     ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
     , postAccountR, getAccountInfoR, getAccountInfoEditR, postAccountInfoR
     , getAccountSubscriptionsR, getAccountSubscriptionR
-    , postAccountSubscriptionDeleR, getAccountSettingsR
+    , postAccountSubscriptionDeleR, getUserRingtoneAudioR
+    , getAccountRingtonesR, postAccountRingtonesR, getAccountNotificationsR
     )
     
 import Handler.Home (getHomeR)

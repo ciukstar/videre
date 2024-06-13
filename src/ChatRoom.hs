@@ -30,8 +30,9 @@ import Control.Concurrent.STM.TChan
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
-    , (^.), (==.), (!=.), (=.)
+    , (^.), (==.), (!=.), (=.), (:&)((:&))
     , just, Value (unValue, Value), Entity (entityVal), not_, unionAll_
+    , innerJoin, on
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
@@ -70,7 +71,7 @@ import Model
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription)
     , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , ContactId, Token, Store, Call
+    , ContactId, Token, Store, Call, Ringtone (Ringtone)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
@@ -81,8 +82,8 @@ import Model
       ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
       , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
       , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallType
-      , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint
-      )
+      , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint, RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType, DefaultRingtoneRingtone
+      ), RingtoneId, RingtoneType (RingtoneTypeCallOutgoing), UserRingtone (UserRingtone), DefaultRingtone (DefaultRingtone)
     )
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
@@ -142,6 +143,8 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getVideoPushRoute :: UserId -> ContactId -> UserId -> HandlerFor m (Route m)
     getVideoOutgoingRoute :: UserId -> ContactId -> UserId -> Bool -> HandlerFor m (Route m)
+    getUserRingtoneAudioRoute :: UserId -> RingtoneId -> HandlerFor m (Route m)
+    getDefaultRingtoneAudioRoute :: RingtoneId -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
 
 
@@ -175,7 +178,6 @@ getChatRoomR sid cid rid = do
     contact  <- liftHandler $ getContactRoute sid rid cid
     icon <- liftHandler $ getStaticRoute img_call_FILL0_wght400_GRAD0_opsz24_svg
     iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
-    ringtone <- liftHandler $ getStaticRoute ringtones_outgoing_call_galaxy_ringtones_1_mp3
     video <- liftHandler $ getVideoPushRoute sid cid rid
     outgoing <- liftHandler $ getVideoOutgoingRoute sid cid rid False
 
@@ -276,6 +278,25 @@ getChatRoomR sid cid rid = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val sid
         return x )
+
+    userRingtone <- liftHandler $ runDB $ selectOne $ do
+        x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
+            `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+        where_ $ t ^. UserRingtoneUser ==. val sid
+        where_ $ t ^. UserRingtoneType ==. val RingtoneTypeCallOutgoing
+        return x
+
+    ringtone <- liftHandler $ case userRingtone of
+      Just (Entity tid _) -> getUserRingtoneAudioRoute sid tid
+      Nothing -> do
+          defaultRingtone <- liftHandler $ runDB $ selectOne $ do
+                x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                    `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeCallOutgoing
+                return x
+          case defaultRingtone of
+            Just (Entity did _) -> getDefaultRingtoneAudioRoute did
+            Nothing -> getStaticRoute ringtones_outgoing_call_galaxy_ringtones_1_mp3
 
     msgr <- getMessageRender
     liftHandler $ defaultLayout $ do

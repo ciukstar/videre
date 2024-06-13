@@ -1,3 +1,4 @@
+YouHaveNotSetAnyRingtonesYet: Încă nu ați setat niciun ton de apel
 Notifications: Notificări
 UserSettings: Setări utilizator
 Settings: Setări
@@ -5,6 +6,8 @@ NoDefaultRingtonesSetYet: Tonurile de apel implicite nu au fost încă setate
 DefaultRingtone: Ton de apel implicit
 IncomingChatMessage: Mesaj de chat primit
 OutgoingChatMessage: Mesaj de chat de ieșire
+IncomingChat: Chat primit
+OutgoingChat: Chat de ieșire
 DefaultSettings: Setări implicite
 AlreadyExists: Deja exista
 SelectNewRingtoneFile: Selectați noul fișier de ton de apel
@@ -256,3 +259,5 @@ Doc019: Entitatea Chat reprezintă mesajele schimbate între doi utilizatori. Î
 Doc020 link: Tonuri de apel noi pot fi adăugate de un administrator în secțiunea <a href=#{link} target=_blank>„Tonuri de apel”</a> din meniul „Date”.
 
 Doc021: Un administrator poate seta, de asemenea, tonuri de apel implicite pentru fiecare tip de apel, apel de ieșire sau de intrare.
+
+Doc022: Utilizatorii își pot schimba tonurile de apel preferate în setările contului lor.

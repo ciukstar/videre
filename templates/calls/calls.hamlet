@@ -124,6 +124,7 @@
                             _{MsgUserAppearsToBeUnavailable email}
 
                 <div slot=actions>
+                      
                   <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
                     <md-icon slot=icon>call_end
                     _{MsgCancel}
@@ -279,6 +280,10 @@
           
           
         <md-divider>
+        
+    <audio loop ##{idAudioOutgoingCallRingtone}>
+      $with (ringtone, mime) <- outgoingCallRingtone
+        <source src=@{ringtone} type=#{mime}>
         
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
     <a href=@{CalleesR uid}>

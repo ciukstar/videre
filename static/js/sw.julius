@@ -255,10 +255,13 @@ self.addEventListener('fetch', function (e) {
   let url = new URL(e.request.url);
   let endpointNeeded = e.request.method === 'GET'
       && url.origin === self.location.origin
-      && !e.request.url.includes('/static/')
-      && !e.request.url.includes('/photo')
-      && !e.request.url.includes('/auth')
-      && !e.request.url.includes('/manifest.json');
+      && (    /^\/callees\/\d+$/.test(url.pathname)
+	   || /^\/calls\/\d+$/.test(url.pathname)
+	   || /^\/subscribers\/\d+\/publishers\/\d+$/.test(url.pathname)
+	   || /^\/my\/contacts\/\d+\/\d+\/\d+$/.test(url.pathname)
+	   || /^\/my\/contacts\/\d+$/.test(url.pathname)
+	   || /^\/chat\/room\/\d+\/\d+\/\d+$/.test(url.pathname)
+	 );
   
   if (endpointNeeded) {
 

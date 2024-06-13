@@ -35,8 +35,8 @@ import Import.NoFoundation
 
 import Database.Esqueleto.Experimental as E
     ( select, selectOne, from, table, val, where_, unValue, asc
-    , (==.), (^.)
-    , orderBy, valList, in_, not_
+    , (==.), (^.), (:&) ((:&))
+    , orderBy, valList, in_, not_, innerJoin, on
     )
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 
@@ -253,6 +253,39 @@ instance Yesod App where
 
             mVAPIDKeys <- liftHandler getVAPIDKeys
 
+            incomingCallRingtone <- do
+                user <- maybeAuth
+                case user of
+                  Just (Entity uid _) -> liftHandler $ do
+                      userIcomingCallRingtone <- runDB $ selectOne $ do
+                          x :& t <- from $ table @Ringtone `E.innerJoin` table @UserRingtone
+                              `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. UserRingtoneRingtone)
+                          where_ $ t ^. UserRingtoneUser E.==. val uid
+                          where_ $ t ^. UserRingtoneType E.==. val RingtoneTypeCallIncoming
+                          return x
+                      case userIcomingCallRingtone of
+                        Just (Entity rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid rid, mime)
+                        Nothing -> do
+                            defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
+                                x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
+                                    `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. DefaultRingtoneRingtone)
+                                where_ $ t ^. DefaultRingtoneType E.==. val RingtoneTypeCallIncoming
+                                return x
+                            case defaultIcomingCallRingtone of
+                              Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
+                              Nothing -> return (StaticR ringtones_incoming_call_samsung_ringtones_1_mp3, "audio/mpeg")
+                            
+                  Nothing -> do
+                      defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
+                          x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
+                              `E.on` (\(x :& t) -> x ^. RingtoneId E.==. t ^. DefaultRingtoneRingtone)
+                          where_ $ t ^. DefaultRingtoneType E.==. val RingtoneTypeCallIncoming
+                          return x
+                      case defaultIcomingCallRingtone of
+                        Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
+                        Nothing -> return (StaticR ringtones_incoming_call_samsung_ringtones_1_mp3, "audio/mpeg")
+            
+
             case mVAPIDKeys of
               Just vapidKeys -> do
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
@@ -282,7 +315,6 @@ instance Yesod App where
     isAuthorized (CallsR uid) _ = isAuthenticatedSelf uid
 
 
-
     isAuthorized PushSubscriptionEndpointR _ = isAuthenticated
 
     isAuthorized (PushSubscriptionsDeleR _ _ pid) _ = isAuthenticatedSelf pid
@@ -292,7 +324,12 @@ instance Yesod App where
     isAuthorized (MyContactsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (ContactsR uid) _ = isAuthenticatedSelf uid
 
-    isAuthorized (AccountSettingsR uid) _ = isAuthenticatedSelf uid
+    
+    isAuthorized (DefaultRingtoneAudioR _) _ = return Authorized
+    
+    isAuthorized (UserRingtoneAudioR uid _) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountNotificationsR uid) _ = isAuthenticatedSelf uid
+    isAuthorized (AccountRingtonesR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionDeleR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountSubscriptionsR uid) _ = isAuthenticatedSelf uid
@@ -302,7 +339,6 @@ instance Yesod App where
     isAuthorized AccountsR _ = return Authorized
     isAuthorized (AccountEditR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountPhotoR _) _ = return Authorized
-
 
     
     isAuthorized (DataR (UserSubscriptionDeleR _ _)) _ = isAdmin
@@ -383,6 +419,19 @@ instance Yesod App where
     makeLogger :: App -> IO Logger
     makeLogger = return . appLogger
 
+
+getDefaultRingtoneAudioR :: RingtoneId -> Handler TypedContent
+getDefaultRingtoneAudioR rid = do
+    
+    ringtone <- runDB $ selectOne $ do
+        x <- from $ table @Ringtone
+        where_ $ x ^. RingtoneId E.==. val rid
+        return x
+    
+    return $ case ringtone of
+      Just (Entity _ (Ringtone _ mime bs)) -> TypedContent (encodeUtf8 mime) $ toContent bs
+      Nothing -> TypedContent "audio/mpeg" $ toContent emptyContent
+      
 
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do

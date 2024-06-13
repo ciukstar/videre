@@ -96,3 +96,18 @@ Array.from(
     
   });
 });
+
+
+Array.from(
+  document.querySelectorAll('md-dialog.app-outgoing-call')
+).forEach((dialog) => {
+  
+  dialog.addEventListener('opened', (e) => {
+    document.getElementById(#{idAudioOutgoingCallRingtone}).play();
+  });
+  
+  dialog.addEventListener('closed', (e) => {
+    document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
+  });
+  
+});

@@ -1,0 +1,53 @@
+
+<header.background>
+  <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
+    <md-icon>arrow_back
+
+  <h1.title-large>
+    _{MsgUserSettings}
+      
+<main>
+
+  <md-tabs aria-label=Tabs>
+    <md-primary-tab #tabRingtones aria-controls=panelRingtones>
+      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+      _{MsgRingtones}
+
+    <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true>
+      <a href=@{AccountNotificationsR uid}>
+      _{MsgNotifications}
+
+  <div #panelRingtones role=tabpanel aria-labelledby=tabRingtones hidden>
+
+  <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+
+    ^{widgetBanner msgs}
+
+    $if null subscriptions
+      <figure style="text-align:center">
+        <span.on-secondary style="font-size:4rem">&#x1F4C2;
+        <figcaption.body-large>
+          _{MsgNoSubscriptionsYet}
+    $else
+      <md-list>
+        $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (Entity _ (User email _ _ _ _ name _ _),attrib)) <- subscriptions
+          <md-list-item type=link href=@{AccountSubscriptionR uid sid}>
+            <img slot=start src=@{AccountPhotoR pid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+            <div slot=headline style="white-space:nowrap">
+              $maybe name <- name
+                #{name}
+              $nothing
+                #{email}
+            <div slot=supporting-text style="white-space:nowrap">
+              #{endpoint}
+            $maybe ua <- ua
+              <div slot=supporting-text style="white-space:nowrap">
+                #{ua}
+            <md-icon slot=end>arrow_forward_ios
+          $maybe attrib <- attrib
+            <div.app-attribution>
+              <div.app-attribution-wrapper.body-small>
+                #{attrib}
+          <md-divider>
+          
+    ^{widgetSnackbar msgs}

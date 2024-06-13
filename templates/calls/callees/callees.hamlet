@@ -210,6 +210,10 @@
               <md-text-button type=button
                 onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
                 _{MsgClose}
+        
+    <audio loop ##{idAudioOutgoingCallRingtone}>
+      $with (ringtone,mime) <- outgoingCallRingtone
+        <source src=@{ringtone} type=#{mime}>
                 
 
   <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">

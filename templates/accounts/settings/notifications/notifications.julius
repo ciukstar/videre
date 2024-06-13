@@ -1,0 +1,6 @@
+
+Array.from(
+  document.querySelectorAll('md-primary-tab:has(a[href])')
+).forEach((tab) => {
+  tab.addEventListener('click', (e) => { e.target.querySelector('a[href]').click(); });
+});

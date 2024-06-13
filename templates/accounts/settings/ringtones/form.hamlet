@@ -1,0 +1,20 @@
+
+<md-list ##{theId}>
+  $forall opt <- opts
+    <md-list-item type=text>
+      <div slot=start>
+        <md-outlined-icon-button type=button toggle
+          aria-label=_{MsgUnselected} aria-label-selected=_{MsgSelected}
+          onclick="!this.selected ? this.querySelector('audio').pause() : this.querySelector('audio').play()">
+
+          <md-icon>play_arrow
+          <md-icon slot=selected>pause
+          <audio>
+            <source type=#{ringtoneMime $ entityVal $ optionInternalValue opt}
+                    src=@{UserRingtoneAudioR uid (entityKey $ optionInternalValue opt)}>
+
+      <div slot=headline style="white-space:nowrap">
+        #{ringtoneName $ entityVal $ optionInternalValue opt}
+
+      <md-switch slot=end touch-target=wrapper name=#{name} value=#{optionExternalValue opt} *{attrs}
+                 :isSelected eval opt:selected>

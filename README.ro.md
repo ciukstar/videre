@@ -88,6 +88,8 @@ Tonuri de apel noi pot fi adăugate de un administrator în secțiunea [„Tonur
 
 Un administrator poate seta, de asemenea, tonuri de apel implicite pentru fiecare tip de apel, apel de ieșire sau de intrare.
 
+Utilizatorii își pot schimba tonurile de apel preferate în setările contului lor.
+
 ## Diagrama ER
 
 ![Diagrama entitate - relație](static/img/ERD_Videre.svg)

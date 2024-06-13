@@ -11,7 +11,7 @@
         <md-menu-item href=@{AccountR uid}>
           <div slot=headline>_{MsgUserAccount}
           
-        <md-menu-item href=@{AccountSettingsR uid}>
+        <md-menu-item href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
           <div slot=headline>_{MsgSettings}
           
         <md-menu-item href=@{AuthR LogoutR}>

@@ -2,6 +2,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE FlexibleContexts #-}
 
 module Handler.Accounts
   ( getAccountPhotoR
@@ -14,8 +15,11 @@ module Handler.Accounts
   , postAccountInfoR
   , getAccountSubscriptionsR
   , getAccountSubscriptionR
-  , postAccountSubscriptionDeleR
-  , getAccountSettingsR
+  , postAccountSubscriptionDeleR  
+  , getUserRingtoneAudioR
+  , getAccountRingtonesR
+  , postAccountRingtonesR
+  , getAccountNotificationsR
   ) where
 
 import Control.Monad (void, join)
@@ -25,12 +29,12 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Persist
-    ( Entity(Entity, entityVal), PersistUniqueWrite (upsert) )
+    ( Entity(Entity, entityVal, entityKey), PersistUniqueWrite (upsert, upsertBy) )
 import qualified Database.Persist as P ((=.), PersistStoreWrite (delete))
 import Database.Esqueleto.Experimental
-    ( select, selectOne, from, table, where_, val, update, set
+    ( Value (unValue), select, selectOne, from, table, where_, val, update, set
     , (^.), (?.), (==.), (=.), (:&)((:&))
-    , Value (unValue), just, innerJoin, leftJoin, on
+    , just, innerJoin, leftJoin, on, orderBy, asc, delete
     )
 
 import Material3 ( md3textField, md3mopt, md3dayField )
@@ -39,19 +43,28 @@ import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
     , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
     , PushSubscriptionId, PushSubscription (PushSubscription)
+    , RingtoneId, Ringtone (Ringtone, ringtoneName, ringtoneMime)
+    , UserRingtone (UserRingtone), Unique (UniqueUserRingtone)
+    , RingtoneType
+      ( RingtoneTypeCallOutgoing, RingtoneTypeCallIncoming
+      , RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming
+      )
     , EntityField
       ( UserPhotoUser, UserPhotoPhoto, UserPhotoMime, UserName, UserId
       , UserInfoUser, UserInfoBirthDate, UserSuperuser, PushSubscriptionPublisher
       , PushSubscriptionSubscriber, UserPhotoAttribution, PushSubscriptionId
+      , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, RingtoneName
+      , UserRingtoneType
       )
     )
 
 import Foundation
-    ( Handler, Form, Widget
+    ( Handler, Form, Widget, App
     , Route
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
       , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
-      , AccountSubscriptionR, AccountSubscriptionDeleR
+      , AccountSubscriptionR, AccountSubscriptionDeleR, UserRingtoneAudioR
+      , AccountRingtonesR, AccountNotificationsR
       )
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
@@ -60,7 +73,9 @@ import Foundation
       , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
       , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
       , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
-      , MsgNotifications
+      , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet
+      , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgSelected
+      , MsgUnselected, MsgIncomingChat, MsgOutgoingChat
       )
     )
 
@@ -71,6 +86,7 @@ import Settings.StaticFiles
     )
 
 import Text.Hamlet (Html)
+import Text.Shakespeare.I18N (RenderMessage)
 
 import Widgets (widgetBanner, widgetSnackbar)
 
@@ -79,26 +95,123 @@ import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
     , MonadHandler (liftHandler), redirect, FileInfo (fileContentType)
     , newIdent, fileSourceByteString, addMessageI, whamlet, getMessages
+    , invalidArgsI, handlerToWidget
     )
 import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Core.Widget (setTitleI)
-import Yesod.Form.Fields (fileField)
+import Yesod.Form.Fields
+    (fileField, radioField, optionsPairs, OptionList (olOptions)
+    , Option (optionInternalValue, optionExternalValue)
+    )
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
     ( MForm, FormResult (FormSuccess), FieldView (fvInput, fvId)
-    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
+    , Field (fieldView)
+    , FieldSettings
+      ( FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
     )
 import Yesod.Persist (YesodPersist(runDB))
 
 
-getAccountSettingsR :: UserId -> Handler Html
-getAccountSettingsR uid = do
+getAccountNotificationsR :: UserId -> Handler Html
+getAccountNotificationsR uid = do
+
+    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+        x :& u :& h <- from $ table @PushSubscription
+            `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
+            `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
+        where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+        return (x, (u, h ?. UserPhotoAttribution)) )
+        
     msgs <- getMessages
     defaultLayout $ do
-        setTitleI MsgSubscription
+        setTitleI MsgUserSettings
+        idPanelNotifications <- newIdent
+        $(widgetFile "accounts/settings/notifications/notifications")
+
+
+postAccountRingtonesR :: UserId -> RingtoneType -> Handler Html
+postAccountRingtonesR uid typ = do
+
+    ((fr,_),_) <- runFormPost $ formRingtone uid typ
+
+    case fr of
+      FormSuccess Nothing -> do
+          void $ runDB $ delete $ do
+              x <- from $ table @UserRingtone
+              where_ $ x ^. UserRingtoneUser ==. val uid
+              where_ $ x ^. UserRingtoneType ==. val typ
+          addMessageI statusSuccess MsgRecordDeleted
+          redirect $ AccountRingtonesR uid typ
+              
+      FormSuccess (Just (Entity rid _)) -> do
+          void $ runDB $ upsertBy (UniqueUserRingtone uid typ)
+              (UserRingtone uid rid typ)
+              [UserRingtoneRingtone P.=. rid]
+          addMessageI statusSuccess MsgRecordEdited
+          redirect $ AccountRingtonesR uid typ
+          
+      _otherwise -> do
+          addMessageI statusError MsgInvalidFormData
+          redirect $ AccountRingtonesR uid typ
+
+
+getAccountRingtonesR :: UserId -> RingtoneType -> Handler Html
+getAccountRingtonesR uid typ = do
+    
+    ringtones <- runDB $ select $ from $ table @Ringtone
+
+    (fw,et) <- generateFormPost $ formRingtone uid typ
+        
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgUserSettings
         idPanelRingtones <- newIdent
-        $(widgetFile "accounts/settings/settings")
+        $(widgetFile "accounts/settings/ringtones/ringtones")
+
+
+formRingtone :: UserId -> RingtoneType -> Form (Maybe (Entity Ringtone))
+formRingtone uid typ extra = do
+
+    options <- liftHandler $ runDB $ select $ do
+        x <- from $ table @Ringtone
+        orderBy [asc (x ^. RingtoneName)]
+        return x
+
+    selected <- liftHandler $ runDB $ selectOne $ do
+        x :& t <- from $ table @Ringtone
+            `innerJoin` table @UserRingtone `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+        where_ $ t ^. UserRingtoneUser ==. val uid
+        where_ $ t ^. UserRingtoneType ==. val typ
+        return x 
+    
+    (ringtoneR, ringtoneV) <- mopt (ringtonesFieldList (option <$> options)) "" (Just selected)
+    
+    let w = [whamlet|
+#{extra}
+^{fvInput ringtoneV}
+|]
+    return (ringtoneR, w)
+  where
+
+      option e@(Entity _ (Ringtone name _ _)) = (name,e)
+     
+      ringtonesFieldList :: RenderMessage App msg => [(msg, Entity Ringtone)] -> Field Handler (Entity Ringtone)
+      ringtonesFieldList = ringtonesField . optionsPairs
+
+      ringtonesField :: Handler (OptionList (Entity Ringtone)) -> Field Handler (Entity Ringtone)
+      ringtonesField ioptlist = (radioField ioptlist)
+          { fieldView = \theId name attrs eval _isReq -> do
+                
+              opts <- olOptions <$> handlerToWidget ioptlist
+              
+              let isSelected :: Either Text (Entity Ringtone) -> Option (Entity Ringtone) -> Bool
+                  isSelected (Left _) _ = False
+                  isSelected (Right x) opt = optionInternalValue opt == x
+                  
+              $(widgetFile "accounts/settings/ringtones/form")
+          }
 
 
 postAccountSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html
@@ -287,6 +400,19 @@ formAccount user extra = do
     return ( (,) <$> nameR <*> photoR
            , $(widgetFile "accounts/form")
            )
+
+
+getUserRingtoneAudioR :: UserId -> RingtoneId -> Handler TypedContent
+getUserRingtoneAudioR _ rid = do
+    
+    ringtone <- runDB $ selectOne $ do
+        x <- from $ table @Ringtone
+        where_ $ x ^. RingtoneId ==. val rid
+        return x
+    
+    case ringtone of
+      Just (Entity _ (Ringtone _ mime bs)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      Nothing -> invalidArgsI [MsgRingtoneNotFound]
 
 
 getAccountPhotoR :: UserId -> Handler TypedContent

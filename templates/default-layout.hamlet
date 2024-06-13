@@ -42,7 +42,8 @@
   <div slot=actions>
   
     <audio loop ##{idAudioIncomingVideoCallRingtone}>
-      <source src=@{StaticR ringtones_incoming_call_samsung_ringtones_1_mp3} type="audio/mpeg">
+      $with (ringtone, mime) <- incomingCallRingtone
+        <source src=@{ringtone} type=#{mime}>
 
     <md-filled-icon-button ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end
@@ -74,7 +75,8 @@
   <div slot=actions>
   
     <audio loop ##{idAudioIncomingAudioCallRingtone}>
-      <source src=@{StaticR ringtones_incoming_call_samsung_ringtones_1_mp3} type="audio/mpeg">
+      $with (ringtone, mime) <- incomingCallRingtone
+        <source src=@{ringtone} type=#{mime}>
 
     <md-filled-icon-button ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
       <md-icon>call_end

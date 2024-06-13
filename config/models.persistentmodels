@@ -4,7 +4,7 @@
 UserRingtone
     user UserId OnDeleteCascade
     ringtone RingtoneId OnDeleteCascade
-    type Text
+    type RingtoneType
     UniqueUserRingtone user type
 
 DefaultRingtone

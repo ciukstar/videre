@@ -228,16 +228,16 @@
       ><path d="M0 0 L70 0 L70 123 L0 123 L0 0 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath75"
-      ><path d="M0 0 L0 123 L70 123 L70 72 L55 72 L55 60 L6 60 L6 46 L60 46 L60 58 L70 58 L70 0 Z"
+      ><path d="M0 0 L0 123 L70 123 L70 67 L54 67 L54 60 L6 60 L6 46 L60 46 L60 53 L70 53 L70 0 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath76"
-      ><path d="M66 172 L66 49 L-4 49 L-4 100 L11 100 L11 112 L60 112 L60 126 L6 126 L6 114 L-4 114 L-4 172 Z"
+      ><path d="M66 172 L66 49 L-4 49 L-4 105 L12 105 L12 112 L60 112 L60 126 L6 126 L6 119 L-4 119 L-4 172 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath77"
-      ><path d="M0 0 L0 46 L15 46 L15 58 L60 58 L60 72 L10 72 L10 60 L0 60 L0 123 L70 123 L70 82 L66 82 L66 68 L70 68 L70 0 Z"
+      ><path d="M0 0 L0 46 L15 46 L15 53 L59 53 L59 67 L9 67 L9 60 L0 60 L0 123 L70 123 L70 82 L66 82 L66 68 L70 68 L70 0 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath78"
-      ><path d="M66 172 L66 126 L51 126 L51 114 L6 114 L6 100 L56 100 L56 112 L66 112 L66 49 L-4 49 L-4 90 L0 90 L0 104 L-4 104 L-4 172 Z"
+      ><path d="M66 172 L66 126 L51 126 L51 119 L7 119 L7 105 L57 105 L57 112 L66 112 L66 49 L-4 49 L-4 90 L0 90 L0 104 L-4 104 L-4 172 Z"
       /></clipPath
       ><clipPath clipPathUnits="userSpaceOnUse" id="clipPath79"
       ><path d="M0 0 L166 0 L166 70 L0 70 L0 0 Z"
@@ -1036,7 +1036,7 @@ AFCjNFCjPNClMqC8BRTnYCDgEooBAMVf0aJncShdAAAAAElFTkSuQmCC" height="18" preserveAs
     ><text x="10" xml:space="preserve" y="11" clip-path="url(#clipPath111)" stroke="none"
       >user</text
     ></g
-    ><g font-size="11px" transform="translate(197,328)" fill-opacity="1" fill="black" text-rendering="geometricPrecision" image-rendering="optimizeQuality" font-family="sans-serif" stroke="black" stroke-opacity="1"
+    ><g font-size="11px" transform="translate(196,323)" fill-opacity="1" fill="black" text-rendering="geometricPrecision" image-rendering="optimizeQuality" font-family="sans-serif" stroke="black" stroke-opacity="1"
     ><text x="9" xml:space="preserve" y="11" clip-path="url(#clipPath112)" stroke="none"
       >entry</text
     ></g

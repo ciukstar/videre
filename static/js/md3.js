@@ -40,5 +40,6 @@ import '@material/web/radio/radio.js';
 
 import '@material/web/tabs/tabs.js';
 import '@material/web/tabs/primary-tab.js';
+import '@material/web/tabs/secondary-tab.js';
 
 import '@material/web/textfield/filled-text-field.js';

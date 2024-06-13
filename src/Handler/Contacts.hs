@@ -28,6 +28,7 @@ import ChatRoom
     ( YesodChat
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
       , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute, getAppSettings
+      , getUserRingtoneAudioRoute, getDefaultRingtoneAudioRoute
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
@@ -69,7 +70,7 @@ import Foundation
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
-      , CalleesR, HomeR
+      , CalleesR, HomeR, UserRingtoneAudioR, DefaultRingtoneAudioR
       )
     , AppMessage
       ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgCalls
@@ -94,10 +95,12 @@ import Material3 (md3mreq, md3switchField)
 
 import Model
     ( statusError, statusSuccess
-    , paramEndpoint, localStorageEndpoint
+    , paramEndpoint, paramBacklink, localStorageEndpoint
     , UserId, User (User, userName, userEmail), UserPhoto, Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Call (Call), CallType (CallTypeAudio, CallTypeVideo)
+    , RingtoneId, Ringtone (Ringtone), UserRingtone
+    , RingtoneType (RingtoneTypeCallOutgoing), DefaultRingtone
     , PushMsgType
       ( PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel
       , PushMsgTypeDecline, PushMsgTypeAccept, PushMsgTypeRefresh
@@ -111,8 +114,10 @@ import Model
       , PushSubscriptionEndpoint
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , ChatUser, UserName, UserEmail, CallCaller, CallCallee
-      , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent
-      ), paramBacklink
+      , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
+      , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneRingtone
+      , DefaultRingtoneType
+      )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -126,6 +131,7 @@ import Settings.StaticFiles
     ( img_call_FILL0_wght400_GRAD0_opsz24_svg
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     , img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg
+    , ringtones_outgoing_call_galaxy_ringtones_1_mp3
     )
 
 import Text.Hamlet (Html)
@@ -219,10 +225,13 @@ getCalleesR uid = do
         orderBy [desc (e ^. UserId)]
         return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
+    outgoingCallRingtone <- resolveOutgoingCallRingtone uid
+
     rndr <- getUrlRender
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgContacts
+        idAudioOutgoingCallRingtone <- newIdent
         idFabAdd <- newIdent
         $(widgetFile "calls/callees/callees")
   where
@@ -302,15 +311,39 @@ getCallsR uid = do
                  )
                ) )
 
+    outgoingCallRingtone <- resolveOutgoingCallRingtone uid
+
     msgr <- getMessageRender
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgCalls
+        idAudioOutgoingCallRingtone <- newIdent
         idFabAdd <- newIdent
         $(widgetFile "calls/calls")
   where
       unwrap = second (first (bimap (second (join . unValue)) (second (join . unValue))))
+
+
+resolveOutgoingCallRingtone :: UserId -> Handler (Route App, Text)
+resolveOutgoingCallRingtone uid = do
+        userOutgoingCallRingtone <- runDB $ selectOne $ do
+            x :& t <- from $ table @Ringtone `innerJoin` table @UserRingtone
+                `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. UserRingtoneRingtone)
+            where_ $ t ^. UserRingtoneUser ==. val uid
+            where_ $ t ^. UserRingtoneType ==. val RingtoneTypeCallOutgoing
+            return x
+        case userOutgoingCallRingtone of
+          Just (Entity rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid rid, mime)
+          Nothing -> do
+              defaultOutgoingCallRingtone <- runDB $ selectOne $ do
+                  x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                      `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                  where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeCallOutgoing
+                  return x
+              case defaultOutgoingCallRingtone of
+                Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
+                Nothing -> return (StaticR ringtones_outgoing_call_galaxy_ringtones_1_mp3, "audio/mpeg")
 
 
 putPushSubscriptionEndpointR :: Handler ()
@@ -824,6 +857,12 @@ instance YesodChat App where
 
     getVideoOutgoingRoute :: UserId -> ContactId -> UserId -> Bool -> Handler (Route App)
     getVideoOutgoingRoute sid cid rid polite = return $ VideoR $ RoomR sid cid rid polite
+
+    getUserRingtoneAudioRoute :: UserId -> RingtoneId -> Handler (Route App)
+    getUserRingtoneAudioRoute uid rid = return $ UserRingtoneAudioR uid rid
+    
+    getDefaultRingtoneAudioRoute :: RingtoneId -> Handler (Route App)
+    getDefaultRingtoneAudioRoute rid = return $ DefaultRingtoneAudioR rid
 
     getAppSettings :: Handler AppSettings
     getAppSettings = getYesod >>= \app -> return $ appSettings app

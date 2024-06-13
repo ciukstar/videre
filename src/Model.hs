@@ -37,22 +37,33 @@ import Data.Ord (Ord)
 import Data.Function ((.), ($))
 import Data.Maybe (Maybe (Nothing))
 import Data.String (String)
-import Data.Text (Text, pack)
+import Data.Text (Text, pack, unpack)
 import Data.Time.Calendar (Day)
 import Data.Time.Clock (UTCTime)
 
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
 
-import Text.Read (Read)
+import Text.Read (Read, readMaybe)
 import Text.Show (Show (show))
 import Text.Hamlet (Html)
+
+import Yesod.Core.Dispatch (PathPiece, toPathPiece, fromPathPiece)
 
 
 data RingtoneType = RingtoneTypeCallOutgoing | RingtoneTypeCallIncoming
                   | RingtoneTypeChatOutgoing | RingtoneTypeChatIncoming
     deriving (Eq, Show, Read)
 derivePersistField "RingtoneType"
+
+
+instance PathPiece RingtoneType where
+    
+    toPathPiece :: RingtoneType -> Text
+    toPathPiece = pack . show
+
+    fromPathPiece :: Text -> Maybe RingtoneType
+    fromPathPiece = readMaybe . unpack
 
 
 data CallStatus = CallStatusAccepted | CallStatusDeclined
@@ -130,6 +141,11 @@ instance FromJSON PushSubscription where
         keyP256dh <- keys .: "p256dh"
         keyAuth <- keys .: "auth"
         return $ PushSubscription subscriber publisher endpoint keyP256dh keyAuth Nothing
+
+
+instance Eq Ringtone where
+    (==) :: Ringtone -> Ringtone -> Bool
+    a == b = ringtoneName a == ringtoneName b
 
 
 instance Eq User where
