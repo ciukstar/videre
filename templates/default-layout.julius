@@ -11,65 +11,57 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
 	registration.pushManager.getSubscription().then(function (subscription) {
           
           if (!subscription) {
-            
-            Notification.requestPermission().then(function (permission) {
+	    
+	    registration.pushManager.subscribe({
+              userVisibleOnly: true,
+              applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+	    }).then((subscription) => {
               
-              if (permission === 'granted') {
-		
-		registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-		}).then((subscription) => {
-                  
-                  const subscr = JSON.parse(JSON.stringify(subscription));
-                  
-                  fetch('@{PushSubscriptionEndpointR}', {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: new URLSearchParams({
-                      endpoint: subscr.endpoint,
-                      p256dh: subscr.keys.p256dh,
-                      auth: subscr.keys.auth,
-                      oldendpoint: endpoint
-                    })
-                  }).then((response) => {
-                    localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
-                  });
-                  
-		}).catch((err) => {
-                  
-                  registration.pushManager.getSubscription().then((subscription) => {
-                    subscription.unsubscribe().then((sccess) => {
-                      registration.pushManager.subscribe({
-			userVisibleOnly: true,
-			applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-                      }).then((subscription) => {
-			
-			const subscr = JSON.parse(JSON.stringify(subscription));
-			
-			fetch('@{PushSubscriptionEndpointR}', {
-                          method: 'PUT',
-                          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                          body: new URLSearchParams({
-                            endpoint: subscr.endpoint,
-                            p256dh: subscr.keys.p256dh,
-                            auth: subscr.keys.auth,
-                            oldendpoint: endpoint
-                          })
-			}).then((response) => {
-                          localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
-			});
-			
-                      });
-                    });
-                  });
-                  
-		});
-		
-              }
+              const subscr = JSON.parse(JSON.stringify(subscription));
               
-            });
-            
+              fetch('@{PushSubscriptionEndpointR}', {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                  endpoint: subscr.endpoint,
+                  p256dh: subscr.keys.p256dh,
+                  auth: subscr.keys.auth,
+                  oldendpoint: endpoint
+                })
+              }).then((response) => {
+                localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+              });
+              
+	    }).catch((err) => {
+              
+              registration.pushManager.getSubscription().then((subscription) => {
+                subscription.unsubscribe().then((sccess) => {
+                  registration.pushManager.subscribe({
+		    userVisibleOnly: true,
+		    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+                  }).then((subscription) => {
+		    
+		    const subscr = JSON.parse(JSON.stringify(subscription));
+		    
+		    fetch('@{PushSubscriptionEndpointR}', {
+                      method: 'PUT',
+                      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                      body: new URLSearchParams({
+                        endpoint: subscr.endpoint,
+                        p256dh: subscr.keys.p256dh,
+                        auth: subscr.keys.auth,
+                        oldendpoint: endpoint
+                      })
+		    }).then((response) => {
+                      localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+		    });
+		    
+                  });
+                });
+              });
+              
+	    });
+	
           }
 	});
 	
@@ -95,7 +87,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
         method: 'POST',
         headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          messageType: #{show PushMsgTypeDecline},
+          messageType: #{PushMsgTypeDecline},
           title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
           body: #{msgr $ MsgCalleeDeclinedTheCall calleeName},
@@ -119,7 +111,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
         method: 'POST',
         headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          messageType: #{show PushMsgTypeAccept},
+          messageType: #{PushMsgTypeAccept},
           title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
           body: #{msgr $ MsgInterlocutorStartedSession calleeName},
@@ -155,7 +147,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
         method: 'POST',
         headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({
-          messageType: #{show PushMsgTypeAccept},
+          messageType: #{PushMsgTypeAccept},
           title: #{msgr MsgAppName},
           icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
           body: #{msgr $ MsgInterlocutorStartedSession calleeName},
@@ -187,7 +179,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeChat}) {
+  if (message.data.messageType === #{PushMsgTypeChat}) {
     
     document.getElementById(#{idImgSenderPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
@@ -195,20 +187,20 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idButtonReplyNotification}).href = message.data.targetRoom;
     document.getElementById(#{idDialogChatNotification}).show();
 
-  } else if (message.data.messageType === #{show PushMsgTypeCancel}) {
+  } else if (message.data.messageType === #{PushMsgTypeCancel}) {
 
     document.getElementById(#{idDialogIncomingVideoCall}).close();
     document.getElementById(#{idDialogIncomingAudioCall}).close();
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
     document.getElementById(#{idDialogMissedCall}).show();
 
-  } else if (message.data.messageType === #{show PushMsgTypeVideoCall}) {
+  } else if (message.data.messageType === #{PushMsgTypeVideoCall}) {
     
     document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
     document.getElementById(#{idDialogIncomingVideoCall}).show();
 
-  } else if (message.data.messageType === #{show PushMsgTypeAudioCall}) {
+  } else if (message.data.messageType === #{PushMsgTypeAudioCall}) {
     
     document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;

@@ -479,6 +479,10 @@ getServiceWorkerR = do
     case mVAPIDKeys of
       Just vapidKeys -> do
           let applicationServerKey = vapidPublicKeyBytes vapidKeys
+          declineCall <- newIdent
+          acceptCall <- newIdent
+          ignoreChat <- newIdent
+          replyChat <- newIdent
           return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
   where

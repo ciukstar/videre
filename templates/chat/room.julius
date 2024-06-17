@@ -94,7 +94,7 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      messageType: #{show PushMsgTypeVideoCall},
+      messageType: #{PushMsgTypeVideoCall},
       icon: '@{icon}',
       title: #{msgr MsgAppName},
       body: #{msgr $ MsgIncomingVideoCallFrom callerName},
@@ -117,7 +117,7 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      messageType: #{show PushMsgTypeAudioCall},
+      messageType: #{PushMsgTypeAudioCall},
       icon: '@{icon}',
       title: #{msgr MsgAppName},
       body: #{msgr $ MsgIncomingAudioCallFrom callerName},
@@ -140,7 +140,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      messageType: #{show PushMsgTypeCancel},
+      messageType: #{PushMsgTypeCancel},
       title: #{msgr MsgAppName},
       icon: '@{iconCallEnd}',
       body: #{msgr $ MsgCallCanceledByCaller callerName},
@@ -160,7 +160,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
 
 navigator.serviceWorker.addEventListener('message', function (message) {
   
-  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+  if (message.data.messageType === #{PushMsgTypeAccept}) {
     
     document.getElementById(#{idDialogOutgoingCall}).close();
     
@@ -174,12 +174,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
     window.location.href = `@{outgoing}?${params}`;
     
-  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+  } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
     document.getElementById(#{idDialogOutgoingCall}).close();
     document.getElementById(#{idDialogCallDeclined}).show();
     
-  } else if (message.data.messageType === #{show PushMsgTypeRefresh}) {
+  } else if (message.data.messageType === #{PushMsgTypeRefresh}) {
     
     window.location.reload();
     

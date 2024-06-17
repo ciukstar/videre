@@ -49,6 +49,8 @@ import Text.Show (Show (show))
 import Text.Hamlet (Html)
 
 import Yesod.Core.Dispatch (PathPiece, toPathPiece, fromPathPiece)
+import Text.Julius (ToJavascript (toJavascript), Javascript)
+import Text.Blaze.Html (Markup, ToMarkup (toMarkup))
 
 
 data RingtoneType = RingtoneTypeCallOutgoing | RingtoneTypeCallIncoming
@@ -91,9 +93,19 @@ data PushMsgType = PushMsgTypeChat | PushMsgTypeRefresh | PushMsgTypeVideoCall
     deriving (Eq, Show, Read)
 
 
+instance ToMarkup PushMsgType where
+    toMarkup :: PushMsgType -> Markup
+    toMarkup = toMarkup . show
+    
+
 instance ToJSON PushMsgType where
     toJSON :: PushMsgType -> Data.Aeson.Value
     toJSON = String . pack . show
+
+
+instance ToJavascript PushMsgType where
+    toJavascript :: PushMsgType -> Javascript
+    toJavascript = toJavascript . String . pack . show
 
 
 data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread

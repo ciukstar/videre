@@ -14,13 +14,13 @@ self.onpush = function (e) {
   }).then(([notify, message]) => {
 
     let actions;
-    if (message.messageType === #{show PushMsgTypeAudioCall} || message.messageType === #{show PushMsgTypeVideoCall}) {
-      actions = [ { action: 'declineCall', title: #{msgr MsgDecline} },
-		  { action: 'acceptCall', title: #{msgr MsgAnswer} }
+    if (message.messageType === #{PushMsgTypeAudioCall} || message.messageType === #{PushMsgTypeVideoCall}) {
+      actions = [ { action: #{declineCall}, title: #{msgr MsgDecline} },
+		  { action: #{acceptCall}, title: #{msgr MsgAnswer} }
 		];
-    } else if (message.messageType === #{show PushMsgTypeChat}) {
-      actions = [ { action: 'ignoreChat', title: #{msgr MsgIgnore} },
-		  { action: 'replyChat', title: #{msgr MsgReply} }
+    } else if (message.messageType === #{PushMsgTypeChat}) {
+      actions = [ { action: #{ignoreChat}, title: #{msgr MsgIgnore} },
+		  { action: #{replyChat}, title: #{msgr MsgReply} }
 		];
     } else {
       actions = [];
@@ -48,7 +48,7 @@ self.onpush = function (e) {
 
 self.addEventListener('notificationclick', (e) => {
 
-  if (e.action === 'declineCall') {
+  if (e.action === #{declineCall}) {
 
     e.notification.close();
 
@@ -56,7 +56,7 @@ self.addEventListener('notificationclick', (e) => {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: #{show PushMsgTypeDecline},
+	messageType: #{PushMsgTypeDecline},
 	title: #{msgr MsgAppName},
 	icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
 	body: #{msgr MsgCallDeclined},
@@ -68,7 +68,7 @@ self.addEventListener('notificationclick', (e) => {
       })
     });
 
-  } else if (e.action === 'acceptCall') {
+  } else if (e.action === #{acceptCall}) {
 
     e.notification.close();
 
@@ -87,7 +87,7 @@ self.addEventListener('notificationclick', (e) => {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
-              messageType: #{show PushMsgTypeAccept},
+              messageType: #{PushMsgTypeAccept},
 	      title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
@@ -119,7 +119,7 @@ self.addEventListener('notificationclick', (e) => {
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
-              messageType: #{show PushMsgTypeAccept},
+              messageType: #{PushMsgTypeAccept},
 	      title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
@@ -150,7 +150,7 @@ self.addEventListener('notificationclick', (e) => {
 	  method: 'POST',
 	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	  body: new URLSearchParams({
-            messageType: #{show PushMsgTypeAccept},
+            messageType: #{PushMsgTypeAccept},
 	    title: #{msgr MsgAppName},
             icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
 	    body: #{msgr $ MsgInterlocutorStartedSession calleeName},
@@ -179,11 +179,11 @@ self.addEventListener('notificationclick', (e) => {
 
     e.waitUntil(promise);
 
-  } else if (e.action === 'ignoreChat') {
+  } else if (e.action === #{ignoreChat}) {
 
     e.notification.close();
 
-  } else if (e.action === 'replyChat') {
+  } else if (e.action === #{replyChat}) {
 
     e.notification.close();
 
@@ -236,7 +236,7 @@ self.addEventListener('notificationclose', (e) => {
     method: 'POST',
     headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      messageType: #{show PushMsgTypeIgnore},
+      messageType: #{PushMsgTypeIgnore},
       title: #{msgr MsgAppName},
       icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
       body: #{msgr MsgCallDeclined},
@@ -284,63 +284,55 @@ self.addEventListener('fetch', function (e) {
 
 self.addEventListener('pushsubscriptionchange', (event) => {
 
-  Notification.requestPermission().then(function (permission) {
+  registration.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+  }).then((subscription) => {
 
-    if (permission === 'granted') {
+    const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+    const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
 
-      registration.pushManager.subscribe({
-	userVisibleOnly: true,
-	applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-      }).then((subscription) => {
+    fetch('@{PushSubscriptionEndpointR}', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+	endpoint: newSubscr.endpoint,
+	p256dh: newSubscr.keys.p256dh,
+	auth: newSubscr.keys.auth,
+	oldendpoint: oldSubscr.endpoint
+      })
+    }).then((response) => {
+      localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
+    });
 
-	const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
-	const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+  }).catch((err) => {
 
-	fetch('@{PushSubscriptionEndpointR}', {
-	  method: 'PUT',
-	  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	  body: new URLSearchParams({
-	    endpoint: newSubscr.endpoint,
-	    p256dh: newSubscr.keys.p256dh,
-	    auth: newSubscr.keys.auth,
-	    oldendpoint: oldSubscr.endpoint
-	  })
-	}).then((response) => {
-	  localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
-	});
+    registration.pushManager.getSubscription().then((subscription) => {
+      subscription.unsubscribe().then((sccess) => {
+	registration.pushManager.subscribe({
+	  userVisibleOnly: true,
+	  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+	}).then((subscription) => {
 
-      }).catch((err) => {
+	  const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+	  const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
 
-	registration.pushManager.getSubscription().then((subscription) => {
-	  subscription.unsubscribe().then((sccess) => {
-	    registration.pushManager.subscribe({
-	      userVisibleOnly: true,
-	      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-	    }).then((subscription) => {
-
-	      const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
-	      const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
-
-	      fetch('@{PushSubscriptionEndpointR}', {
-		method: 'PUT',
-		headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-		body: new URLSearchParams({
-		  endpoint: newSubscr.endpoint,
-		  p256dh: newSubscr.keys.p256dh,
-		  auth: newSubscr.keys.auth,
-		  oldendpoint: oldSubscr.endpoint
-		})
-	      }).then((response) => {
-		localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
-	      });
-
-	    });
+	  fetch('@{PushSubscriptionEndpointR}', {
+	    method: 'PUT',
+	    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+	    body: new URLSearchParams({
+	      endpoint: newSubscr.endpoint,
+	      p256dh: newSubscr.keys.p256dh,
+	      auth: newSubscr.keys.auth,
+	      oldendpoint: oldSubscr.endpoint
+	    })
+	  }).then((response) => {
+	    localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
 	  });
+
 	});
-
       });
-
-    }
+    });
 
   });
 

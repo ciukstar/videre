@@ -43,8 +43,8 @@
                   $maybe end <- iso8601Show <$> end
                     <time datetime=#{end}>#{end}
                 <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
-                  :CallTypeVideo == ctype:data-message-type=#{show PushMsgTypeVideoCall}
-                  :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
+                  :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
+                  :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                   :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
                   data-recipient-id=#{show $ fromSqlKey caller}
@@ -171,8 +171,8 @@
                   $maybe end <- iso8601Show <$> end
                     <time datetime=#{end}>#{end}
                 <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
-                  :CallTypeVideo == ctype:data-message-type=#{show PushMsgTypeVideoCall}
-                  :CallTypeAudio == ctype:data-message-type=#{show PushMsgTypeAudioCall}
+                  :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
+                  :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                   :CallTypeAudio == ctype:data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
                   data-recipient-id=#{show $ fromSqlKey callee}

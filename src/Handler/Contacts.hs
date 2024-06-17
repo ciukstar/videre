@@ -28,7 +28,7 @@ import ChatRoom
     ( YesodChat
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
       , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute, getAppSettings
-      , getUserRingtoneAudioRoute, getDefaultRingtoneAudioRoute
+      , getUserRingtoneAudioRoute, getDefaultRingtoneAudioRoute, getVapidKeys
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
@@ -142,7 +142,7 @@ import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 import VideoRoom
     ( YesodVideo
       ( getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute
-      , getAppSettings, getHomeRoute
+      , getAppSettings, getHomeRoute, getVapidKeys
       )
     , Route (RoomR)
     )
@@ -835,6 +835,9 @@ instance YesodVideo App where
     getAppSettings :: Handler AppSettings
     getAppSettings = getYesod >>= \app -> return $ appSettings app
 
+    getVapidKeys :: Handler (Maybe VAPIDKeys)
+    getVapidKeys = getVAPIDKeys
+
 
 instance YesodChat App where
 
@@ -867,3 +870,6 @@ instance YesodChat App where
 
     getAppSettings :: Handler AppSettings
     getAppSettings = getYesod >>= \app -> return $ appSettings app
+
+    getVapidKeys :: Handler (Maybe VAPIDKeys)
+    getVapidKeys = getVAPIDKeys

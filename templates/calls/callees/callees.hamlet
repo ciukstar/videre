@@ -43,7 +43,7 @@
             <md-menu positioning=popover skip-restore-focus=true anchor=buttonContactItemAnchor#{i} #menuContactItemMenu#{i}>
             
               <md-menu-item.app-button-call type=menuitem data-i=#{i}
-                data-message-type=#{show PushMsgTypeVideoCall}
+                data-message-type=#{PushMsgTypeVideoCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                 data-recipient-id=#{show $ fromSqlKey rid}
@@ -56,7 +56,7 @@
                 <div slot=headline>_{MsgVideoCall}
                 
               <md-menu-item.app-button-call type=menuitem data-i=#{i} #idButtonAuioCall#{i}
-                data-message-type=#{show PushMsgTypeAudioCall}
+                data-message-type=#{PushMsgTypeAudioCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
                 data-recipient-id=#{show $ fromSqlKey rid}
@@ -131,7 +131,7 @@
             <div slot=actions>
 
               <md-outlined-button.app-button-call type=button data-i=#{i} #idButtonAuioCall#{i}
-                data-message-type=#{show PushMsgTypeAudioCall}
+                data-message-type=#{PushMsgTypeAudioCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
                 data-recipient-id=#{show $ fromSqlKey rid}
@@ -144,7 +144,7 @@
                 _{MsgAudio}
 
               <md-filled-button.app-button-call type=button data-i=#{i} #idButtonVideoCall#{i}
-                data-message-type=#{show PushMsgTypeVideoCall}
+                data-message-type=#{PushMsgTypeVideoCall}
                 data-title=_{MsgAppName}
                 data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
                 data-recipient-id=#{show $ fromSqlKey rid}

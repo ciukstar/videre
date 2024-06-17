@@ -175,7 +175,7 @@ navigator.mediaDevices.getUserMedia({
   });
 
   navigator.serviceWorker.addEventListener('message', (message) => {
-    if (message.data.messageType === #{show PushMsgTypeEndSession}) {
+    if (message.data.messageType === #{PushMsgTypeEndSession}) {
       stream.getTracks().forEach((track) => { track.stop(); });
     }
   });
@@ -187,7 +187,7 @@ navigator.mediaDevices.getUserMedia({
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeEndSession}) {
+  if (message.data.messageType === #{PushMsgTypeEndSession}) {
     pc.close();
     ws.close();
 
@@ -210,7 +210,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
         title: #{msgr MsgAppName},
         icon: '@{iconCallEnd}',
         body: #{msgr $ MsgInterlocutorEndedSession interlocutorName},
-        messageType: #{show PushMsgTypeEndSession},
+        messageType: #{PushMsgTypeEndSession},
 	targetRoom: '@{toParent $ RoomR rid cid sid True}',
 	targetPush: '@{toParent $ PushMessageR rid cid sid}',
         videor: #{rawJS videor},

@@ -32,7 +32,7 @@ Array.from(
 	    method: 'POST',
 	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
 	    body: new URLSearchParams({
-	      messageType: #{show PushMsgTypeCancel},
+	      messageType: #{PushMsgTypeCancel},
 	      title: call.dataset.title,
 	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
 	      body: call.dataset.bodyCancel,
@@ -52,7 +52,7 @@ Array.from(
 
 	navigator.serviceWorker.addEventListener('message', function (message) {
 	  
-	  if (message.data.messageType === #{show PushMsgTypeAccept}) {
+	  if (message.data.messageType === #{PushMsgTypeAccept}) {
 	    
 	    dlgOutgoingCall.close();
 	    
@@ -66,7 +66,7 @@ Array.from(
 
 	    window.location.href = `${call.dataset.targetRoom}?${params}`;
 	    
-	  } else if (message.data.messageType === #{show PushMsgTypeDecline}) {
+	  } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
 	    dlgOutgoingCall.close();
 	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).show();
@@ -89,7 +89,7 @@ Array.from(
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeRefresh}) {
+  if (message.data.messageType === #{PushMsgTypeRefresh}) {
     window.location.reload();
   }
 

@@ -31,7 +31,7 @@ import Control.Concurrent.STM.TChan
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
     , (^.), (==.), (!=.), (=.), (:&)((:&))
-    , just, Value (unValue, Value), Entity (entityVal), not_, unionAll_
+    , just, Value (Value), Entity (entityVal), not_, unionAll_
     , innerJoin, on
     )
 import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
@@ -39,13 +39,13 @@ import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
 import Data.Aeson.Text (encodeToLazyText)
-import Data.Bifunctor (Bifunctor(bimap))
 import Data.Function ((&))
 import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList )
 import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Set as S
-import Data.Text (Text, pack, unpack)
+import Data.Text (Text, pack)
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Text.Lazy (toStrict)
 import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
@@ -62,16 +62,15 @@ import Foundation
     )
 
 import Network.HTTP.Client.Conduit (Manager)
+import Network.HTTP.Types (extractPath)
 
 import Model
-    ( statusError, secretVolumeVapid, apiInfoVapid
-    , paramEndpoint, paramBacklink
+    ( statusError, paramEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
     , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription)
-    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , ContactId, Token, Store, Call, Ringtone (Ringtone)
+    , ContactId, Call, Ringtone (Ringtone)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
@@ -82,8 +81,8 @@ import Model
     , RingtoneType
       ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming)
     , EntityField
-      ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated, TokenApi
-      , PushSubscriptionSubscriber, TokenId, TokenStore, StoreToken, StoreVal
+      ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated
+      , PushSubscriptionSubscriber
       , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallType
       , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint
       , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType
@@ -108,17 +107,14 @@ import Settings.StaticFiles
     , ringtones_incoming_message_ringtone_1_mp3
     )
 
-import System.IO (readFile')
-
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
-import Text.Read (readMaybe)
 
 import Web.WebPush
-    ( mkPushNotification, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
-    , readVAPIDKeys, pushMessage, pushSenderEmail, pushExpireInSeconds
+    ( mkPushNotification
+    , pushMessage, pushSenderEmail, pushExpireInSeconds
     , sendPushNotification, pushTopic, PushTopic (PushTopic), pushUrgency
-    , PushUrgency (PushUrgencyHigh)
+    , PushUrgency (PushUrgencyHigh), VAPIDKeys
     )
 
 import Yesod.Core
@@ -153,6 +149,7 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getUserRingtoneAudioRoute :: UserId -> RingtoneId -> HandlerFor m (Route m)
     getDefaultRingtoneAudioRoute :: RingtoneId -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
+    getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
@@ -421,31 +418,9 @@ chatApp userId interlocutorId contactId = do
                      case chat' of
                        Just (Entity _ (Chat uid iid _ message _ _ _)) -> do
 
-                           storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-                               x <- from $ table @Token
-                               where_ $ x ^. TokenApi ==. val apiInfoVapid
-                               return (x ^. TokenId, x ^. TokenStore) )
-
-                           let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-                           details <- case storeType of
-                             Just (_, StoreTypeGoogleSecretManager) -> do
-                                 liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-                             Just (tid, StoreTypeDatabase) -> do
-                                 liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB
-                                     (
-                                         selectOne $ do
-                                           x <-from $ table @Store
-                                           where_ $ x ^. StoreToken ==. val tid
-                                           return $ x ^. StoreVal
-                                     )
-
-                             Just (_,StoreTypeSession) -> return Nothing
-                             Nothing -> return Nothing
-
-                           case details of
-                             Just vapidKeysMinDetails -> do
+                           mVapidKeys <- liftHandler getVapidKeys
+                           case mVapidKeys of
+                             Just vapidKeys -> do
 
                                  subscriptions <- liftHandler $ runDB $ select $ do
                                      x <- from $ table @PushSubscription
@@ -458,23 +433,25 @@ chatApp userId interlocutorId contactId = do
                                      where_ $ x ^. UserId ==. val uid
                                      return x
 
-                                 let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+                                 
                                  iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
                                  urlr <- getUrlRender
                                  msgr <- getMessageRender
                                  tpr <- getRouteToParent
                                  Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
 
+                                 let expath = decodeUtf8 . extractPath . encodeUtf8 . urlr
+
                                  forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth _)) -> do
                                      photor <- liftHandler $ getAccountPhotoRoute pid
                                      let notification = mkPushNotification endpoint p256dh auth
                                              & pushMessage .~ object
                                                  [ "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
-                                                 , "icon" .= urlr iconr
-                                                 , "image" .= urlr photor
+                                                 , "icon" .= expath iconr
+                                                 , "image" .= expath photor
                                                  , "body" .= message
                                                  , "messageType" .= PushMsgTypeChat
-                                                 , "targetRoom" .= urlr (tpr $ ChatRoomR sid contactId pid)
+                                                 , "targetRoom" .= (expath . tpr $ ChatRoomR sid contactId pid)
                                                  , "senderId" .= pid
                                                  , "senderName" .= (
                                                        (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender

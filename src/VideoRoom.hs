@@ -24,7 +24,7 @@ import Control.Lens ((.~), (?~))
 import Control.Monad (forever, forM_)
 
 import Database.Esqueleto.Experimental
-    ( select, selectOne, Value (unValue), from, table, where_, val
+    ( select, selectOne, from, table, where_, val
     , (^.), (==.), (=.)
     , just, update, set
     )
@@ -34,12 +34,11 @@ import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
 import qualified Data.Aeson as A (Value)
-import Data.Bifunctor (Bifunctor(bimap))
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import qualified Data.Map as M ( lookup, insert, alter )
 import Data.Text (Text, unpack, pack)
-import Data.Text.Encoding (encodeUtf8)
+import Data.Text.Encoding (encodeUtf8, decodeUtf8)
 import Data.Time.Clock (getCurrentTime)
 
 import Foundation
@@ -51,10 +50,9 @@ import Foundation
 
 import Model
     ( UserId, User (User, userEmail, userName)
-    , paramBacklink, apiInfoVapid, secretVolumeVapid
-    , PushSubscription (PushSubscription), ContactId, Token
-    , StoreType (StoreTypeGoogleSecretManager, StoreTypeDatabase, StoreTypeSession)
-    , Store, UserPhoto (UserPhoto)
+    , paramBacklink
+    , PushSubscription (PushSubscription), ContactId
+    , UserPhoto (UserPhoto)
     , Call (Call, callCaller, callCallee, callStart, callEnd, callType, callStatus)
     , CallType (CallTypeVideo, CallTypeAudio)
     , CallStatus
@@ -66,13 +64,14 @@ import Model
       , PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeCancel
       )
     , EntityField
-      ( UserId, TokenApi, TokenId, TokenStore
-      , StoreToken, StoreVal, UserPhotoUser, PushSubscriptionSubscriber
+      ( UserId
+      , UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
       )
     )
 
 import Network.HTTP.Client (Manager)
+import Network.HTTP.Types (extractPath)
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
@@ -84,8 +83,6 @@ import Settings
     )
 import Settings.StaticFiles
     (img_call_end_FILL0_wght400_GRAD0_opsz24_svg)
-
-import System.IO (readFile')
 
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
@@ -99,9 +96,9 @@ import VideoRoom.Data
     )
 
 import Web.WebPush
-    ( VAPIDKeysMinDetails(VAPIDKeysMinDetails), readVAPIDKeys, mkPushNotification
-    , pushMessage, pushSenderEmail, pushExpireInSeconds, sendPushNotification
-    , pushUrgency, PushUrgency (PushUrgencyHigh), pushTopic, PushTopic (PushTopic)
+    ( mkPushNotification, pushMessage, pushSenderEmail, pushExpireInSeconds
+    , sendPushNotification, pushUrgency, PushUrgency (PushUrgencyHigh)
+    , pushTopic, PushTopic (PushTopic), VAPIDKeys
     )
 
 import Yesod
@@ -128,6 +125,7 @@ class YesodVideo m where
     getHomeRoute :: HandlerFor m Text
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
+    getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
 
 
 getRoomR :: (Yesod m, YesodVideo m)
@@ -215,35 +213,13 @@ postPushMessageR sid cid rid = do
         where_ $ x ^. PushSubscriptionPublisher ==. val sid
         return x
 
-    manager <- liftHandler getAppHttpManager
-
-    storeType <- liftHandler $ (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
-
-    let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
-
-    details <- case storeType of
-      Just (_, StoreTypeGoogleSecretManager) -> do
-          liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
-
-      Just (tid, StoreTypeDatabase) -> do
-          liftHandler $ ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
-              x <-from $ table @Store
-              where_ $ x ^. StoreToken ==. val tid
-              return $ x ^. StoreVal )
-
-      Just (_,StoreTypeSession) -> return Nothing
-      Nothing -> return Nothing
-
     toParent <- getRouteToParent
-    urlRender <- getUrlRender
+    urlr <- getUrlRender
+    manager <- liftHandler getAppHttpManager
+    mVapidKeys <- liftHandler getVapidKeys
 
-    case details of
-      Just vapidKeysMinDetails -> do
-
-          let vapidKeys = readVAPIDKeys vapidKeysMinDetails
+    case mVapidKeys of
+      Just vapidKeys -> do
 
           Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
 
@@ -268,15 +244,17 @@ postPushMessageR sid cid rid = do
                                                             })
             _otherwise -> return Nothing
 
+          let expath = decodeUtf8 . extractPath . encodeUtf8 . urlr
+
           forM_ subscriptions $ \(Entity _ (PushSubscription _ _ endpoint p256dh auth _)) -> do
                 let notification = mkPushNotification endpoint p256dh auth
                         & pushMessage .~ object [ "title" .= messageTitle
                                                 , "icon" .= icon
-                                                , "image" .= (urlRender . toParent . PhotoR $ sid)
+                                                , "image" .= (expath . toParent . PhotoR $ sid)
                                                 , "body" .= messageBody
                                                 , "messageType" .= messageType
-                                                , "targetRoom" .= urlRender (toParent $ RoomR rid cid sid True)
-                                                , "targetPush" .= urlRender (toParent $ PushMessageR rid cid sid)
+                                                , "targetRoom" .= (expath . toParent $ RoomR rid cid sid True)
+                                                , "targetPush" .= (expath . toParent $ PushMessageR rid cid sid)
                                                 , "senderId" .= sid
                                                 , "senderName" .= ( (userName . entityVal <$> sender)
                                                                     <|> (Just . userEmail . entityVal <$> sender)

@@ -16,7 +16,7 @@ Array.from(
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{show PushMsgTypeRefresh}) {
+  if (message.data.messageType === #{PushMsgTypeRefresh}) {
     document.getElementById(`idBadgePhoto${message.data.senderId}`)?.remove();
   }
 
