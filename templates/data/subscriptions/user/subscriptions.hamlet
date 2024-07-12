@@ -2,7 +2,7 @@
   <md-icon-button href=@{DataR SubscriptionsR} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgTheUserSubscriptions}
 
 <main>
@@ -15,9 +15,9 @@
       <img src=@{DataR $ UserPhotoR uid} width=56 height=56 loading=lazy alt=_{MsgPhoto}>
       <figcaption>
         $maybe attrib <- attrib
-          <div.app-attribution.body-small>
+          <div.app-attribution.md-typescale-body-small>
             #{attrib}
-        <div.body-large>
+        <div.md-typescale-body-large>
           $maybe name <- name
             #{name}
           $nothing
@@ -26,7 +26,7 @@
   $if null subscriptions
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoSubscriptionsYet}
   $else
     <md-list>
@@ -46,7 +46,7 @@
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
+            <div.app-attribution-wrapper.md-typescale-body-small>
               #{attrib}
         <md-divider>
           

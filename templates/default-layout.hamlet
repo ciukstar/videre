@@ -9,9 +9,9 @@
 
     <figure ##{idFigureSenderPhoto}>
       <img ##{idImgSenderPhoto} width=48 height=48>
-      <figcaption.body-large ##{idFigcaptionSenderInfo}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionSenderInfo}>
 
-    <p.body-medium ##{idNotificationBody}>
+    <p.md-typescale-body-medium ##{idNotificationBody}>
   
     <audio loop ##{idAudioIncomingChatRingtone} preload=none>
       $with (ringtone, mime) <- incomingChatRingtone
@@ -41,7 +41,7 @@
         <div.circle.one>
         <div.circle.two>
       
-      <figcaption.body-large ##{idFigcaptionVideoCallerPhoto}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionVideoCallerPhoto}>
   
     <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
@@ -74,7 +74,7 @@
         <div.circle.one>
         <div.circle.two>
       
-      <figcaption.body-large ##{idFigcaptionAudioCallerPhoto}>
+      <figcaption.md-typescale-body-large ##{idFigcaptionAudioCallerPhoto}>
   
     <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
@@ -101,7 +101,7 @@
       <md-icon>close
 
   <form slot=content method=dialog>
-    <p.body-large>
+    <p.md-typescale-body-large>
       _{MsgMissedCall},&nbsp;
       <span ##{idMissedCallCaller}>
 

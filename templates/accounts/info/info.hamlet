@@ -3,7 +3,7 @@
     <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
       <md-icon>arrow_back
           
-    <h1.title-large>
+    <h1.md-typescale-title-large>
       _{MsgUserAccount}
 
   $maybe _ <- info
@@ -32,9 +32,9 @@
         
     $maybe Entity _ (UserInfo _ bday) <- info
       <dl>
-        <dt.label-large>
+        <dt.md-typescale-label-large>
           _{MsgBirthday}
-        <dd.body-medium>
+        <dd.md-typescale-body-medium>
             $maybe dt <- show <$> bday
               <time datetime=#{dt}>#{dt}
             $nothing

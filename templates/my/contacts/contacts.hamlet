@@ -2,7 +2,7 @@
 <header.app-top-app-bar.primary>
   ^{widgetMenu}
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgAppName}
 
   <span.app-top-app-bar-end>
@@ -15,9 +15,9 @@
   $if null entries
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgYourContactListIsEmpty}
-        <p.body-small>
+        <p.md-typescale-body-small>
           _{MsgYouMightWantToAddAFew}
   $else
     
@@ -60,7 +60,7 @@
           <md-icon slot=end>arrow_forward_ios
         $maybe attrib <- attrib
           <div.app-attribution>
-            <div.app-attribution-wrapper.body-small>
+            <div.app-attribution-wrapper.md-typescale-body-small>
               #{attrib}
         <md-divider>
         

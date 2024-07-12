@@ -3,7 +3,7 @@
   <md-icon-button href=@{DataR RingtonesR} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgRingtone}
 
   <div.header-end>
@@ -33,13 +33,13 @@
 
   $maybe Entity rid (Ringtone name mime _) <- ringtone
     <dl>
-      <dt.label-large>_{MsgTheName}
+      <dt.md-typescale-label-large>_{MsgTheName}
       <dd>#{name}
 
-      <dt.label-large>_{MsgType}
+      <dt.md-typescale-label-large>_{MsgType}
       <dd>#{mime}
 
-      <dt.label-large>_{MsgAudio}
+      <dt.md-typescale-label-large>_{MsgAudio}
       <dd>
         <audio controls src=@{DataR $ RingtoneAudioR rid} preload=none>
           

@@ -1,7 +1,7 @@
 <header.app-top-app-bar.primary>
   ^{widgetMenu}
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgAppName}
 
   <span.app-top-app-bar-end>
@@ -11,10 +11,10 @@
 
   ^{widgetBanner msgs}
 
-  <h2.headline>
+  <h2.md-typescale-headline-large>
     _{MsgWelcomeTo} _{MsgAppName}
     
-  <p.body-small>
+  <p.md-typescale-body-small>
     _{MsgSendMessagesVideochatOrAudioCall}
 
   $maybe Entity uid _ <- user
@@ -25,7 +25,7 @@
     <md-filled-tonal-button has-icon type=link href=@{AuthR LoginR}>
       <md-icon slot=icon>login
       _{MsgLogIn}
-    <p.body-small>
+    <p.md-typescale-body-small>
       _{MsgLoginToAccessYourContacts}
     
 

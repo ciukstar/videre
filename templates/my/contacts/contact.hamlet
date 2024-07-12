@@ -3,7 +3,7 @@
   <md-icon-button type=link href=#{backlink}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgContact}
 
   <span.app-top-app-bar-end>
@@ -41,11 +41,11 @@
     <figcaption>
       $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, (_, _)))) <- contact
         $maybe attribution <- attrib
-          <div.body-small>
+          <div.md-typescale-body-small>
             ^{attribution}
         $maybe name <- name
-          <div.body-large>#{name}
-        <div.body-medium>#{email}
+          <div.md-typescale-body-large>#{name}
+        <div.md-typescale-body-medium>#{email}
 
 
   <form method=post action=@?{(ContactR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et2}>
@@ -56,7 +56,7 @@
       <dl>
         <dt>
           <md-icon.notifications-disabled>notifications_off
-        <dd.body-small>
+        <dd.md-typescale-body-small>
           $maybe name <- name
             _{MsgYouAreNotSubscribedToNotificationsFrom name}
           $nothing
@@ -67,7 +67,7 @@
       <dl>
         <dt>
           <md-icon.call-loop>repeat
-        <dd.body-small>
+        <dd.md-typescale-body-small>
           $maybe name <- name
             _{MsgUserSubscribedOnThisDevice name}
           $nothing
@@ -82,7 +82,7 @@
       <dl>
         <dt>
           <md-icon.phone-disabled>phone_disabled
-        <dd.body-small>
+        <dd.md-typescale-body-small>
           $maybe name <- name
             _{MsgYouAreNotYetInContactListOfUser name}
           $nothing

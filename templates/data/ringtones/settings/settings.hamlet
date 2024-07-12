@@ -2,7 +2,7 @@
 <header.primary>
   ^{widgetMenu}
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgRingtones}
 
   <div #idHeaderEnd>
@@ -30,7 +30,7 @@
       $if null defaults
         <figure style="text-align:center">
           <span.on-secondary style="font-size:4rem">&varnothing;
-          <figcaption.body-large>
+          <figcaption.md-typescale-body-large>
             _{MsgNoDefaultRingtonesSetYet}
       $else
         <md-list>

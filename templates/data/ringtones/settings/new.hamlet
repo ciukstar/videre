@@ -2,7 +2,7 @@
   <md-icon-button href=@{DataR RingtoneSettingsR} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgDefaultSettings}
 
 <main>

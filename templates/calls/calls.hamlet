@@ -2,7 +2,7 @@
 <header.app-top-app-bar.primary>
   ^{widgetMenu}
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgCalls}
 
   <span.app-top-app-bar-end>
@@ -15,9 +15,9 @@
   $if null calls
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgYouHaveNotMadeAnyCallsYet}
-        <p.body-small>
+        <p.md-typescale-body-small>
           _{MsgSelectCalleeToCall}
   $else
     <md-list>
@@ -96,7 +96,7 @@
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                     $with (Value subscriptions) <- ns1
                       $if subscriptions < 1
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           $maybe name <- name
                             _{MsgUserYouSeemsUnsubscribed name}
                           $nothing
@@ -110,14 +110,14 @@
                         $else
                           double_arrow
                       $if loops > 0
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
                     <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                     $with (Value accessible) <- na1
                       $if accessible < 1
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}
                           $nothing
@@ -135,7 +135,7 @@
                   _{MsgCallDeclined}
 
                 <div slot=content>
-                  <p.body-large>
+                  <p.md-typescale-body-large>
                     $maybe name <- name
                       _{MsgCalleeDeclinedTheCall name}
                     $nothing
@@ -148,7 +148,7 @@
 
               $maybe attrib <- attrib
                 <div.app-attribution>
-                  <div.app-attribution-wrapper.body-small>
+                  <div.app-attribution-wrapper.md-typescale-body-small>
                     #{attrib}
           $else
             
@@ -223,7 +223,7 @@
                     <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                     $with (Value subscriptions) <- ns2
                       $if subscriptions < 1
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           $with Entity _ (User email _ _ _ _ name _ _) <- callerE
                             $maybe name <- name
                               _{MsgUserYouSeemsUnsubscribed name}
@@ -238,14 +238,14 @@
                         $else
                           double_arrow
                       $if loops > 0
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
                     <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                     $with (Value accessible) <- na2
                       $if accessible < 1
-                        <figcaption.body-small>
+                        <figcaption.md-typescale-body-small>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}
                           $nothing
@@ -262,7 +262,7 @@
                   _{MsgCallDeclined}
 
                 <div slot=content>
-                  <p.body-large>
+                  <p.md-typescale-body-large>
                     $maybe name <- name
                       _{MsgCalleeDeclinedTheCall name}
                     $nothing
@@ -275,7 +275,7 @@
 
               $maybe attrib <- attrib
                 <div.app-attribution>
-                  <div.app-attribution-wrapper.body-small>
+                  <div.app-attribution-wrapper.md-typescale-body-small>
                     #{attrib}
           
           

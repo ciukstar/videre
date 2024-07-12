@@ -17,7 +17,7 @@ header
         align-items: center
         justify-content: flex-start
         column-gap: 0.5rem
-        .title-small
+        .md-typescale-title-small
             white-space: nowrap
             overflow: hidden
             text-overflow: ellipsis

@@ -216,8 +216,8 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
 
-            addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
-            addScript $ StaticR js_md3_min_js
+            -- addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
+            -- addScript $ StaticR js_md3_min_js
 
             idDialogChatNotification <- newIdent
             idFigureSenderPhoto <- newIdent
@@ -837,23 +837,32 @@ instance YesodAuthEmail App where
 
                       let accounts = users <> supers
 
+                      toWidget [julius|
+                          const menuAnchor = document.getElementById('anchorDemoAccounts');
+                          const menuDemoAccounts = document.getElementById('menuDemoAccounts');
+                          window.addEventListener('load',function (e) {
+                            menuDemoAccounts.style.visibility = 'visible';
+                          });
+                          menuAnchor.addEventListener('click',function (e) {
+                            menuDemoAccounts.open = !menuDemoAccounts.open;
+                          });
+                      |]
                       toWidget [cassius|
                           ##{fvId emailV}, ##{fvId passV}
                             align-self: stretch
                       |]
                       [whamlet|
 <span style="position:relative;align-self:flex-end">
-  <md-text-button.body-small type=button #anchorDemoAccounts trailing-icon
-    onclick="document.getElementById('menuDemoAccounts').open = !document.getElementById('menuDemoAccounts').open">
+  <md-text-button.body-small type=button #anchorDemoAccounts trailing-icon>
     _{MsgDemoUserAccounts}
     <md-icon slot=icon>arrow_drop_down
-  <md-menu #menuDemoAccounts anchor=anchorDemoAccounts>
+  <md-menu #menuDemoAccounts anchor=anchorDemoAccounts style="visibility:hidden">
     $with n <- length accounts
       $forall (i,Entity uid (User email _ _ _ _ name super admin)) <- zip (irange 1) accounts
         $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
           <md-menu-item onclick="document.getElementById('#{fvId emailV}').value = '#{email}';document.getElementById('#{fvId passV}').value = '#{pass}'">
             <md-icon slot=start>
-              <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto} style="clip-path:circle(50%)">
+              <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto} height=24 width=24 style="clip-path:circle(50%)">
             <div slot=headline>
               #{email}
             <div slot=supporting-text style="white-space:nowrap;max-width:50vw">

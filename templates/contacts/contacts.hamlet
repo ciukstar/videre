@@ -3,7 +3,7 @@
   <md-icon-button type=link href=#{backlink}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgContacts}
 
 <main>
@@ -13,7 +13,7 @@
   $if null users
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoRegisteredUsersYet}
   $else
 

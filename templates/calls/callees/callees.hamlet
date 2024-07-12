@@ -3,7 +3,7 @@
   <md-icon-button type=link href=@{CallsR uid}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgContacts}
 
 <main>
@@ -13,9 +13,9 @@
   $if null callees
     <figure style="text-align:center">
       <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.body-large>
+      <figcaption.md-typescale-body-large>
         _{MsgNoRegisteredUsersYet}
-        <p.body-small>
+        <p.md-typescale-body-small>
           _{MsgYouMightWantToAddAFew}
   $else
     <md-list>
@@ -75,7 +75,7 @@
               
           $maybe attrib <- attrib
             <div.app-attribution>
-              <div.app-attribution-wrapper.body-small>
+              <div.app-attribution-wrapper.md-typescale-body-small>
                 #{attrib}
                 
           <md-divider>
@@ -92,17 +92,17 @@
                 <img.user-photo src=@{AccountPhotoR rid} width=96 height=96 loading=lazy>
                 <figcaption>
                   $maybe attribution <- attrib
-                    <div.body-small>
+                    <div.md-typescale-body-small>
                       ^{attribution}
                   $maybe name <- name
-                    <div.body-large>#{name}
-                  <div.body-medium>#{email}
+                    <div.md-typescale-body-large>#{name}
+                  <div.md-typescale-body-medium>#{email}
 
               $if ns < 1
                 <dl>
                   <dt>
                     <md-icon.notifications-disabled>notifications_off
-                  <dd.body-small>
+                  <dd.md-typescale-body-small>
                     $maybe name <- name
                       _{MsgYouAreNotSubscribedToNotificationsFrom name}
                     $nothing
@@ -112,7 +112,7 @@
                 <dl>
                   <dt>
                     <md-icon.call-loop>repeat
-                  <dd.body-small>
+                  <dd.md-typescale-body-small>
                     $maybe name <- name
                       _{MsgUserSubscribedOnThisDevice name}
                     $nothing
@@ -122,7 +122,7 @@
                 <dl>
                   <dt>
                     <md-icon.phone-disabled>phone_disabled
-                  <dd.body-small>
+                  <dd.md-typescale-body-small>
                     $maybe name <- name
                       _{MsgYouAreNotYetInContactListOfUser name}
                     $nothing
@@ -165,7 +165,7 @@
               <figure>
                 <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                 $if ns < 1
-                  <figcaption.body-small>
+                  <figcaption.md-typescale-body-small>
                     $maybe Entity _ (User email _ _ _ _ name _ _) <- caller
                       $maybe name <- name
                         _{MsgUserYouSeemsUnsubscribed name}
@@ -179,13 +179,13 @@
                   $else
                     double_arrow
                 $if nl > 0
-                  <figcaption.body-small>
+                  <figcaption.md-typescale-body-small>
                     _{MsgCallerCalleeSubscriptionLoopWarning}
 
               <figure>
                 <img src=@{AccountPhotoR rid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
                 $if na < 1
-                  <figcaption.body-small>
+                  <figcaption.md-typescale-body-small>
                     $maybe name <- name
                       _{MsgUserAppearsToBeUnavailable name}
                     $nothing
@@ -202,7 +202,7 @@
               _{MsgCallDeclined}
 
             <div slot=content>
-              <p.body-large>
+              <p.md-typescale-body-large>
                 $maybe name <- name
                   _{MsgCalleeDeclinedTheCall name}
                 $nothing

@@ -3,7 +3,7 @@
   <md-icon-button type=link href=@{DataR $ UserSubscriptionsR uid} aria-label=_{MsgBack}>
     <md-icon>arrow_back
 
-  <h1.title-large>
+  <h1.md-typescale-title-large>
     _{MsgSubscription}
 
   <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
@@ -29,17 +29,17 @@
       
   $maybe Entity _ (PushSubscription _ _ endpoint _ _ ua) <- subscription
     <dl>
-      <dt.label-large>
+      <dt.md-typescale-label-large>
         _{MsgEndpoint}
       <dd>
-        <code.body-small>
+        <code.md-typescale-body-small>
           #{endpoint}
         
-      <dt.label-large>
+      <dt.md-typescale-label-large>
         _{MsgUserAgent}
       <dd>
         $maybe ua <- ua
-          <code.body-small>
+          <code.md-typescale-body-small>
             #{ua}
 
 ^{widgetSnackbar msgs}

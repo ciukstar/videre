@@ -41,7 +41,7 @@
   <div slot=headline>
     _{MsgCallEnded}
 
-  <p.body-medium slot=content>
+  <p.md-typescale-body-medium slot=content>
     _{MsgInterlocutorEndedSession interlocutorName}
 
   <div slot=actions>

@@ -20,5 +20,5 @@ main
     align-items: center
     row-gap: 1rem
 
-    p.body-small
+    p.md-typescale-body-small
         text-align: center

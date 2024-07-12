@@ -2,8 +2,8 @@
 #{extra}
 <div ##{idFormFieldSubscribe}>
   ^{fvInput v}
-  <label.body-large for=#{fvId v}>
+  <label.md-typescale-body-large for=#{fvId v}>
     #{fvLabel v}
 
-<p.body-small>
+<p.md-typescale-body-small>
   _{MsgAllowToBeNotifiedBy publisherName}

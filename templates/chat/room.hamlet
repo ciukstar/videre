@@ -6,7 +6,7 @@
   <span.app-title>
     <img src=@{photor} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
 
-    <span.title-small>
+    <span.md-typescale-title-small>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
         $maybe name <- name
           #{name}
@@ -42,9 +42,9 @@
   <div ##{idChatOutput}>
 
     $forall (day,messages) <- chats
-      <time.day-bubble.body-small datetime=#{show day}>#{show day}
+      <time.day-bubble.md-typescale-body-small datetime=#{show day}>#{show day}
       $forall (Value userId, _, Value time, Value msg, Value callType, Value media) <- messages
-        <p.bubble.body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
+        <p.bubble.md-typescale-body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
           <span.bubble-content>
             $if media
               $case callType
@@ -57,7 +57,7 @@
             $else
               #{msg}
           <span.bubble-status-line>
-            <time.time-bubble.body-small datetime=#{show time}>
+            <time.time-bubble.md-typescale-body-small datetime=#{show time}>
             <i.icon>done_all
           <span.bubble-tail-out>
             <span.bubble-tail>
@@ -85,7 +85,7 @@
     <figure>
       <img src=@{photos} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
       $if not subscribed
-        <figcaption.body-small>
+        <figcaption.md-typescale-body-small>
           $maybe Entity _ (User email _ _ _ _ name _ _) <- user
             $maybe name <- name
               _{MsgUserYouSeemsUnsubscribed name}
@@ -100,14 +100,14 @@
         <md-icon.callarrow>double_arrow
 
       $if loop
-        <figcaption.body-small>
+        <figcaption.md-typescale-body-small>
           _{MsgCallerCalleeSubscriptionLoopWarning}
       
 
     <figure>
       <img src=@{photor} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
       $if not accessible
-        <figcaption.body-small>
+        <figcaption.md-typescale-body-small>
           $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
             $maybe name <- name
               _{MsgUserAppearsToBeUnavailable name}
@@ -135,7 +135,7 @@
     _{MsgCallDeclined}
 
   <form slot=content method=dialog>
-    <p.body-large>
+    <p.md-typescale-body-large>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
         $maybe name <- name
           _{MsgCalleeDeclinedTheCall name}

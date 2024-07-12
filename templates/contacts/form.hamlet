@@ -17,7 +17,7 @@
       onclick="document.getElementById('#{idDialogSubscribe}').close()">
       <md-icon>close
     
-  <p.body-medium slot=content ##{idDialogSubscribeContent}>
+  <p.md-typescale-body-medium slot=content ##{idDialogSubscribeContent}>
     _{MsgAllowToBeNotifiedBySelectedUsers}.
 
   <div slot=actions>

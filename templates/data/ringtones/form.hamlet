@@ -1,13 +1,13 @@
 
 #{extra}
 
-<label.body-small for=#{fvId audioV}>
+<label.md-typescale-body-small for=#{fvId audioV}>
   
   <md-outlined-button type=button style="pointer-events:none;width:100%">
     <md-icon slot=icon>library_music
     <span ##{idButtonUploadLabel} data-label=_{MsgSelectRingtoneFile}>
       _{MsgSelectRingtone}
-<div.body-small.on-error>
+<div.md-typescale-body-small.on-error>
   $maybe errs <- fvErrors audioV
     #{errs}
 
