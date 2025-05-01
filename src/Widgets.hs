@@ -2,8 +2,7 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Widgets
-  ( widgetMenu
-  , widgetUser
+  ( widgetUser
   , widgetBanner
   , widgetSnackbar
   ) where
@@ -13,26 +12,25 @@ import Database.Persist (Entity (Entity))
 import Foundation
     ( Widget
     , Route
-      ( HomeR, DataR, DocsR, AuthR, AccountR, AccountPhotoR, MyContactsR, CallsR
+      ( AuthR, AccountR, AccountPhotoR, MyContactsR
       , AccountRingtonesR
       )
     , DataR (UsersR, TokensR, SubscriptionsR, RingtonesR)
     , AppMessage
       ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
       , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
-      , MsgCalls, MsgContacts, MsgSubscriptions, MsgRingtones, MsgSettings
+      , MsgContacts, MsgSubscriptions, MsgRingtones, MsgSettings
       )
     )
 
 import Model
     (statusError, statusSuccess
-    , User (User), RingtoneType (RingtoneTypeCallOutgoing)
+    , RingtoneType (RingtoneTypeCallOutgoing)
     )
 
 import Settings (widgetFile)
 
 import Yesod.Auth (maybeAuth, Route (LoginR, LogoutR))
-import Yesod.Core.Handler (getCurrentRoute)
 import Data.Text (Text)
 import Text.Hamlet (Html)
 
@@ -45,15 +43,6 @@ widgetBanner msgs = do
 widgetSnackbar :: [(Text, Html)] -> Widget
 widgetSnackbar msgs = do
     $(widgetFile "widgets/snackbar")
-
-
-widgetMenu :: Widget
-widgetMenu = do
-    
-    user <- maybeAuth
-    curr <- getCurrentRoute
-    
-    $(widgetFile "widgets/menu")
 
 
 widgetUser :: Widget

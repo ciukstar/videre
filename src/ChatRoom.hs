@@ -11,6 +11,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where

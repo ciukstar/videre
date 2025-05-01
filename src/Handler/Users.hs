@@ -28,7 +28,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Form, Widget
+    ( Handler, Form, Widget, widgetMainMenu
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage
@@ -66,7 +66,7 @@ import Settings.StaticFiles
     
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core
@@ -250,6 +250,8 @@ getUsersR = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgUsers
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "data/users/users")
 
 

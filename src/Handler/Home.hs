@@ -9,7 +9,7 @@ module Handler.Home (getHomeR) where
 import Database.Persist (Entity (Entity))
 
 import Foundation
-    ( Handler
+    ( Handler, widgetMainMenu, widgetAccount
     , Route (AuthR, MyContactsR)
     , AppMessage
       ( MsgWelcomeTo, MsgAppName, MsgSendMessagesVideochatOrAudioCall
@@ -21,10 +21,10 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth, Route (LoginR))
-import Yesod.Core (Yesod(defaultLayout), getMessages)
+import Yesod.Core (Yesod(defaultLayout), getMessages, newIdent)
 import Yesod.Core.Handler (setUltDestCurrent)
 import Yesod.Core.Widget (setTitleI)
 
@@ -36,5 +36,7 @@ getHomeR = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgAppName
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "homepage")
 

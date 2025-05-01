@@ -4,7 +4,7 @@
 module Handler.Resources (getDocsR) where
 
 import Foundation
-    ( Handler
+    ( Handler, widgetMainMenu
     , Route (StaticR, HomeR, AuthR, DataR)
     , DataR (RingtonesR)
     , AppMessage
@@ -28,12 +28,12 @@ import Settings.StaticFiles (img_ERD_Videre_svg)
 import Text.Blaze.Html (preEscapedToHtml)
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (Route (LoginR))
 import Yesod.Core
     ( Yesod(defaultLayout), setUltDestCurrent, getMessages, getUrlRender
-    , getMessageRender
+    , getMessageRender, newIdent
     )
 import Yesod.Core.Widget (setTitleI)
 
@@ -51,4 +51,6 @@ getDocsR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgAppDocumentation
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "resources/docs")

@@ -22,7 +22,7 @@ import Database.Persist (Entity (Entity))
 import qualified Database.Persist as P (delete)
 
 import Foundation
-    ( Handler, Form
+    ( Handler, Form, widgetMainMenu
     , Route (DataR)
     , DataR
       ( UserPhotoR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR
@@ -50,9 +50,9 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner, widgetSnackbar)
 
-import Yesod.Core (Yesod(defaultLayout), whamlet, addMessageI, redirect)
+import Yesod.Core (Yesod(defaultLayout), whamlet, addMessageI, redirect, newIdent)
 import Yesod.Core.Handler (getMessages)
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form (FormResult(FormSuccess))
@@ -144,4 +144,6 @@ getSubscriptionsR = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSubscriptions
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "data/subscriptions/subscriptions")

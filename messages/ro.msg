@@ -1,3 +1,5 @@
+Home: Acasă
+Logo: Logo
 Postpone: Amână
 YouHaveNotSetAnyRingtonesYet: Încă nu ați setat niciun ton de apel
 Notifications: Notificări

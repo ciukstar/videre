@@ -7,15 +7,15 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
       const endpoint = localStorage.getItem(#{localStorageEndpoint});
 
       if (endpoint) {
-	
-	registration.pushManager.getSubscription().then(function (subscription) {
+        
+        registration.pushManager.getSubscription().then(function (subscription) {
           
           if (!subscription) {
-	    
-	    registration.pushManager.subscribe({
+            
+            registration.pushManager.subscribe({
               userVisibleOnly: true,
               applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-	    }).then((subscription) => {
+            }).then((subscription) => {
               
               const subscr = JSON.parse(JSON.stringify(subscription));
               
@@ -32,18 +32,18 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
                 localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
               });
               
-	    }).catch((err) => {
+            }).catch((err) => {
               
               registration.pushManager.getSubscription().then((subscription) => {
                 subscription.unsubscribe().then((sccess) => {
                   registration.pushManager.subscribe({
-		    userVisibleOnly: true,
-		    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+                    userVisibleOnly: true,
+                    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
                   }).then((subscription) => {
-		    
-		    const subscr = JSON.parse(JSON.stringify(subscription));
-		    
-		    fetch('@{PushSubscriptionEndpointR}', {
+                    
+                    const subscr = JSON.parse(JSON.stringify(subscription));
+                    
+                    fetch('@{PushSubscriptionEndpointR}', {
                       method: 'PUT',
                       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                       body: new URLSearchParams({
@@ -52,19 +52,19 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
                         auth: subscr.keys.auth,
                         oldendpoint: endpoint
                       })
-		    }).then((response) => {
+                    }).then((response) => {
                       localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
-		    });
-		    
+                    });
+                    
                   });
                 });
               });
               
-	    });
-	
+            });
+        
           }
-	});
-	
+        });
+        
       }
 
     }
@@ -208,14 +208,6 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
   }
 
-});
-
-window.addEventListener('load', (e) => {
-  [ #{idDialogChatNotification}
-  , #{idDialogIncomingVideoCall}
-  , #{idDialogIncomingAudioCall}
-  , #{idDialogMissedCall}    
-  ].forEach(x => { document.getElementById(x).style.visibility = 'visible'; });
 });
 
 

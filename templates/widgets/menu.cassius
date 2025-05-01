@@ -1,28 +1,19 @@
 
-details.app-nav-drawer
-  summary
-    list-style: none
-  aside.app-nav-drawer
-    position: fixed
-    top: 0
-    left: 0
-    display: flex
-    flex-direction: column
-    box-sizing: border-box
-    height: 100%
-    transition: 0.5s
-    padding: 1rem
-    --md-elevation-level: 1
-    .app-header
-      margin-bottom: 2rem
-      text-align: end
-    .app-submenu
-      display: flex
-      flex-direction: column
+ ##{idOverlay}
+     z-index: 101
 
-details > summary > md-menu-item > div
-  display: flex
-  flex-layout: row
-  justify-content: space-between
-  align-items: center
-  gap: 2rem
+##{idDialogMainMenu}
+    z-index: 102
+    header
+        nav
+            flex: 1
+
+            ##{idButtonMainMenuClose}
+                margin-left: auto
+
+    nav.drawer > a:is(:hover)
+        background-color: var(--active)
+
+    nav.drawer > a:is(.active)
+        background-color: var(--secondary-container)
+        color: var(--on-secondary-container)

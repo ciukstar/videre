@@ -66,7 +66,7 @@ import qualified Database.Persist as P ( PersistStoreWrite (delete), (=.) )
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
-    ( Handler, Form, getVAPIDKeys, App (appHttpManager, appSettings)
+    ( Handler, Form, getVAPIDKeys, App (appHttpManager, appSettings), widgetMainMenu
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
@@ -155,7 +155,7 @@ import Web.WebPush
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core
@@ -319,6 +319,8 @@ getCallsR uid = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgCalls
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
         idFabAdd <- newIdent
         $(widgetFile "calls/calls")
@@ -628,6 +630,8 @@ getMyContactsR uid = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgAppName
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         idFabAdd <- newIdent
         $(widgetFile "my/contacts/contacts")
   where

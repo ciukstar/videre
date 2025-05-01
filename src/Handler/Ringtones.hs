@@ -36,7 +36,7 @@ import Database.Persist
     )    
 
 import Foundation
-    ( Handler, Form
+    ( Handler, Form, widgetMainMenu
     , Route (DataR)
     , DataR
       ( RingtoneNewR, RingtonesR, RingtonesR, RingtoneR, RingtoneAudioR
@@ -74,7 +74,7 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetBanner, widgetMenu, widgetSnackbar, widgetUser)
+import Widgets (widgetBanner, widgetSnackbar, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, newIdent, FileInfo (fileContentType)
@@ -223,6 +223,8 @@ getRingtoneSettingsR = do
     msgs <- getMessages  
     defaultLayout $ do
         setTitleI MsgDefaultSettings
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "data/ringtones/settings/settings")
 
 
@@ -442,6 +444,8 @@ getRingtonesR = do
     
     defaultLayout $ do
         setTitleI MsgRingtones
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         $(widgetFile "data/ringtones/ringtones")
 
 

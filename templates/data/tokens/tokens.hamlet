@@ -1,15 +1,17 @@
 
-<header.primary>
-  <div #headerStart>
-    ^{widgetMenu}
+^{widgetMainMenu idOverlay idDialogMainMenu}
 
-    <h1.md-typescale-title-large>
+<header.fixed.primary>
+  <nav.responsive.max>
+    <button.circle.transparent data-ui=##{idDialogMainMenu}>
+      <i>menu
+
+    <h1.title.max>
       _{MsgTokens}
 
-  ^{widgetUser}
+    ^{widgetUser}
 
-
-<main>
+<main.reponsive>
 
   ^{widgetBanner msgs}
 

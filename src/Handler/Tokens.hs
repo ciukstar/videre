@@ -38,7 +38,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( App (appSettings), Form, Handler
+    ( App (appSettings), Form, Handler, widgetMainMenu
     , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
@@ -85,7 +85,7 @@ import Text.Shakespeare.Text (st)
 
 import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails))
 
-import Widgets (widgetMenu, widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner, widgetSnackbar)
 
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
@@ -195,6 +195,8 @@ postTokensVapidClearR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
+              idOverlay <- newIdent
+              idDialogMainMenu <- newIdent
               formTokensGmail <- newIdent
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
@@ -470,6 +472,8 @@ postTokensGoogleapisClearR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
+              idOverlay <- newIdent
+              idDialogMainMenu <- newIdent
               formTokensGmail <- newIdent
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
@@ -522,6 +526,8 @@ postTokensR = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
+              idOverlay <- newIdent
+              idDialogMainMenu <- newIdent
               formTokensGmail <- newIdent
               formTokensGmailClear <- newIdent
               formTokensVapid <- newIdent
@@ -550,6 +556,8 @@ getTokensR = do
     defaultLayout $ do
         setUltDestCurrent
         setTitleI MsgTokens
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
         formTokensGmail <- newIdent
         formTokensGmailClear <- newIdent
         formTokensVapid <- newIdent

@@ -1,37 +1,37 @@
 
 ^{widget}
 
-<md-dialog ##{idDialogChatNotification} style="visibility:hidden">
-  <div slot=headline>
+<dialog ##{idDialogChatNotification}>
+  <h6>
     _{MsgNewMessage}
 
-  <form slot=content method=dialog>
+  <form method=dialog>
 
     <figure ##{idFigureSenderPhoto}>
       <img ##{idImgSenderPhoto} width=48 height=48>
-      <figcaption.md-typescale-body-large ##{idFigcaptionSenderInfo}>
+      <figcaption.large-text ##{idFigcaptionSenderInfo}>
 
-    <p.md-typescale-body-medium ##{idNotificationBody}>
+    <p.medium-text ##{idNotificationBody}>
   
     <audio loop ##{idAudioIncomingChatRingtone} preload=none>
       $with (ringtone, mime) <- incomingChatRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <div slot=actions>
+  <nav.right-align>
 
-    <md-text-button ##{idButtonIgnoreNotification} type=button>
+    <button.transparent.link ##{idButtonIgnoreNotification} type=button>
       _{MsgIgnore}
 
-    <md-filled-button ##{idButtonReplyNotification} has-icon type=link>
-      <md-icon slot=icon>reply
+    <button ##{idButtonReplyNotification} type=button>
+      <i>reply
       _{MsgReply}
 
 
-<md-dialog ##{idDialogIncomingVideoCall} style="visibility:hidden">
-  <div slot=headline>
+<dialog ##{idDialogIncomingVideoCall}>
+  <h6>
     _{MsgIncomingVideoCall}
 
-  <div slot=content>
+  <div>
 
     <figure ##{idFigureVideoCallerPhoto}>
       <div.img-wrapper>
@@ -41,30 +41,30 @@
         <div.circle.one>
         <div.circle.two>
       
-      <figcaption.md-typescale-body-large ##{idFigcaptionVideoCallerPhoto}>
+      <figcaption.large-text ##{idFigcaptionVideoCallerPhoto}>
   
     <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <div slot=actions>
+  <nav.right-align>
 
-    <md-filled-icon-button ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
-      <md-icon>call_end
+    <button.cicle.fill ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
+      <i>call_end
 
-    <md-filled-icon-button ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
-      <md-icon>call
+    <button.circle.fill ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
+      <i>call
 
-    <md-filled-button ##{idButtonVideoCallAccept} has-icon type=button>
-      <md-icon slot=icon>videocam
+    <button.fill ##{idButtonVideoCallAccept} type=button>
+      <i>videocam
       _{MsgAccept}
       
 
-<md-dialog ##{idDialogIncomingAudioCall} style="visibility:hidden">
-  <div slot=headline>
+<dialog ##{idDialogIncomingAudioCall}>
+  <h6>
     _{MsgIncomingAudioCall}
 
-  <div slot=content>
+  <div>
 
     <figure ##{idFigureAudioCallerPhoto}>
       <div.img-wrapper>
@@ -74,37 +74,36 @@
         <div.circle.one>
         <div.circle.two>
       
-      <figcaption.md-typescale-body-large ##{idFigcaptionAudioCallerPhoto}>
+      <figcaption.large-text ##{idFigcaptionAudioCallerPhoto}>
   
     <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <div slot=actions>
+  <nav.right-align>
 
-    <md-filled-icon-button ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
-      <md-icon>call_end
+    <button.circle.fill ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
+      <i>call_end
 
-    <md-filled-icon-button ##{idButtonAudioCallAcceptVideo} type=button title=_{MsgVideoCall}>
-      <md-icon>videocam
+    <button.circle.fill ##{idButtonAudioCallAcceptVideo} type=button title=_{MsgVideoCall}>
+      <i>videocam
 
-    <md-filled-button ##{idButtonAudioCallAccept} has-icon type=button>
-      <md-icon slot=icon>call
+    <button.fill ##{idButtonAudioCallAccept} type=button>
+      <i>call
       _{MsgAccept}
 
 
-<md-dialog ##{idDialogMissedCall} style="visibility:hidden">
-  <div slot=headline>
-    <span style="flex:1">_{MsgMissedCall}
-    <md-icon-button type=button title=_{MsgClose}
-      onclick="document.getElementById('#{idDialogMissedCall}').close()">
-      <md-icon>close
+<dialog ##{idDialogMissedCall}>
+  <div.row>
+    <h6.max>_{MsgMissedCall}
+    <button.transparent.circle type=button title=_{MsgClose} data-ui=##{idDialogMissedCall}>
+      <i>close
 
-  <form slot=content method=dialog>
-    <p.md-typescale-body-large>
+  <form method=dialog>
+    <p.large-text>
       _{MsgMissedCall},&nbsp;
       <span ##{idMissedCallCaller}>
 
-  <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('#{idDialogMissedCall}').close()">
+  <nav.right-align>
+    <button type=button data-ui=##{idDialogMissedCall}>
       _{MsgClose}

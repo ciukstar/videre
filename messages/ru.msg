@@ -1,3 +1,6 @@
+
+Home: Главная
+Logo: Логотип
 Postpone: Откладывать
 YouHaveNotSetAnyRingtonesYet: Вы еще не установили мелодии звонка
 Notifications: Уведомления

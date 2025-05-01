@@ -534,6 +534,20 @@ isAdmin = do
         Nothing -> unauthorizedI MsgLoginPlease
 
 
+widgetAccount :: Widget
+widgetAccount = do
+    user <- maybeAuth
+    $(widgetFile "widgets/account") 
+
+
+widgetMainMenu :: Text -> Text -> Widget
+widgetMainMenu idOverlay idDialogMainMenu = do
+    curr <- getCurrentRoute
+    user <- maybeAuth
+    idButtonMainMenuClose <- newIdent
+    $(widgetFile "widgets/menu")
+
+
 -- Define breadcrumbs.
 instance YesodBreadcrumbs App where
     -- Takes the route that the user is currently on, and returns a tuple

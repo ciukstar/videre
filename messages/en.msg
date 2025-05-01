@@ -1,3 +1,6 @@
+
+Home: Home
+Logo: Logo
 Postpone: Postpone
 YouHaveNotSetAnyRingtonesYet: You haven't set any ringtones yet
 Notifications: Notifications

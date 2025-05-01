@@ -1,3 +1,6 @@
+
+Home: Accueil
+Logo: Logo
 Postpone: Reporter
 YouHaveNotSetAnyRingtonesYet: Vous n'avez pas encore défini de sonneries
 Notifications: Notifications
