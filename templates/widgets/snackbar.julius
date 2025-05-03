@@ -1,5 +1,14 @@
 
-Array.from(document.querySelectorAll('.app-snackbar')).forEach(x => {
-  x.querySelector('md-icon-button').onclick = (e) => { x.style.display = 'none'; };
-  setTimeout(() => { x.style.display = 'none'; }, 5000);
+Array.from(
+  document.querySelectorAll('.snackbar')
+).map(
+  x => [x,Array.from(x.querySelectorAll('button.close'))]
+).forEach(([snackbar,buttons]) => {
+  buttons.forEach(x => x.addEventListener('click', e => { snackbar.classList.remove('active'); }));
 });
+
+setTimeout(() => {
+  Array.from(
+    document.querySelectorAll('.snackbar')
+  ).forEach(x => { x.classList.remove('active'); });
+}, 6000);

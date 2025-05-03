@@ -22,6 +22,8 @@ module Material3
   , md3checkboxesField
   , md3checkboxesFieldList
   , tsep
+
+  , md3widget
   ) where
 
 
@@ -267,3 +269,19 @@ md3mreq field fs mdef = do
 
 tsep :: Text
 tsep = "<>"
+
+
+
+md3widget :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
+md3widget v = [whamlet|
+  <div.field.label.border.round :isJust (fvErrors v):.invalid>
+
+    ^{fvInput v}
+    <label for=#{fvId v}>
+      #{fvLabel v}
+      $if fvRequired v
+        <sup>*
+
+    $maybe err <- fvErrors v
+      <span.error>#{err}
+|]

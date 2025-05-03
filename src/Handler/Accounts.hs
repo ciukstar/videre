@@ -37,6 +37,27 @@ import Database.Esqueleto.Experimental
     , just, innerJoin, leftJoin, on, orderBy, asc, delete
     )
 
+import Foundation
+    ( Handler, Form, Widget, App, widgetSnackbar
+    , Route
+      ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
+      , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
+      , AccountSubscriptionR, AccountSubscriptionDeleR, UserRingtoneAudioR
+      , AccountRingtonesR, AccountNotificationsR
+      )
+    , AppMessage
+      ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
+      , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
+      , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
+      , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
+      , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
+      , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
+      , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet
+      , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgSelected
+      , MsgUnselected, MsgIncomingChat, MsgOutgoingChat
+      )
+    )
+
 import Material3 ( md3textField, md3mopt, md3dayField )
 
 import Model
@@ -58,27 +79,6 @@ import Model
       )
     )
 
-import Foundation
-    ( Handler, Form, Widget, App
-    , Route
-      ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
-      , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
-      , AccountSubscriptionR, AccountSubscriptionDeleR, UserRingtoneAudioR
-      , AccountRingtonesR, AccountNotificationsR
-      )
-    , AppMessage
-      ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
-      , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
-      , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
-      , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
-      , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
-      , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
-      , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet
-      , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgSelected
-      , MsgUnselected, MsgIncomingChat, MsgOutgoingChat
-      )
-    )
-
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
@@ -88,7 +88,7 @@ import Settings.StaticFiles
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage)
 
-import Widgets (widgetBanner, widgetSnackbar)
+import Widgets (widgetBanner)
 
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
@@ -101,7 +101,7 @@ import Yesod.Core.Content
     (TypedContent (TypedContent), ToContent (toContent))
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields
-    (fileField, radioField, optionsPairs, OptionList (olOptions)
+    ( fileField, optionsPairs, radioField', OptionList (olOptions)
     , Option (optionInternalValue, optionExternalValue)
     )
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
@@ -201,7 +201,7 @@ formRingtone uid typ extra = do
       ringtonesFieldList = ringtonesField . optionsPairs
 
       ringtonesField :: Handler (OptionList (Entity Ringtone)) -> Field Handler (Entity Ringtone)
-      ringtonesField ioptlist = (radioField ioptlist)
+      ringtonesField ioptlist = (radioField' ioptlist)
           { fieldView = \theId name attrs eval _isReq -> do
                 
               opts <- olOptions <$> handlerToWidget ioptlist

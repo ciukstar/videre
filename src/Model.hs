@@ -199,6 +199,12 @@ statusSuccess = "success"
 statusError :: Text
 statusError = "error"
 
+msgSuccess :: Text
+msgSuccess = "success"
+
+msgError :: Text
+msgError = "error"
+
 
 ultDestKey :: Text
 ultDestKey = "_ULT"

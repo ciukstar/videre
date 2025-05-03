@@ -4,7 +4,6 @@
 module Widgets
   ( widgetUser
   , widgetBanner
-  , widgetSnackbar
   ) where
 
 import Database.Persist (Entity (Entity))
@@ -12,19 +11,17 @@ import Database.Persist (Entity (Entity))
 import Foundation
     ( Widget
     , Route
-      ( AuthR, AccountR, AccountPhotoR, MyContactsR
+      ( AuthR, AccountR, AccountPhotoR
       , AccountRingtonesR
       )
-    , DataR (UsersR, TokensR, SubscriptionsR, RingtonesR)
     , AppMessage
-      ( MsgWelcome, MsgTokens, MsgMainMenu, MsgData, MsgUsers, MsgDocumentation
-      , MsgSourceCode, MsgResources, MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
-      , MsgContacts, MsgSubscriptions, MsgRingtones, MsgSettings
+      ( MsgSignIn, MsgUserAccount, MsgSignOut, MsgPhoto
+      , MsgSettings
       )
     )
 
 import Model
-    (statusError, statusSuccess
+    ( statusError
     , RingtoneType (RingtoneTypeCallOutgoing)
     )
 
@@ -38,11 +35,6 @@ import Text.Hamlet (Html)
 widgetBanner :: [(Text, Html)] -> Widget
 widgetBanner msgs = do
     $(widgetFile "widgets/banner")
-
-
-widgetSnackbar :: [(Text, Html)] -> Widget
-widgetSnackbar msgs = do
-    $(widgetFile "widgets/snackbar")
 
 
 widgetUser :: Widget

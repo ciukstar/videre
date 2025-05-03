@@ -7,5 +7,6 @@
     <h1.title.max>
       _{MsgAuthentication}
     
-<main.responsive>
+<main.responsive.vertical.middle-align>
+
   ^{forM_ (authPlugins app) (flip apLogin tp)}

@@ -534,6 +534,10 @@ isAdmin = do
         Nothing -> unauthorizedI MsgLoginPlease
 
 
+widgetSnackbar :: [(Text,Html)] -> Widget
+widgetSnackbar msgs = $(widgetFile "widgets/snackbar")
+
+
 widgetAccount :: Widget
 widgetAccount = do
     user <- maybeAuth
@@ -867,32 +871,32 @@ instance YesodAuthEmail App where
                           });
                                       |]
                       [whamlet|
-<button.border.transparent type=button ##{idButtonDemoAccounts} data-ui=##{idMenuDemoAccounts}>
-  <span>_{MsgDemoUserAccounts}
-  <i>arrow_drop_down
-  <menu.border.no-wrap ##{idMenuDemoAccounts}>
-    $forall Entity uid (User email _ _ _ _ name super admin) <- accounts
-      $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
-        <li data-email=#{email} data-password=#{pass} data-ui=##{idMenuDemoAccounts}>
-          <i.circle>
-            <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto}>
-            
-          <div.max>
-            <h6.small>
-              #{email}
-            <div.large-line>
-              $maybe name <- name
-                #{name}
-            <div.upper>
-              $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator)]
-                $if not (null roles)
-                  $forall role <- roles
-                    _{role} #
+                          <button.border.transparent type=button ##{idButtonDemoAccounts} data-ui=##{idMenuDemoAccounts}>
+                            <span>_{MsgDemoUserAccounts}
+                            <i>arrow_drop_down
+                            <menu.border.no-wrap ##{idMenuDemoAccounts}>
+                              $forall Entity uid (User email _ _ _ _ name super admin) <- accounts
+                                $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
+                                  <li data-email=#{email} data-password=#{pass} data-ui=##{idMenuDemoAccounts}>
+                                    <i.circle>
+                                      <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto}>
 
-#{extra}
+                                    <div.max>
+                                      <h6.small>
+                                        #{email}
+                                      <div.large-line>
+                                        $maybe name <- name
+                                          #{name}
+                                      <div.upper>
+                                        $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator)]
+                                          $if not (null roles)
+                                            $forall role <- roles
+                                              _{role} #
 
-^{md3widget emailV}
-^{md3widget passV}
+                          #{extra}
+
+                          ^{md3widget emailV}
+                          ^{md3widget passV}
                       |]
               return (r,w)
 
