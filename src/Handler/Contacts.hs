@@ -67,7 +67,7 @@ import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
     ( App (appHttpManager, appSettings), Handler, Form
-    , getVAPIDKeys, widgetMainMenu, widgetSnackbar
+    , getVAPIDKeys, widgetMainMenu, widgetSnackbar, widgetAccount
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
@@ -155,8 +155,6 @@ import Web.WebPush
     , pushSenderEmail, pushExpireInSeconds, pushTopic, PushTopic (PushTopic)
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
-
-import Widgets (widgetUser, widgetBanner)
 
 import Yesod.Auth (maybeAuth)
 import Yesod.Core

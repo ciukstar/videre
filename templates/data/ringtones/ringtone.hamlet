@@ -29,8 +29,6 @@
 
 <main>
 
-  ^{widgetBanner msgs}
-
   $maybe Entity rid (Ringtone name mime _) <- ringtone
     <dl>
       <dt.md-typescale-label-large>_{MsgTheName}

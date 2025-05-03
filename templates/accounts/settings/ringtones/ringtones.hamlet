@@ -36,8 +36,6 @@
 
   <div ##{idPanelRingtones} role=tabpanel aria-labelledby=tabRingtones>
 
-    ^{widgetBanner msgs}
-
     $if null ringtones
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&#x1F4C2;

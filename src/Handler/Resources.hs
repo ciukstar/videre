@@ -4,7 +4,7 @@
 module Handler.Resources (getDocsR) where
 
 import Foundation
-    ( Handler, widgetMainMenu, widgetSnackbar
+    ( Handler, widgetMainMenu, widgetSnackbar, widgetAccount
     , Route (StaticR, HomeR, AuthR, DataR)
     , DataR (RingtonesR)
     , AppMessage
@@ -26,8 +26,6 @@ import Settings.StaticFiles (img_ERD_Videre_svg)
 
 import Text.Blaze.Html (preEscapedToHtml)
 import Text.Hamlet (Html)
-
-import Widgets (widgetUser, widgetBanner)
 
 import Yesod.Auth (Route (LoginR))
 import Yesod.Core

@@ -13,8 +13,6 @@
 
 <main.reponsive.vertical.middle-align.large-space>
 
-  ^{widgetBanner msgs}
-
   <h2.small.margin>
     _{MsgWelcomeTo} _{MsgAppName}
     

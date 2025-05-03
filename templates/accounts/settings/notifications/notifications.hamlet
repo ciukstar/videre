@@ -21,8 +21,6 @@
 
   <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
 
-    ^{widgetBanner msgs}
-
     $if null subscriptions
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&#x1F4C2;

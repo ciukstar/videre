@@ -9,11 +9,9 @@
     <h1.title.max>
       _{MsgCalls}
 
-    ^{widgetUser}
+    ^{widgetAccount}
 
 <main.reponsive>
-
-  ^{widgetBanner msgs}
 
   $if null calls
     <figure style="text-align:center">

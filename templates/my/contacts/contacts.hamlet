@@ -9,11 +9,9 @@
     <h1.title.max>
       _{MsgAppName}
 
-    ^{widgetUser}
+    ^{widgetAccount}
 
 <main.reponsive>
-
-  ^{widgetBanner msgs}
 
   $if null entries
     <figure style="text-align:center">

@@ -88,8 +88,6 @@ import Settings.StaticFiles
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage)
 
-import Widgets (widgetBanner)
-
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender

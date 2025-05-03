@@ -27,8 +27,6 @@
   <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
 
   <div ##{idPanelInfo} role=tabpanel aria-labelledby=tabInfo>
-
-    ^{widgetBanner msgs}
         
     $maybe Entity _ (UserInfo _ bday) <- info
       <dl>

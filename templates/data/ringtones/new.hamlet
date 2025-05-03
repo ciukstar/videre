@@ -7,8 +7,6 @@
 
 <main>
 
-  ^{widgetBanner msgs}
-
   <form method=post action=@{DataR RingtonesR} enctype=#{et} ##{idFormRingtone}>
   
     ^{fw}

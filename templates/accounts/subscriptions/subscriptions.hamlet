@@ -28,8 +28,6 @@
 
   <div ##{idPanelSubscriptions} role=tabpanel aria-labelledby=tabSubscriptions>
 
-    ^{widgetBanner msgs}
-
     $if null subscriptions
       <figure style="text-align:center">
         <span.on-secondary style="font-size:4rem">&varnothing;

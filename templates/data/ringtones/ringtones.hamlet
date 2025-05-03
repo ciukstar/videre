@@ -9,11 +9,9 @@
     <h1.title.max>
       _{MsgRingtones}
 
-    ^{widgetUser}
+    ^{widgetAccount}
 
 <main.reponsive>
-
-  ^{widgetBanner msgs}
 
   $if null ringtones
     <figure style="text-align:center">

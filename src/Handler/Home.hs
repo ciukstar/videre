@@ -21,8 +21,6 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetBanner)
-
 import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages, newIdent)
 import Yesod.Core.Handler (setUltDestCurrent)

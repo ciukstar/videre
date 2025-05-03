@@ -35,7 +35,7 @@ import Database.Persist
     )    
 
 import Foundation
-    ( Handler, Form, widgetMainMenu, widgetSnackbar
+    ( Handler, Form, widgetMainMenu, widgetSnackbar, widgetAccount
     , Route (DataR)
     , DataR
       ( RingtoneNewR, RingtonesR, RingtonesR, RingtoneR, RingtoneAudioR
@@ -72,8 +72,6 @@ import Model
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)
-
-import Widgets (widgetBanner, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, newIdent, FileInfo (fileContentType)
