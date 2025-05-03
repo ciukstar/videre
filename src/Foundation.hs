@@ -40,7 +40,7 @@ import Database.Esqueleto.Experimental as E
     )
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 
-import Material3 (md3passwordField, md3emailField, md3widget)
+import Material3 (md3widget)
 
 import Network.Mail.Mime
     ( Part (partDisposition, partEncoding, partType, partContent, partHeaders, Part)
@@ -702,19 +702,16 @@ instance YesodAuthEmail App where
         authLayout $ do
             setTitleI PasswordResetTitle
             idFormForgotPassword <- newIdent
-            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
-            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/forgot")
       where
           formForgotPassword :: Form Text
           formForgotPassword extra = do
-              rndr <- getMessageRender
-              (r,v) <- mreq md3emailField FieldSettings
+              (r,v) <- mreq emailField FieldSettings
                   { fsLabel = SomeMessage MsgEmailAddress
                   , fsId = Just "forgotPassword", fsName = Just "email", fsTooltip = Nothing
-                  , fsAttrs = [("label", rndr MsgEmailAddress)]
+                  , fsAttrs = [("autocomplete", "email")]
                   } Nothing
-              return (r,[whamlet|#{extra}^{fvInput v}|])
+              return (r,[whamlet|#{extra} ^{md3widget v}|])
 
 
     setPasswordHandler :: Bool -> AuthHandler App TypedContent
@@ -726,47 +723,40 @@ instance YesodAuthEmail App where
             idFormSetPassWrapper <- newIdent
             idFormSetPass <- newIdent
             (fw,et) <- liftHandler $ generateFormPost formSetPassword
-            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
-            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/password")
+            
       where
           formSetPassword :: Form (Text,Text,Text)
           formSetPassword extra = do
-              rndr <- getMessageRender
-              (currR,currV) <- mreq md3passwordField FieldSettings
+              (currR,currV) <- mreq passwordField FieldSettings
                   { fsLabel = SomeMessage CurrentPassword
                   , fsTooltip = Nothing
                   , fsId = Just "currentPassword"
                   , fsName = Just "current"
-                  , fsAttrs = [("label", rndr CurrentPassword)]
+                  , fsAttrs = [("autocomplete", "off")]
                   } Nothing
-              (newR,newV) <- mreq md3passwordField FieldSettings
+              (newR,newV) <- mreq passwordField FieldSettings
                   { fsLabel = SomeMessage NewPass
                   , fsTooltip = Nothing
                   , fsId = Just "newPassword"
                   , fsName = Just "new"
-                  , fsAttrs = [("label", rndr NewPass)]
+                  , fsAttrs = [("autocomplete", "off")]
                   } Nothing
-              (confR,confV) <- mreq md3passwordField FieldSettings
+              (confR,confV) <- mreq passwordField FieldSettings
                   { fsLabel = SomeMessage ConfirmPass
                   , fsTooltip = Nothing
                   , fsId = Just "confirmPassword"
                   , fsName = Just "confirm"
-                  , fsAttrs = [("label", rndr ConfirmPass)]
+                  , fsAttrs = [("autocomplete", "off")]
                   } Nothing
 
               let r = (,,) <$> currR <*> newR <*> confR
-              let w = do
-                      toWidget [cassius|
-                                       ##{fvId currV}, ##{fvId newV}, ##{fvId confV}
-                                         align-self: stretch
-                                       |]
-                      [whamlet|
+              let w = [whamlet|
                               #{extra}
                               $if old
-                                ^{fvInput currV}
-                              ^{fvInput newV}
-                              ^{fvInput confV}
+                                ^{md3widget currV}
+                              ^{md3widget newV}
+                              ^{md3widget confV}
                               |]
               return (r,w)
 
@@ -790,21 +780,18 @@ instance YesodAuthEmail App where
             setTitleI RegisterLong
             formRegisterWrapper <- newIdent
             formRegister <- newIdent
-            toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
-            toWidget $(juliusFile "templates/widgets/snackbar.julius")
             $(widgetFile "auth/register")
       where
           formRegEmailForm :: Form Text
           formRegEmailForm extra = do
-              renderMsg <- getMessageRender
-              (emailR,emailV) <- mreq md3emailField FieldSettings
+              (emailR,emailV) <- mreq emailField FieldSettings
                   { fsLabel = SomeMessage MsgEmailAddress
                   , fsId = Just "email", fsName = Just "email", fsTooltip = Nothing
-                  , fsAttrs = [("label", renderMsg MsgEmailAddress)]
+                  , fsAttrs = [("autocomplete","email")]
                   } Nothing
               let w = [whamlet|
                           #{extra}
-                          ^{fvInput emailV}
+                          ^{md3widget emailV}
                       |]
               return (emailR,w)
 
@@ -817,25 +804,21 @@ instance YesodAuthEmail App where
 
         idFormEmailLoginWarpper <- newIdent
         idFormEmailLogin <- newIdent
-
-        toWidget $(cassiusFile "templates/widgets/snackbar.cassius")
-        toWidget $(juliusFile "templates/widgets/snackbar.julius")
         $(widgetFile "auth/email")
 
       where
           formEmailLogin :: Form (Text,Text)
           formEmailLogin extra = do
-              msgRender <- liftHandler getMessageRender
               (emailR,emailV) <- mreq emailField FieldSettings
                   { fsLabel = SomeMessage MsgEmailAddress
                   , fsTooltip = Nothing, fsId = Just "email", fsName = Just "email"
-                  , fsAttrs = [("label", msgRender MsgEmailAddress)]
+                  , fsAttrs = [("autocomplete", "email")]
                   } Nothing
                   
               (passR,passV) <- mreq passwordField FieldSettings
                   { fsLabel = SomeMessage MsgPassword
                   , fsTooltip = Nothing, fsId = Just "password", fsName = Just "password"
-                  , fsAttrs = [("label", msgRender MsgPassword)]
+                  , fsAttrs = [("autocomplete", "off")]
                   } Nothing
                   
               let r = (,) <$> emailR <*> passR

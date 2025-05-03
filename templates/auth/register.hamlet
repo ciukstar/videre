@@ -1,30 +1,24 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button href=@{AuthR LoginR} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
+<header.fixed>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{AuthR LoginR} title=_{MsgBack}>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgRegistration}
+    <h1.title.max>
+      _{MsgRegistration}
       
-<main>
+<main.responsive>
 
-  $forall (status,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.md-typescale-body-medium>
-      #{status}. #{msg}
-
-
-  <div ##{formRegisterWrapper}>
-    <h1.md-typescale-body-medium>
+  <div.responsive.center-align.large-padding ##{formRegisterWrapper}>
+    <p.large-text>
       _{EnterEmail}
+      
     <form method=post action=@{parent registerR} enctype=#{et} ##{formRegister}>
       ^{fw}
-      <md-filled-button type=submit>
-        _{Register}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1
-    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-    <md-elevation>
-    <span.md-typescale-body-medium>#{msg}
-    <md-icon-button type=button>
-      <md-icon>close
+      <nav.center-align>
+        <button type=submit>
+          _{Register}
+
+
+^{widgetSnackbar msgs}

@@ -22,7 +22,7 @@ import Database.Persist (Entity (Entity))
 import qualified Database.Persist as P (delete)
 
 import Foundation
-    ( Handler, Form, widgetMainMenu
+    ( Handler, Form, widgetMainMenu, widgetSnackbar
     , Route (DataR)
     , DataR
       ( UserPhotoR, SubscriptionsR, UserSubscriptionsR, UserSubscriptionR
@@ -50,7 +50,7 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner)
 
 import Yesod.Core (Yesod(defaultLayout), whamlet, addMessageI, redirect, newIdent)
 import Yesod.Core.Handler (getMessages)

@@ -1,20 +1,24 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
+<header.fixed>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack}>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgAuthentication}
+    <h1.title.max>
+      _{MsgAuthentication}
+      
+<main.responsive.vertical.middle-align>
 
-<main>
+  <p.large-text>
+    #{msg}
 
-  <h2.md-typescale-headline-medium>
-    #{msg}.
-  
-  <md-filled-button type=button href=@{AuthR LoginR}>
-    _{MsgSignIn}
+  <nav.center-align>
+    <a.button href=@{AuthR LoginR} role=button>
+      _{MsgSignIn}
 
-  <div.md-typescale-body-large>_{MsgOr}
+  <p>
+    _{MsgOr}
 
-  <md-text-button type=button href=@{HomeR}>
-    _{MsgBackToHomepage}
+  <nav.center-align>
+    <a.button.transparent.link href=@{HomeR} role=button>
+      _{MsgBackToHomepage}

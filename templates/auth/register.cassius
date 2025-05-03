@@ -1,9 +1,5 @@
 
+
 ##{formRegisterWrapper}
-  display: flex
-  flex-direction: column
-  gap: 1rem
-  ##{formRegister}
-    display: flex
-    flex-direction: column
-    gap: 1rem
+
+    max-width: 30rem

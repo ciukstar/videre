@@ -1,8 +1,4 @@
 
-$forall (status,msg) <- filter ((==) statusError . fst) msgs
-  <div.app-banner.error.md-typescale-body-medium>
-    #{status}. #{msg}
-
 <div.responsive ##{idFormEmailLoginWarpper}>
 
   <div.large-margin style="border-top:1px solid rgba(0,0,0,0.3);position:relative;margin: 1rem 0">
@@ -27,12 +23,5 @@ $forall (status,msg) <- filter ((==) statusError . fst) msgs
   <a.button.transparent.link href=@{parent registerR} role=button>
     _{MsgCreateAccount}
 
-^{widgetSnackbar msgs}
 
-$forall (status,msg) <- filter ((/=) statusError . fst) msgs
-  <aside.app-snackbar.shape-small.elevation-1
-    :status == statusSuccess:.primary-container :status /= statusSuccess:.error-container>
-    <md-elevation>
-    <span.md-typescale-body-medium>#{msg}
-    <md-icon-button type=button>
-      <md-icon>close
+^{widgetSnackbar msgs}

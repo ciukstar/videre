@@ -38,7 +38,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( App (appSettings), Form, Handler, widgetMainMenu
+    ( App (appSettings), Form, Handler, widgetMainMenu, widgetSnackbar
     , Route (DataR)
     , DataR
       ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
@@ -85,7 +85,7 @@ import Text.Shakespeare.Text (st)
 
 import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails))
 
-import Widgets (widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner)
 
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod

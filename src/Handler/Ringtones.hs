@@ -21,7 +21,6 @@ module Handler.Ringtones
 
 
 import Data.Bifunctor (Bifunctor(bimap))
-
 import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 
@@ -36,7 +35,7 @@ import Database.Persist
     )    
 
 import Foundation
-    ( Handler, Form, widgetMainMenu
+    ( Handler, Form, widgetMainMenu, widgetSnackbar
     , Route (DataR)
     , DataR
       ( RingtoneNewR, RingtonesR, RingtonesR, RingtoneR, RingtoneAudioR
@@ -74,7 +73,7 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetBanner, widgetSnackbar, widgetUser)
+import Widgets (widgetBanner, widgetUser)
 
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, newIdent, FileInfo (fileContentType)

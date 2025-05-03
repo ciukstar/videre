@@ -28,7 +28,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Form, Widget, widgetMainMenu
+    ( Handler, Form, Widget, widgetMainMenu, widgetSnackbar
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage
@@ -66,7 +66,7 @@ import Settings.StaticFiles
     
 import Text.Hamlet (Html)
 
-import Widgets (widgetUser, widgetBanner, widgetSnackbar)
+import Widgets (widgetUser, widgetBanner)
 
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core

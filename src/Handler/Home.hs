@@ -9,7 +9,7 @@ module Handler.Home (getHomeR) where
 import Database.Persist (Entity (Entity))
 
 import Foundation
-    ( Handler, widgetMainMenu, widgetAccount
+    ( Handler, widgetMainMenu, widgetAccount, widgetSnackbar
     , Route (AuthR, MyContactsR)
     , AppMessage
       ( MsgWelcomeTo, MsgAppName, MsgSendMessagesVideochatOrAudioCall
@@ -21,7 +21,7 @@ import Settings (widgetFile)
 
 import Text.Hamlet (Html)
 
-import Widgets (widgetBanner, widgetSnackbar)
+import Widgets (widgetBanner)
 
 import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages, newIdent)
