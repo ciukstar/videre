@@ -27,6 +27,7 @@ module Material3
 
 import Data.Foldable (find)
 import qualified Data.List.Safe as LS (head, tail)
+import Data.Maybe (isJust)
 import Data.Text (Text, pack, splitOn)
 import Data.Text.Lazy (toStrict)
 import Data.Time.Calendar (Day)
@@ -38,7 +39,7 @@ import qualified Text.Blaze.Html.Renderer.Text as T (renderHtml)
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage)
 
-import Yesod.Core (MonadHandler(HandlerSite), newIdent)
+import Yesod.Core (MonadHandler(HandlerSite), newIdent, WidgetFor)
 import Yesod.Core.Handler (HandlerFor)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
@@ -52,7 +53,7 @@ import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
     ( Field (fieldView)
     , FieldSettings (fsId, fsName, fsAttrs)
-    , FieldView (fvErrors), MForm, FormResult
+    , FieldView (fvErrors, fvInput, fvId, fvLabel, fvRequired), MForm, FormResult
     )
 
 
