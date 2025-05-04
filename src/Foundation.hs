@@ -845,14 +845,15 @@ instance YesodAuthEmail App where
                       
                       toWidget [julius|
                           Array.from(
-                            document.getElementById(#{idButtonDemoAccounts}).querySelectorAll('menu li')
+                            document.getElementById(#{idMenuDemoAccounts}).querySelectorAll('li[data-email][data-pwd]')
                           ).forEach(x => {
                             x.addEventListener('click', e => {
                               document.getElementById(#{fvId emailV}).value = x.dataset.email;
-                              document.getElementById(#{fvId passV}).value = x.dataset.password;
+                              document.getElementById(#{fvId passV}).value = x.dataset.pwd;
+                              document.getElementById(#{idMenuDemoAccounts}).classList.remove('active');
                             });
                           });
-                                      |]
+                      |]
                       [whamlet|
                           <button.border.transparent type=button ##{idButtonDemoAccounts} data-ui=##{idMenuDemoAccounts}>
                             <span>_{MsgDemoUserAccounts}
@@ -860,7 +861,7 @@ instance YesodAuthEmail App where
                             <menu.border.no-wrap ##{idMenuDemoAccounts}>
                               $forall Entity uid (User email _ _ _ _ name super admin) <- accounts
                                 $with pass <- maybe "" (TE.decodeUtf8 . localPart) (emailAddress $ TE.encodeUtf8 email)
-                                  <li data-email=#{email} data-password=#{pass} data-ui=##{idMenuDemoAccounts}>
+                                  <li data-email=#{email} data-pwd=#{pass} data-ui=##{idMenuDemoAccounts}>
                                     <i.circle>
                                       <img src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto}>
 

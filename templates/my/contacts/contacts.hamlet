@@ -14,11 +14,11 @@
 <main.reponsive.no-padding>
 
   $if null entries
-    <figure.center-align>
+    <figure.margin.center-align>
       <i.extra>folder_open
         
       <figcaption>
-        _{MsgYourContactListIsEmpty}
+        <p>_{MsgYourContactListIsEmpty}
         <p.secondary-text>
           _{MsgYouMightWantToAddAFew}
           

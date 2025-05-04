@@ -45,7 +45,7 @@ import Yesod.Core (MonadHandler(HandlerSite), newIdent, WidgetFor)
 import Yesod.Core.Handler (HandlerFor)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
-    ( emailField, passwordField, textField, OptionList (olOptions), radioField
+    ( emailField, passwordField, textField, OptionList (olOptions), radioField'
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
     , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
     , FormMessage, doubleField, dayField, timeField, datetimeLocalField
@@ -114,21 +114,6 @@ md3selectField options = (selectField options)
 
     get :: (Eq a) => [Option a] -> a -> Text
     get os a = maybe "undefied" optionExternalValue $ find (\o -> optionInternalValue o == a) os          
-
-
-md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
-md3radioField options = (radioField options)
-    { fieldView = \theId name attrs x isReq -> do
-          opts <- zip [1 :: Int ..] . olOptions <$> handlerToWidget options
-          let sel (Left _) _ = False
-              sel (Right y) opt = optionInternalValue opt == y
-          [whamlet|
-<div ##{theId} *{attrs}>
-  $forall (i,opt) <- opts
-    <div>
-      <md-radio ##{theId}-#{i} name=#{name} :isReq:required=true value=#{optionExternalValue opt} :sel x opt:checked>
-      <label.label-large for=#{theId}-#{i}>#{optionDisplay opt}
-|] }
 
 
 md3telField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
@@ -270,6 +255,22 @@ md3mreq field fs mdef = do
 tsep :: Text
 tsep = "<>"
 
+
+md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
+md3radioField options = (radioField' options)
+    { fieldView = \theId name attrs x isReq -> do
+          opts <- zip [1 :: Int ..] . olOptions <$> handlerToWidget options
+          let sel (Left _) _ = False
+              sel (Right y) opt = optionInternalValue opt == y
+          [whamlet|
+<div ##{theId} *{attrs}>
+  $forall (i,opt) <- opts
+    <label.radio for=#{theId}-#{i}>
+      <input type=radio ##{theId}-#{i} name=#{name} :isReq:required=true value=#{optionExternalValue opt} :sel x opt:checked>
+      <span style="white-space:normal">
+        #{optionDisplay opt}
+
+|] }
 
 
 md3widget :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()

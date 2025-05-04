@@ -774,9 +774,9 @@ getContactsR uid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Int -> Maybe Text
+formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Text -> Maybe Text
              -> Form ([Entity User], Maybe (Text,Text,Text),Text)
-formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe backlink extra = do
+formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverlay backlink extra = do
 
     (endpointR, endpointV) <- mopt hiddenField "" Nothing
     (p256dhR, p256dhV) <- mopt hiddenField "" Nothing

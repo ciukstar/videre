@@ -55,7 +55,7 @@ import Foundation
       )
     )
 
-import Material3 (md3radioField, md3emailField)
+import Material3 (md3radioField, md3widget)
 
 import Model
     ( gmailAccessToken, gmailRefreshToken, apiInfoGoogle
@@ -75,11 +75,13 @@ import Network.Wreq.Lens (statusCode, responseStatus)
 
 import Settings
     ( widgetFile, AppSettings (appGoogleApiConf, appGcloudConf)
-    , GoogleApiConf (googleApiConfClientSecret, googleApiConfClientId), GcloudConf (gcloudProjectId)
+    , GoogleApiConf (googleApiConfClientSecret, googleApiConfClientId)
+    , GcloudConf (gcloudProjectId)
     )
 import System.IO (readFile')
 
 import Text.Blaze.Html (preEscapedToHtml, toHtml)
+import Text.Cassius (cassius)
 import Text.Hamlet (Html)
 import Text.Read (readMaybe)
 import Text.Shakespeare.Text (st)
@@ -88,17 +90,17 @@ import Web.WebPush (generateVAPIDKeys, VAPIDKeysMinDetails (VAPIDKeysMinDetails)
 
 import Yesod.Core
     ( Yesod(defaultLayout), whamlet, SomeMessage (SomeMessage), getYesod
-    , getUrlRender, deleteSession, getMessageRender, getMessages, logWarn
-    , addMessage, setUltDestCurrent, newIdent, lookupSession
+    , getUrlRender, deleteSession, getMessages, logWarn
+    , addMessage, setUltDestCurrent, newIdent, lookupSession, ToWidget (toWidget)
     )
 import Yesod.Core.Handler (redirect, addMessageI, setSession)
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Persist (YesodPersist(runDB))
 import Yesod.Form.Input (ireq, runInputGet)
-import Yesod.Form.Fields (optionsPairs, textField)
+import Yesod.Form.Fields (optionsPairs, textField, emailField)
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost)
 import Yesod.Form.Types
-    ( FormResult (FormSuccess), FieldView (fvInput)
+    ( FormResult (FormSuccess), FieldView (fvInput, fvId)
     , FieldSettings (FieldSettings, fsLabel, fsId, fsName, fsTooltip, fsAttrs)
     )
 
@@ -463,6 +465,7 @@ postTokensGoogleapisClearR = do
           deleteSession gmailSender
           addMessageI statusSuccess MsgCleared
           redirect $ DataR TokensR
+          
       _otherwise -> do
           (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
           (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
@@ -551,6 +554,7 @@ getTokensR = do
     (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
     (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
     (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
+    
     msgs <- getMessages
     defaultLayout $ do
         setUltDestCurrent
@@ -572,43 +576,65 @@ formVapid token extra = do
     (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
         { fsLabel = SomeMessage MsgStoreType
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
-        , fsAttrs = [("class","app-options-store-type")]
+        , fsAttrs = []
         } (tokenStore . entityVal <$> token)
+        
     return ( storeR
-           , [whamlet|
-               #{extra}
-               <fieldset.shape-medium>
-                 <legend.body-medium>_{MsgStoreType}<sup>*
-                 ^{fvInput storeV}
-             |]
+           , do
+                 toWidget [cassius|
+                             ##{fvId storeV}
+                                 display: flex
+                                 flex-direction: column
+                                 row-gap: 1rem
+                          |]
+                 [whamlet|
+                   #{extra}
+                   <fieldset.shape-medium>
+                     <legend.body-medium>
+                       _{MsgStoreType}<sup>*
+                       
+                     ^{fvInput storeV}
+                 |]
            )
 
 
 formStoreOptions :: Maybe (Entity Token)-> Form (Text,StoreType)
 formStoreOptions token extra = do
-    msg <- getMessageRender
+    
     let storeOptions = [ (MsgUserSession, StoreTypeSession)
                        , (MsgDatabase, StoreTypeDatabase)
                        , (MsgGoogleSecretManager, StoreTypeGoogleSecretManager)
                        ]
-    (emailR,emailV) <- mreq md3emailField FieldSettings
+                       
+    (emailR,emailV) <- mreq emailField FieldSettings
         { fsLabel = SomeMessage MsgEmailAddress
-        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
-        , fsAttrs = [("label", msg MsgGmailAccount)]
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Just (SomeMessage MsgGmailAccount)
+        , fsAttrs = [("autocomplete", "email")]
         } (Just "ciukstar@gmail.com")
+        
     (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
         { fsLabel = SomeMessage MsgStoreType
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
-        , fsAttrs = [("class","app-options-store-type")]
+        , fsAttrs = []
         } (tokenStore . entityVal <$> token)
+        
     return ( (,) <$> emailR <*> storeR
-           , [whamlet|
-               #{extra}
-               ^{fvInput emailV}
-               <fieldset.shape-medium>
-                 <legend.body-medium>_{MsgStoreType}<sup>*
-                 ^{fvInput storeV}
-             |]
+           , do
+                 toWidget [cassius|
+                             ##{fvId storeV}
+                                 display: flex
+                                 flex-direction: column
+                                 row-gap: 1rem
+                          |]
+                 [whamlet|
+                   #{extra}
+                   ^{md3widget emailV}
+                   <fieldset>
+                     <legend>
+                       _{MsgStoreType}<sup>*
+
+                     ^{fvInput storeV}
+                 |]
            )
 
 

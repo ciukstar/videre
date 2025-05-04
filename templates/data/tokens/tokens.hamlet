@@ -11,40 +11,43 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive>
 
-  <div.app-card.shape-large.outline>
-    <div.app-card-title.md-typescale-headline-medium>
+  <article>
+    <h2.title>
       Gmail
-    <div.app-card-content>
+    <p>
     
       <form.formStoreType method=post action=@{DataR TokensR} enctype=#{etGmail} ##{formTokensGmail}>
         ^{fwGmail}
           
-    <div.app-card-actions>
+    <nav>
       <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etGmailClear} ##{formTokensGmailClear}>
         ^{fwGmailClear}
-      <md-text-button type=submit form=#{formTokensGmailClear}>
+      <button.transparent.link type=submit form=#{formTokensGmailClear}>
         _{MsgClearSettings}
-      <md-filled-button type=submit form=#{formTokensGmail}>
+        
+      <button type=submit form=#{formTokensGmail}>
         _{MsgInitialize}
 
-  <div.app-card.shape-large.outline>
-    <div.app-card-title.md-typescale-headline-medium>
+  <article>
+    <h2.title>
       VAPID
-    <div.md-typescale-body-small>_{MsgVapidGenerationWarning}.
-    <div.app-card-content>
+    <p>_{MsgVapidGenerationWarning}.
+    
+    <p>
     
       <form.formStoreType method=post action=@{DataR TokensVapidR} enctype=#{etVapid} ##{formTokensVapid}>
         ^{fwVapid}
           
-    <div.app-card-actions>
+    <nav>
       <form method=post action=@{DataR TokensVapidClearR} enctype=#{etVapidClear} ##{formTokensVapidClear}>
         ^{fwVapidClear}
         
-      <md-text-button type=submit form=#{formTokensVapidClear}>
+      <button.transparent.link type=submit form=#{formTokensVapidClear}>
         _{MsgClearSettings}
-      <md-filled-button type=submit form=#{formTokensVapid}>
+        
+      <button type=submit form=#{formTokensVapid}>
         _{MsgGenerate}
 
 ^{widgetSnackbar msgs}
