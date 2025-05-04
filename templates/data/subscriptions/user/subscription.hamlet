@@ -24,8 +24,6 @@
         _{MsgDele}
 
 <main>
-
-  ^{widgetBanner msgs}
       
   $maybe Entity _ (PushSubscription _ _ endpoint _ _ ua) <- subscription
     <dl>

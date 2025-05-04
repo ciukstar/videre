@@ -8,23 +8,23 @@
 
 ^{fvInput usersV}
 
+<div.overlay ##{idOverlay} data-ui=##{idDialogSubscribe}>
 
-<md-dialog ##{idDialogSubscribe}>
-  <div slot=headline>
-    <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+<dialog ##{idDialogSubscribe} data-ui=##{idOverlay}>
+  <div.row>
+    <h6.max style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
       _{MsgSubscribeToNotifications}
-    <md-icon-button type=button title=_{MsgClose}
-      onclick="document.getElementById('#{idDialogSubscribe}').close()">
-      <md-icon>close
+    <button.transparent.circle type=button title=_{MsgClose} data-ui=##{idDialogSubscribe}>
+      <i>close
     
-  <p.md-typescale-body-medium slot=content ##{idDialogSubscribeContent}>
+  <p ##{idDialogSubscribeContent}>
     _{MsgAllowToBeNotifiedBySelectedUsers}.
 
-  <div slot=actions>
+  <nav.right-align>
 
-    <md-text-button type=button ##{idButtonSubmitNoSubscription}>
+    <button.transparent.link type=button ##{idButtonSubmitNoSubscription}>
       _{MsgPostpone}
 
-    <md-filled-button has-icon type=button ##{idButtonSubmitWithSubscription}>
-      <md-icon slot=icon>check
+    <button type=button ##{idButtonSubmitWithSubscription}>
+      <i>check
       _{MsgSubscribe}

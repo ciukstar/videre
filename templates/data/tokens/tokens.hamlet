@@ -9,11 +9,9 @@
     <h1.title.max>
       _{MsgTokens}
 
-    ^{widgetUser}
+    ^{widgetAccount}
 
 <main.reponsive>
-
-  ^{widgetBanner msgs}
 
   <div.app-card.shape-large.outline>
     <div.app-card-title.md-typescale-headline-medium>

@@ -7,10 +7,12 @@ $maybe Entity uid (User email _ name _ _ _ _ _) <- user
     <menu.left.no-wrap #accountmenutrigger>
 
       <a.row.padding href=@{AccountR uid}>
-        <div slot=headline>_{MsgUserAccount}
+        <i>manage_accounts
+        <div.max>_{MsgUserAccount}
 
       <a.row.padding href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
-        <div slot=headline>_{MsgSettings}
+        <i>settings
+        <div.max>_{MsgSettings}
           
       <a.row.padding href=@{AuthR LogoutR}>
         <i>logout

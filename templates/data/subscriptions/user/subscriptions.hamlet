@@ -6,8 +6,6 @@
     _{MsgTheUserSubscriptions}
 
 <main>
-
-  ^{widgetBanner msgs}
       
   $maybe (Entity uid (User email _ _ _ _ name _ _),attrib) <- user
     

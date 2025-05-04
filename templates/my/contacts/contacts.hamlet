@@ -11,42 +11,46 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.reponsive.no-padding>
 
   $if null entries
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.md-typescale-body-large>
+    <figure.center-align>
+      <i.extra>folder_open
+        
+      <figcaption>
         _{MsgYourContactListIsEmpty}
-        <p.md-typescale-body-small>
+        <p.secondary-text>
           _{MsgYouMightWantToAddAFew}
+          
   $else
     
-    <md-list>
-      $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
-        <md-list-item type=link href=@{ChatR $ ChatRoomR uid cid rid}>
-          <div slot=start>
-            <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-            $if ns < 1
-              <md-icon.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
-                notifications_off
-            $elseif nl > 0
-              <md-icon.call-loop #idBadgePhoto#{fromSqlKey rid}>
-                repeat
-            $elseif na < 1
-              <md-icon.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
-                phone_disabled
-                
-          <div slot=headline>
+    $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
+      <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
+
+        <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
+          $if ns < 1
+            <i.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
+              notifications_off
+          $elseif nl > 0
+            <i.call-loop #idBadgePhoto#{fromSqlKey rid}>
+              repeat
+          $elseif na < 1
+            <i.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
+              phone_disabled
+
+        <div.content.max>
+          <div.headline.large-text>
             $maybe name <- name
               #{name}
             $nothing
               #{email}
+              
           $maybe (time, (message, (ctype, media))) <- content
-            <div slot=supporting-text>
+            <div.supporting-text.secondary-text>
               $with dt <- iso8601Show time
                 <time datetime=#{dt}>#{dt}
-            <div slot=supporting-text>
+
+            <div.supporting-text.secondary-text>
               $if media
                 $case ctype
                   $of CallTypeVideo
@@ -58,16 +62,19 @@
               $else
                 <md-icon style="vertical-align:sub;--md-icon-size:1rem">done_all
                 #{message}
-          <md-icon slot=end>arrow_forward_ios
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.md-typescale-body-small>
-              #{attrib}
-        <md-divider>
-        
-  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    $with backlink <- rndr $ MyContactsR uid
-      <a href=@?{(ContactsR uid,[("backlink",backlink)])}>
-      <md-icon slot=icon>add
+
+        <i.secondary-text>arrow_forward_ios
+ 
+      $maybe attrib <- attrib
+        <div.app-attribution>
+          <div.app-attribution-wrapper.md-typescale-body-small>
+            #{attrib}
+
+      <hr>
+
+  $with backlink <- rndr $ MyContactsR uid
+    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@?{(ContactsR uid,[("backlink",backlink)])}
+              style="z-index:1" onclick="event.stopPropagation()">
+      <i>add
 
 ^{widgetSnackbar msgs}

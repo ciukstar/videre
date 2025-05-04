@@ -28,8 +28,6 @@
     
       
 <main>
-
-  ^{widgetBanner msgs}
       
   $maybe (Entity uid (User email authType _ verkey verified name super admin),attrib) <- user
     

@@ -40,7 +40,8 @@ import Control.Monad.IO.Class (liftIO)
 
 import Data.Aeson (toJSON, object)
 import qualified Data.Aeson as A
-    ( object, Value (Bool), Result( Success, Error ), (.=) )
+    ( object, Value (Bool), Result( Success, Error ), (.=)
+    )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.List (sortBy)
 import Data.Maybe (fromMaybe)
@@ -631,7 +632,6 @@ getMyContactsR uid = do
         setTitleI MsgAppName
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
-        idFabAdd <- newIdent
         $(widgetFile "my/contacts/contacts")
   where
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
@@ -653,6 +653,7 @@ postContactsR uid = do
         return x
 
     idFormPostContacts <- newIdent
+    idOverlay <- newIdent
     idDialogSubscribe <- newIdent
 
     mVAPIDKeys <- getVAPIDKeys
@@ -661,7 +662,7 @@ postContactsR uid = do
       Just vapidKeys -> do
 
           ((fr,fw),et) <- runFormPost $ formContacts
-              uid users vapidKeys idFormPostContacts idDialogSubscribe Nothing
+              uid users vapidKeys idFormPostContacts idDialogSubscribe idOverlay Nothing
 
           case fr of
             FormSuccess (contacts, subscription, location) -> do
@@ -722,6 +723,7 @@ postContactsR uid = do
                       Nothing -> return ()
                 addMessageI statusSuccess MsgNewContactsAdded
                 redirect location
+                
             FormFailure errs -> defaultLayout $ do
                 setTitleI MsgContacts
                 forM_ errs $ \err -> addMessage statusError (toHtml err)
@@ -729,6 +731,7 @@ postContactsR uid = do
                 idFabAdd <- newIdent
                 backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
                 $(widgetFile "contacts/contacts")
+                
             FormMissing -> defaultLayout $ do
                 setTitleI MsgContacts
                 addMessageI statusError MsgInvalidFormData
@@ -736,6 +739,7 @@ postContactsR uid = do
                 idFabAdd <- newIdent
                 backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
                 $(widgetFile "contacts/contacts")
+                
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -750,6 +754,7 @@ getContactsR uid = do
 
     idFormPostContacts <- newIdent
     idDialogSubscribe <- newIdent
+    idOverlay <- newIdent
     rndr <- getUrlRender
     backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
 
@@ -759,7 +764,7 @@ getContactsR uid = do
       Just vapidKeys -> do
 
           (fw,et) <- generateFormPost $ formContacts
-              uid users vapidKeys idFormPostContacts idDialogSubscribe (Just backlink)
+              uid users vapidKeys idFormPostContacts idDialogSubscribe idOverlay (Just backlink)
 
           msgs <- getMessages
           defaultLayout $ do
@@ -769,7 +774,7 @@ getContactsR uid = do
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
-formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Maybe Text
+formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Int -> Maybe Text
              -> Form ([Entity User], Maybe (Text,Text,Text),Text)
 formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe backlink extra = do
 
@@ -796,25 +801,32 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe backlink
 
       usersField :: Handler (OptionList (Entity User)) -> Field Handler [Entity User]
       usersField ioptlist = (multiSelectField ioptlist)
-          { fieldView = \theId name attrs eval _idReq -> do
+          { fieldView = \theId name attrs x isReq -> do
               opts <- olOptions <$> handlerToWidget ioptlist
-              let optselected (Left _) _ = False
-                  optselected (Right vals) opt = optionInternalValue opt `elem` vals
+              
+              let sel (Left _) _ = False
+                  sel (Right vals) opt = optionInternalValue opt `elem` vals
+                  
+              let iopts = zip [1 :: Int .. ] opts
+                  
               [whamlet|
-                <md-list ##{theId}>
-                  $forall opt <- opts
-                    <md-list-item type=button onclick="this.querySelector('md-checkbox').click()">
-                      <img slot=start src=@{AccountPhotoR (entityKey $ optionInternalValue opt)}
-                        width=56 height=56 loading=lazy style="clip-path:circle(50%)">
+                <div ##{theId} *{attrs}>
+                  $forall (i,opt) <- iopts
+                    <div.max.row.no-margin.padding.wave onclick="document.getElementById('#{theId}-#{i}').click()">
+                      <img.circle src=@{AccountPhotoR (entityKey $ optionInternalValue opt)} loading=lazy alt=_{MsgPhoto}>
+                      <div.content.max>
+                        <h6.headline.large-text style="white-space:nowrap">
+                          $maybe name <- userName $ entityVal $ optionInternalValue opt
+                            #{name}
+                        <div.supporting-text.secondary-text style="white-space:nowrap">
+                          #{optionDisplay opt}
 
-                      <div slot=headline style="white-space:nowrap">
-                        $maybe name <- userName $ entityVal $ optionInternalValue opt
-                          #{name}
-                      <div slot=supporting-text style="white-space:nowrap">
-                        #{optionDisplay opt}
+                      <label.checkbox>
+                        <input type=checkbox ##{theId}-#{i} name=#{name} value=#{optionExternalValue opt}
+                          :sel x opt:checked :isReq:required=true>
+                        <span>
 
-                      <md-checkbox touch-target=wrapper slot=end onclick="event.stopPropagation()"
-                        name=#{name} value=#{optionExternalValue opt} *{attrs} :optselected eval opt:checked>
+                    <hr>
               |]
           }
 

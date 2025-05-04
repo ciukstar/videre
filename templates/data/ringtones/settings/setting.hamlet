@@ -26,8 +26,6 @@
 
 <main>
 
-  ^{widgetBanner msgs}
-
   $maybe (Entity _ (DefaultRingtone _ typ), Entity rid (Ringtone name _ _)) <- setting
     <dl>
       <dt.md-typescale-label-large>_{MsgRingtone}

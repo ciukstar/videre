@@ -28,7 +28,8 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Form, Widget, widgetMainMenu, widgetSnackbar
+    ( Handler, Form, Widget
+    , widgetMainMenu, widgetSnackbar, widgetAccount
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
     , AppMessage
@@ -66,15 +67,13 @@ import Settings.StaticFiles
     
 import Text.Hamlet (Html)
 
-import Widgets (widgetUser, widgetBanner)
-
-import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Core
     ( defaultLayout, newIdent, getMessages, setUltDestCurrent
     , SomeMessage (SomeMessage), getMessageRender, FileInfo (fileContentType)
     , addMessageI, redirect, TypedContent (TypedContent), ToContent (toContent)
     , fileSourceByteString, MonadHandler (liftHandler)
     )
+import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, runFormPost)
 import Yesod.Form.Types

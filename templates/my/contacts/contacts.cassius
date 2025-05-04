@@ -1,36 +1,5 @@
 
-header
-
-    position: sticky
-    top: 0
-    z-index: 1
-    height: var(--app-top-app-bar-height)
-    display: flex
-    align-items: center
-    column-gap: 0.5rem
-    padding: 0 1rem
-    .app-top-app-bar-end
-        margin-left: auto
-
 main
-
-    display: flex
-    flex-direction: column
-
-    div[slot=start]
-        position: relative
-        img.user-photo
-            clip-path: circle(50%)
-        .phone-disabled, .notifications-disabled, .call-loop
-            position: absolute
-            top: 0
-            right: -0.5rem
-            color: white
-            background: red
-            clip-path: circle(50%)
-
-    div[slot=headline], div[slot=supporting-text]
-        white-space: nowrap
 
     .app-attribution
         position: relative
@@ -43,8 +12,3 @@ main
             bottom: 0
             left: 0.4rem
             font-size: 0.5rem
-        
-    ##{idFabAdd}
-        position: fixed
-        right: 1rem
-        bottom: 1rem

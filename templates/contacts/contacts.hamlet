@@ -1,25 +1,29 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button type=link href=#{backlink}>
-    <md-icon>arrow_back
+<header.fixed>
+  <nav.responsive.max>
+    <a.button.circle.transparent href=#{backlink} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgContacts}
+    <h1.title.max>
+      _{MsgContacts}
 
-<main>
+<main.reponsive.no-padding>
 
   $if null users
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.md-typescale-body-large>
+    <figure.center-align.margin>
+      <i.extra>folder_open
+      <figcaption>
         _{MsgNoRegisteredUsersYet}
+        
   $else
 
     <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
       ^{fw}
 
-        
-  <md-fab ##{idFabAdd} label=_{MsgAdd} aria-label=_{MsgAdd}>
-    <md-icon slot=icon>add
+  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd}
+            style="z-index:1" onclick="event.stopPropagation()">
+    <i>add
+    _{MsgAdd}
+    
 
 ^{widgetSnackbar msgs}
