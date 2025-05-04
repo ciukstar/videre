@@ -7,7 +7,7 @@
     <h1.title.max>
       _{MsgContacts}
 
-<main.reponsive.no-padding>
+<main.responsive.no-padding>
 
   $if null users
     <figure.center-align.margin>

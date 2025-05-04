@@ -1,21 +1,23 @@
-<header.background>
-  <md-icon-button href=@{DataR RingtonesR} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgRingtone}
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{DataR RingtonesR} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-<main>
+    <h1.title.max>
+      _{MsgRingtone}
 
-  <form method=post action=@{DataR RingtonesR} enctype=#{et} ##{idFormRingtone}>
+<main.responsive.padding>
+
+  <form.vertical method=post action=@{DataR RingtonesR} enctype=#{et} ##{idFormRingtone}>
   
     ^{fw}
 
-  <div.actions>
-    <md-text-button type=link href=@{DataR RingtonesR}>
+  <nav.right-align>
+    <a.button.transparent.link href=@{DataR RingtonesR} role=button>
       _{MsgCancel}
 
-    <md-filled-button type=submit form=#{idFormRingtone}>
+    <button type=submit form=#{idFormRingtone}>
       _{MsgSave}
           
 ^{widgetSnackbar msgs}

@@ -24,6 +24,7 @@ module Material3
   , tsep
 
   , md3widget
+  , md3widgetFile
   ) where
 
 
@@ -32,6 +33,7 @@ import qualified Data.List.Safe as LS (head, tail)
 import Data.Maybe (isJust)
 import Data.Text (Text, pack, splitOn)
 import Data.Text.Lazy (toStrict)
+import Text.Julius (julius)
 import Data.Time.Calendar (Day)
 import Data.Time (TimeOfDay, LocalTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
@@ -41,7 +43,7 @@ import qualified Text.Blaze.Html.Renderer.Text as T (renderHtml)
 import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage)
 
-import Yesod.Core (MonadHandler(HandlerSite), newIdent, WidgetFor)
+import Yesod.Core (MonadHandler(HandlerSite), newIdent, WidgetFor, ToWidget (toWidget))
 import Yesod.Core.Handler (HandlerFor)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
@@ -254,6 +256,31 @@ md3mreq field fs mdef = do
 
 tsep :: Text
 tsep = "<>"
+
+
+md3widgetFile :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
+md3widgetFile v = do
+    idButtonUploadLabel <- newIdent
+    toWidget [julius|
+        document.getElementById(#{fvId v}).addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          const label = document.getElementById(#{idButtonUploadLabel});
+          if (file) {
+            label.textContent = file.name;
+          }
+        }, false);
+    |]
+    [whamlet|
+        <button.transparent.border>
+          <i>upload_file
+          <span ##{idButtonUploadLabel}>
+            #{fvLabel v}
+            
+          ^{fvInput v}
+
+        $maybe err <- fvErrors v
+          <span.error-text>#{err}
+    |]
 
 
 md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a

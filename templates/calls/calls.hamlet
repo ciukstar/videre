@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive>
 
   $if null calls
     <figure style="text-align:center">

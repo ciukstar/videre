@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive>
 
   $if null subscriptions
     <figure style="text-align:center">

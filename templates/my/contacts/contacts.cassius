@@ -3,9 +3,6 @@ main
 
     .app-attribution
         position: relative
-        margin: 0
-        padding: 0
-        line-height: 0
         
         .app-attribution-wrapper
             position: absolute

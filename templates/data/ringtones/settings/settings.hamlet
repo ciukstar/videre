@@ -11,45 +11,39 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive.no-padding>
 
-  <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabRingtones aria-controls=panelRingtones onclick="this.querySelector('a[href]').click()">
+  <div.tabs.min>
+    <a href=@{DataR RingtonesR}>
+      _{MsgRingtones}
 
-      <a href=@{DataR RingtonesR} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgRingtones}
+    <a.active href=@{DataR RingtoneSettingsR}>
+      _{MsgDefaultSettings}
 
-    <md-primary-tab #tabSettings aria-controls=#{idPanelSettings} active=true
-      onclick="this.querySelector('a[href]').click()">
-
-      <a href=@{DataR RingtoneSettingsR} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgDefaultSettings}
-
-  <div #panelRingtones role=tabpanel aria-labelledby=tabRingtones hidden>
-
-  <div ##{idPanelSettings} role=tabpanel aria-labelledby=tabSettings>
+  <div.page.no-padding.active>
+  
     $if null defaults
-      <figure style="text-align:center">
-        <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.md-typescale-body-large>
+      <figure.margin.center-align>
+        <i.extra>folder_open
+        <figcaption>
           _{MsgNoDefaultRingtonesSetYet}
+          
     $else
-      <md-list>
-        $forall (Entity did (DefaultRingtone _ typ), Entity _ (Ringtone name _ _)) <- defaults
-          <md-list-item type=link href=@{DataR $ RingtoneSettingR did}>
-            <div slot=start>
-              <md-icon>
-                $case typ
-                  $of RingtoneTypeCallOutgoing
-                    call_made
-                  $of RingtoneTypeCallIncoming
-                    call_received
-                  $of RingtoneTypeChatOutgoing
-                    outgoing_mail
-                  $of RingtoneTypeChatIncoming
-                    mark_email_read
+      $forall (Entity did (DefaultRingtone _ typ), Entity _ (Ringtone name _ _)) <- defaults
+        <a.row.wave.padding href=@{DataR $ RingtoneSettingR did}>
+          <i>
+            $case typ
+              $of RingtoneTypeCallOutgoing
+                call_made
+              $of RingtoneTypeCallIncoming
+                call_received
+              $of RingtoneTypeChatOutgoing
+                outgoing_mail
+              $of RingtoneTypeChatIncoming
+                mark_email_read
 
-            <div slot=headline style="white-space:nowrap">
+          <div.max>
+            <div.headline.large-text>
               $case typ
                 $of RingtoneTypeCallOutgoing
                   _{MsgOutgoingCall}
@@ -60,16 +54,14 @@
                 $of RingtoneTypeChatIncoming
                   _{MsgIncomingChatMessage}
 
-            <div slot=supporting-text style="white-space:nowrap">
+            <div.supporting-text.secondary-text>
               #{name}
 
-            <md-icon slot=end>arrow_forward_ios
+          <i.secondary-text>arrow_forward_ios
 
-          <md-divider>
+        <hr>
     
-        
-  <md-fab ##{idFabAdd} aria-label=_{MsgAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{DataR RingtoneSettingNewR}>
-    <md-icon slot=icon>add
+  <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@{DataR RingtoneSettingNewR} title=_{MsgAdd}>
+    <i>add
           
 ^{widgetSnackbar msgs}

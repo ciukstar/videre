@@ -54,7 +54,7 @@ import Foundation
       )
     )
     
-import Material3 (md3mreq, md3textField, md3selectField)
+import Material3 (md3mreq, md3textField, md3selectField, md3widget, md3widgetFile)
 
 import Model
     ( statusSuccess, statusError, RingtoneId, Ringtone (Ringtone, ringtoneName)
@@ -83,7 +83,7 @@ import Yesod.Core.Widget (setTitleI)
 import Yesod.Form
     ( Field, FieldView (fvInput, fvId, fvErrors), checkM, optionsPairs
     , FormResult (FormSuccess)
-    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
+    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs), textField
     )
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, runFormPost, mreq, mopt)
@@ -214,9 +214,6 @@ getRingtoneSettingsR = do
             `innerJoin` table @Ringtone `on` (\(x :& r) -> x ^. DefaultRingtoneRingtone ==. r ^. RingtoneId)
         return (x, r) 
     
-    idPanelSettings <- newIdent
-    idFabAdd <- newIdent
-    
     msgs <- getMessages  
     defaultLayout $ do
         setTitleI MsgDefaultSettings
@@ -289,27 +286,24 @@ getRingtoneEditR rid = do
         $(widgetFile "data/ringtones/edit")
     
 
-data RingtoneEditForm = RingtoneEditForm Text (Maybe FileInfo)
+data RingtoneEditForm = RingtoneEditForm !Text !(Maybe FileInfo)
 
 
 formRingtoneEdit :: Maybe (Entity Ringtone) -> Form RingtoneEditForm
 formRingtoneEdit ringtone extra = do
-
-    msgr <- getMessageRender
     
-    (nameR, nameV) <- md3mreq uniqueNameField FieldSettings
+    (nameR, nameV) <- mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgTheName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", msgr MsgTheName)]
+        , fsAttrs = []
         } (ringtoneName . entityVal <$> ringtone)
         
     (audioR, audioV) <- mopt fileField FieldSettings
-        { fsLabel = SomeMessage MsgAudio
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("style","opacity:0;position:absolute")]
+        { fsLabel = maybe (SomeMessage MsgSelectRingtone) (SomeMessage . ringtoneName . entityVal) ringtone
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Just (SomeMessage MsgAudio)
+        , fsAttrs = []
         } Nothing
 
-    idButtonUploadLabel <- newIdent
             
     return ( RingtoneEditForm <$> nameR <*> audioR
            , $(widgetFile "data/ringtones/form")
@@ -317,7 +311,7 @@ formRingtoneEdit ringtone extra = do
 
   where
       uniqueNameField :: Field Handler Text
-      uniqueNameField = checkM uniqueName md3textField
+      uniqueNameField = checkM uniqueName textField
 
       uniqueName :: Text -> Handler (Either AppMessage Text)
       uniqueName name = do
@@ -341,11 +335,13 @@ getRingtoneR rid = do
         where_ $ x ^. RingtoneId ==. val rid
         return x
 
-    (fw,et) <- generateFormPost formRingtoneDelete
+    (fw0,et0) <- generateFormPost formRingtoneDelete
 
     msgs <- getMessages    
     defaultLayout $ do
         setTitleI MsgRingtone
+        idOverlay <- newIdent
+        idDialogDelete <- newIdent
         $(widgetFile "data/ringtones/ringtone")
 
 
@@ -380,37 +376,33 @@ getRingtoneNewR = do
         $(widgetFile "data/ringtones/new")
     
 
-data RingtoneForm = RingtoneForm Text FileInfo
+data RingtoneForm = RingtoneForm !Text !FileInfo
 
 
 formRingtone :: Maybe (Entity Ringtone) -> Form RingtoneForm
 formRingtone ringtone extra = do
-
-    msgr <- getMessageRender
     
-    (nameR, nameV) <- md3mreq uniqueNameField FieldSettings
+    (nameR, nameV) <- mreq uniqueNameField FieldSettings
         { fsLabel = SomeMessage MsgTheName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", msgr MsgTheName)]
+        , fsAttrs = []
         } (ringtoneName . entityVal <$> ringtone)
         
     (audioR, audioV) <- mreq fileField FieldSettings
-        { fsLabel = SomeMessage MsgAudio
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("style","opacity:0;position:absolute")]
+        { fsLabel = maybe (SomeMessage MsgSelectRingtone) (SomeMessage . ringtoneName . entityVal) ringtone
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Just (SomeMessage MsgAudio)
+        , fsAttrs = []
         } Nothing
 
     
     let r = RingtoneForm <$> nameR <*> audioR
-
-    idButtonUploadLabel <- newIdent
-    let w = $(widgetFile "data/ringtones/form")
+    let w = $(widgetFile "data/ringtones/form") 
             
     return (r,w)
 
   where
       uniqueNameField :: Field Handler Text
-      uniqueNameField = checkM uniqueName md3textField
+      uniqueNameField = checkM uniqueName textField
 
       uniqueName :: Text -> Handler (Either AppMessage Text)
       uniqueName name = do
@@ -434,11 +426,7 @@ getRingtonesR = do
         orderBy [desc (x ^. RingtoneId)]
         return x
 
-    msgs <- getMessages
-    
-    idPanelRingtones <- newIdent
-    idFabAdd <- newIdent
-    
+    msgs <- getMessages    
     defaultLayout $ do
         setTitleI MsgRingtones
         idOverlay <- newIdent

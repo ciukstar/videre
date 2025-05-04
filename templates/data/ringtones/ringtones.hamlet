@@ -11,47 +11,40 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive.no-padding>
 
-  $if null ringtones
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.md-typescale-body-large>
-        _{MsgNoRingtonesYet}
-  $else
+  <div.tabs.min>
+    <a.active href=@{DataR RingtonesR}>
+      _{MsgRingtones}
 
-    <md-tabs aria-label=Tabs>
-      <md-primary-tab #tabRingtones aria-controls=#{idPanelRingtones} active=true 
-        onclick="this.querySelector('a[href]').click()">
-        
-        <a href=@{DataR RingtonesR} style="color:inherit;text-decoration:inherit;cursor:inherit">
-          _{MsgRingtones}
-          
-      <md-primary-tab #tabSettings aria-controls=panelSettings onclick="this.querySelector('a[href]').click()">
-        <a href=@{DataR RingtoneSettingsR} style="color:inherit;text-decoration:inherit;cursor:inherit">
-          _{MsgDefaultSettings}
+    <a href=@{DataR RingtoneSettingsR}>
+      _{MsgDefaultSettings}
 
-    <div ##{idPanelRingtones} role=tabpanel aria-labelledby=tabRingtones>
-      <md-list>
-        $forall Entity rid (Ringtone name mime _) <- ringtones
-          <md-list-item type=link href=@{DataR $ RingtoneR rid}>
-            <div slot=start>
-              <md-icon>music_note
+  <div.page.no-padding.active>
 
-            <div slot=headline style="white-space:nowrap">
+    $if null ringtones
+      <figure.margin.center-align>
+        <i.extra>folder_open
+        <figcaption>
+          _{MsgNoRingtonesYet}
+
+    $else
+      $forall Entity rid (Ringtone name mime _) <- ringtones
+        <a.row.wave.padding href=@{DataR $ RingtoneR rid}>
+          <i>music_note
+
+          <div.max>
+            <div.headline.large-text>
               #{name}
-            <div slot=supporting-text style="white-space:nowrap">
+            <div.supporting-text.secondary-text>
               #{mime}
 
-            <md-icon slot=end>arrow_forward_ios
+          <i.secondary-text>arrow_forward_ios
 
-          <md-divider>
+        <hr>
 
-    <div #panelSettings role=tabpanel aria-labelledby=tabSettings hidden>
-        
-  <md-fab ##{idFabAdd} aria-label=_{MsgAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{DataR RingtoneNewR}>
-    <md-icon slot=icon>add
+  <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@{DataR RingtoneNewR} title=_{MsgAdd}>
+    <i>add
 
 ^{widgetSnackbar msgs}
 

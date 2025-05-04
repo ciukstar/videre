@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.reponsive.vertical.middle-align.large-space>
+<main.responsive.vertical.middle-align.large-space>
 
   <h2.small.margin>
     _{MsgWelcomeTo} _{MsgAppName}

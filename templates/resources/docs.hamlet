@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.reponsive>
+<main.responsive>
 
   <section>
     <h2.md-typescale-headline-medium>_{MsgAppName}

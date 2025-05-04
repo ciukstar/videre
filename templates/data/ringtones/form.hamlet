@@ -1,17 +1,6 @@
 
 #{extra}
 
-<label.md-typescale-body-small for=#{fvId audioV}>
-  
-  <md-outlined-button type=button style="pointer-events:none;width:100%">
-    <md-icon slot=icon>library_music
-    <span ##{idButtonUploadLabel} data-label=_{MsgSelectRingtoneFile}>
-      _{MsgSelectRingtone}
-<div.md-typescale-body-small.on-error>
-  $maybe errs <- fvErrors audioV
-    #{errs}
+^{md3widgetFile audioV}
 
-^{fvInput audioV}
-    
-
-^{fvInput nameV}
+^{md3widget nameV}

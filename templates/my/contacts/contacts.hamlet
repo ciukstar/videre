@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.reponsive.no-padding>
+<main.responsive.no-padding>
 
   $if null entries
     <figure.margin.center-align>
