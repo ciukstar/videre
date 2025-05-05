@@ -24,6 +24,7 @@ module Material3
   , tsep
 
   , md3widget
+  , md3widgetSelect
   , md3widgetFile
   ) where
 
@@ -55,9 +56,9 @@ import Yesod.Form.Fields
     )
 import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
-    ( Field (fieldView)
+    ( Field (fieldView), FormResult, MForm
     , FieldSettings (fsId, fsName, fsAttrs)
-    , FieldView (fvErrors, fvInput, fvId, fvLabel, fvRequired), MForm, FormResult
+    , FieldView (fvErrors, fvInput, fvId, fvLabel, fvRequired)
     )
 
 
@@ -258,6 +259,20 @@ tsep :: Text
 tsep = "<>"
 
 
+md3widgetSelect :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
+md3widgetSelect v = [whamlet|
+  <div.field.label.suffix.border.round :isJust (fvErrors v):.invalid>
+    ^{fvInput v}
+    <label for=#{fvId v}>
+      #{fvLabel v}
+      $if fvRequired v
+        <sup>*
+    <i>arrow_drop_down
+    $maybe err <- fvErrors v
+      <span.error>#{err}
+|]
+
+
 md3widgetFile :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
 md3widgetFile v = do
     idButtonUploadLabel <- newIdent
@@ -283,6 +298,21 @@ md3widgetFile v = do
     |]
 
 
+md3widget :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
+md3widget v = [whamlet|
+  <div.field.label.border.round :isJust (fvErrors v):.invalid>
+
+    ^{fvInput v}
+    <label for=#{fvId v}>
+      #{fvLabel v}
+      $if fvRequired v
+        <sup>*
+
+    $maybe err <- fvErrors v
+      <span.error>#{err}
+|]
+
+
 md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
 md3radioField options = (radioField' options)
     { fieldView = \theId name attrs x isReq -> do
@@ -298,18 +328,3 @@ md3radioField options = (radioField' options)
         #{optionDisplay opt}
 
 |] }
-
-
-md3widget :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
-md3widget v = [whamlet|
-  <div.field.label.border.round :isJust (fvErrors v):.invalid>
-
-    ^{fvInput v}
-    <label for=#{fvId v}>
-      #{fvLabel v}
-      $if fvRequired v
-        <sup>*
-
-    $maybe err <- fvErrors v
-      <span.error>#{err}
-|]

@@ -12,7 +12,7 @@ import Foundation
     ( Handler, widgetMainMenu, widgetAccount, widgetSnackbar
     , Route (AuthR, MyContactsR)
     , AppMessage
-      ( MsgWelcomeTo, MsgAppName, MsgSendMessagesVideochatOrAudioCall
+      ( MsgWelcome, MsgAppName, MsgSendMessagesVideochatOrAudioCall
       , MsgLoginToAccessYourContacts, MsgLogIn, MsgShowMyContacts
       )
     )

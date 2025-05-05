@@ -54,7 +54,7 @@ import Foundation
       )
     )
     
-import Material3 (md3mreq, md3textField, md3selectField, md3widget, md3widgetFile)
+import Material3 (md3mreq, md3textField, md3selectField, md3widget, md3widgetFile, md3widgetSelect)
 
 import Model
     ( statusSuccess, statusError, RingtoneId, Ringtone (Ringtone, ringtoneName)
@@ -83,7 +83,7 @@ import Yesod.Core.Widget (setTitleI)
 import Yesod.Form
     ( Field, FieldView (fvInput, fvId, fvErrors), checkM, optionsPairs
     , FormResult (FormSuccess)
-    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs), textField
+    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs), textField, selectField
     )
 import Yesod.Form.Fields (fileField)
 import Yesod.Form.Functions (generateFormPost, runFormPost, mreq, mopt)
@@ -115,11 +115,13 @@ getRingtoneSettingR did = do
         where_ $ x ^. DefaultRingtoneId ==. val did
         return (x,r)
 
-    (fw,et) <- generateFormPost formRingtoneSettingDelete
+    (fw0,et0) <- generateFormPost formRingtoneSettingDelete
     
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgDefaultRingtone
+        idOverlay <- newIdent
+        idDialogDelete <- newIdent
         $(widgetFile "data/ringtones/settings/setting")
 
 
@@ -167,20 +169,20 @@ formRingtoneDefault setting extra = do
         orderBy [asc (x ^. RingtoneName)]
         return (x ^. RingtoneName, x ^. RingtoneId) )
         
-    (ringtoneR,ringtoneV) <- md3mreq (md3selectField (optionsPairs ringtones)) FieldSettings
+    (ringtoneR,ringtoneV) <- mreq (selectField (optionsPairs ringtones)) FieldSettings
         { fsLabel = SomeMessage MsgRingtone
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label",msgr MsgRingtone)]
+        , fsAttrs = []
         } Nothing
 
-    (typeR,typeV) <- md3mreq (uniqueTypeSelectField types) FieldSettings
+    (typeR,typeV) <- mreq (uniqueTypeSelectField types) FieldSettings
         { fsLabel = SomeMessage MsgType
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label",msgr MsgType)]
         } Nothing
 
     return ( DefaultRingtone <$> ringtoneR <*> typeR
-           , [whamlet|#{extra} ^{fvInput ringtoneV} ^{fvInput typeV}|]
+           , [whamlet|#{extra} ^{md3widgetSelect ringtoneV} ^{md3widgetSelect typeV}|]
            )
   where
       types = [ (MsgOutgoingCall, RingtoneTypeCallOutgoing)
@@ -190,7 +192,7 @@ formRingtoneDefault setting extra = do
               ]
 
       uniqueTypeSelectField :: [(AppMessage,RingtoneType)] -> Field Handler RingtoneType
-      uniqueTypeSelectField xs = checkM uniqueType (md3selectField (optionsPairs xs))
+      uniqueTypeSelectField xs = checkM uniqueType (selectField (optionsPairs xs))
 
       uniqueType :: RingtoneType -> Handler (Either AppMessage RingtoneType)
       uniqueType typ = do

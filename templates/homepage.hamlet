@@ -11,10 +11,10 @@
 
     ^{widgetAccount}
 
-<main.responsive.vertical.middle-align.large-space>
+<main.responsive>
 
-  <h2.small.margin>
-    _{MsgWelcomeTo} _{MsgAppName}
+  <h2.title.margin>
+    _{MsgWelcome}
     
   <p.margin.large-text>
     _{MsgSendMessagesVideochatOrAudioCall}

@@ -8,7 +8,7 @@ $doctype 5
     <meta name="description" content=#{msgr MsgMetaDescription}>
     <meta name=keywords content=#{msgr MsgMetaKeywords}>
     <meta name="author" content="Sergiu Starciuc, ciukstar@gmail.com">
-    <meta name="theme-color" content="#7f5700">
+    <meta name="theme-color" content="#6750a4">
     <meta name="color-scheme" content="light dark">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     $maybe gsv <- seoGoogleSiteVerification $ appSeo $ appSettings master
