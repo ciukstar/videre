@@ -58,7 +58,7 @@ import Foundation
       )
     )
 
-import Material3 ( md3textField, md3mopt, md3dayField )
+import Material3 ( md3dayField, md3widget )
 
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
@@ -100,7 +100,7 @@ import Yesod.Core.Content
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields
     ( fileField, optionsPairs, radioField', OptionList (olOptions)
-    , Option (optionInternalValue, optionExternalValue)
+    , Option (optionInternalValue, optionExternalValue), textField
     )
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
@@ -378,12 +378,13 @@ getAccountEditR uid = do
 formAccount :: Maybe (Entity User)
             -> Html -> MForm Handler (FormResult (Maybe Text,Maybe FileInfo), Widget)
 formAccount user extra = do
-    rndr <- liftHandler getMessageRender
-    (nameR,nameV) <- mopt md3textField FieldSettings
+    
+    (nameR,nameV) <- mopt textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgFullName)]
+        , fsAttrs = []
         } (userName . entityVal <$> user)
+        
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing

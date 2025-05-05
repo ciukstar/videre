@@ -26,21 +26,23 @@
       <button.circle.transparent.border title=_{MsgTakePhoto} type=button ##{idButtonTakePhoto} data-ui=##{idOverlay}>
         <i>photo_camera
 
-<details.app-attribution
-  ontoggle="this.querySelector('.app-expand').textContent = this.open ? 'expand_less' : 'expand_more'">
-  <summary.md-typescale-label-large>
-    <md-ripple>
-    <span>_{MsgAttribution}
-    <md-icon.app-expand>expand_more
-    
-  ^{fvInput attribV}
+<details>
+  <summary>
+    #{fvLabel attribV}
+  <div.field.textarea.label.border.round :isJust (fvErrors attribV):.invalid>
 
-^{fvInput nameV}
+    ^{fvInput attribV}
+    <label for=#{fvId attribV}>
+      #{fvLabel attribV}
+      $if fvRequired attribV
+        <sup>*
 
-<div style="display:flex;align-items:center;gap:1rem">
-  ^{fvInput adminV}
-  <label.md-typescale-body-large for=#{fvId adminV}>
-    #{fvLabel adminV}
+    $maybe err <- fvErrors attribV
+      <span.error>#{err}
+
+^{md3widget nameV}
+
+^{md3widgetSwitch adminV}
 
 
 <dialog ##{idDialogSnapshot}>

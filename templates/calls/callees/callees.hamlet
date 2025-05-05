@@ -1,106 +1,110 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button type=link href=@{CallsR uid}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{CallsR uid} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgContacts}
+    <h1.title.max>
+      _{MsgContacts}
 
-<main>
+<main.responsive.no-padding>
 
   $if null callees
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.md-typescale-body-large>
-        _{MsgNoRegisteredUsersYet}
-        <p.md-typescale-body-small>
+    <figure.center-align.margin>
+      <i.extra>folder_open
+      <figcaption>
+        <p>_{MsgNoRegisteredUsersYet}
+        <p.secondary-text>
           _{MsgYouMightWantToAddAFew}
+          
   $else
-    <md-list>
+    <ul.list.border>
       $forall (cid, (Entity rid (User email _ _ _ _ name _ _), (attrib, (ns, (nl, na))))) <- callees
         $with i <- fromSqlKey cid
-          <md-list-item type=text onclick="document.getElementById('idDialogDetails#{i}').show()">
-            <div slot=start>
-              <img.user-photo src=@{AccountPhotoR rid} width=56 height=56 loading=lazy>
-              $if ns < 1
-                <md-icon.notifications-disabled>notifications_off
-              $elseif nl > 0
-                <md-icon.call-loop>repeat
-              $elseif na < 1
-                <md-icon.phone-disabled>phone_disabled
-                
-            <div slot=headline>
-              $maybe name <- name
-                #{name}
-              $nothing
-                #{email}
-                
-            <md-icon-button slot=end #buttonContactItemAnchor#{i}
-              onclick="document.getElementById('menuContactItemMenu#{i}').open = !document.getElementById('menuContactItemMenu#{i}').open; event.stopImmediatePropagation()">
-              <md-icon>more_horiz
-            <md-menu positioning=popover skip-restore-focus=true anchor=buttonContactItemAnchor#{i} #menuContactItemMenu#{i}>
-            
-              <md-menu-item.app-button-call type=menuitem data-i=#{i}
-                data-message-type=#{PushMsgTypeVideoCall}
-                data-title=_{MsgAppName}
-                data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
-                data-recipient-id=#{show $ fromSqlKey rid}
-                data-videor 
-                data-videos
-                data-target-room=@{VideoR $ RoomR uid cid rid False}
-                data-target-push=@{VideoR $ PushMessageR uid cid rid}
-                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
-                <md-icon slot=start>videocam
-                <div slot=headline>_{MsgVideoCall}
-                
-              <md-menu-item.app-button-call type=menuitem data-i=#{i} #idButtonAuioCall#{i}
-                data-message-type=#{PushMsgTypeAudioCall}
-                data-title=_{MsgAppName}
-                data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
-                data-recipient-id=#{show $ fromSqlKey rid}
-                data-audior
-                data-audios
-                data-target-room=@{VideoR $ RoomR uid cid rid False}
-                data-target-push=@{VideoR $ PushMessageR uid cid rid}
-                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
-                <md-icon slot=start>call
-                <div slot=headline>_{MsgAudioCall}
+          <li.padding>
+          
+            <img.circle src=@{AccountPhotoR rid} loading=lazy alt=_{MsgPhoto}>
 
-              <md-menu-item type=link href=@?{(ContactR uid rid cid,[(paramBacklink, rndr $ CalleesR uid)])}
-                onclick="event.stopPropagation()">
-                <md-icon slot=start>contacts
-                <div slot=headline>_{MsgViewContact}
+            <div.max data-ui=#idDialogDetails#{i}>
+              <div.headline.large-text>
+                $maybe name <- name
+                  #{name}
+                $nothing
+                  #{email}
+                  
+              <div.supporting-text>
+                $if ns < 1
+                  <i.tiny.error.circle.tiny-padding>notifications_off
+                $elseif nl > 0
+                  <i.tiny.error.circle.tiny-padding>repeat
+                $elseif na < 1
+                  <i.tiny.error.circle.tiny-padding>phone_disabled
+                
+            <button.circle.transparent>
+              <i>more_horiz
+              
+              <menu.no-wrap.left #menuContactItemMenu#{i}>
+
+                <li.app-button-call type=menuitem data-i=#{i}
+                  data-message-type=#{PushMsgTypeVideoCall}
+                  data-title=_{MsgAppName}
+                  data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                  data-recipient-id=#{show $ fromSqlKey rid}
+                  data-videor 
+                  data-videos
+                  data-target-room=@{VideoR $ RoomR uid cid rid False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                  data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                  <i>videocam
+                  <div>_{MsgVideoCall}
+
+                <li.app-button-call type=menuitem data-i=#{i} #idButtonAuioCall#{i}
+                  data-message-type=#{PushMsgTypeAudioCall}
+                  data-title=_{MsgAppName}
+                  data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                  data-recipient-id=#{show $ fromSqlKey rid}
+                  data-audior
+                  data-audios
+                  data-target-room=@{VideoR $ RoomR uid cid rid False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                  data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                  <i>call
+                  <div>_{MsgAudioCall}
+
+                <li>
+                  <a href=@?{(ContactR uid rid cid,[(paramBacklink, rndr $ CalleesR uid)])}>
+                    <i>contacts
+                    <div>_{MsgViewContact}
               
           $maybe attrib <- attrib
             <div.app-attribution>
-              <div.app-attribution-wrapper.md-typescale-body-small>
+              <div.app-attribution-wrapper>
                 #{attrib}
                 
-          <md-divider>
+          <hr>
           
-          <md-dialog.app-details #idDialogDetails#{i}>
-            <div slot=headline>
-              <span style="flex:1">_{MsgContact}
-              <md-icon-button type=button title=_{MsgClose}
-                onclick="document.getElementById('idDialogDetails#{i}').close()">
-                <md-icon>close
+          <dialog.app-details #idDialogDetails#{i}>
+            <div.row>
+              <h6.max>_{MsgContact}
+              <button.transparent.circle type=button title=_{MsgClose} data-ui=#idDialogDetails#{i}>
+                <i>close
               
-            <div slot=content>
-              <figure.app-callee>
-                <img.user-photo src=@{AccountPhotoR rid} width=96 height=96 loading=lazy>
+            <div>
+              <figure.center-align>
+                <img.extra.circle src=@{AccountPhotoR rid} loading=lazy alt=_{MsgPhoto}>
                 <figcaption>
                   $maybe attribution <- attrib
-                    <div.md-typescale-body-small>
+                    <div.small-text.secondary-text>
                       ^{attribution}
                   $maybe name <- name
-                    <div.md-typescale-body-large>#{name}
-                  <div.md-typescale-body-medium>#{email}
+                    <div.large-text>#{name}
+                  <div.small-text>#{email}
 
               $if ns < 1
                 <dl>
                   <dt>
-                    <md-icon.notifications-disabled>notifications_off
-                  <dd.md-typescale-body-small>
+                    <i.tiny.error.circle.tiny-padding>notifications_off
+                  <dd.small-text>
                     $maybe name <- name
                       _{MsgYouAreNotSubscribedToNotificationsFrom name}
                     $nothing
@@ -109,53 +113,53 @@
               $if nl > 0
                 <dl>
                   <dt>
-                    <md-icon.call-loop>repeat
-                  <dd.md-typescale-body-small>
+                    <i.tiny.error.circle.tiny-padding>repeat
+                  <dd.small-text>
                     $maybe name <- name
                       _{MsgUserSubscribedOnThisDevice name}
                     $nothing
                       _{MsgUserSubscribedOnThisDevice email}
 
               $elseif na < 1
-                <dl>
+                <dl.vertical-margin>
                   <dt>
-                    <md-icon.phone-disabled>phone_disabled
-                  <dd.md-typescale-body-small>
+                    <i.tiny.error.circle.tiny-padding>phone_disabled
+                  <dd>
                     $maybe name <- name
                       _{MsgYouAreNotYetInContactListOfUser name}
                     $nothing
                       _{MsgYouAreNotYetInContactListOfUser email}
 
-            <div slot=actions>
+            <nav.right-align>
 
-              <md-outlined-button.app-button-call type=button data-i=#{i} #idButtonAuioCall#{i}
-                data-message-type=#{PushMsgTypeAudioCall}
-                data-title=_{MsgAppName}
-                data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
-                data-recipient-id=#{show $ fromSqlKey rid}
-                data-audior
-                data-audios
-                data-target-room=@{VideoR $ RoomR uid cid rid False}
-                data-target-push=@{VideoR $ PushMessageR uid cid rid}
-                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
-                <md-icon slot=icon>call
-                _{MsgAudio}
+              <button.border.trnsparent.app-button-call type=button data-i=#{i} #idButtonAuioCall#{i}
+                  data-message-type=#{PushMsgTypeAudioCall}
+                  data-title=_{MsgAppName}
+                  data-body=_{MsgIncomingAudioCallFrom $ fromMaybe email name}
+                  data-recipient-id=#{show $ fromSqlKey rid}
+                  data-audior
+                  data-audios
+                  data-target-room=@{VideoR $ RoomR uid cid rid False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                  data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+                <i>call
+                <span>_{MsgAudio}
 
-              <md-filled-button.app-button-call type=button data-i=#{i} #idButtonVideoCall#{i}
-                data-message-type=#{PushMsgTypeVideoCall}
-                data-title=_{MsgAppName}
-                data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
-                data-recipient-id=#{show $ fromSqlKey rid}
-                data-videor 
-                data-videos
-                data-target-room=@{VideoR $ RoomR uid cid rid False}
-                data-target-push=@{VideoR $ PushMessageR uid cid rid}
-                data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
+              <button.app-button-call type=button data-i=#{i} #idButtonVideoCall#{i}
+                  data-message-type=#{PushMsgTypeVideoCall}
+                  data-title=_{MsgAppName}
+                  data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
+                  data-recipient-id=#{show $ fromSqlKey rid}
+                  data-videor 
+                  data-videos
+                  data-target-room=@{VideoR $ RoomR uid cid rid False}
+                  data-target-push=@{VideoR $ PushMessageR uid cid rid}
+                  data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                 
-                <md-icon slot=icon>videocam
-                _{MsgVideoCall}
+                <i>videocam
+                <spn>_{MsgVideoCall}
 
-          <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+          <dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
             <div slot=headline>
               _{MsgOutgoingCall} ...
 
@@ -195,7 +199,7 @@
                 _{MsgCancel}
 
 
-          <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
+          <dialog.app-call-declined #idDialogCallDeclined#{i}>
             <div slot=headline>
               _{MsgCallDeclined}
 
@@ -214,11 +218,10 @@
     <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
       $with (ringtone,mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
-                
 
-  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    $with backlink <- rndr $ CalleesR uid
-      <a href=@?{(ContactsR uid,[("backlink", backlink)])}>
-      <md-icon slot=icon>add
+  $with backlink <- rndr $ CalleesR uid
+    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate title=_{MsgAdd}
+            href=@?{(ContactsR uid,[("backlink", backlink)])}>
+      <i>add
 
 ^{widgetSnackbar msgs}

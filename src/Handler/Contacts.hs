@@ -90,11 +90,11 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack
       )
     )
 
-import Material3 (md3mreq, md3switchField)
+import Material3 (md3widgetSwitch)
 
 import Model
     ( statusError, statusSuccess
@@ -110,7 +110,8 @@ import Model
       )
     , Unique (UniquePushSubscription)
     , CallStatus
-      ( CallStatusAccepted, CallStatusDeclined, CallStatusCanceled, CallStatusEnded )
+      ( CallStatusAccepted, CallStatusDeclined, CallStatusCanceled, CallStatusEnded
+      )
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
       , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
@@ -118,8 +119,8 @@ import Model
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
       , ChatUser, UserName, UserEmail, CallCaller, CallCallee
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
-      , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneRingtone
-      , DefaultRingtoneType
+      , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType
+      , DefaultRingtoneRingtone      
       )
     )
 
@@ -171,14 +172,15 @@ import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Input (runInputGet, ireq, runInputPost, iopt)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
-    , Option (optionInternalValue, optionExternalValue, optionDisplay), urlField, textField
+    , Option (optionInternalValue, optionExternalValue, optionDisplay)
+    , urlField, textField, checkBoxField
     )
 import Yesod.Form.Functions (generateFormPost, mreq, runFormPost, mopt)
 import Yesod.Core.Json (parseCheckJsonBody, returnJson)
 import Yesod.Form.Types
-    ( Field (fieldView), FieldView (fvInput, fvLabel, fvId)
+    ( Field (fieldView), FieldView (fvInput, fvId)
     , FormResult (FormSuccess, FormFailure, FormMissing)
-    , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
+    , FieldSettings (FieldSettings, fsTooltip, fsId, fsName, fsAttrs, fsLabel)
     )
 import Yesod.Static (StaticRoute)
 import Yesod.Persist.Core (YesodPersist(runDB))
@@ -233,7 +235,6 @@ getCalleesR uid = do
     defaultLayout $ do
         setTitleI MsgContacts
         idAudioOutgoingCallRingtone <- newIdent
-        idFabAdd <- newIdent
         $(widgetFile "calls/callees/callees")
   where
       unwrap = bimap unValue (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))))
@@ -445,16 +446,16 @@ formSubscribe backlink vapidKeys sid pid cid notif extra = do
         where_ $ x ^. UserId ==. val pid
         return (x ^. UserName, x ^. UserEmail) )
 
-    (r,v) <- md3mreq md3switchField FieldSettings
+    (r,v) <- mreq checkBoxField FieldSettings
         { fsLabel = SomeMessage MsgSubscribeToNotifications
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("icons","")]
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = []
         } ( pure notif )
 
     idFormFieldSubscribe <- newIdent
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
-    return (r, $(widgetFile "my/contacts/push/subscription/form"))
+    return (r, $(widgetFile "my/contacts/push/subscription/form")) 
 
 
 postContactRemoveR :: UserId -> UserId -> ContactId -> Handler Html

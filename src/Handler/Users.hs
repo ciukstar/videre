@@ -42,8 +42,6 @@ import Foundation
       , MsgAttribution, MsgTakePhoto, MsgUploadPhoto, MsgClose
       )
     )
-    
-import Material3 (md3switchField, md3htmlField, md3mopt, md3mreq )
 
 import Model
     ( statusError, statusSuccess
@@ -76,14 +74,15 @@ import Yesod.Core
     , fileSourceByteString, MonadHandler (liftHandler)
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
-import Yesod.Form.Fields (fileField, textField)
-import Yesod.Form.Functions (generateFormPost, runFormPost, mopt)
+import Yesod.Form.Fields (fileField, textField, checkBoxField, htmlField)
+import Yesod.Form.Functions (generateFormPost, runFormPost, mopt, mreq)
 import Yesod.Form.Types
     ( FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsName, fsAttrs, fsId)
-    , FieldView (fvInput, fvLabel, fvId, fvErrors)
+    , FieldView (fvInput, fvId, fvErrors, fvLabel, fvRequired)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
+import Data.Maybe (isJust)
 
 
 postUserDeleR :: UserId -> Handler Html
@@ -207,10 +206,10 @@ formUser user extra = do
         , fsAttrs = [("label", rndr MsgFullName)]
         } (userName . entityVal <$> user)
         
-    (adminR,adminV) <- md3mreq md3switchField FieldSettings
+    (adminR,adminV) <- mreq checkBoxField FieldSettings
         { fsLabel = SomeMessage MsgAdministrator
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("icons","")]
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = []
         } (userAdmin . entityVal <$> user)
 
     (photoR,photoV) <- mopt fileField FieldSettings
@@ -226,10 +225,10 @@ formUser user extra = do
           return $ x ^. UserPhotoAttribution
       Nothing -> return Nothing
     
-    (attribR,attribV) <- md3mopt md3htmlField FieldSettings
+    (attribR,attribV) <- mopt htmlField FieldSettings
         { fsLabel = SomeMessage MsgAttribution
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgAttribution)]
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = []
         } (Just attrib)
 
     let r = UserData <$> nameR <*> adminR <*> photoR <*> attribR

@@ -1,9 +1,7 @@
 
 #{extra}
-<div ##{idFormFieldSubscribe}>
-  ^{fvInput v}
-  <label.md-typescale-body-large for=#{fvId v}>
-    #{fvLabel v}
 
-<p.md-typescale-body-small>
+^{md3widgetSwitch v}
+
+<p.secondary-text>
   _{MsgAllowToBeNotifiedBy publisherName}

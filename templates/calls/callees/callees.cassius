@@ -1,51 +1,15 @@
 
-header
-
-    position: sticky
-    top: 0
-    z-index: 1
-    height: var(--app-top-app-bar-height)
-    display: flex
-    align-items: center
-    column-gap: 0.5rem
-    padding: 0 1rem
-    .app-top-app-bar-end
-        margin-left: auto
-
 main
-
-    display: flex
-    flex-direction: column
-
-    div[slot=start]
-        position: relative
-        img.user-photo
-            clip-path: circle(50%)
-        .phone-disabled, .notifications-disabled, .call-loop
-            position: absolute
-            top: 0
-            right: -0.5rem
-            color: white
-            background: red
-            clip-path: circle(50%)
 
     div[slot=headline], div[slot=supporting-text]
         white-space: nowrap
 
     .app-details
-        div[slot=content]
-            figure.app-callee
-                text-align: center
-                img.user-photo
-                  clip-path: circle(50%)
 
-            dl
-                display: flex
-                align-items: center
-            .phone-disabled, .notifications-disabled, .call-loop
-                color: white
-                background: red
-                clip-path: circle(50%)
+        dl
+            display: flex
+            align-items: center
+            column-gap: 1rem
 
     .app-outgoing-call
 
@@ -82,20 +46,12 @@ main
 
     .app-attribution
         position: relative
-        margin: 0
-        padding: 0
-        line-height: 0
         
         .app-attribution-wrapper
             position: absolute
             bottom: 0
             left: 0.4rem
             font-size: 0.5rem
-        
-    ##{idFabAdd}
-        position: fixed
-        right: 1rem
-        bottom: 1rem
 
 
 @keyframes callarrow

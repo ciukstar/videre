@@ -14,35 +14,38 @@
 <main.responsive>
 
   $if null calls
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&#x1F4C2;
-      <figcaption.md-typescale-body-large>
-        _{MsgYouHaveNotMadeAnyCallsYet}
-        <p.md-typescale-body-small>
+    <figure.center-align.margin>
+      <i.extra>folder_open
+      <figcaption>
+        <p>_{MsgYouHaveNotMadeAnyCallsYet}
+        <p.secondary-text>
           _{MsgSelectCalleeToCall}
+          
   $else
-    <md-list>
+    <ul.list.border>
       $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,((ns1,(nl1,na1)),(ns2,(nl2,na2)))))) <- calls
         $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
-              <md-list-item.app-call type=text #idItemCall#{i}>
-
-                <div slot=start>
-                  <img.user-photo src=@{AccountPhotoR caller} width=56 height=56 loading=lazy>
-                <div slot=headline>
-                  $maybe name <- name
-                    #{name}
-                  $nothing
-                    #{email}
-                  <sup>
-                    <md-icon>call_made
-                <div slot=supporting-text>
-                  $with start <- iso8601Show start
-                    <time datetime=#{start}>#{start}
-                <div slot=supporting-text>
-                  $maybe end <- iso8601Show <$> end
-                    <time datetime=#{end}>#{end}
+              <li.app-call type=text #idItemCall#{i}>
+                
+                <img.circle src=@{AccountPhotoR caller} loading=lazy alt=_{MsgPhoto}>
+                <div.max>
+                  <div.headline.large-text>
+                    $maybe name <- name
+                      #{name}
+                    $nothing
+                      #{email}
+                    <sup>
+                      <i>call_made
+        
+                  <div.supporting-text.secondary-text>
+                    $with start <- iso8601Show start
+                      <time datetime=#{start}>#{start}
+                  <div.supporting-text.secondary-text>
+                    $maybe end <- iso8601Show <$> end
+                      <time datetime=#{end}>#{end}
+                    
                 <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
                   :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
                   :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
@@ -154,23 +157,25 @@
           $else
             
             $with (Entity _ (User email _ _ _ _ name _ _), attrib) <- (calleeE, attribCallee)
-              <md-list-item.app-call type=text #idItemCall#{i}>
+              <li.app-call type=text #idItemCall#{i}>
                 
-                <div slot=start>
-                  <img.user-photo src=@{AccountPhotoR callee} width=56 height=56 loading=lazy>
-                <div slot=headline>
-                  $maybe name <- name
-                    #{name}
-                  $nothing
-                    #{email}
-                  <sup>
-                    <md-icon>call_received
-                <div slot=supporting-text>
-                  $with start <- iso8601Show start
-                    <time datetime=#{start}>#{start}
-                <div slot=supporting-text>
-                  $maybe end <- iso8601Show <$> end
-                    <time datetime=#{end}>#{end}
+                <img.circle src=@{AccountPhotoR callee} loading=lazy alt=_{MsgPhoto}>
+                <div.max>
+                  <div.headline.large-text>
+                    $maybe name <- name
+                      #{name}
+                    $nothing
+                      #{email}
+                    <sup>
+                      <i>call_received
+                  <div.supporting-text.secondary-text>
+                    $with start <- iso8601Show start
+                      <time datetime=#{start}>#{start}
+        
+                  <div.supporting-text.secondary-text>
+                    $maybe end <- iso8601Show <$> end
+                      <time datetime=#{end}>#{end}
+        
                 <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
                   :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
                   :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
@@ -280,14 +285,13 @@
                     #{attrib}
           
           
-        <md-divider>
+        <hr>
         
     <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
       $with (ringtone, mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
-        
-  <md-fab aria-label=_{MsgAdd} ##{idFabAdd} onclick="this.querySelector('a[href]').click()">
-    <a href=@{CalleesR uid}>
-    <md-icon slot=icon>add_call
+
+  <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@{CalleesR uid} title=_{MsgAdd}>
+    <i>add_call
 
 ^{widgetSnackbar msgs}

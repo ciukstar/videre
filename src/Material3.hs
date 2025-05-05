@@ -4,16 +4,12 @@
 {-# LANGUAGE TypeOperators #-}
 
 module Material3
-  ( md3mopt
-  , md3mreq
-  , md3emailField
+  ( md3emailField
   , md3passwordField
   , md3radioField
   , md3telField
   , md3textareaField
   , md3selectField
-  , md3switchField
-  , md3htmlField
   , md3doubleField
   , md3dayField
   , md3timeField
@@ -24,6 +20,7 @@ module Material3
 
   , md3widget
   , md3widgetSelect
+  , md3widgetSwitch
   , md3widgetFile
   ) where
 
@@ -32,31 +29,25 @@ import Data.Foldable (find)
 import qualified Data.List.Safe as LS (head, tail)
 import Data.Maybe (isJust)
 import Data.Text (Text, pack, splitOn)
-import Data.Text.Lazy (toStrict)
 import Text.Julius (julius)
 import Data.Time.Calendar (Day)
 import Data.Time (TimeOfDay, LocalTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
-import qualified Text.Blaze.Html.Renderer.String as S (renderHtml)
-import qualified Text.Blaze.Html.Renderer.Text as T (renderHtml)
-import Text.Hamlet (Html)
 import Text.Shakespeare.I18N (RenderMessage)
 
-import Yesod.Core (MonadHandler(HandlerSite), newIdent, WidgetFor, ToWidget (toWidget))
+import Yesod.Core (newIdent, WidgetFor, ToWidget (toWidget))
 import Yesod.Core.Handler (HandlerFor)
 import Yesod.Core.Widget (whamlet, handlerToWidget)
 import Yesod.Form.Fields
     ( emailField, passwordField, textField, OptionList (olOptions), radioField'
     , Option (optionExternalValue, optionDisplay, optionInternalValue)
-    , textareaField, Textarea (Textarea), selectField, checkBoxField, htmlField
+    , textareaField, Textarea (Textarea), selectField
     , FormMessage, doubleField, dayField, timeField, datetimeLocalField
     , optionsPairs, multiSelectField
     )
-import Yesod.Form.Functions (mopt, mreq)
 import Yesod.Form.Types
-    ( Field (fieldView), FormResult, MForm
-    , FieldSettings (fsId, fsName, fsAttrs)
+    ( Field (fieldView)
     , FieldView (fvErrors, fvInput, fvId, fvLabel, fvRequired)
     )
 
@@ -80,15 +71,6 @@ md3checkboxesField ioptlist = (multiSelectField ioptlist)
                   #{optionDisplay opt}
           |]
     }
-
-
-md3switchField :: Monad m => Field m Bool
-md3switchField = checkBoxField
-    { fieldView = \theId name attrs x _ -> [whamlet|
-<md-switch ##{theId} *{attrs} name=#{name} :showVal id x:value=yes :showVal id x:selected>
-|] }
-    where
-      showVal = either (const False)
 
 
 md3selectField :: (Eq a, RenderMessage m FormMessage) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
@@ -188,62 +170,12 @@ md3textareaField = textareaField { fieldView = \theId name attrs x req -> [whaml
 |] }
 
 
-md3htmlField ::  Monad m => RenderMessage (HandlerSite m) FormMessage => Field m Html
-md3htmlField = htmlField { fieldView = \theId name attrs x req -> [whamlet|
-<md-filled-text-field ##{theId} type=textarea name=#{name} :req:required value=#{showVal x} *{attrs}>
-  $if elem "error" (fst <$> attrs)
-    <md-icon slot=trailing-icon>error
-|] }
-    where
-      showVal = either id (pack . S.renderHtml)
-
-
 md3doubleField :: RenderMessage m FormMessage => Field (HandlerFor m) Double
 md3doubleField = doubleField { fieldView = \theId name attrs ex req -> [whamlet|
 <md-filled-text-field ##{theId} type=number name=#{name} :req:required value=#{either id (pack . show) ex} *{attrs}>
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }
-
-
-md3mopt :: (RenderMessage site FormMessage, HandlerSite m ~ site, MonadHandler m)
-        => Field m a           -- ^ form field
-        -> FieldSettings site  -- ^ settings for this field
-        -> Maybe (Maybe a)     -- ^ optional default value
-        -> MForm m (FormResult (Maybe a), FieldView site)
-md3mopt field fs mdef = do
-    identName <- newIdent
-    identId <- newIdent
-    let nameFs = fs { fsId = Just identId, fsName = Just identName}
-    (r,v) <- mopt field nameFs Nothing
-
-    let attributes = case fvErrors v of
-          Nothing -> []
-          Just errs -> [("error",""),("error-text",toStrict $ T.renderHtml errs)]
-
-    (_,v') <- mopt field (nameFs { fsAttrs = fsAttrs nameFs <> attributes }) mdef
-
-    return (r,v')
-
-
-md3mreq :: (RenderMessage site FormMessage, HandlerSite m ~ site, MonadHandler m)
-        => Field m a           -- ^ form field
-        -> FieldSettings site  -- ^ settings for this field
-        -> Maybe a             -- ^ optional default value
-        -> MForm m (FormResult a, FieldView site)
-md3mreq field fs mdef = do
-    identName <- newIdent
-    identId <- newIdent
-    let nameFs = fs { fsId = Just identId, fsName = Just identName}
-    (r,v) <- mreq field nameFs Nothing
-
-    let attributes = case fvErrors v of
-          Nothing -> []
-          Just errs -> [("error",""),("error-text",toStrict $ T.renderHtml errs)]
-
-    (_,v') <- mreq field (nameFs { fsAttrs = fsAttrs nameFs <> attributes }) mdef
-
-    return (r,v')
 
 
 tsep :: Text
@@ -261,6 +193,20 @@ md3widgetSelect v = [whamlet|
     <i>arrow_drop_down
     $maybe err <- fvErrors v
       <span.error>#{err}
+|]
+
+    
+md3widgetSwitch :: RenderMessage m FormMessage => FieldView m -> WidgetFor m ()
+md3widgetSwitch v = [whamlet|
+  <div.field.no-margin.middle-align.small :isJust (fvErrors v):.invalid>
+    <nav.no-padding>          
+      <label.switch>
+        ^{fvInput v}
+        <span style="padding-left:1rem">
+          #{fvLabel v}
+
+      $maybe err <- fvErrors v
+        <span.error>#{err}
 |]
 
 
