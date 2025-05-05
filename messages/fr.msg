@@ -1,4 +1,6 @@
 
+TakePhoto: Prendre une photo
+UploadPhoto: Télécharger une photo
 Home: Accueil
 Logo: Logo
 Postpone: Reporter

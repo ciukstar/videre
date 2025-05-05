@@ -1,4 +1,6 @@
 
+TakePhoto: Take a photo
+UploadPhoto: Upload photo
 Home: Home
 Logo: Logo
 Postpone: Postpone

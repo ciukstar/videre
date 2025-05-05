@@ -11,27 +11,34 @@
 
     ^{widgetAccount}
 
-<main.responsive>
+<main.responsive.no-padding>
 
   $if null users
-    <figure style="text-align:center">
-      <span.on-secondary style="font-size:4rem">&varnothing;
-      <figcaption.md-typescale-body-large>
+    <figure.margin.center-align>
+      <i.extra>folder_open
+      <figcaption>
         _{MsgNoUsersYet}
+        
   $else
-    <md-list>
-      $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- users
-        <md-list-item type=link href=@{DataR $ UserR uid}>
-          <img slot=start src=@{DataR $ UserPhotoR uid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-          <div slot=headline>
+    
+    $forall (Entity uid (User email _ _ _ _ name _ _),attrib) <- users
+      <a.row.padding.wave href=@{DataR $ UserR uid}>
+        <img.circle src=@{DataR $ UserPhotoR uid} loading=lazy alt=_{MsgPhoto}>
+
+        <div.max>
+          <div.headline.large-text>
             $maybe name <- name
               #{name}
-          <div slot=supporting-text>#{email}
-          <md-icon slot=end>arrow_forward_ios
-        $maybe attrib <- attrib
-          <div.app-attribution>
-            <div.app-attribution-wrapper.md-typescale-body-small>
-              #{attrib}
-        <md-divider>
+       
+          <div.supporting-text.secondary-text>
+            #{email}
+   
+        <i.secondary-text>arrow_forward_ios
+   
+      $maybe attrib <- attrib
+        <div.app-attribution>
+          <div.app-attribution-wrapper.md-typescale-body-small>
+            #{attrib}
+      <hr>
 
 ^{widgetSnackbar msgs}

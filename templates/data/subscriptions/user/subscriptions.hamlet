@@ -50,12 +50,12 @@
               #{ua}
      
         <i.secondary-text>arrow_forward_ios
-
-      <hr>
  
       $maybe attrib <- attrib
         <div.app-attribution>
           <div.app-attribution-wrapper>
             #{attrib}
+
+      <hr>
           
 ^{widgetSnackbar msgs}

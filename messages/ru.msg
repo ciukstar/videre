@@ -1,4 +1,6 @@
 
+TakePhoto: Сфотографироваться
+UploadPhoto: Загрузить фото
 Home: Главная
 Logo: Логотип
 Postpone: Откладывать

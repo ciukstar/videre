@@ -10,7 +10,6 @@ module Material3
   , md3passwordField
   , md3radioField
   , md3telField
-  , md3textField
   , md3textareaField
   , md3selectField
   , md3switchField
@@ -138,14 +137,6 @@ md3passwordField = passwordField { fieldView = \theId name attrs x req -> [whaml
 md3emailField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
 md3emailField = emailField { fieldView = \theId name attrs x req -> [whamlet|
 <md-filled-text-field ##{theId} type=email name=#{name} :req:required value=#{either id id x} *{attrs}>
-  $if elem "error" (fst <$> attrs)
-    <md-icon slot=trailing-icon>error
-|] }
-
-
-md3textField :: RenderMessage m FormMessage => Field (HandlerFor m) Text
-md3textField = textField { fieldView = \theId name attrs ex req -> [whamlet|
-<md-filled-text-field ##{theId} type=text name=#{name} :req:required value=#{either id id ex} *{attrs}>
   $if elem "error" (fst <$> attrs)
     <md-icon slot=trailing-icon>error
 |] }

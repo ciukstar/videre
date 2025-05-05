@@ -28,7 +28,7 @@ import Database.Persist
 import qualified Database.Persist as P ((=.))
 
 import Foundation
-    ( Handler, Form, Widget
+    ( Handler, Form
     , widgetMainMenu, widgetSnackbar, widgetAccount
     , Route (DataR, StaticR)
     , DataR (UserR, UsersR, UserDeleR, UserEditR, UserPhotoR)
@@ -39,11 +39,11 @@ import Foundation
       , MsgFullName, MsgGoogle, MsgEmail, MsgEdit, MsgDele, MsgConfirmPlease
       , MsgDeleteAreYouSure, MsgInvalidFormData, MsgRecordDeleted, MsgNotSpecified
       , MsgRecordEdited, MsgSuperuser, MsgAdministrator, MsgSuperuserCannotBeDeleted
-      , MsgAttribution
+      , MsgAttribution, MsgTakePhoto, MsgUploadPhoto, MsgClose
       )
     )
     
-import Material3 ( md3textField, md3switchField, md3htmlField, md3mopt, md3mreq )
+import Material3 (md3switchField, md3htmlField, md3mopt, md3mreq )
 
 import Model
     ( statusError, statusSuccess
@@ -63,6 +63,8 @@ import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
     , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_account_circle_24dp_013048_FILL0_wght400_GRAD0_opsz24_svg
+    , img_camera_24dp_0000F5_FILL0_wght400_GRAD0_opsz24_svg
     )
     
 import Text.Hamlet (Html)
@@ -74,12 +76,12 @@ import Yesod.Core
     , fileSourceByteString, MonadHandler (liftHandler)
     )
 import Yesod.Core.Widget (setTitleI, whamlet)
-import Yesod.Form.Fields (fileField)
-import Yesod.Form.Functions (generateFormPost, runFormPost)
+import Yesod.Form.Fields (fileField, textField)
+import Yesod.Form.Functions (generateFormPost, runFormPost, mopt)
 import Yesod.Form.Types
-    ( MForm, FormResult (FormSuccess)
+    ( FormResult (FormSuccess)
     , FieldSettings (FieldSettings, fsLabel, fsTooltip, fsName, fsAttrs, fsId)
-    , FieldView (fvInput, fvLabel, fvId)
+    , FieldView (fvInput, fvLabel, fvId, fvErrors)
     )
 import Yesod.Persist.Core (YesodPersist(runDB))
 
@@ -92,17 +94,18 @@ postUserDeleR uid = do
         where_ $ x ^. UserSuperuser ==. val True
         return $ x ^. UserSuperuser )
         
-    ((fr,fw),et) <- runFormPost formDelete
+    ((fr,fw0),et0) <- runFormPost formDelete
     case (fr,superuser) of
       (FormSuccess (),False) -> do
           runDB $ delete uid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR UsersR
+          
       (FormSuccess (),True) -> do
           addMessageI statusError MsgSuperuserCannotBeDeleted
           redirect $ DataR $ UserR uid
+          
       _otherwise -> do
-
           user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
               x :& h <- from $ table @User
                   `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
@@ -113,6 +116,8 @@ postUserDeleR uid = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgUser
+              idOverlay <- newIdent
+              idDialogDelete <- newIdent
               $(widgetFile "data/users/user")
           
 
@@ -155,6 +160,7 @@ postUserR uid = do
               
           addMessageI statusSuccess MsgRecordEdited
           redirect $ DataR $ UserR uid
+          
       _otherwise -> do
           defaultLayout $ do
               setTitleI MsgUser
@@ -170,10 +176,12 @@ getUserR uid = do
         where_ $ x ^. UserId ==. val uid
         return (x, h ?. UserPhotoAttribution) )
     
-    (fw,et) <- generateFormPost formDelete
+    (fw0,et0) <- generateFormPost formDelete
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUser
+        idOverlay <- newIdent
+        idDialogDelete <- newIdent
         $(widgetFile "data/users/user")
 
 
@@ -182,19 +190,18 @@ formDelete extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 
 data UserData = UserData
-    (Maybe Text) -- ^ userDataName
-    Bool -- ^ userDataAdmin
-    (Maybe FileInfo) -- ^ userDataPhoto
-    (Maybe Html) -- ^ userDataPhotoAttribution
+    !(Maybe Text) -- ^ userDataName
+    !Bool -- ^ userDataAdmin
+    !(Maybe FileInfo) -- ^ userDataPhoto
+    !(Maybe Html) -- ^ userDataPhotoAttribution
 
 
-formUser :: Maybe (Entity User)
-         -> Html -> MForm Handler (FormResult UserData, Widget)
+formUser :: Maybe (Entity User) -> Form UserData
 formUser user extra = do
 
     rndr <- getMessageRender
     
-    (nameR,nameV) <- md3mopt md3textField FieldSettings
+    (nameR,nameV) <- mopt textField FieldSettings
         { fsLabel = SomeMessage MsgFullName
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("label", rndr MsgFullName)]
@@ -206,7 +213,7 @@ formUser user extra = do
         , fsAttrs = [("icons","")]
         } (userAdmin . entityVal <$> user)
 
-    (photoR,photoV) <- md3mopt fileField FieldSettings
+    (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
         , fsAttrs = [("style","display:none")]
@@ -227,11 +234,18 @@ formUser user extra = do
 
     let r = UserData <$> nameR <*> adminR <*> photoR <*> attribR
 
+    idOverlay <- newIdent
     idLabelPhoto <- newIdent
     idFigurePhoto <- newIdent
     idImgPhoto <- newIdent
+    idButtonUploadPhoto <- newIdent
+    idButtonTakePhoto <- newIdent
+    idDialogSnapshot <- newIdent
+    idButtonCloseDialogSnapshot <- newIdent
+    idVideo <- newIdent
+    idButtonCapture <- newIdent
     
-    let w = $(widgetFile "data/users/form")
+    let w = $(widgetFile "data/users/form") 
 
     return (r,w)
 

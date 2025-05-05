@@ -1,3 +1,5 @@
+TakePhoto: Faceți o poză
+UploadPhoto: Încărcați o fotografie
 Home: Acasă
 Logo: Logo
 Postpone: Amână
