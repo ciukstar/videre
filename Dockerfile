@@ -1,10 +1,10 @@
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 RUN mkdir -p /opt/videre \
-	&& apt-get update \
-	&& apt-get install -y --no-install-recommends build-essential zlib1g-dev libpq-dev libicu-dev \
-	&& apt-get install -y ca-certificates && update-ca-certificates \
-	&& apt-get clean \
-	&& rm -rf /var/lib/apt/lists/*
+        && apt-get update \
+        && apt-get install -y --no-install-recommends build-essential zlib1g-dev libpq-dev libicu-dev \
+        && apt-get install -y ca-certificates && update-ca-certificates \
+        && apt-get clean \
+        && rm -rf /var/lib/apt/lists/*
 
 ARG YESOD_SUPERUSER_USERNAME
 ARG YESOD_SUPERUSER_PASSWORD
