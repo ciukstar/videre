@@ -42,7 +42,7 @@ import Settings (AppSettings (appDevelopment))
 fillDemoRu :: MonadIO m => AppSettings -> ReaderT SqlBackend m ()
 fillDemoRu appSettings = do
 
-    if appDevelopment appSettings
+    if True -- appDevelopment appSettings
         then do    
         tid <- insert Token { tokenApi = apiInfoVapid
                             , tokenStore = StoreTypeDatabase
