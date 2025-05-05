@@ -60,14 +60,14 @@ import Yesod.Persist.Core (YesodPersist(runDB))
 
 postUserSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html
 postUserSubscriptionDeleR uid sid = do
-    ((fr,fw),et) <- runFormPost formUserSubscriptionDelete
+    ((fr,fw0),et0) <- runFormPost formUserSubscriptionDelete
     case fr of
       FormSuccess () -> do
           _ <- runDB $ P.delete sid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR $ UserSubscriptionsR uid
-      _otherwise -> do     
-
+          
+      _otherwise -> do
           subscription <- runDB $ selectOne $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionId ==. val sid
@@ -77,9 +77,10 @@ postUserSubscriptionDeleR uid sid = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgSubscriptions
+              idOverlay <- newIdent
+              idDialogDelete <- newIdent
               $(widgetFile "data/subscriptions/user/subscription")
               
-
 
 getUserSubscriptionR :: UserId -> PushSubscriptionId -> Handler Html
 getUserSubscriptionR uid sid = do
@@ -89,10 +90,13 @@ getUserSubscriptionR uid sid = do
         where_ $ x ^. PushSubscriptionId ==. val sid
         return x
     
-    (fw,et) <- generateFormPost formUserSubscriptionDelete
+    (fw0,et0) <- generateFormPost formUserSubscriptionDelete
+    
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSubscriptions
+        idOverlay <- newIdent
+        idDialogDelete <- newIdent
         $(widgetFile "data/subscriptions/user/subscription")
 
 

@@ -1,43 +1,48 @@
 
-<header.background>
-  <md-icon-button type=link href=@{DataR $ UserSubscriptionsR uid} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{DataR $ UserSubscriptionsR uid} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgSubscription}
+    <h1.title.max>
+      _{MsgSubscription}
 
-  <md-icon-button type=button aria-label=_{MsgDele} #buttonDelete
-    onclick="document.getElementById('idDialogDelete').show()">
-    <md-icon>delete
+    <button.circle.transparent type=button title=_{MsgDele} data-ui=##{idDialogDelete}>
+      <i>delete
 
-<md-dialog #idDialogDelete>
-  <div slot=headline>
-    _{MsgConfirmPlease}
-  <div slot=content>
-    _{MsgDeleteAreYouSure}
-  <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('idDialogDelete').close()">
-      _{MsgCancel}
-    <form slot=content method=post action=@{DataR $ UserSubscriptionDeleR uid sid} enctype=#{et}>
-      ^{fw}
-      <md-filled-button type=submit>
-        _{MsgDele}
-
-<main>
+<main.responsive.padding>
       
   $maybe Entity _ (PushSubscription _ _ endpoint _ _ ua) <- subscription
     <dl>
-      <dt.md-typescale-label-large>
+      <dt.bold>
         _{MsgEndpoint}
-      <dd>
-        <code.md-typescale-body-small>
+      <dd.margin>
+        <code.small-text>
           #{endpoint}
         
-      <dt.md-typescale-label-large>
+      <dt.bold>
         _{MsgUserAgent}
-      <dd>
+      <dd.margin>
         $maybe ua <- ua
-          <code.md-typescale-body-small>
+          <code.small-text>
             #{ua}
 
 ^{widgetSnackbar msgs}
+
+
+<div.overlay ##{idOverlay} data-ui=##{idOverlay}>
+
+<dialog ##{idDialogDelete}>
+  <h6>_{MsgConfirmPlease}
+  
+  <p>_{MsgDeleteAreYouSure}
+  
+  <form method=post action=@{DataR $ UserSubscriptionDeleR uid sid} enctype=#{et0}>
+    ^{fw0}
+    
+    <nav.right-align.no-space>
+      <button.transparent.link type=button data-ui=##{idDialogDelete}>
+        _{MsgCancel}
+ 
+      <button.error type=submit>
+        _{MsgDele}
