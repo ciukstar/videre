@@ -42,6 +42,8 @@ import Foundation
       , MsgAttribution, MsgTakePhoto, MsgUploadPhoto, MsgClose
       )
     )
+    
+import Material3 (md3widget, md3widgetSwitch )
 
 import Model
     ( statusError, statusSuccess

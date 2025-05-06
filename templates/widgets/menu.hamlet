@@ -1,5 +1,5 @@
 
-<div.overlay ##{idOverlay}>
+<div.overlay.no-round ##{idOverlay}>
 
 <dialog.left.no-padding.primary ##{idDialogMainMenu}>
 

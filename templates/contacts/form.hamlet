@@ -8,11 +8,12 @@
 
 ^{fvInput usersV}
 
-<div.overlay ##{idOverlay} data-ui=##{idDialogSubscribe}>
+<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
 
-<dialog ##{idDialogSubscribe} data-ui=##{idOverlay}>
+<dialog ##{idDialogSubscribe}>
+
   <div.row>
-    <h6.max style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+    <h6.max.headline>
       _{MsgSubscribeToNotifications}
     <button.transparent.circle type=button title=_{MsgClose} data-ui=##{idDialogSubscribe}>
       <i>close

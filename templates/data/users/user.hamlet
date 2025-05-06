@@ -79,7 +79,7 @@
 ^{widgetSnackbar msgs}
 
 
-<div.overlay ##{idOverlay} data-ui=##{idOverlay}>
+<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
 
 <dialog ##{idDialogDelete}>
   <h6>_{MsgConfirmPlease}

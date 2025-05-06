@@ -1,4 +1,1 @@
 
-document.getElementById(#{idFabAdd}).onclick = (e) => {
-  document.getElementById(#{idDialogSubscribe}).show();
-};

@@ -1,49 +1,37 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button type=link href=#{backlink}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=#{backlink} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgContact}
+    <h1.title.max>
+      _{MsgContact}
 
-  <span.app-top-app-bar-end>
-    <md-icon-button type=button aria-label=_{MsgDele}
-      onclick="document.getElementById('#{idDialogRemove}').show()">
-      <md-icon>delete
+    <button.transparent.circle type=button title=_{MsgDele} data-ui=##{idDialogRemove}>
+      <i>delete
 
-<md-dialog ##{idDialogRemove}>
-  <div slot=headline>
-    _{MsgConfirmPlease}
-  <div slot=content>
-    _{MsgRemoveAreYouSure}
-  <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('#{idDialogRemove}').close()">
-      _{MsgCancel}
-    <form slot=content method=post action=@?{(ContactRemoveR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et}>
-      ^{fw}
-      <md-filled-button type=submit>
-        _{MsgRemove}
-
-<main>
+<main.responsive>
   
-  <figure>
-    <img src=@{AccountPhotoR pid} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
+  <figure.center-align>
+  
+    <img.extra.circle src=@{AccountPhotoR pid} loading=lazy alt=_{MsgPhoto}>
     $maybe (_, (_, (subscriptions, (loops, accessible)))) <- contact
-      $if subscriptions < 1
-        <md-icon.notifications-disabled>notifications_off
-      $elseif loops > 0
-        <md-icon.call-loop>repeat
-      $elseif accessible < 1
-        <md-icon.phone-disabled>phone_disabled
+      <sup.absolute>
+        $if subscriptions < 1
+          <i.error.tiny.circle.tiny-padding.notifications-disabled>notifications_off
+        $elseif loops > 0
+          <i.error.tiny.circle.tiny-padding.call-loop>repeat
+        $elseif accessible < 1
+          <i.error.tiny.circle.tiny-padding.phone-disabled>phone_disabled
         
     <figcaption>
       $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, (_, _)))) <- contact
         $maybe attribution <- attrib
-          <div.md-typescale-body-small>
+          <div.smll-text.secondary-text>
             ^{attribution}
         $maybe name <- name
-          <div.md-typescale-body-large>#{name}
-        <div.md-typescale-body-medium>#{email}
+          <div.large-text>#{name}
+        <div>#{email}
 
 
   <form method=post action=@?{(ContactR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et2}>
@@ -51,39 +39,63 @@
 
   $maybe (Entity _ (User email _ _ _ _ name _ _), (_, (ns, (nl,na)))) <- contact
     $if ns < 1
-      <dl>
-        <dt>
-          <md-icon.notifications-disabled>notifications_off
-        <dd.md-typescale-body-small>
-          $maybe name <- name
-            _{MsgYouAreNotSubscribedToNotificationsFrom name}
-          $nothing
-            _{MsgYouAreNotSubscribedToNotificationsFrom email}
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <i.error.tiny.circle.tiny-padding.notifications-disabled>notifications_off
+            <td>
+              $maybe name <- name
+                _{MsgYouAreNotSubscribedToNotificationsFrom name}
+              $nothing
+                _{MsgYouAreNotSubscribedToNotificationsFrom email}
       
 
     $if nl > 0
-      <dl>
-        <dt>
-          <md-icon.call-loop>repeat
-        <dd.md-typescale-body-small>
-          $maybe name <- name
-            _{MsgUserSubscribedOnThisDevice name}
-          $nothing
-            _{MsgUserSubscribedOnThisDevice email}
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <i.error.tiny.circle.tiny-padding.call-loop>repeat
+            <td>
+              $maybe name <- name
+                _{MsgUserSubscribedOnThisDevice name}
+              $nothing
+                _{MsgUserSubscribedOnThisDevice email}
 
       <form method=post action=@?{(PushSubscriptionsDeleR pid cid sid,[(paramBacklink,backlink)])} enctype=#{et3}>
         ^{fw3}
-        <md-text-button type=submit>
+        <button.transparent.link type=submit>
           _{MsgCancelThisSubscription}
       
     $elseif na < 1
-      <dl>
-        <dt>
-          <md-icon.phone-disabled>phone_disabled
-        <dd.md-typescale-body-small>
-          $maybe name <- name
-            _{MsgYouAreNotYetInContactListOfUser name}
-          $nothing
-            _{MsgYouAreNotYetInContactListOfUser email}
+      <table>
+        <tbody>
+          <tr>
+            <td>
+              <i.error.tiny.circle.tiny-padding.phone-disabled>phone_disabled
+            <td>
+              $maybe name <- name
+                _{MsgYouAreNotYetInContactListOfUser name}
+              $nothing
+                _{MsgYouAreNotYetInContactListOfUser email}
 
 ^{widgetSnackbar msgs}
+
+
+<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+
+<dialog ##{idDialogRemove}>
+  <h6>_{MsgConfirmPlease}
+  
+  <p>_{MsgRemoveAreYouSure}
+  
+  <form method=post action=@?{(ContactRemoveR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et0}>
+    ^{fw0}
+    
+    <nav.right-align.no-space>
+      <button.transparent.link type=button data-ui=##{idDialogRemove}>
+        _{MsgCancel}
+ 
+      <button.error type=submit>
+        _{MsgRemove}

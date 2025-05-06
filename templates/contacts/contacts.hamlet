@@ -20,8 +20,7 @@
     <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
       ^{fw}
 
-  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd}
-            style="z-index:1" onclick="event.stopPropagation()">
+  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd} data-ui=##{idDialogSubscribe}>
     <i>add
     _{MsgAdd}
     

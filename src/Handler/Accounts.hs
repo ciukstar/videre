@@ -58,7 +58,7 @@ import Foundation
       )
     )
 
-import Material3 ( md3dayField, md3widget )
+import Material3 ( md3widget )
 
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
@@ -90,7 +90,7 @@ import Text.Shakespeare.I18N (RenderMessage)
 
 import Yesod.Auth (Route (LogoutR), maybeAuth)
 import Yesod.Core
-    ( Yesod(defaultLayout), SomeMessage (SomeMessage), getMessageRender
+    ( Yesod(defaultLayout), SomeMessage (SomeMessage)
     , MonadHandler (liftHandler), redirect, FileInfo (fileContentType)
     , newIdent, fileSourceByteString, addMessageI, whamlet, getMessages
     , invalidArgsI, handlerToWidget
@@ -100,7 +100,7 @@ import Yesod.Core.Content
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields
     ( fileField, optionsPairs, radioField', OptionList (olOptions)
-    , Option (optionInternalValue, optionExternalValue), textField
+    , Option (optionInternalValue, optionExternalValue), textField, dayField
     )
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
@@ -296,20 +296,18 @@ getAccountInfoEditR uid = do
         $(widgetFile "accounts/info/edit")
 
 
-formUserInfo :: UserId -> Maybe (Entity UserInfo)
-             -> Html -> MForm Handler (FormResult UserInfo, Widget)
+formUserInfo :: UserId -> Maybe (Entity UserInfo) -> Form UserInfo
 formUserInfo uid info extra = do
-    rndr <- getMessageRender
-    (bdayR,bdayV) <- md3mopt md3dayField FieldSettings
+    (bdayR,bdayV) <- mopt dayField FieldSettings
         { fsLabel = SomeMessage MsgBirthday
-        , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("label", rndr MsgBirthday)]
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = []
         } (userInfoBirthDate . entityVal <$> info)
 
     let r = UserInfo uid <$> bdayR
     let w = [whamlet|
                     #{extra}
-                    ^{fvInput bdayV}
+                    ^{md3widget bdayV}
                     |]
     return (r,w)
 

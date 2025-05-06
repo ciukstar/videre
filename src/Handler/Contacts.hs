@@ -94,8 +94,6 @@ import Foundation
       )
     )
 
-import Material3 (md3widgetSwitch)
-
 import Model
     ( statusError, statusSuccess
     , paramEndpoint, paramBacklink, localStorageEndpoint
@@ -531,12 +529,11 @@ getContactR sid pid cid = do
           (fw3,et3) <- generateFormPost $ formSubscriptionDelete endpoint
           (fw2,et2) <- generateFormPost $ formSubscribe backlink vapidKeys sid pid cid permission
 
-          (fw,et) <- generateFormPost formContactRemove
+          (fw0,et0) <- generateFormPost formContactRemove
 
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgViewContact
-              idDialogRemove <- newIdent
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
