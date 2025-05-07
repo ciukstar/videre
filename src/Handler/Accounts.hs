@@ -29,7 +29,8 @@ import Data.Text (Text)
 import Data.Text.Encoding (encodeUtf8)
 
 import Database.Persist
-    ( Entity(Entity, entityVal, entityKey), PersistUniqueWrite (upsert, upsertBy) )
+    ( Entity(Entity, entityVal, entityKey), upsert, upsertBy
+    )
 import qualified Database.Persist as P ((=.), PersistStoreWrite (delete))
 import Database.Esqueleto.Experimental
     ( Value (unValue), select, selectOne, from, table, where_, val, update, set
@@ -50,11 +51,10 @@ import Foundation
       , MsgSave, MsgRecordEdited, MsgPersonalInfo, MsgAccount, MsgEdit
       , MsgBirthday, MsgSuperuser, MsgAdministrator, MsgNotIndicated
       , MsgSubscriptions, MsgNoSubscriptionsYet, MsgSubscription, MsgUserAgent
-      , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease
+      , MsgEndpoint, MsgDele, MsgDeleteAreYouSure, MsgConfirmPlease, MsgSelect
       , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
-      , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet
-      , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgSelected
-      , MsgUnselected, MsgIncomingChat, MsgOutgoingChat
+      , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet, MsgIncomingChat
+      , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgOutgoingChat
       )
     )
 
@@ -165,7 +165,6 @@ getAccountRingtonesR uid typ = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUserSettings
-        idPanelRingtones <- newIdent
         $(widgetFile "accounts/settings/ringtones/ringtones")
 
 
@@ -184,12 +183,12 @@ formRingtone uid typ extra = do
         where_ $ t ^. UserRingtoneType ==. val typ
         return x 
     
-    (ringtoneR, ringtoneV) <- mopt (ringtonesFieldList (option <$> options)) "" (Just selected)
+    (ringtoneR,ringtoneV) <- mopt (ringtonesFieldList (option <$> options)) "" (Just selected)
     
     let w = [whamlet|
-#{extra}
-^{fvInput ringtoneV}
-|]
+                    #{extra}
+                    ^{fvInput ringtoneV}
+            |]
     return (ringtoneR, w)
   where
 
@@ -214,7 +213,7 @@ formRingtone uid typ extra = do
 
 postAccountSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html
 postAccountSubscriptionDeleR uid sid = do
-    ((fr,fw),et) <- runFormPost formAccountSubscriptionDelete
+    ((fr,fw0),et0) <- runFormPost formAccountSubscriptionDelete
     case fr of
       FormSuccess () -> do
           _ <- runDB $ P.delete sid
@@ -231,6 +230,8 @@ postAccountSubscriptionDeleR uid sid = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgSubscriptions
+              idOverlay <- newIdent
+              idDialogDelete <- newIdent
               $(widgetFile "accounts/subscriptions/subscription")
 
 
@@ -242,10 +243,12 @@ getAccountSubscriptionR uid sid = do
         where_ $ x ^. PushSubscriptionId ==. val sid
         return x
     
-    (fw,et) <- generateFormPost formAccountSubscriptionDelete
+    (fw0,et0) <- generateFormPost formAccountSubscriptionDelete
     msgs <- getMessages
     defaultLayout $ do
-        setTitleI MsgSubscription 
+        setTitleI MsgSubscription
+        idOverlay <- newIdent
+        idDialogDelete <- newIdent
         $(widgetFile "accounts/subscriptions/subscription")
 
 
@@ -266,7 +269,6 @@ getAccountSubscriptionsR uid = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgSubscriptions
-        idPanelSubscriptions <- newIdent
         $(widgetFile "accounts/subscriptions/subscriptions")
 
 
@@ -322,11 +324,9 @@ getAccountInfoR uid = do
 
     (fw,et) <- generateFormPost $ formUserInfo uid info
 
-    msgs <- getMessages
-    
+    msgs <- getMessages    
     defaultLayout $ do
         setTitleI MsgPersonalInfo
-        idPanelInfo <- newIdent
         $(widgetFile "accounts/info/info")
 
 
@@ -354,9 +354,9 @@ postAccountR uid = do
 getAccountR :: UserId -> Handler Html
 getAccountR uid = do
     user <- maybeAuth
+    msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUserAccount
-        idPanelAccount <- newIdent
         $(widgetFile "accounts/account")
 
 
@@ -420,6 +420,7 @@ getAccountPhotoR uid = do
         return x
     case photo of
       Just (Entity _ (UserPhoto _ mime bs _)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
+      
       Nothing -> do
           superuser <- maybe False unValue <$> runDB ( selectOne $ do
               x <- from $ table @User

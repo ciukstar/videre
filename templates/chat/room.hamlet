@@ -1,7 +1,7 @@
 
 <header.fixed.primary>
   <nav.responsive.max>
-    <a.button.circle.transparent.no-margin href=@{HomeR} role=button title=_{MsgBack}>
+    <a.button.circle.transparent.no-margin href=@{backlink} role=button title=_{MsgBack}>
       <i>arrow_back
       
     <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
@@ -80,7 +80,7 @@
 
 <dialog ##{idDialogOutgoingCall}>
   <h6>
-    _{MsgOutgoingCall} ...
+    _{MsgOutgoingCall}...
 
   <div.content.vertical-margin>
     
@@ -132,12 +132,14 @@
       _{MsgCancel}
 
 
-<dialog ##{idDialogCallDeclined} open>
+<dialog ##{idDialogCallDeclined}>
   <h6>
     _{MsgCallDeclined}
 
-  <form slot=content method=dialog>
-    <p.large-text>
+  <figure.center-align.vertical-margin>
+    <i.extra.margin>phone_disabled
+    
+    <figcaption.large-text>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
         $maybe name <- name
           _{MsgCalleeDeclinedTheCall name}

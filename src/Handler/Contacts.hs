@@ -536,6 +536,8 @@ getContactR sid pid cid = do
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgViewContact
+              idOverlay <- newIdent
+              idDialogRemove <- newIdent
               $(widgetFile "my/contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]

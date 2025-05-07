@@ -1,0 +1,10 @@
+
+##{theId}
+
+    div.max
+        min-width: 0
+
+        .headline
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis

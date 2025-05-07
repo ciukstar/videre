@@ -1,44 +1,46 @@
-<header.app-top-app-bar.background>
-  <div #headerStart>
-    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
-          
-    <h1.md-typescale-title-large>
+
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack} role=button>
+      <i>arrow_back
+
+    <h1.title.max>
       _{MsgUserAccount}
 
-  <div #headerEnd>
-    <md-icon-button type=button href=@{AccountEditR uid} aria-label=_{MsgEdit}>
-      <md-icon>edit
-      
-<main>
-  
-  <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabAccount aria-controls=#{idPanelAccount} active=true onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=panelInfo onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountInfoR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgPersonalInfo}
-    <md-primary-tab #tabSubscriptions aria-controls=panelSubscriptions onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountSubscriptionsR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgSubscriptions}
+    <a.button.circle.transparent href=@{AccountEditR uid} role=button title=_{MsgEdit}>
+      <i>edit
 
-  <div ##{idPanelAccount} role=tabpanel aria-labelledby=tabAccount>
-    <figure>
-      <img src=@{AccountPhotoR uid} height=96 width=auto loading=lazy alt=_{MsgPhoto}>
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+    <a.active href=@{AccountR uid}>
+      _{MsgAccount}
+    
+    <a href=@{AccountInfoR uid}>
+      _{MsgPersonalInfo}
+    
+    <a href=@{AccountSubscriptionsR uid}>
+      _{MsgSubscriptions}
+
+  <div.page.active.padding>
+  
+    <figure.center-align.margin>
+      <img.extra.circle src=@{AccountPhotoR uid} loading=lazy alt=_{MsgPhoto}>
+      
       <figcation>
         $maybe Entity _ (User email _ _ _ _ name super admin) <- user
           $maybe name <- name
-            <div.md-typescale-body-large>#{name}
-          <div.md-typescale-body-medium>#{email}
+            <p.large-text>#{name}
+          <p>#{email}
+          
           $with roles <- snd <$> filter fst [(super,MsgSuperuser),(admin,MsgAdministrator)]
             $if not (null roles)
-              <div.md-typescale-label-large style="margin-top:1rem;text-transform:uppercase">
+              <div.large-text.upper>
                 $forall role <- roles
                   _{role} #
 
-    <md-text-button href=@{AuthR LogoutR}>_{MsgSignOut}
+    <nav.center-align>
+      <button.transparent.link href=@{AuthR LogoutR}>
+        _{MsgSignOut}
 
-  <div #panelInfo role=tabpanel aria-labelledby=tabInfo hidden>
-
-  <div #panelSubscriptions role=tabpanel aria-labelledby=tabSubscriptions hidden>
+^{widgetSnackbar msgs}

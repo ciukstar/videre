@@ -1,58 +1,62 @@
-<header.app-top-app-bar.background>
-  <div #headerStart>
-    <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
-          
-    <h1.md-typescale-title-large>
+
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack} role=button>
+      <i>arrow_back
+
+    <h1.title.max>
       _{MsgUserAccount}
 
-  <div #headerEnd>
-      
-<main>
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+    <a href=@{AccountR uid}>
+      _{MsgAccount}
+    
+    <a href=@{AccountInfoR uid}>
+      _{MsgPersonalInfo}
+    
+    <a.active href=@{AccountSubscriptionsR uid}>
+      _{MsgSubscriptions}
 
-  <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabAccount aria-controls=panelAccount onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgAccount}
-    <md-primary-tab #tabInfo aria-controls=panelInfo onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountInfoR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgPersonalInfo}
-    <md-primary-tab #tabSubscriptions aria-controls=#{idPanelSubscriptions} active=true 
-      onclick="this.querySelector('a[href]').click()">
-      <a href=@{AccountSubscriptionsR uid} style="color:inherit;text-decoration:inherit;cursor:inherit">
-        _{MsgSubscriptions}
-
-  <div #panelAccount role=tabpanel aria-labelledby=tabAccount hidden>
-
-  <div #panelInfo role=tabpanel aria-labelledby=tabInfo hidden>
-
-  <div ##{idPanelSubscriptions} role=tabpanel aria-labelledby=tabSubscriptions>
+  <div.page.active>
 
     $if null subscriptions
-      <figure style="text-align:center">
-        <span.on-secondary style="font-size:4rem">&varnothing;
-        <figcaption.md-typescale-body-large>
+      <figure.center-align.margin>
+        <i.extra.margin>folder_open
+        <figcaption.large-text>
           _{MsgNoSubscriptionsYet}
+          
     $else
-      <md-list>
-        $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (Entity _ (User email _ _ _ _ name _ _),attrib)) <- subscriptions
-          <md-list-item type=link href=@{AccountSubscriptionR uid sid}>
-            <img slot=start src=@{AccountPhotoR pid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-            <div slot=headline style="white-space:nowrap">
-              $maybe name <- name
-                #{name}
-              $nothing
-                #{email}
-            <div slot=supporting-text style="white-space:nowrap">
-              #{endpoint}
-            $maybe ua <- ua
-              <div slot=supporting-text style="white-space:nowrap">
-                #{ua}
-            <md-icon slot=end>arrow_forward_ios
-          $maybe attrib <- attrib
-            <div.app-attribution>
-              <div.app-attribution-wrapper.md-typescale-body-small>
-                #{attrib}
-          <md-divider>
+      
+      $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (user,attrib)) <- subscriptions
+        <a.row.padding.wave href=@{AccountSubscriptionR uid sid}>
 
-    ^{widgetSnackbar msgs}
+          <img.circle src=@{AccountPhotoR pid} loading=lazy>
+
+          <div.max>
+            <div.headline.large-text>
+              $with Entity _ (User email _ _ _ _ name _ _) <- user
+                $maybe name <- name
+                  #{name}
+                $nothing
+                  #{email}
+
+            <div.supporting-text.secondary-text>
+              #{endpoint}
+       
+            $maybe ua <- ua
+              <div.supporting-text.secondary-text>
+                #{ua}
+  
+          <i.secondary-text>arrow_forward_ios
+   
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper>
+              #{attrib}
+       
+        <hr>
+
+
+^{widgetSnackbar msgs}

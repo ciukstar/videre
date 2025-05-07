@@ -1,51 +1,47 @@
 
-<header.background>
-  <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgUserSettings}
-      
-<main>
+    <h1.title.max>
+      _{MsgUserSettings}
 
-  <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabRingtones aria-controls=#{idPanelRingtones} active=true>        
-      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+    <a.active href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
       _{MsgRingtones}
-
-    <md-primary-tab #tabNotifications aria-controls=panelNotifications>        
-      <a href=@{AccountNotificationsR uid}>
+    
+    <a href=@{AccountNotificationsR uid}>
       _{MsgNotifications}
 
-  <md-tabs>
-    <md-secondary-tab :typ == RingtoneTypeCallOutgoing:active=true>
-      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
-      _{MsgOutgoingCall}
+  <div.page.active.no-padding>
 
-    <md-secondary-tab :typ == RingtoneTypeCallIncoming:active=true>
-      <a href=@{AccountRingtonesR uid RingtoneTypeCallIncoming}>
-      _{MsgIncomingCall}
+    <nav.row.scroll style="display:block" ##{idNavScrollTabs}>
+      <div.tabs>
+        <a.no-wrap href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing} :typ == RingtoneTypeCallOutgoing:.active>
+          _{MsgOutgoingCall}
 
-    <md-secondary-tab :typ == RingtoneTypeChatOutgoing:active=true>
-      <a href=@{AccountRingtonesR uid RingtoneTypeChatOutgoing}>
-      _{MsgOutgoingChat}
+        <a.no-wrap href=@{AccountRingtonesR uid RingtoneTypeCallIncoming} :typ == RingtoneTypeCallIncoming:.active>
+          _{MsgIncomingCall}
 
-    <md-secondary-tab :typ == RingtoneTypeChatIncoming:active=true>
-      <a href=@{AccountRingtonesR uid RingtoneTypeChatIncoming}>
-      _{MsgIncomingChat}
+        <a.no-wrap href=@{AccountRingtonesR uid RingtoneTypeChatOutgoing} :typ == RingtoneTypeChatOutgoing:.active>
+          _{MsgOutgoingChat}
 
-  <div ##{idPanelRingtones} role=tabpanel aria-labelledby=tabRingtones>
+        <a.no-wrap href=@{AccountRingtonesR uid RingtoneTypeChatIncoming} :typ == RingtoneTypeChatIncoming:.active>
+          _{MsgIncomingChat}
 
-    $if null ringtones
-      <figure style="text-align:center">
-        <span.on-secondary style="font-size:4rem">&#x1F4C2;
-        <figcaption.md-typescale-body-large>
-          _{MsgYouHaveNotSetAnyRingtonesYet}
-    $else
-      <form method=post action=@{AccountRingtonesR uid typ} enctype=#{et}>
-        ^{fw}
+    <div.page.active.no-padding>
+
+      $if null ringtones
+        <figure.center-align.margin>
+          <i.extra.margin>folder_open
+          <figcaption.large-text>
+            _{MsgYouHaveNotSetAnyRingtonesYet}
+     
+      $else
+        <form method=post action=@{AccountRingtonesR uid typ} enctype=#{et}>
+          ^{fw}
           
-    ^{widgetSnackbar msgs}
-
-
-  <div #panelNotifications role=tabpanel aria-labelledby=tabNotifications hidden>
+^{widgetSnackbar msgs}

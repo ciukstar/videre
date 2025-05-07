@@ -1,14 +1,14 @@
 
 Array.from(
-  document.querySelectorAll('md-switch[slot=end]')
+  document.querySelectorAll('input[type=checkbox]')
 ).forEach((x) => {
   x.addEventListener('change', function (e) {
     
-    if (e.target.selected) {
+    if (e.target.checked) {
       Array.from(
-	document.querySelectorAll('md-switch[slot=end][selected]')
+        document.querySelectorAll('input[type=checkbox][checked]')
       ).filter((y) => y != e.target).forEach((y) => {
-	y.selected = false;
+        y.checked = false;
       });
     }
 
@@ -16,3 +16,28 @@ Array.from(
     
   });
 });
+
+Array.from(
+  document.getElementById(#{theId}).querySelectorAll('button.toggle')
+).forEach((x) => {
+  x.addEventListener('click', e => {
+    const selected = e.target.toggleAttribute('selected');
+    const icon = e.target.querySelector('i');
+    
+    if (selected) {
+      e.target.querySelector('audio').play();
+      icon.textContent = 'pause';
+    } else {
+      e.target.querySelector('audio').pause();
+      icon.textContent = 'play_arrow';
+    }
+    
+  });
+  
+  x.querySelector('audio').addEventListener('ended', e => {
+    x.removeAttribute('selected');
+    x.querySelector('i').textContent = 'play_arrow';    
+  });;
+  
+});
+
