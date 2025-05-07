@@ -94,6 +94,8 @@ import Foundation
       )
     )
 
+import Material3 (md3widgetSwitch)
+
 import Model
     ( statusError, statusSuccess
     , paramEndpoint, paramBacklink, localStorageEndpoint

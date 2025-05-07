@@ -1,43 +1,39 @@
 
-<header.app-top-app-bar.primary>
-  <md-filled-icon-button type=link href=@{backlink}>
-    <md-icon>arrow_back
+<header.fixed.primary>
+  <nav.responsive.max>
+    <a.button.circle.transparent.no-margin href=@{HomeR} role=button title=_{MsgBack}>
+      <i>arrow_back
+      
+    <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
 
-  <span.app-title>
-    <img src=@{photor} width=24 height=24 alt=_{MsgPhoto} loading=lazy style="clip-path:circle(50%)">
+    <div.max.interlocutor>
+      <div.interlocutor>
+        $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
+          $maybe name <- name
+            #{name}
+          $nothing
+            #{email}
 
-    <span.md-typescale-title-small>
-      $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
-        $maybe name <- name
-          #{name}
-        $nothing
-          #{email}
-
-  <span.app-top-app-bar-end>
-
-    <div style="position:relative">
-      <md-filled-icon-button type=button aria-label=_{MsgVideoCall} ##{idButtonVideoCall}>
-        <md-icon>video_call
+    <button.circle.transparent type=button title=_{MsgVideoCall} ##{idButtonVideoCall}>
+      <i>video_call
       $if (||) ((||) (not subscribed) (not accessible)) loop
-        <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
+        <div.badge>
 
-    <div style="position:relative">
-      <md-filled-icon-button type=button aria-label=_{MsgAudioCall} ##{idButtonAudioCall}>
-        <md-icon>call
+    <button.circle.transparent type=button title=_{MsgAudioCall} ##{idButtonAudioCall}>
+      <i>call
       $if (||) ((||) (not subscribed) (not accessible)) loop
-        <sup style="position:absolute;top:0;right:0;color:red">&#x25cf;
+        <div.badge>
 
-    <span style="position:relaive">
-      <md-filled-icon-button type=button aria-label=_{MsgActions} #btnMenuMore
-        onclick="document.getElementById('menuMore').open = !document.getElementById('menuMore').open">
-        <md-icon>more_vert
-      <md-menu anchor=btnMenuMore x-offset=16 y-offset=16 #menuMore>
+    <button.circle.transparent type=button title=_{MsgActions}>
+      <i>more_vert
+      <menu.no-wrap.left>
         $maybe backlink <- rndr <$> curr
-          <md-menu-item href=@?{(contact,[(paramBacklink, backlink)])}>
-            <div slot=headline>_{MsgViewContact}
+          <li>
+            <a href=@?{(contact,[(paramBacklink, backlink)])}>
+              _{MsgViewContact}
+              
 
-
-<main>
+<main.responsive.no-padding>
 
   <div ##{idChatOutput}>
 
@@ -63,10 +59,13 @@
             <span.bubble-tail>
 
 
-  <form ##{idMessageForm}>
-    <md-filled-text-field ##{idMessageInput} autofocus type=textarea label=_{MsgMessage}>
-      <md-filled-icon-button type=submit slot=trailing-icon disabled ##{idButtonSend}>
-        <md-icon>send
+<footer.transparent>
+  <form.row ##{idMessageForm}>
+    <div.responsive.max.field.border.round>
+      <input type=textarea ##{idMessageInput} autofocus placeholder=_{MsgMessage}>
+      
+    <button.circle type=submit disabled ##{idButtonSend}>
+      <i>send
 
   <audio ##{idAudioOutgoingChat} preload=none>
     $with (ringtone, mime) <- outgoingChatRingtoneR
@@ -76,45 +75,48 @@
     $with (ringtone, mime) <- incomingChatRingtoneR
       <source src=@{ringtone} type=#{mime}>
 
-<md-dialog ##{idDialogOutgoingCall}>
-  <div slot=headline>
+
+<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+
+<dialog ##{idDialogOutgoingCall}>
+  <h6>
     _{MsgOutgoingCall} ...
 
-  <div slot=content>
+  <div.content.vertical-margin>
     
     <figure>
-      <img src=@{photos} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+      <img.circle src=@{photos} alt=_{MsgPhoto} loading=lazy>
       $if not subscribed
-        <figcaption.md-typescale-body-small>
+        <figcaption.small-text>
           $maybe Entity _ (User email _ _ _ _ name _ _) <- user
             $maybe name <- name
               _{MsgUserYouSeemsUnsubscribed name}
             $nothing
               _{MsgUserYouSeemsUnsubscribed email}
 
-    <figure.center>
+    <figure.between>
     
       $if loop
-        <md-icon>repeat
+        <i>repeat
       $else
-        <md-icon.callarrow>double_arrow
+        <i.callarrow>double_arrow
 
       $if loop
-        <figcaption.md-typescale-body-small>
+        <figcaption.small-text>
           _{MsgCallerCalleeSubscriptionLoopWarning}
       
 
     <figure>
-      <img src=@{photor} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+      <img.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
       $if not accessible
-        <figcaption.md-typescale-body-small>
+        <figcaption.small-text>
           $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
             $maybe name <- name
               _{MsgUserAppearsToBeUnavailable name}
             $nothing
               _{MsgUserAppearsToBeUnavailable email}
 
-  <div slot=actions>
+  <nav.right-align>
   
     <audio loop ##{idAudioOutgoingCallRingtone} preload=none>
       $with (ringtone, mime) <- outgoingCallRingtoneR
@@ -122,26 +124,26 @@
   
     $if not subscribed
       $maybe backlink <- rndr <$> curr
-        <md-text-button type=link href=@?{(contact,[(paramBacklink, backlink)])}>
+        <a.button.transparent.link href=@?{(contact,[(paramBacklink, backlink)])}>
           _{MsgSubscribe}
       
-    <md-filled-button has-icon type=button ##{idButtonOutgoingCallCancel}>
-      <md-icon slot=icon>call_end
+    <button.error type=button ##{idButtonOutgoingCallCancel}>
+      <i>call_end
       _{MsgCancel}
 
 
-<md-dialog ##{idDialogCallDeclined}>
-  <div slot=headline>
+<dialog ##{idDialogCallDeclined} open>
+  <h6>
     _{MsgCallDeclined}
 
   <form slot=content method=dialog>
-    <p.md-typescale-body-large>
+    <p.large-text>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
         $maybe name <- name
           _{MsgCalleeDeclinedTheCall name}
         $nothing
           _{MsgCalleeDeclinedTheCall email}
 
-  <div slot=actions>
-    <md-text-button type=button onclick="document.getElementById('#{idDialogCallDeclined}').close()">
+  <nav.right-align>
+    <button.transparent.link type=button data-ui=##{idDialogCallDeclined}>
       _{MsgClose}

@@ -1,31 +1,11 @@
 
 header
 
-    position: sticky
-    top: 0
-    z-index: 1
-    height: var(--app-top-app-bar-height,64px)
-    display: flex
-    align-items: center
-    justify-content: flex-start
-    column-gap: 0.5rem
-    padding: 0 0.5rem
-
-    .app-title
+    .interlocutor
         min-width: 0
-        display: flex
-        align-items: center
-        justify-content: flex-start
-        column-gap: 0.5rem
-        .md-typescale-title-small
-            white-space: nowrap
-            overflow: hidden
-            text-overflow: ellipsis
-        
-    .app-top-app-bar-end
-        margin-left: auto
-        display: flex
-        flex-wrap: nowrap
+        white-space: nowrap
+        overflow: hidden
+        text-overflow: ellipsis
 
 main
 
@@ -105,44 +85,27 @@ main
                     width: 10px
                     height: 13px
                     clip-path: polygon(0 0,100% 0,100% 100%)
-            
-    ##{idMessageForm}
-        padding: 0.5rem 0.5rem 1rem 0.5rem
-
-        ##{idMessageInput}
-            width: 100%
 
 ##{idDialogOutgoingCall}
 
-    div[slot=content]
-        display: flex
+    .content
+        display: grid
+        grid-template-columns: 1fr 1fr 1fr
         align-items: baseline
-        justify-content: space-around
 
         figure
             margin: 0
             padding: 0
-            flex: 1
             text-align: center
-            
-            img
-                clip-path: circle(50%)
                 
-            md-icon
-                --md-icon-size: 48px
-                
-        figure.center
+        figure.between
             text-align: start
-            md-icon.callarrow
+            i.callarrow
                 animation-name: callarrow
-                animation-duration: 3s
+                animation-duration: 4s
                 animation-delay: 0s
                 animation-iteration-count: infinite
-                animation-timing-function: steps(3, jump-end)
-
-    ##{idButtonOutgoingCallCancel}
-        --md-sys-color-primary: red
-        --md-sys-color-on-primary: #FFFFFF
+                animation-timing-function: steps(4, jump-end)
 
 
 @keyframes callarrow
@@ -151,5 +114,5 @@ main
         opacity: 1
 
     to
-        margin-left: 75%
+        margin-left: 100%
         opacity: 0

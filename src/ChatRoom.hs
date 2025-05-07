@@ -42,7 +42,8 @@ import Data.Aeson (object, (.=))
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Function ((&))
 import qualified Data.Map as M
-    ( Map, lookup, insert, alter, fromListWith, toList )
+    ( Map, lookup, insert, alter, fromListWith, toList
+    )
 import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Set as S
 import Data.Text (Text, pack)
@@ -58,7 +59,7 @@ import Foundation
       , MsgCancel, MsgClose, MsgCallCanceledByCaller, MsgIncomingAudioCallFrom
       , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
-      , MsgSubscribe
+      , MsgSubscribe, MsgBack
       )
     )
 
@@ -176,7 +177,7 @@ getChatChannelR sid cid rid = webSockets (chatApp sid rid cid)
 
 getChatRoomR :: UserId -> ContactId -> UserId -> ChatHandler Html
 getChatRoomR sid cid rid = do
-
+    
     backlink <- liftHandler $ getBacklink sid rid
     photos <- liftHandler $ getAccountPhotoRoute sid
     photor <- liftHandler $ getAccountPhotoRoute rid
