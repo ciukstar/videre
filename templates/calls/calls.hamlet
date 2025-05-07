@@ -11,7 +11,7 @@
 
     ^{widgetAccount}
 
-<main.responsive>
+<main.responsive.no-padding>
 
   $if null calls
     <figure.center-align.margin>
@@ -22,14 +22,15 @@
           _{MsgSelectCalleeToCall}
           
   $else
-    <ul.list.border>
-      $forall (Entity i (Call caller callee start end ctype s),(((callerE,attribCaller),(calleeE,attribCallee)),(c,((ns1,(nl1,na1)),(ns2,(nl2,na2)))))) <- calls
+    <ul.list.border.large-space>
+      $forall (Entity i caller,(((callerE,attribCaller),(calleeE,attribCallee)),(c,((ns1,(nl1,na1)),(ns2,(nl2,na2)))))) <- calls
         $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
-              <li.app-call type=text #idItemCall#{i}>
+              <li.app-call #idItemCall#{i}>
                 
                 <img.circle src=@{AccountPhotoR caller} loading=lazy alt=_{MsgPhoto}>
+                
                 <div.max>
                   <div.headline.large-text>
                     $maybe name <- name
@@ -41,12 +42,13 @@
         
                   <div.supporting-text.secondary-text>
                     $with start <- iso8601Show start
-                      <time datetime=#{start}>#{start}
+                      <time.daytime datetime=#{start}>#{start}
+                      
                   <div.supporting-text.secondary-text>
                     $maybe end <- iso8601Show <$> end
-                      <time datetime=#{end}>#{end}
+                      <time.daytime datetime=#{end}>#{end}
                     
-                <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
+                <button.transparent.circle.app-call data-i=#{i} #idButtonCall#{i}
                   :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
                   :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
@@ -57,7 +59,7 @@
                   data-target-room=@{VideoR $ RoomR uid cid caller False}
                   data-target-push=@{VideoR $ PushMessageR uid cid caller}
                   data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
-                  <md-icon>
+                  <i>
                     $case ctype
                       $of CallTypeVideo
                         $maybe status <- s
@@ -89,77 +91,75 @@
                               call
                         $nothing
                           call
-                      
 
-              <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
-                <div slot=headline>
-                  _{MsgOutgoingCall} ...
+              $maybe attrib <- attrib
+                <div.app-attribution>
+                  <div.app-attribution-wrapper>
+                    #{attrib}                      
 
-                <div slot=content>
+              <dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+                <h6>
+                  _{MsgOutgoingCall}...
+
+                <div.content>
                   <figure>
-                    <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    <img.circle src=@{AccountPhotoR uid} alt=_{MsgPhoto} loading=lazy>
                     $with (Value subscriptions) <- ns1
                       $if subscriptions < 1
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           $maybe name <- name
                             _{MsgUserYouSeemsUnsubscribed name}
                           $nothing
                             _{MsgUserYouSeemsUnsubscribed email}
 
-                  <figure.center>
+                  <figure.between>
                     $with (Value loops) <- nl1
-                      <md-icon.callarrow>
+                      <i.callarrow>
                         $if loops > 0
                           repeat
                         $else
                           double_arrow
                       $if loops > 0
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
-                    <img src=@{AccountPhotoR caller} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    <img.circle src=@{AccountPhotoR caller} alt=_{MsgPhoto} loading=lazy>
                     $with (Value accessible) <- na1
                       $if accessible < 1
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}
                           $nothing
                             _{MsgUserAppearsToBeUnavailable email}
 
-                <div slot=actions>
-                      
-                  <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
-                    <md-icon slot=icon>call_end
+                <nav.right-align>
+                  <button.error type=button #idButtonOutgoingCallCancel#{i}>
+                    <i>call_end
                     _{MsgCancel}
 
 
-              <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
-                <div slot=headline>
+              <dialog.app-call-declined #idDialogCallDeclined#{i}>
+                <h6>
                   _{MsgCallDeclined}
 
-                <div slot=content>
-                  <p.md-typescale-body-large>
-                    $maybe name <- name
-                      _{MsgCalleeDeclinedTheCall name}
-                    $nothing
-                      _{MsgCalleeDeclinedTheCall email}
+                <p.large-text>
+                  $maybe name <- name
+                    _{MsgCalleeDeclinedTheCall name}
+                  $nothing
+                    _{MsgCalleeDeclinedTheCall email}
 
-                <div slot=actions>
-                  <md-text-button type=button
-                    onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+                <nav.right-align.no-space>
+                  <button.transparent.link type=button data-ui=#idDialogCallDeclined#{i}>
                     _{MsgClose}
-
-              $maybe attrib <- attrib
-                <div.app-attribution>
-                  <div.app-attribution-wrapper.md-typescale-body-small>
-                    #{attrib}
+                    
           $else
             
             $with (Entity _ (User email _ _ _ _ name _ _), attrib) <- (calleeE, attribCallee)
-              <li.app-call type=text #idItemCall#{i}>
+              <li.app-call #idItemCall#{i}>
                 
                 <img.circle src=@{AccountPhotoR callee} loading=lazy alt=_{MsgPhoto}>
+                
                 <div.max>
                   <div.headline.large-text>
                     $maybe name <- name
@@ -168,15 +168,16 @@
                       #{email}
                     <sup>
                       <i>call_received
+                      
                   <div.supporting-text.secondary-text>
                     $with start <- iso8601Show start
-                      <time datetime=#{start}>#{start}
+                      <time.daytime datetime=#{start}>#{start}
         
                   <div.supporting-text.secondary-text>
                     $maybe end <- iso8601Show <$> end
-                      <time datetime=#{end}>#{end}
+                      <time.daytime datetime=#{end}>#{end}
         
-                <md-icon-button.app-call slot=end data-i=#{i} #idButtonCall#{i}
+                <button.transparent.circle.app-call data-i=#{i} #idButtonCall#{i}
                   :CallTypeVideo == ctype:data-message-type=#{PushMsgTypeVideoCall}
                   :CallTypeAudio == ctype:data-message-type=#{PushMsgTypeAudioCall}
                   :CallTypeVideo == ctype:data-body=_{MsgIncomingVideoCallFrom $ fromMaybe email name}
@@ -187,7 +188,7 @@
                   data-target-room=@{VideoR $ RoomR uid cid callee False}
                   data-target-push=@{VideoR $ PushMessageR uid cid callee}
                   data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
-                  <md-icon>
+                  <i>
                     $case ctype
                       $of CallTypeVideo
                         $maybe status <- s
@@ -220,68 +221,66 @@
                         $nothing
                           call
 
-              <md-dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
-                <div slot=headline>
-                  _{MsgOutgoingCall} ...
+              <dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
+                <h6>
+                  _{MsgOutgoingCall}...
 
-                <div slot=content>
+                <div.content>
                   <figure>
-                    <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    <img.circle src=@{AccountPhotoR uid} alt=_{MsgPhoto} loading=lazy>
                     $with (Value subscriptions) <- ns2
                       $if subscriptions < 1
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           $with Entity _ (User email _ _ _ _ name _ _) <- callerE
                             $maybe name <- name
                               _{MsgUserYouSeemsUnsubscribed name}
                             $nothing
                               _{MsgUserYouSeemsUnsubscribed email}
 
-                  <figure.center>
+                  <figure.between>
                     $with (Value loops) <- nl2
-                      <md-icon.callarrow>
+                      <i.callarrow>
                         $if loops > 0
                           repeat
                         $else
                           double_arrow
                       $if loops > 0
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           _{MsgCallerCalleeSubscriptionLoopWarning}
 
                   <figure>
-                    <img src=@{AccountPhotoR callee} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                    <img.circle src=@{AccountPhotoR callee} alt=_{MsgPhoto} loading=lazy>
                     $with (Value accessible) <- na2
                       $if accessible < 1
-                        <figcaption.md-typescale-body-small>
+                        <figcaption.small-text>
                           $maybe name <- name
                             _{MsgUserAppearsToBeUnavailable name}
                           $nothing
                             _{MsgUserAppearsToBeUnavailable email}
 
-                <div slot=actions>
-                  <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
-                    <md-icon slot=icon>call_end
+                <nav.right-lign.no-space>
+                  <button.error type=button #idButtonOutgoingCallCancel#{i}>
+                    <i>call_end
                     _{MsgCancel}
 
 
-              <md-dialog.app-call-declined #idDialogCallDeclined#{i}>
-                <div slot=headline>
+              <dialog.app-call-declined #idDialogCallDeclined#{i}>
+                <h6>
                   _{MsgCallDeclined}
 
-                <div slot=content>
-                  <p.md-typescale-body-large>
-                    $maybe name <- name
-                      _{MsgCalleeDeclinedTheCall name}
-                    $nothing
-                      _{MsgCalleeDeclinedTheCall email}
+                <p.large-text>
+                  $maybe name <- name
+                    _{MsgCalleeDeclinedTheCall name}
+                  $nothing
+                    _{MsgCalleeDeclinedTheCall email}
 
-                <div slot=actions>
-                  <md-text-button type=button
-                    onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+                <nav.right-align>
+                  <button.transparent.link type=button data-ui=#idDialogCallDeclined#{i}>
                     _{MsgClose}
 
               $maybe attrib <- attrib
                 <div.app-attribution>
-                  <div.app-attribution-wrapper.md-typescale-body-small>
+                  <div.app-attribution-wrapper>
                     #{attrib}
           
           

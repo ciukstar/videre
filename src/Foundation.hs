@@ -541,6 +541,7 @@ widgetSnackbar msgs = $(widgetFile "widgets/snackbar")
 widgetAccount :: Widget
 widgetAccount = do
     user <- maybeAuth
+    idMenu <- newIdent
     $(widgetFile "widgets/account") 
 
 

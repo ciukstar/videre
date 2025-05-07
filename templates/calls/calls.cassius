@@ -2,30 +2,31 @@
 
 main
 
-    display: flex
-    flex-direction: column
+    a.row
+    
+        div.max
+            min-width: 0
+            
+            .headline, .supporting-text
+                white-space: nowrap
+                overflow: hidden
+                text-overflow: ellipsis
 
-    div[slot=start]
+    .app-attribution
         position: relative
-        img.user-photo
-            clip-path: circle(50%)
-        .phone-disabled, .notifications-disabled
+        
+        .app-attribution-wrapper
             position: absolute
-            top: 0
-            right: -0.5rem
-            color: white
-            background: red
-            clip-path: circle(50%)
-
-    div[slot=headline], div[slot=supporting-text]
-        white-space: nowrap
+            bottom: 0
+            left: 0.4rem
+            font-size: 0.5rem
 
     .app-outgoing-call
 
-        div[slot=content]
-            display: flex
+        div.content
+            display: grid
+            grid-template-columns: 1fr 1fr 1fr
             align-items: baseline
-            justify-content: space-around
 
             figure
                 margin: 0
@@ -33,41 +34,14 @@ main
                 flex: 1
                 text-align: center
 
-                img
-                    clip-path: circle(50%)
-
-                md-icon
-                    --md-icon-size: 48px
-
-            figure.center
+            figure.between
                 text-align: start
-                md-icon.callarrow
+                i.callarrow
                     animation-name: callarrow
-                    animation-duration: 3s
+                    animation-duration: 4s
                     animation-delay: 0s
                     animation-iteration-count: infinite
-                    animation-timing-function: steps(3, jump-end)
-
-        .app-outgoing-call-cancel
-            --md-sys-color-primary: red
-            --md-sys-color-on-primary: #FFFFFF
-
-    .app-attribution
-        position: relative
-        margin: 0
-        padding: 0
-        line-height: 0
-        
-        .app-attribution-wrapper
-            position: absolute
-            bottom: 0
-            left: 0.4rem
-            font-size: 0.5rem
-        
-    ##{idFabAdd}
-        position: fixed
-        right: 1rem
-        bottom: 1rem
+                    animation-timing-function: steps(4, jump-end)
 
 
 @keyframes callarrow
@@ -76,5 +50,5 @@ main
         opacity: 1
 
     to
-        margin-left: 75%
+        margin-left: 100%
         opacity: 0

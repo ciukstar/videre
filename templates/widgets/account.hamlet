@@ -1,10 +1,10 @@
 
 $maybe Entity uid (User email _ name _ _ _ _ _) <- user
   
-  <button.circle.transparent.no-elevate data-ui=#accountmenutrigger>
-    <img.photo.profile src=@{DataR $ UserPhotoR uid} alt=_{MsgPhoto} loading=lazy title=#{fromMaybe email name}>
+  <button.circle.transparent.no-elevate data-ui=##{idMenu}>
+    <img.photo.profile src=@{AccountPhotoR uid} alt=_{MsgPhoto} loading=lazy title=#{fromMaybe email name}>
 
-    <menu.left.no-wrap #accountmenutrigger>
+    <menu.left.no-wrap ##{idMenu}>
 
       <a.row.padding href=@{AccountR uid}>
         <i>manage_accounts

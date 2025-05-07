@@ -1,51 +1,58 @@
 
-<header.background>
-  <md-icon-button href=@{HomeR} aria-label=_{MsgBack}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <h1.md-typescale-title-large>
-    _{MsgUserSettings}
-      
-<main>
+    <h1.title.max>
+      _{MsgUserSettings}
 
-  <md-tabs aria-label=Tabs>
-    <md-primary-tab #tabRingtones aria-controls=panelRingtones>
-      <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+    <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
       _{MsgRingtones}
-
-    <md-primary-tab #tabNotifications aria-controls=#{idPanelNotifications} active=true>
-      <a href=@{AccountNotificationsR uid}>
+    
+    <a.active href=@{AccountNotificationsR uid}>
       _{MsgNotifications}
 
-  <div #panelRingtones role=tabpanel aria-labelledby=tabRingtones hidden>
-
-  <div ##{idPanelNotifications} role=tabpanel aria-labelledby=tabNotifications>
+  <div.page.active.no-padding>
 
     $if null subscriptions
-      <figure style="text-align:center">
-        <span.on-secondary style="font-size:4rem">&#x1F4C2;
-        <figcaption.md-typescale-body-large>
+      <figure.center-align.margin>
+        <i.extra.margin>folder_open
+        <figcaption.large-text>
           _{MsgNoSubscriptionsYet}
-    $else
-      <md-list>
-        $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (Entity _ (User email _ _ _ _ name _ _),attrib)) <- subscriptions
-          <md-list-item type=link href=@{AccountSubscriptionR uid sid}>
-            <img slot=start src=@{AccountPhotoR pid} width=56 height=56 loading=lazy style="clip-path:circle(50%)">
-            <div slot=headline style="white-space:nowrap">
-              $maybe name <- name
-                #{name}
-              $nothing
-                #{email}
-            <div slot=supporting-text style="white-space:nowrap">
-              #{endpoint}
-            $maybe ua <- ua
-              <div slot=supporting-text style="white-space:nowrap">
-                #{ua}
-            <md-icon slot=end>arrow_forward_ios
-          $maybe attrib <- attrib
-            <div.app-attribution>
-              <div.app-attribution-wrapper.md-typescale-body-small>
-                #{attrib}
-          <md-divider>
           
-    ^{widgetSnackbar msgs}
+    $else
+      
+      $forall (Entity sid (PushSubscription _ pid endpoint _ _ ua), (user,attrib)) <- subscriptions
+        <a.row.padding.wave href=@{AccountSubscriptionR uid sid}>
+
+          <img.circle slot=start src=@{AccountPhotoR pid} loading=lazy>
+
+          <div.max>
+            <div.headline.large-text style="white-space:nowrap">
+              $with Entity _ (User email _ _ _ _ name _ _) <- user
+                $maybe name <- name
+                  #{name}
+                $nothing
+                  #{email}
+  
+            <div.supporting-text.secondary-text style="white-space:nowrap">
+              #{endpoint}
+       
+            $maybe ua <- ua
+              <div.supporting-text.secondary-text style="white-space:nowrap">
+                #{ua}
+
+          <i.secondary-text>arrow_forward_ios
+
+        $maybe attrib <- attrib
+          <div.app-attribution>
+            <div.app-attribution-wrapper>
+              #{attrib}
+
+        <hr>
+          
+^{widgetSnackbar msgs}

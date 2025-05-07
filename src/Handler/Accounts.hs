@@ -62,6 +62,7 @@ import Material3 ( md3widget )
 
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
+    , keyScrollLeft
     , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
     , PushSubscriptionId, PushSubscription (PushSubscription)
     , RingtoneId, Ringtone (Ringtone, ringtoneName, ringtoneMime)
@@ -125,7 +126,6 @@ getAccountNotificationsR uid = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUserSettings
-        idPanelNotifications <- newIdent
         $(widgetFile "accounts/settings/notifications/notifications")
 
 
@@ -165,6 +165,7 @@ getAccountRingtonesR uid typ = do
     msgs <- getMessages
     defaultLayout $ do
         setTitleI MsgUserSettings
+        idNavScrollTabs <- newIdent
         $(widgetFile "accounts/settings/ringtones/ringtones")
 
 

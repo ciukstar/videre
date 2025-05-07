@@ -217,3 +217,6 @@ paramEndpoint = "endpoint"
 
 localStorageEndpoint :: Text
 localStorageEndpoint = "VIDERE_WEB_PUSH_SUBSCRIPTION_ENDPOINT"
+
+keyScrollLeft :: Text
+keyScrollLeft = "tabsScrollLeft"

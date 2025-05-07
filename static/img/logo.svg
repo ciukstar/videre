@@ -24,8 +24,8 @@
      inkscape:deskcolor="#d1d1d1"
      showgrid="false"
      inkscape:zoom="31.958333"
-     inkscape:cx="12"
-     inkscape:cy="12"
+     inkscape:cx="12.031291"
+     inkscape:cy="12.031291"
      inkscape:window-width="1920"
      inkscape:window-height="999"
      inkscape:window-x="0"
@@ -34,5 +34,6 @@
      inkscape:current-layer="svg2347" />
   <path
      d="M320-400h240q17 0 28.5-11.5T600-440v-80l80 80v-240l-80 80v-80q0-17-11.5-28.5T560-720H320q-17 0-28.5 11.5T280-680v240q0 17 11.5 28.5T320-400ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"
-     id="path2345" />
+     id="path2345"
+     style="fill:#ffffff" />
 </svg>

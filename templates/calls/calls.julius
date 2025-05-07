@@ -1,6 +1,6 @@
 
 Array.from(
-  document.body.querySelectorAll('time[datetime]')
+  document.body.querySelectorAll('time.daytime[datetime]')
 ).forEach(function (x) {
   x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
     navigator.language, {
@@ -14,7 +14,7 @@ Array.from(
 });
 
 Array.from(
-  document.querySelectorAll('md-icon-button.app-call')
+  document.querySelectorAll('button.app-call')
 ).forEach((call) => {
   call.addEventListener('click', (e) => {
 
@@ -22,73 +22,73 @@ Array.from(
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: call.dataset.messageType,
-	icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
-	title: #{msgr MsgAppName},
-	body: call.dataset.body,
-	videor: 'videor' in call.dataset,
-	audior: true,
-	videos: 'videos' in call.dataset,
-	audios: true
+        messageType: call.dataset.messageType,
+        icon: '@{StaticR img_call_FILL0_wght400_GRAD0_opsz24_svg}',
+        title: #{msgr MsgAppName},
+        body: call.dataset.body,
+        videor: 'videor' in call.dataset,
+        audior: true,
+        videos: 'videos' in call.dataset,
+        audios: true
       })
     }).then(
       (result) => {
-	
-	const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${call.dataset.i}`);
-	
-	document.getElementById(`idButtonOutgoingCallCancel${call.dataset.i}`).addEventListener('click', (e) => {
+        
+        const dlgOutgoingCall = document.getElementById(`idDialogOutgoingCall${call.dataset.i}`);
+        
+        document.getElementById(`idButtonOutgoingCallCancel${call.dataset.i}`).addEventListener('click', (e) => {
 
-	  fetch(call.dataset.targetPush, {
-	    method: 'POST',
-	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	    body: new URLSearchParams({
-	      messageType: #{PushMsgTypeCancel},
-	      title: #{msgr MsgAppName},
-	      icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
-	      body: call.dataset.bodyCancel,
-	      videor: false,
-	      audior: false,
-	      videos: false,
-	      audios: false
-	    })
-	  }).then((result) => {
-	    dlgOutgoingCall.close();
-	    window.location.reload();
-	  }).catch(
-	    (err) => console.error(err);
-	  );
-	  
-	});
+          fetch(call.dataset.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              messageType: #{PushMsgTypeCancel},
+              title: #{msgr MsgAppName},
+              icon: '@{StaticR img_call_end_FILL0_wght400_GRAD0_opsz24_svg}',
+              body: call.dataset.bodyCancel,
+              videor: false,
+              audior: false,
+              videos: false,
+              audios: false
+            })
+          }).then((result) => {
+            dlgOutgoingCall.close();
+            window.location.reload();
+          }).catch(
+            (err) => console.error(err);
+          );
+          
+        });
 
-	navigator.serviceWorker.addEventListener('message', function (message) {
-	  
-	  if (message.data.messageType === #{PushMsgTypeAccept}) {
-	    
-	    dlgOutgoingCall.close();
-	    
-	    const params = new URLSearchParams({
-	      backlink: '@{CallsR uid}',
-	      videor: message.data.videor,
-	      audior: message.data.audior,
-	      videos: message.data.videos,
-	      audios: message.data.audios
-	    });
+        navigator.serviceWorker.addEventListener('message', function (message) {
+          
+          if (message.data.messageType === #{PushMsgTypeAccept}) {
+            
+            dlgOutgoingCall.close();
+            
+            const params = new URLSearchParams({
+              backlink: '@{CallsR uid}',
+              videor: message.data.videor,
+              audior: message.data.audior,
+              videos: message.data.videos,
+              audios: message.data.audios
+            });
 
-	    window.location.href = `${call.dataset.targetRoom}?${params}`;
-	    
-	  } else if (message.data.messageType === #{PushMsgTypeDecline}) {
+            window.location.href = `${call.dataset.targetRoom}?${params}`;
+            
+          } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
-	    dlgOutgoingCall.close();
-	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).show();
-	    document.getElementById(`idDialogCallDeclined${call.dataset.i}`).addEventListener('closed', () => {
-	      window.location.reload();
-	    });
-	    
-	  }
-	  
-	});
-	
-	dlgOutgoingCall.show();
+            dlgOutgoingCall.close();
+            document.getElementById(`idDialogCallDeclined${call.dataset.i}`).show();
+            document.getElementById(`idDialogCallDeclined${call.dataset.i}`).addEventListener('closed', () => {
+              window.location.reload();
+            });
+            
+          }
+          
+        });
+        
+        dlgOutgoingCall.show();
       }
     ).catch(
       (err) => { console.error(err); }
@@ -99,7 +99,7 @@ Array.from(
 
 
 Array.from(
-  document.querySelectorAll('md-dialog.app-outgoing-call')
+  document.querySelectorAll('dialog.app-outgoing-call')
 ).forEach((dialog) => {
   
   dialog.addEventListener('opened', (e) => {
