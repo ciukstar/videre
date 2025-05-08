@@ -27,7 +27,7 @@
     <figcaption>
       $maybe (Entity _ (User email _ _ _ _ name _ _), (attrib, (_, (_, _)))) <- contact
         $maybe attribution <- attrib
-          <div.smll-text.secondary-text>
+          <div.small-text.secondary-text>
             ^{attribution}
         $maybe name <- name
           <div.large-text>#{name}

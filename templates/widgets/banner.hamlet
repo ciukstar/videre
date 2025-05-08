@@ -1,4 +1,0 @@
-
-$forall (_,msg) <- filter ((==) statusError . fst) msgs
-    <div.app-banner.error.md-typescale-body-medium>
-      #{msg}

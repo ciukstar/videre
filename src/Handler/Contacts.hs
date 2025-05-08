@@ -138,6 +138,7 @@ import Settings.StaticFiles
     , ringtones_outgoing_call_galaxy_ringtones_1_mp3
     )
 
+import Text.Cassius (cassius)
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
@@ -168,7 +169,7 @@ import Yesod.Core.Handler
     ( setUltDestCurrent, newIdent, redirect, lookupGetParam, sendStatusJSON
     , getUrlRender
     )
-import Yesod.Core.Widget (setTitleI, whamlet)
+import Yesod.Core.Widget (setTitleI, whamlet, toWidget)
 import Yesod.Form.Input (runInputGet, ireq, runInputPost, iopt)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
@@ -809,25 +810,32 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverla
                   sel (Right vals) opt = optionInternalValue opt `elem` vals
                   
               let iopts = zip [1 :: Int .. ] opts
-                  
+              toWidget [cassius|
+                  ##{theId}
+                      div.content
+                          min-width: 0
+                          .headline, .supporting-text
+                              white-space:nowrap
+                              overflow: hidden
+                              text-overflow: ellipsis
+              |]
               [whamlet|
-                <div ##{theId} *{attrs}>
+                <ul.list.border.large-space ##{theId} *{attrs}>
                   $forall (i,opt) <- iopts
-                    <div.max.row.no-margin.padding.wave onclick="document.getElementById('#{theId}-#{i}').click()">
+                    <li.wave onclick="document.getElementById('#{theId}-#{i}').click()">
                       <img.circle src=@{AccountPhotoR (entityKey $ optionInternalValue opt)} loading=lazy alt=_{MsgPhoto}>
+                      
                       <div.content.max>
-                        <h6.headline.large-text style="white-space:nowrap">
+                        <div.headline.large-text>
                           $maybe name <- userName $ entityVal $ optionInternalValue opt
                             #{name}
-                        <div.supporting-text.secondary-text style="white-space:nowrap">
+                        <div.supporting-text.secondary-text>
                           #{optionDisplay opt}
 
                       <label.checkbox>
                         <input type=checkbox ##{theId}-#{i} name=#{name} value=#{optionExternalValue opt}
                           :sel x opt:checked :isReq:required=true>
                         <span>
-
-                    <hr>
               |]
           }
 

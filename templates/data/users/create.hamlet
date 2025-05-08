@@ -1,17 +1,19 @@
-<header.app-top-app-bar.background>
-  <div #headerStart>
-    <md-icon-button href=@{DataR UsersR} aria-label=_{MsgBack}>
-      <md-icon>arrow_back
-          
-    <h1.md-typescale-title-large>
+
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{DataR UsersR} title=_{MsgBack} role=button>
+      <i>arrow_back
+
+    <h1.title.max>
       _{MsgUser}
-      
-<main>
+
+<main.responsive.padding>
 
   <form method=post action=@{DataR UsersR} enctype=#{et} novalidate>
     ^{fw}
-    <div.app-form-actions>
-      <md-text-button type=button href=@{DataR UsersR}>
+    <nav.right-align.no-space>
+      <a.button.transparent.link href=@{DataR UsersR} role=button>
         _{MsgCancel}
-      <md-filled-button type=submit>
+        
+      <button type=submit>
         _{MsgSave}

@@ -27,5 +27,4 @@
       _{MsgPostpone}
 
     <button type=button ##{idButtonSubmitWithSubscription}>
-      <i>check
       _{MsgSubscribe}

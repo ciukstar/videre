@@ -32,14 +32,14 @@
       <dd.margin>#{email}
       
       <dt.bold>_{MsgFullName}
-      <dd.margin>
+      <dd.small-margin>
         $maybe name <- name
           #{name}
         $nothing
           <i>_{MsgNotSpecified}
       
       <dt.bold>_{MsgAuthentication}
-      <dd.margin>
+      <dd.small-margin>
         $case authType
           $of UserAuthTypePassword
             _{MsgPassword}
@@ -49,28 +49,28 @@
             _{MsgGoogle}
         
       <dt.bold>_{MsgVerificationKey}
-      <dd.margin>
+      <dd.small-margin>
         $maybe verkey <- verkey
           #{verkey}
         $nothing
           <i>_{MsgNotSpecified}
         
       <dt.bold>_{MsgVerified}
-      <dd.margin>
+      <dd.small-margin>
         $if verified
           _{MsgYes}
         $else
           _{MsgNo}
         
       <dt.bold>_{MsgSuperuser}
-      <dd.margin>
+      <dd.small-margin>
         $if super
           _{MsgYes}
         $else
           _{MsgNo}
         
       <dt.bold>_{MsgAdministrator}
-      <dd.margin>
+      <dd.small-margin>
         $if admin
           _{MsgYes}
         $else
@@ -82,7 +82,8 @@
 <div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
 
 <dialog ##{idDialogDelete}>
-  <h6>_{MsgConfirmPlease}
+  <div.title>
+    <h6>_{MsgConfirmPlease}
   
   <p>_{MsgDeleteAreYouSure}
   

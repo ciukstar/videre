@@ -14,107 +14,107 @@
 <main.responsive>
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgAppName}
-    <h3.md-typescale-body-large>
+    <h2>_{MsgAppName}
+    <p.large-text>
       _{MsgAppDescription}
       
-    <h2.md-typescale-headline-small>
+    <h2.title>
       _{MsgOverview}
-    <p.md-typescale-body-medium>
+    <p>
       #{t $ MsgDoc001 (m MsgAppName) (r HomeR) ws wrtc wp}
       
-    <h2.md-typescale-headline-small>
+    <h2.title>
       _{MsgUsage}
-    <p.md-typescale-body-medium>
+    <p>
       #{t $ MsgDoc006 (r $ AuthR LoginR)}
       
-    <p.md-typescale-body-medium>
+    <p>
       _{MsgDoc007}
       
-    <p.md-typescale-body-medium>
+    <p>
       _{MsgDoc008}
       
-    <p.md-typescale-body-medium>
+    <p>
       #{t $ MsgDoc009 "https://www.w3.org/TR/webrtc/"}
       
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgSuperuser}
+    <h2>_{MsgSuperuser}
     <dl>
 
-      <dt.md-typescale-label-large>_{MsgUsername}
-      <dd.md-typescale-body-small>
+      <dt.large-text>_{MsgUsername}
+      <dd.small-text>
         <code>&dollar;YESOD_SUPERUSER_USERNAME
 
-      <dt.md-typescale-label-large>_{MsgPassword}
-      <dd.md-typescale-body-small>
+      <dt.large-text>_{MsgPassword}
+      <dd.small-text>
         <code>&dollar;YESOD_SUPERUSER_PASSWORD
 
-    <p.md-typescale-body-medium>_{MsgDoc002}
+    <p>_{MsgDoc002}
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgDoc003}
+    <h2>_{MsgDoc003}
     <ul>
-      <li.md-typescale-body-large>
+      <li>
         _{MsgEmail}:
         <a href="https://developers.google.com/gmail/api/guides" target=_blank>Gmail API
         <dl>
-          <dt.md-typescale-label-large>
+          <dt.large-text>
             _{MsgClientId}
-          <dd.md-typescale-body-small>
+          <dd.small-text>
             <code>&dollar;YESOD_GOOGLE_CLIENT_ID
 
-          <dt.md-typescale-label-large>
+          <dt.large-text>
             _{MsgClientSecret}
-          <dd.md-typescale-body-small>
+          <dd.small-text>
             <code>&dollar;YESOD_GOOGLE_CLIENT_SECRET
-      <li.md-typescale-body-large>
+      <li>
         _{MsgWebRealTimeCommunication}:
         <a href="https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API" target=_blank>
           WebRTC API
         <dl>
-          <dt.md-typescale-label-large>
+          <dt.large-text>
             _{MsgConfiguration}
-          <dd.md-typescale-body-small>
+          <dd.small-text>
             <code>&dollar;YESOD_RTC_PEER_CONNECTION_CONFIG
-            <p.md-typescale-body-small>
+            <p.small-text>
               #{t $ MsgDoc017 "https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection"}
-            <p.md-typescale-body-small>
+            <p.small-text>
               _{MsgDoc018}
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgSearchEngineOptimization}
+    <h2>_{MsgSearchEngineOptimization}
     <ul>
-      <li.md-typescale-body-large>
+      <li>
         <a href="https://search.google.com/search-console" target=_blank>Google SEO
         <div>
-          <code.md-typescale-body-small>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
-      <li.md-typescale-body-large>
+          <code.small-text>&dollar;YESOD_GOOGLE_SITE_VERIFICATION
+      <li>
         <a href="https://www.bing.com/webmasters" target=_blank>Bing SEO
         <div>
-          <code.md-typescale-body-small>&dollar;YESOD_MS_VALIDATE
-      <li.md-typescale-body-large>
+          <code.small-text>&dollar;YESOD_MS_VALIDATE
+      <li>
         <a href="https://webmaster.yandex.com/welcome" target=_blank>Yandex SEO
         <div>
-          <code.md-typescale-body-small>&dollar;YESOD_YANDEX_VERIFICATION
+          <code.small-text>&dollar;YESOD_YANDEX_VERIFICATION
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgBasicEntities}
+    <h2>_{MsgBasicEntities}
     
   <section>
-    <h2.md-typescale-headline-small>_{MsgUser}
+    <h2.title>_{MsgUser}
     <p>
       #{t $ MsgDoc010 (r $ AuthR LoginR) "https://developers.google.com/gmail/api/guides"}
     <p>
       _{MsgDoc011}
       
   <section>
-    <h2.md-typescale-headline-small>_{MsgContact}
+    <h2.title>_{MsgContact}
     <p>
       _{MsgDoc012}
       
   <section>
-    <h2.md-typescale-headline-small>_{MsgPushSubscription}
+    <h2.title>_{MsgPushSubscription}
     <p>
       _{MsgDoc013}
     <p>
@@ -123,17 +123,17 @@
       #{t $ MsgDoc015 "https://developer.mozilla.org/en-US/docs/Web/API/Push_API"}
       
   <section>
-    <h2.md-typescale-headline-small>_{MsgEntityCall}
+    <h2.title>_{MsgEntityCall}
     <p>
       _{MsgDoc016}
       
   <section>
-    <h2.md-typescale-headline-small>_{MsgEntityChat}
+    <h2.title>_{MsgEntityChat}
     <p>
       _{MsgDoc019}
       
   <section>
-    <h2.md-typescale-headline-small>_{MsgRingtone}
+    <h2.title>_{MsgRingtone}
     <p>
       #{t $ MsgDoc020 (r $ DataR RingtonesR)}
     <p>
@@ -142,16 +142,16 @@
       _{MsgDoc022}
     
   <section>
-    <h2.md-typescale-headline-medium>_{MsgErDiagram}
+    <h2>_{MsgErDiagram}
     <img #idImgErdDiagram src=@{StaticR img_ERD_Videre_svg} alt=_{MsgErDiagram} loading=lazy>
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgSourceCode}
-    <p.md-typescale-body-medium>#{t $ MsgDoc004 "https://github.com/ciukstar/videre"}
+    <h2>_{MsgSourceCode}
+    <p>#{t $ MsgDoc004 "https://github.com/ciukstar/videre"}
 
   <section>
-    <h2.md-typescale-headline-medium>_{MsgIssueTracking}
-    <p.md-typescale-body-medium>#{t $ MsgDoc005 "https://github.com/ciukstar/videre/issues"}
+    <h2>_{MsgIssueTracking}
+    <p>#{t $ MsgDoc005 "https://github.com/ciukstar/videre/issues"}
       
 
 ^{widgetSnackbar msgs}

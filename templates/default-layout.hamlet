@@ -36,12 +36,12 @@
     <figure.margin ##{idFigureVideoCallerPhoto}>
       <div.img-wrapper>
       
-        <img.soundwave.circle.extra ##{idImgVideoCallerPhoto}>
+        <img.circle.extra ##{idImgVideoCallerPhoto}>
 
         <div.soundwave.one>
         <div.soundwave.two>
       
-      <figcaption.large-text ##{idFigcaptionVideoCallerPhoto}>
+      <figcaption.margin.large-text ##{idFigcaptionVideoCallerPhoto}>
   
     <audio loop ##{idAudioIncomingVideoCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone

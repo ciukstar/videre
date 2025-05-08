@@ -1,0 +1,10 @@
+
+
+##{idDialogDelete}
+    div.title
+        min-width: 0
+        
+        h6
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis

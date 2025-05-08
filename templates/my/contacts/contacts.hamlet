@@ -15,7 +15,7 @@
 
   $if null entries
     <figure.margin.center-align>
-      <i.extra>folder_open
+      <i.extra.margin>folder_open
         
       <figcaption>
         <p>_{MsgYourContactListIsEmpty}
@@ -27,15 +27,17 @@
     $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
       <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
 
-        <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
+        <div>
+          <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
+          
           $if ns < 1
-            <i.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
               notifications_off
           $elseif nl > 0
-            <i.call-loop #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.call-loop #idBadgePhoto#{fromSqlKey rid}>
               repeat
           $elseif na < 1
-            <i.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
               phone_disabled
 
         <div.content.max>

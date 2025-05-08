@@ -1,48 +1,42 @@
 
-document.getElementById(#{fvId v}).onchange = function (e) {
+document.getElementById(#{fvId v}).addEventListener('change', function (e) {
 
-  const progress = document.createElement('md-circular-progress');
-  progress.setAttribute('indeterminate','');
-  progress.style.position = 'absolute';
-  progress.style.top = 0;
-  progress.style.right = 0;
-  progress.style.bottom = 0;
-  progress.style.left = 0;
-  progress.style.margin = 'auto';
+  const progress = document.createElement('progress');
+  progress.classList.add('small','circle','absolute','right');
   document.getElementById(#{idFormFieldSubscribe}).appendChild(progress);
   
-  if (this.selected) {
+  if (this.checked) {
 
     Notification.requestPermission().then(function (permission) {
       
       if (permission === 'granted') {
-	
+        
         navigator.serviceWorker.ready.then((registration) => {
 
-	  registration.pushManager.subscribe({
+          registration.pushManager.subscribe({
             userVisibleOnly: true,
-	    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+            applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
           }).then(function (subscription) {
-	    
-	    if (subscription) {
-	      const subscr = JSON.parse( JSON.stringify(subscription) );
-	      subscr.subscriber = #{rawJS subscriberId};
-	      subscr.publisher = #{rawJS publisherId};
-	      
-	      fetch('@{PushSubscriptionsR sid pid}', {
-		method: 'POST',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(subscr)
-	      }).then((response) => {
-		localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
-		window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
-	      });
-	    }
-	    
-	  });
-  
-	});
-	
+            
+            if (subscription) {
+              const subscr = JSON.parse( JSON.stringify(subscription) );
+              subscr.subscriber = #{rawJS subscriberId};
+              subscr.publisher = #{rawJS publisherId};
+              
+              fetch('@{PushSubscriptionsR sid pid}', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(subscr)
+              }).then((response) => {
+                localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+                window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
+              });
+            }
+            
+          });
+          
+        });
+        
       }
       
     });
@@ -52,19 +46,19 @@ document.getElementById(#{fvId v}).onchange = function (e) {
     navigator.serviceWorker.ready.then(function (registration) {
       registration.pushManager.getSubscription().then(function (subscription) {
 
-	let url = !!subscription
-	    ? `@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`
-	    : '@{PushSubscriptionsR sid pid}'
-	
-	fetch(url, {
+        let url = !!subscription
+            ? `@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`
+            : '@{PushSubscriptionsR sid pid}'
+        
+        fetch(url, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription)      
         }).then(function (result) {
-	  window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
-	});
-	
+          window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
+        });
+        
       });
     });
   }
-};
+});

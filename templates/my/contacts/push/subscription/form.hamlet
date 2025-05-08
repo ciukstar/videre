@@ -1,7 +1,8 @@
 
 #{extra}
 
-^{md3widgetSwitch v}
+<div ##{idFormFieldSubscribe}>
+  ^{md3widgetSwitch v}
 
 <p.secondary-text>
   _{MsgAllowToBeNotifiedBy publisherName}

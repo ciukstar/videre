@@ -11,7 +11,7 @@
 
   $if null users
     <figure.center-align.margin>
-      <i.extra>folder_open
+      <i.extra.margin>folder_open
       <figcaption>
         _{MsgNoRegisteredUsersYet}
         

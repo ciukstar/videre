@@ -11,7 +11,7 @@
 
   <form method=post action=@{DataR $ UserR uid} enctype=#{et}>
     ^{fw}
-    <nav.right-align>
+    <nav.right-align.no-space>
       <a.button.transparent.link href=@{DataR $ UserR uid} role=button>
         _{MsgCancel}
         

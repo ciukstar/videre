@@ -11,6 +11,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
+
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module VideoRoom
@@ -28,8 +29,7 @@ import Database.Esqueleto.Experimental
     , (^.), (==.), (=.)
     , just, update, set
     )
-import Database.Persist
-    ( Entity (Entity, entityVal), PersistStoreWrite (insert) )
+import Database.Persist (Entity (Entity), entityVal, insert, update)
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))

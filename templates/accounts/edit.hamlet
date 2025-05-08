@@ -12,7 +12,7 @@
   <form method=post action=@{AccountR uid} enctype=#{et}>
     ^{fw}
     <nav.right-align>
-      <a.button.transparent.link type=button href=@{AccountR uid}>
+      <a.button.transparent.link href=@{AccountR uid} role=button>
         _{MsgCancel}
         
       <button type=submit>
