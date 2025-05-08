@@ -33,13 +33,13 @@
 
   <div>
 
-    <figure ##{idFigureVideoCallerPhoto}>
+    <figure.margin ##{idFigureVideoCallerPhoto}>
       <div.img-wrapper>
       
-        <img ##{idImgVideoCallerPhoto} width=64 height=64>
+        <img.soundwave.circle.extra ##{idImgVideoCallerPhoto}>
 
-        <div.circle.one>
-        <div.circle.two>
+        <div.soundwave.one>
+        <div.soundwave.two>
       
       <figcaption.large-text ##{idFigcaptionVideoCallerPhoto}>
   
@@ -49,13 +49,13 @@
 
   <nav.right-align>
 
-    <button.cicle.fill ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
+    <button.circle.error ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
       <i>call_end
 
-    <button.circle.fill ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
+    <button.circle.green ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
       <i>call
 
-    <button.fill ##{idButtonVideoCallAccept} type=button>
+    <button.green ##{idButtonVideoCallAccept} type=button>
       <i>videocam
       _{MsgAccept}
       

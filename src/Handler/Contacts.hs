@@ -323,7 +323,6 @@ getCallsR uid = do
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
-        idFabAdd <- newIdent
         $(widgetFile "calls/calls")
   where
       unwrap = second (first (bimap (second (join . unValue)) (second (join . unValue))))

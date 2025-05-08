@@ -44,7 +44,7 @@ import Data.Time.Clock (getCurrentTime)
 import Foundation
     ( AppMessage
       ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
-      , MsgEndSession, MsgAppName, MsgSelected, MsgUnselected
+      , MsgEndSession, MsgAppName, MsgBack
       )
     )
 
@@ -75,14 +75,16 @@ import Network.HTTP.Types (extractPath)
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
-    (atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue)
+    ( atomically, readTVarIO, writeTVar, newTQueue, readTQueue, writeTQueue
+    )
 
 import Settings
     ( widgetFile, AppSettings (appSuperuser)
     , Superuser (Superuser, superuserUsername)
     )
 import Settings.StaticFiles
-    (img_call_end_FILL0_wght400_GRAD0_opsz24_svg)
+    ( img_call_end_FILL0_wght400_GRAD0_opsz24_svg
+    )
 
 import Text.Hamlet (Html)
 import Text.Julius (RawJS(rawJS))
@@ -116,7 +118,8 @@ import Yesod.Form.Fields (boolField, intField, textField)
 import Yesod.Persist.Core (runDB)
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets
-    ( WebSocketsT, sendTextData, race_, sourceWS, webSockets)
+    ( WebSocketsT, sendTextData, race_, sourceWS, webSockets
+    )
 
 
 class YesodVideo m where

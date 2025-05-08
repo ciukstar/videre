@@ -118,7 +118,10 @@ navigator.mediaDevices.getUserMedia({
 }).then((stream) => {
 
   document.getElementById(#{idButtonSwitchVideocam}).onclick = (e) => {
-
+    
+    const selected = e.target.toggleAttribute('selected');
+    e.target.querySelector('i').textContent = selected ? 'video_camera_front' : 'video_camera_back';
+    
     e.target.dataset.facingMode = e.target.dataset.facingMode === 'user' ? 'environment' : 'user';
 
     pc.getSenders().filter(
@@ -143,6 +146,9 @@ navigator.mediaDevices.getUserMedia({
   };
 
   document.getElementById(#{idButtonVideoSwitch}).onclick = (e) => {
+    
+    const selected = e.target.toggleAttribute('selected');
+    e.target.querySelector('i').textContent = selected ? 'videocam' : 'videocam_off';
 
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getVideoTracks()[0].kind
@@ -158,6 +164,9 @@ navigator.mediaDevices.getUserMedia({
   };
 
   document.getElementById(#{idButtonAudioSwitch}).onclick = (e) => {
+    
+    const selected = e.target.toggleAttribute('selected');
+    e.target.querySelector('i').textContent = selected ? 'mic' : 'mic_off';
 
     pc.getSenders().filter(
       (sender) => sender.track.kind === stream.getAudioTracks()[0].kind
@@ -211,8 +220,8 @@ navigator.serviceWorker.addEventListener('message', function (message) {
         icon: '@{iconCallEnd}',
         body: #{msgr $ MsgInterlocutorEndedSession interlocutorName},
         messageType: #{PushMsgTypeEndSession},
-	targetRoom: '@{toParent $ RoomR rid cid sid True}',
-	targetPush: '@{toParent $ PushMessageR rid cid sid}',
+        targetRoom: '@{toParent $ RoomR rid cid sid True}',
+        targetPush: '@{toParent $ PushMessageR rid cid sid}',
         videor: #{rawJS videor},
         audior: #{rawJS audior},
         videos: #{rawJS videos},

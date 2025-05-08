@@ -1,29 +1,30 @@
 
-<header.app-top-app-bar.background>
-  <md-icon-button href=#{backlink} aria-label=MsgBack ##{idButtonExitSession}>
-    <md-icon>arrow_back
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=#{backlink} ##{idButtonExitSession} title=_{MsgBack} role=button>
+      <i>arrow_back
 
-  <md-outlined-icon-button has-icon ##{idButtonSwitchVideocam} toggle selected data-facing-mode=user>
-    <md-icon slot=selected>video_camera_front
-    <md-icon>video_camera_back
+    <button.transparent.circle.border ##{idButtonSwitchVideocam} toggle selected data-facing-mode=user>
+      <i>video_camera_front
 
-  <md-outlined-icon-button has-icon ##{idButtonVideoSwitch} toggle :videos:selected
-    aria-label=_{MsgUnselected} aria-label-selected=_{MsgSelected}>
+    <button.transparent.circle.border ##{idButtonVideoSwitch} toggle :videos:selected>
+      <i>
+        $if videos
+          videocam
+        $else
+          videocam_off
 
-    <md-icon slot=selected>videocam
-    <md-icon>videocam_off
+    <button.transparent.circle.border ##{idButtonAudioSwitch} toggle :audios:selected>
+      <i>
+        $if audios
+          mic
+        $else
+          mic_off
 
-  <md-outlined-icon-button has-icon ##{idButtonAudioSwitch} toggle :audios:selected
-    aria-label=_{MsgUnselected} aria-label-selected=_{MsgSelected}>
+    <button.circle.error ##{idButtonEndSession}>
+      <i>call_end
 
-    <md-icon slot=selected>mic
-    <md-icon>mic_off
-
-  <md-filled-icon-button has-icon ##{idButtonEndSession}>
-    <md-icon>call_end
-
-
-<main>
+<main.responsive.no-padding>
 
   <div ##{idWrapperVideoRemote}>
     <video autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}
@@ -37,14 +38,13 @@
       <img src=@{toParent $ PhotoR sid} loading=lazy ##{idImgVideoSelfPlaceholder}>
 
 
-<md-dialog ##{idDialogCallEnded}>
-  <div slot=headline>
+<dialog ##{idDialogCallEnded}>
+  <h6>
     _{MsgCallEnded}
 
-  <p.md-typescale-body-medium slot=content>
+  <p>
     _{MsgInterlocutorEndedSession interlocutorName}
 
-  <div slot=actions>
-
-    <md-text-button type=link href=#{backlink}>
+  <nav.right-align>
+    <button.transparent.link href=#{backlink}>
       _{MsgEndSession}

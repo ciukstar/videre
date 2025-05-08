@@ -24,7 +24,7 @@
   $else
     <ul.list.border.large-space>
       $forall (Entity i caller,(((callerE,attribCaller),(calleeE,attribCallee)),(c,((ns1,(nl1,na1)),(ns2,(nl2,na2)))))) <- calls
-        $with (i, Entity cid (Contact _ _ _)) <- (fromSqlKey i, c)
+        $with (_, (i, Entity cid (Contact _ _ _))) <- (caller, (fromSqlKey i, c))
           $if uid == callee
             $with (Entity _ (User email _ _ _ _ name _ _),attrib) <- (callerE, attribCaller)
               <li.app-call #idItemCall#{i}>

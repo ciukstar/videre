@@ -21,7 +21,7 @@
   <p ##{idDialogSubscribeContent}>
     _{MsgAllowToBeNotifiedBySelectedUsers}.
 
-  <nav.right-align>
+  <nav.right-align.no-space>
 
     <button.transparent.link type=button ##{idButtonSubmitNoSubscription}>
       _{MsgPostpone}

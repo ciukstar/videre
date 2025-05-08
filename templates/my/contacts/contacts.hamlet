@@ -48,19 +48,19 @@
           $maybe (time, (message, (ctype, media))) <- content
             <div.supporting-text.secondary-text>
               $with dt <- iso8601Show time
-                <time datetime=#{dt}>#{dt}
+                <time.daytime datetime=#{dt}>#{dt}
 
-            <div.supporting-text.secondary-text>
+            <div.supporting-text.secondary-text.row.no-padding.no-margin>
               $if media
                 $case ctype
                   $of CallTypeVideo
-                    <md-icon style="vertical-align:sub;--md-icon-size:1rem">videocam
+                    <i>videocam
                     _{MsgVideoCall}
                   $of CallTypeAudio
-                    <md-icon style="vertical-align:sub;--md-icon-size:1rem">call
+                    <i>call
                     _{MsgAudioCall}
               $else
-                <md-icon style="vertical-align:sub;--md-icon-size:1rem">done_all
+                <i>done_all
                 #{message}
 
         <i.secondary-text>arrow_forward_ios
@@ -73,8 +73,7 @@
       <hr>
 
   $with backlink <- rndr $ MyContactsR uid
-    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@?{(ContactsR uid,[("backlink",backlink)])}
-              style="z-index:1" onclick="event.stopPropagation()">
+    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@?{(ContactsR uid,[("backlink",backlink)])}>
       <i>add
 
 ^{widgetSnackbar msgs}
