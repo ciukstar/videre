@@ -36,8 +36,6 @@ body
     ##{idDialogChatNotification}
         ##{idFigureSenderPhoto}
             text-align: center
-            ##{idImgSenderPhoto}
-                clip-path: circle(50%)
 
     ##{idDialogIncomingVideoCall}
 
@@ -53,21 +51,6 @@ body
             text-align: center
             ##{idImgAudioCallerPhoto}
                 z-index: 1
-                clip-path: circle(50%)
-
-        ##{idButtonAudioCallDecline}
-          --md-sys-color-primary: red
-          --md-sys-color-on-primary: #FFFFFF
-
-        ##{idButtonAudioCallAcceptVideo}
-          --md-sys-color-primary: green
-          --md-sys-color-on-primary: #FFFFFF
-          margin-left: 1rem
-
-        ##{idButtonAudioCallAccept}
-          --md-sys-color-primary: green
-          --md-sys-color-on-primary: #FFFFFF
-          margin-left: 1rem
 
 
 @keyframes soundwave

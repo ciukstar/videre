@@ -54,12 +54,12 @@ import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 import Foundation
     ( AppMessage
       ( MsgPhoto, MsgMessage, MsgViewContact, MsgActions, MsgNewMessage
-      , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall
-      , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall
+      , MsgPushNotificationExcception, MsgVideoCall, MsgAudioCall, MsgBack
+      , MsgOutgoingCall, MsgCallDeclined, MsgCalleeDeclinedTheCall, MsgChats
       , MsgCancel, MsgClose, MsgCallCanceledByCaller, MsgIncomingAudioCallFrom
       , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
-      , MsgSubscribe, MsgBack, MsgChats
+      , MsgSubscribe
       )
     )
 

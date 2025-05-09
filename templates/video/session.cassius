@@ -1,37 +1,8 @@
-
-header
-
-    position: sticky
-    top: 0
-    z-index: 1
-    height: var(--app-top-appbar-height, 64px)
-    padding: 0 1rem
-    display: flex
-    flex-direction: row
-    justify-content: flex-start
-    align-items: center
-    column-gap: 0.5rem
-    
-    ##{idButtonSwitchVideocam}
-        margin-left: auto
-            
-    ##{idButtonVideoSwitch}, ##{idButtonAudioSwitch}
-        --md-outlined-icon-button-selected-container-color: green
-        --md-outlined-icon-button-selected-outline-color: green
-        --md-outlined-icon-button-outline-color: red
-        --md-outlined-icon-button-hover-icon-color: red
-        --md-outlined-icon-button-focus-icon-color: red
-        --md-outlined-icon-button-pressed-icon-color: red
-        --md-outlined-icon-button-icon-color: red
-
-    ##{idButtonEndSession}
-        --md-sys-color-primary: red
-        --md-sys-color-on-primary: white
     
 main
 
     position: relative
-    height: calc(100svh - var(--app-top-appbar-height, 64px))
+    height: calc(100svh - var(--app-top-appbar-height, 4rem))
 
     ##{idWrapperVideoRemote}
         position: relative
@@ -67,7 +38,8 @@ main
             height: auto
             border-radius: 4px
             visibility: #{visibilityPlaceholderS}
-        
+
+
 @media screen and (orientation: portrait)
     ##{idVideoRemote}
         width: 100%

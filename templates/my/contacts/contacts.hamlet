@@ -69,7 +69,7 @@
  
       $maybe attrib <- attrib
         <div.app-attribution>
-          <div.app-attribution-wrapper.md-typescale-body-small>
+          <div.app-attribution-wrapper>
             #{attrib}
 
       <hr>

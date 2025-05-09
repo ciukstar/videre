@@ -157,62 +157,61 @@
                   data-body-cancel=_{MsgCallCanceledByCaller $ fromMaybe email name}>
                 
                 <i>videocam
-                <spn>_{MsgVideoCall}
+                <span>_{MsgVideoCall}
 
           <dialog.app-outgoing-call #idDialogOutgoingCall#{i}>
-            <div slot=headline>
-              _{MsgOutgoingCall} ...
-
-            <div slot=content>
+            <div.row>
+              <h6.max>_{MsgOutgoingCall}...
+              
+            <div.content>
               <figure>
-                <img src=@{AccountPhotoR uid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                <img.circle src=@{AccountPhotoR uid} alt=_{MsgPhoto} loading=lazy>
                 $if ns < 1
-                  <figcaption.md-typescale-body-small>
+                  <figcaption.small-text>
                     $maybe Entity _ (User email _ _ _ _ name _ _) <- caller
                       $maybe name <- name
                         _{MsgUserYouSeemsUnsubscribed name}
                       $nothing
                         _{MsgUserYouSeemsUnsubscribed email}
 
-              <figure.center>
-                <md-icon.callarrow>
+              <figure.between>
+                <i.callarrow>
                   $if nl > 0
                     repeat
                   $else
                     double_arrow
                 $if nl > 0
-                  <figcaption.md-typescale-body-small>
+                  <figcaption.small-text>
                     _{MsgCallerCalleeSubscriptionLoopWarning}
 
               <figure>
-                <img src=@{AccountPhotoR rid} width=48 height=48 alt=_{MsgPhoto} loading=lazy>
+                <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
                 $if na < 1
-                  <figcaption.md-typescale-body-small>
+                  <figcaption.small-text>
                     $maybe name <- name
                       _{MsgUserAppearsToBeUnavailable name}
                     $nothing
                       _{MsgUserAppearsToBeUnavailable email}
 
-            <div slot=actions>
-              <md-filled-button.app-outgoing-call-cancel has-icon type=button #idButtonOutgoingCallCancel#{i}>
-                <md-icon slot=icon>call_end
+            <nav.right-align>
+              <button.error.app-outgoing-call-cancel type=button #idButtonOutgoingCallCancel#{i}>
+                <i>call_end
                 _{MsgCancel}
 
 
           <dialog.app-call-declined #idDialogCallDeclined#{i}>
-            <div slot=headline>
-              _{MsgCallDeclined}
+            <div.row>
+              <h6.max>_{MsgCallDeclined}              
 
-            <div slot=content>
-              <p.md-typescale-body-large>
+            <div.content>
+              <p.large-text>
                 $maybe name <- name
                   _{MsgCalleeDeclinedTheCall name}
                 $nothing
                   _{MsgCalleeDeclinedTheCall email}
 
-            <div slot=actions>
-              <md-text-button type=button
-                onclick="document.getElementById('idDialogCallDeclined#{i}').close()">
+            <nav.right-align>
+              <button.transparent.link type=button data-ui=#idDialogCallDeclined#{i}>
                 _{MsgClose}
         
     <audio loop ##{idAudioOutgoingCallRingtone} preload=none>

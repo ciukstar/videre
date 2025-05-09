@@ -2,7 +2,7 @@
 <div.responsive ##{idFormEmailLoginWarpper}>
 
   <div.large-margin style="border-top:1px solid rgba(0,0,0,0.3);position:relative;margin: 1rem 0">
-    <div.background.md-typescale-body-small style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
+    <div.background.small-text style="padding:0 0.5rem;position:absolute;left:50%;transform:translate(-50%,-50%)">
       _{MsgOr}
       
   <form.center-align.large-padding method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>

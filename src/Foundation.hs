@@ -155,8 +155,6 @@ instance Yesod App where
     errorHandler NotFound = selectRep $ do
         provideRep $ defaultLayout $ do
             setTitleI MsgPageNotFound
-            idHeader <- newIdent
-            idHeaderStart <- newIdent
             $(widgetFile "error/not-found")
         provideRep $ return $ object ["message" .= ("Page not found." :: Text)]
         provideRep $ return ("Page not found." :: Text)
@@ -171,7 +169,6 @@ instance Yesod App where
     errorHandler (InvalidArgs msgs) = selectRep $ do
         provideRep $ defaultLayout $ do
             setTitleI MsgInvalidArguments
-            idHeader <- newIdent
             $(widgetFile "error/invalid-args")
         provideRep $ return $ object ["message" .= msgs]
         provideRep $ return $ T.intercalate ", " msgs
@@ -216,8 +213,8 @@ instance Yesod App where
 
         pc <- widgetToPageContent $ do
 
-            -- addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
-            -- addScript $ StaticR js_md3_min_js
+            addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
+            addScript $ StaticR js_md3_min_js
 
             idDialogChatNotification <- newIdent
             idFigureSenderPhoto <- newIdent

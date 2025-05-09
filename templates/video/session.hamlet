@@ -4,6 +4,8 @@
     <a.button.transparent.circle href=#{backlink} ##{idButtonExitSession} title=_{MsgBack} role=button>
       <i>arrow_back
 
+    <div.max>
+
     <button.transparent.circle.border ##{idButtonSwitchVideocam} toggle selected data-facing-mode=user>
       <i>video_camera_front
 
@@ -46,5 +48,5 @@
     _{MsgInterlocutorEndedSession interlocutorName}
 
   <nav.right-align>
-    <button.transparent.link href=#{backlink}>
+    <a.button href=#{backlink} role=button>
       _{MsgEndSession}
