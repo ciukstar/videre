@@ -38,31 +38,40 @@
   <div ##{idChatOutput}>
 
     $forall (day,messages) <- chats
-      <time.day-bubble.md-typescale-body-small datetime=#{show day}>#{show day}
+      $with dt <- show day
+        <time.day-bubble.small-text datetime=#{dt}>
+          #{dt}
+        
       $forall (Value userId, _, Value time, Value msg, Value callType, Value media) <- messages
-        <p.bubble.md-typescale-body-medium :sid == userId:.right.user :sid /= userId:.left.interlocutor>
+        <p.bubble :sid == userId:.atright.user :sid /= userId:.atleft.interlocutor>
           <span.bubble-content>
             $if media
               $case callType
                 $of CallTypeVideo
-                  <md-icon style="vertical-align:bottom">videocam
+                  <i.tiny.tiny-margin style="vertical-align:bottom">
+                    videocam
                   _{MsgVideoCall}
+                  
                 $of CallTypeAudio
-                  <md-icon style="vertical-align:bottom">call
+                  <i.tiny.tiny-margin style="vertical-align:bottom">
+                    call
                   _{MsgAudioCall}
+                  
             $else
               #{msg}
+              
           <span.bubble-status-line>
-            <time.time-bubble.md-typescale-body-small datetime=#{show time}>
-            <i.icon>done_all
+            <time.time-bubble.small-text datetime=#{show time}>
+            <i.tiny.tiny-margin>done_all
+            
           <span.bubble-tail-out>
             <span.bubble-tail>
 
 
-<footer.transparent>
+<footer.fixed>
   <form.row ##{idMessageForm}>
-    <div.responsive.max.field.border.round>
-      <input type=textarea ##{idMessageInput} autofocus placeholder=_{MsgMessage}>
+    <div.responsive.max.field.textarea.min.border.round>
+      <textarea ##{idMessageInput} autofocus placeholder=_{MsgMessage}>
       
     <button.circle type=submit disabled ##{idButtonSend}>
       <i>send

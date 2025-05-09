@@ -9,7 +9,7 @@ header
 
 main
 
-    height: calc(100svh - var(--app-top-appbar-height,64px))
+    height: calc(100svh - var(--app-top-appbar-height,4rem))
     display: flex
     flex-direction: column
     
@@ -30,6 +30,7 @@ main
           padding: 0.5rem
           border-radius: 0.5rem
           box-shadow: 1px 1px 1px rgba(0,0,0,0.2)
+          background-color: var(--background)
 
         .bubble
             width: fit-content
@@ -43,13 +44,12 @@ main
                 display: flex
                 justify-content: flex-end
                 align-items: center
-                i.icon
-                  font-family: 'Material Symbols Outlined'
 
-        .bubble.right
+        .bubble.atright
             border-radius: 8px 0 8px 8px
             align-self: flex-end
-            background-color: var(--md-sys-color-surface-variant)
+            background-color: var(--tertiary-container)
+            color: var(--on-tertiary-container)
             box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
             .bubble-tail-out
@@ -61,15 +61,17 @@ main
                 
                 .bubble-tail
                     display: block
-                    background-color: var(--md-sys-color-surface-variant)
+                    background-color: var(--tertiary-container)
+                    color: var(--on-tertiary-container)
                     width: 10px
                     height: 13px
                     clip-path: polygon(0 0,100% 0,0 100%)
           
-        .bubble.left
+        .bubble.atleft
             border-radius: 0 8px 8px 8px
             align-self: flex-start
-            background-color: var(--md-sys-color-primary-container)
+            background-color: var(--secondary-container)
+            color: var(--on-secondary-container)
             box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
             .bubble-tail-out
@@ -81,7 +83,8 @@ main
 
                 .bubble-tail
                     display: block
-                    background-color: var(--md-sys-color-primary-container)
+                    background-color: var(--secondary-container)
+                    color: var(--on-secondary-container)
                     width: 10px
                     height: 13px
                     clip-path: polygon(0 0,100% 0,100% 100%)

@@ -29,7 +29,7 @@ import Database.Esqueleto.Experimental
     , (^.), (==.), (=.)
     , just, update, set
     )
-import Database.Persist (Entity (Entity), entityVal, insert, update)
+import Database.Persist (Entity (Entity), entityVal, insert)
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))

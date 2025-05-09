@@ -59,7 +59,7 @@ import Foundation
       , MsgCancel, MsgClose, MsgCallCanceledByCaller, MsgIncomingAudioCallFrom
       , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
-      , MsgSubscribe, MsgBack
+      , MsgSubscribe, MsgBack, MsgChats
       )
     )
 
@@ -130,6 +130,7 @@ import Yesod.Core.Handler
     , getMessageRender
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
+import Yesod.Core.Widget ()
 import Yesod.Form.Fields (FormMessage, intField)
 import Yesod.Form.Input (runInputPost, ireq)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
@@ -344,7 +345,7 @@ getChatRoomR sid cid rid = do
 
     msgr <- getMessageRender
     liftHandler $ defaultLayout $ do
-
+        setTitleI MsgChats
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idChatOutput <- newIdent

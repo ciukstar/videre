@@ -20,7 +20,7 @@ const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
 const conn = new WebSocket('@{toParent $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
 
-output.scrollTop = output.scrollHeight;
+window.scrollTo(0, document.body.scrollHeight);
 
 input.addEventListener('input',function (e) {
   document.getElementById(#{idButtonSend}).disabled = !(this.value && this.value.trim());
@@ -30,35 +30,54 @@ input.addEventListener('input',function (e) {
 conn.onmessage = function (e) {
   
   const data = JSON.parse(e.data);
-  const bubble = document.createElement('p');
-  const bubbleStatusLine = document.createElement('span');
-  const time = document.createElement('time');
-  const icon = document.createElement('i');
-  const bubbleTailOut = document.createElement('span');
-  const bubbleTail = document.createElement('span');
   
-  bubble.classList.add("bubble","body-medium");
-  bubble.classList.add(... data.user == #{pack $ show $ fromSqlKey sid} ? ["user","right"] : ["interlocutor","left"]);
-  bubbleStatusLine.classList.add("bubble-status-line");
-  time.setAttribute("datetime",data.created);
-  time.classList.add("body-small");
-  icon.style.fontFamily = "Material Symbols Outlined";
-  bubbleTailOut.classList.add("bubble-tail-out");
-  bubbleTail.classList.add("bubble-tail");
-  
-  bubble.appendChild(document.createTextNode(data.message));
-  time.appendChild(document.createTextNode(new Date(data.created).toLocaleTimeString(
-    navigator.language, {hour: 'numeric',minute: 'numeric'}
-  )));
+  output.appendChild((() => {
+    const bubble = document.createElement('p');
+    bubble.classList.add('bubble');
+    bubble.classList.add(... data.user == #{pack $ show $ fromSqlKey sid} ? ['user','atright'] : ['interlocutor','atleft']);
 
-  bubbleTailOut.appendChild(bubbleTail);
-  icon.appendChild(document.createTextNode("done_all"));
-  bubbleStatusLine.appendChild(time);
-  bubbleStatusLine.appendChild(icon);
-  bubble.appendChild(bubbleStatusLine);
-  bubble.appendChild(bubbleTailOut);
-  output.appendChild(bubble);
-  output.scrollTop = output.scrollHeight;
+    bubble.appendChild(document.createTextNode(data.message));
+
+    bubble.appendChild((() => {
+      const bubbleStatusLine = document.createElement('span');
+      bubbleStatusLine.classList.add('bubble-status-line');
+
+      bubbleStatusLine.appendChild((() => {
+        const time = document.createElement('time');
+        time.setAttribute('datetime', data.created);
+        time.classList.add('small-text');
+        time.appendChild(document.createTextNode(new Date(data.created).toLocaleTimeString(
+          navigator.language, { hour: 'numeric', minute: 'numeric' }
+        )));
+        return time;
+      }) ());
+
+      bubbleStatusLine.appendChild((() => {
+        const icon = document.createElement('i');
+        icon.classList.add('tiny','tiny-margin');
+        icon.appendChild(document.createTextNode('done_all'));
+        return icon;
+      }) ());
+      
+      return bubbleStatusLine;
+    }) ());
+
+    bubble.appendChild((() => {
+      const bubbleTailOut = document.createElement('span');
+      bubbleTailOut.classList.add('bubble-tail-out');
+      bubbleTailOut.appendChild((() => {
+        const bubbleTail = document.createElement('span');
+        bubbleTail.classList.add('bubble-tail');
+        return bubbleTail;
+      }) ());
+      
+      return bubbleTailOut;
+    }) ());
+    
+    return bubble;
+  }) ());
+  
+  window.scrollTo(0, document.body.scrollHeight);
 
   if (data.user === #{rawJS $ pack $ show $ fromSqlKey rid}) {
     
@@ -81,7 +100,7 @@ conn.onerror = function (e) {
 form.addEventListener("submit", function(e) {
   conn.send( input.value );
   input.value = "";
-  const btnSubmit = this.querySelector('md-filled-icon-button');
+  const btnSubmit = document.getElementById(#{idButtonSend});
   btnSubmit.disabled = true;
   input.focus();
   e.preventDefault();
