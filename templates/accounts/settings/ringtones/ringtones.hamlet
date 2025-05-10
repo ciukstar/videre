@@ -10,11 +10,15 @@
 <main.responsive.no-padding>
   
   <div.tabs.min>
+      
     <a.active href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
       _{MsgRingtones}
     
     <a href=@{AccountNotificationsR uid}>
       _{MsgNotifications}
+    
+    <a href=@{AccountPreferencesR uid}>
+      _{MsgAppearance}
 
   <div.page.active.no-padding>
 

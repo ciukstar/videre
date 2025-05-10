@@ -9,15 +9,15 @@
 /push/subscription/endpoint PushSubscriptionEndpointR PUT
 
 /subscribers/#UserId/contacts/#ContactId/publishers/#UserId PushSubscriptionsDeleR POST
-/subscribers/#UserId/publishers/#UserId 		    PushSubscriptionsR     POST DELETE
+/subscribers/#UserId/publishers/#UserId                     PushSubscriptionsR     POST DELETE
 
 /callees/#UserId CalleesR GET
 /calls/#UserId   CallsR   GET
 
 /my/contacts/#UserId/#UserId/#ContactId/remove ContactRemoveR POST
 /my/contacts/#UserId/#UserId/#ContactId        ContactR       GET
-/my/contacts/#UserId 		       	       MyContactsR    GET
-/contacts/#UserId    		       	       ContactsR      GET POST
+/my/contacts/#UserId                           MyContactsR    GET
+/contacts/#UserId                              ContactsR      GET POST
 
 
 /accounts/#UserId/ringtones/#RingtoneId/audio UserRingtoneAudioR    GET
@@ -26,8 +26,8 @@
 /ringtones/#RingtoneId/audio                  DefaultRingtoneAudioR GET
 
 /accounts/#UserId/subscriptions/#PushSubscriptionId/dele AccountSubscriptionDeleR POST
-/accounts/#UserId/subscriptions/#PushSubscriptionId 	 AccountSubscriptionR     GET
-/accounts/#UserId/subscriptions 		    	 AccountSubscriptionsR 	  GET
+/accounts/#UserId/subscriptions/#PushSubscriptionId      AccountSubscriptionR     GET
+/accounts/#UserId/subscriptions                          AccountSubscriptionsR    GET
 
 /accounts/#UserId/info/edit AccountInfoEditR GET
 /accounts/#UserId/info      AccountInfoR     GET POST
@@ -55,13 +55,13 @@
     /subscriptions/#UserId/#PushSubscriptionId/dele UserSubscriptionDeleR POST
     /subscriptions/#UserId/#PushSubscriptionId      UserSubscriptionR     GET
     /subscriptions/#UserId                          UserSubscriptionsR    GET
-    /subscriptions 	                            SubscriptionsR        GET
+    /subscriptions                                  SubscriptionsR        GET
 
     
     /forms/ringtones/settings/#DefaultRingtoneId/dele RingtoneSettingDeleR POST
     /forms/ringtones/settings/new                     RingtoneSettingNewR  GET
     /ringtones/settings/defaults/#DefaultRingtoneId   RingtoneSettingR     GET
-    /ringtones/settings/defaults           	      RingtoneSettingsR    GET POST
+    /ringtones/settings/defaults                      RingtoneSettingsR    GET POST
     
     /forms/ringtone/#RingtoneId/dele RingtoneDeleR     POST
     /forms/ringtone/#RingtoneId/edit RingtoneEditR     GET

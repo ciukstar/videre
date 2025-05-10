@@ -67,11 +67,19 @@ import Handler.Contacts
     )
 
 import Handler.Accounts
-    ( getAccountPhotoR, getAccountEditR, getAccountsR, getAccountR
-    , postAccountR, getAccountInfoR, getAccountInfoEditR, postAccountInfoR
-    , getAccountSubscriptionsR, getAccountSubscriptionR
-    , postAccountSubscriptionDeleR, getUserRingtoneAudioR
-    , getAccountRingtonesR, postAccountRingtonesR, getAccountNotificationsR
+    ( getAccountsR
+    , getAccountR, postAccountR
+    , getAccountPhotoR
+    , getAccountEditR
+    , getAccountInfoR, postAccountInfoR
+    , getAccountInfoEditR
+    , getAccountSubscriptionsR
+    , getAccountSubscriptionR
+    , postAccountSubscriptionDeleR
+    , getUserRingtoneAudioR
+    , getAccountRingtonesR, postAccountRingtonesR
+    , getAccountPreferencesR
+    , getAccountNotificationsR
     )
     
 import Handler.Home (getHomeR)

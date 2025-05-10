@@ -1,0 +1,5 @@
+
+document.getElementById(#{idInputThemeMode}).addEventListener('click', function (e) {
+  const theme = ui('mode', ui('mode') === 'light' ? 'dark' : 'light');  
+  localStorage.setItem(#{keyThemeMode},theme);
+});

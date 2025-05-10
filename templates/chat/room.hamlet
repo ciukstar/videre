@@ -86,7 +86,7 @@
       <source src=@{ringtone} type=#{mime}>
 
 
-<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+<div.overlay.no-round ##{idOverlay}>
 
 <dialog ##{idDialogOutgoingCall}>
   <h6>

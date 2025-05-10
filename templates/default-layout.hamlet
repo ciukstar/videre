@@ -1,7 +1,7 @@
 
 ^{widget}
 
-<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+<div.overlay.no-round ##{idOverlay}>
 
 <dialog ##{idDialogChatNotification}>
   <h6>
@@ -51,7 +51,7 @@
 
   <nav.right-align>
 
-    <button.circle.error ##{idButtonVideoCallDecline} type=button title=_{MsgDecl}>
+    <button.circle.error ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
       <i>call_end
 
     <button.circle.green ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>

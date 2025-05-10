@@ -27,7 +27,8 @@ import Control.Applicative ((<|>))
 import Control.Lens ((.~),(?~))
 import Control.Monad (forever, forM_)
 import Control.Concurrent.STM.TChan
-    ( writeTChan, dupTChan, readTChan, newBroadcastTChan )
+    ( writeTChan, dupTChan, readTChan, newBroadcastTChan
+    )
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select, orderBy, desc
@@ -35,7 +36,7 @@ import Database.Esqueleto.Experimental
     , just, Value (Value), Entity (entityVal), not_, unionAll_
     , innerJoin, on
     )
-import Database.Persist (Entity (Entity), PersistStoreWrite (insert))
+import Database.Persist (Entity (Entity), insert)
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))

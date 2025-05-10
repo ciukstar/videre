@@ -1,0 +1,35 @@
+
+<header.fixed.max>
+  <nav.responsive.max>
+    <a.button.transparent.circle href=@{HomeR} title=_{MsgBack} role=button>
+      <i>arrow_back
+
+    <h1.title.max>
+      _{MsgUserSettings}
+
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+      
+    <a href=@{AccountRingtonesR uid RingtoneTypeCallOutgoing}>
+      _{MsgRingtones}
+    
+    <a href=@{AccountNotificationsR uid}>
+      _{MsgNotifications}
+    
+    <a.active href=@{AccountPreferencesR uid}>
+      _{MsgAppearance}
+
+  <div.page.active.padding>
+
+    <div.field.middle-align>
+      <nav>
+        <label.switch.icon>
+          <input type=checkbox ##{idInputThemeMode}>
+          <span>
+            <i>dark_mode
+        <label.large-text.max for=#{idInputThemeMode}>
+          _{MsgTheme}
+  
+          
+^{widgetSnackbar msgs}

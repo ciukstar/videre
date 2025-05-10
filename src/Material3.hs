@@ -8,6 +8,7 @@ module Material3
   , md3widgetSelect
   , md3widgetSwitch
   , md3widgetFile
+  , md3radioField
   ) where
 
 import Data.Maybe (isJust)
@@ -95,3 +96,20 @@ md3widget v = [whamlet|
     $maybe err <- fvErrors v
       <span.error>#{err}
 |]
+
+
+md3radioField :: (RenderMessage m FormMessage, Eq a) => HandlerFor m (OptionList a) -> Field (HandlerFor m) a
+md3radioField options = (radioField' options)
+    { fieldView = \theId name attrs x isReq -> do
+          opts <- zip [1 :: Int ..] . olOptions <$> handlerToWidget options
+          let sel (Left _) _ = False
+              sel (Right y) opt = optionInternalValue opt == y
+          [whamlet|
+<div ##{theId} *{attrs}>
+  $forall (i,opt) <- opts
+    <label.radio for=#{theId}-#{i}>
+      <input type=radio ##{theId}-#{i} name=#{name} :isReq:required=true value=#{optionExternalValue opt} :sel x opt:checked>
+      <span style="white-space:normal">
+        #{optionDisplay opt}
+
+|] }

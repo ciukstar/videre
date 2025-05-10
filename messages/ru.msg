@@ -1,4 +1,3 @@
-
 TakePhoto: Сфотографироваться
 UploadPhoto: Загрузить фото
 Home: Главная
@@ -118,7 +117,7 @@ TextChat: Чат с помощью текстового сообщения
 NewMessage: Новое сообщение
 Notification: Уведомление
 Ignore: Игнорировать
-Reply: 
+Reply: Ответить
 PushNotificationExcception: Ошибка push-уведомления
 NoMessagesExchangedYet: Сообщениями пока не обменивались
 SubscribeToNotifications: Подписаться на уведомления

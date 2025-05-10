@@ -40,6 +40,8 @@
       <img src=@{toParent $ PhotoR sid} loading=lazy ##{idImgVideoSelfPlaceholder}>
 
 
+<div.overlay.no-round ##{idOverlay}>
+
 <dialog ##{idDialogCallEnded}>
   <h6>
     _{MsgCallEnded}
@@ -48,5 +50,5 @@
     _{MsgInterlocutorEndedSession interlocutorName}
 
   <nav.right-align>
-    <a.button href=#{backlink} role=button>
+    <a.button href=#{backlink} role=button data-ui=##{idOverlay}>
       _{MsgEndSession}

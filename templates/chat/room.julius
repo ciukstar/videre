@@ -124,6 +124,7 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
+    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('open'));
   }).catch(function (err) {
     console.error(err);
   });
@@ -147,6 +148,7 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).show();
+    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('open'));
   }).catch(function (err) {
     console.error(err);
   });
@@ -170,6 +172,7 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
     })
   }).then(function (result) {
     document.getElementById(#{idDialogOutgoingCall}).close();
+    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
   }).catch(function (err) {
     console.error(err);
   });
@@ -182,6 +185,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   if (message.data.messageType === #{PushMsgTypeAccept}) {
     
     document.getElementById(#{idDialogOutgoingCall}).close();
+    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
     
     const params = new URLSearchParams({
       backlink: '@{backlink}',
@@ -196,7 +200,9 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
     document.getElementById(#{idDialogOutgoingCall}).close();
+    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
     document.getElementById(#{idDialogCallDeclined}).show();
+    document.getElementById(#{idDialogCallDeclined}).dispatchEvent(new Event('open'));
     
   } else if (message.data.messageType === #{PushMsgTypeRefresh}) {
     
@@ -206,10 +212,22 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   
 });
 
-document.getElementById(#{idDialogOutgoingCall}).addEventListener('opened', (e) => {
+
+document.getElementById(#{idDialogCallDeclined}).addEventListener('open', (e) => {
+  document.getElementById(#{idOverlay}).classList.add('active');
+});
+
+document.getElementById(#{idDialogOutgoingCall}).addEventListener('open', (e) => {
+  document.getElementById(#{idOverlay}).classList.add('active');
   document.getElementById(#{idAudioOutgoingCallRingtone}).play();
 });
 
-document.getElementById(#{idDialogOutgoingCall}).addEventListener('closed', (e) => {
+
+document.getElementById(#{idDialogCallDeclined}).addEventListener('close', (e) => {
+  document.getElementById(#{idOverlay}).classList.remove('active');
+});
+
+document.getElementById(#{idDialogOutgoingCall}).addEventListener('close', (e) => {
   document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
+  document.getElementById(#{idOverlay}).classList.remove('active');
 });

@@ -22,10 +22,10 @@ import Control.Monad.Logger (LogSource)
 
 import qualified Data.Aeson as A (Value (Bool))
 import Data.Aeson.Lens ( key, AsValue(_String) )
-import Data.Kind (Type)
-import qualified Data.CaseInsensitive as CI
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
+import Data.Kind (Type)
+import qualified Data.CaseInsensitive as CI
 import Data.Function ((&))
 import qualified Data.Text as T (intercalate)
 import qualified Data.Text.Encoding as TE
@@ -257,7 +257,7 @@ instance Yesod App where
                           where_ $ t ^. UserRingtoneType E.==. val RingtoneTypeChatIncoming
                           return x
                       case userIcomingCallRingtone of
-                        Just (Entity _rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid mime)
+                        Just (Entity rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid rid, mime)
                         Nothing -> do
                             defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
                                 x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
@@ -353,7 +353,8 @@ instance Yesod App where
 
     
     isAuthorized (DefaultRingtoneAudioR _) _ = return Authorized
-    
+
+    isAuthorized (AccountPreferencesR uid) _ = isAuthenticatedSelf uid
     isAuthorized (UserRingtoneAudioR uid _) _ = isAuthenticatedSelf uid
     isAuthorized (AccountNotificationsR uid) _ = isAuthenticatedSelf uid
     isAuthorized (AccountRingtonesR uid _) _ = isAuthenticatedSelf uid

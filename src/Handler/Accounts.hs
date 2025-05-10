@@ -19,6 +19,7 @@ module Handler.Accounts
   , getUserRingtoneAudioR
   , getAccountRingtonesR
   , postAccountRingtonesR
+  , getAccountPreferencesR
   , getAccountNotificationsR
   ) where
 
@@ -44,7 +45,7 @@ import Foundation
       ( HomeR, StaticR, AuthR, AccountPhotoR, AccountEditR, AccountR
       , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
       , AccountSubscriptionR, AccountSubscriptionDeleR, UserRingtoneAudioR
-      , AccountRingtonesR, AccountNotificationsR
+      , AccountRingtonesR, AccountNotificationsR, AccountPreferencesR
       )
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto
@@ -55,6 +56,7 @@ import Foundation
       , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
       , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet, MsgIncomingChat
       , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgOutgoingChat
+      , MsgAppearance, MsgTheme
       )
     )
 
@@ -62,7 +64,7 @@ import Material3 ( md3widget )
 
 import Model
     ( UserId, UserPhoto (UserPhoto), statusSuccess, statusError
-    , keyScrollLeft
+    , keyThemeMode, keyScrollLeft
     , User (User, userName), UserInfo (UserInfo, userInfoBirthDate)
     , PushSubscriptionId, PushSubscription (PushSubscription)
     , RingtoneId, Ringtone (Ringtone, ringtoneName, ringtoneMime)
@@ -210,6 +212,15 @@ formRingtone uid typ extra = do
                   
               $(widgetFile "accounts/settings/ringtones/form")
           }
+
+
+getAccountPreferencesR :: UserId -> Handler Html
+getAccountPreferencesR uid = do        
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgSubscriptions
+        idInputThemeMode <- newIdent
+        $(widgetFile "accounts/settings/preferences/preferences")
 
 
 postAccountSubscriptionDeleR :: UserId -> PushSubscriptionId -> Handler Html

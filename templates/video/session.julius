@@ -206,6 +206,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     videoSelf.srcObject = null;
 
     document.getElementById(#{idDialogCallEnded}).show();
+    document.getElementById(#{idDialogCallEnded}).dispatchEvent(new Event('open'));
   }
 
 });
@@ -247,4 +248,9 @@ navigator.mediaDevices.enumerateDevices().then((devices) => {
   } else {
     document.getElementById(#{idButtonSwitchVideocam}).removeAttribute('disabled');
   }
+});
+
+
+document.getElementById(#{idDialogCallEnded}).addEventListener('open', (e) => {
+  document.getElementById(#{idOverlay}).classList.add('active');
 });

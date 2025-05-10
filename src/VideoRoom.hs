@@ -175,9 +175,11 @@ getRoomR sid cid rid polite = do
         idButtonVideoSwitch <- newIdent
         idButtonAudioSwitch <- newIdent
         idButtonEndSession <- newIdent
+        idOverlay <- newIdent
         idDialogCallEnded <- newIdent
         $(widgetFile "video/session")
   where
+      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 

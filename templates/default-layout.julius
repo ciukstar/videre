@@ -192,6 +192,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idDialogIncomingAudioCall}).dispatchEvent(new Event('close'));
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
     document.getElementById(#{idDialogMissedCall}).show();
+    document.getElementById(#{idDialogMissedCall}).dispatchEvent(new Event('open'));
 
   } else if (message.data.messageType === #{PushMsgTypeVideoCall}) {
     
@@ -218,13 +219,13 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 ].forEach(([dialog,ringtone]) => {
   
   document.getElementById(dialog).addEventListener('open', (e) => {
-    document.getElementById(#{id}).classList.add('active');
+    document.getElementById(#{idOverlay}).classList.add('active');
     document.getElementById(ringtone).play();
   });
   
   document.getElementById(dialog).addEventListener('close', (e) => {
     document.getElementById(ringtone).pause();
-    document.getElementById(#{id}).classList.remove('active');
+    document.getElementById(#{idOverlay}).classList.remove('active');
   });
   
 });
