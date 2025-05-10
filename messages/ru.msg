@@ -118,7 +118,7 @@ TextChat: Чат с помощью текстового сообщения
 NewMessage: Новое сообщение
 Notification: Уведомление
 Ignore: Игнорировать
-Reply: Отвечать
+Reply: 
 PushNotificationExcception: Ошибка push-уведомления
 NoMessagesExchangedYet: Сообщениями пока не обменивались
 SubscribeToNotifications: Подписаться на уведомления

@@ -212,17 +212,12 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
-
-            addStylesheet $ StaticR css_m3_material_tokens_css_baseline_css
-            addScript $ StaticR js_md3_min_js
-
             idDialogChatNotification <- newIdent
             idFigureSenderPhoto <- newIdent
             idImgSenderPhoto <- newIdent
             idFigcaptionSenderInfo <- newIdent
             idNotificationBody <- newIdent
             idAudioIncomingChatRingtone <- newIdent
-            idButtonIgnoreNotification <- newIdent
             idButtonReplyNotification <- newIdent
 
             idDialogIncomingVideoCall <- newIdent
@@ -262,7 +257,7 @@ instance Yesod App where
                           where_ $ t ^. UserRingtoneType E.==. val RingtoneTypeChatIncoming
                           return x
                       case userIcomingCallRingtone of
-                        Just (Entity rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid rid, mime)
+                        Just (Entity _rid (Ringtone _ mime _)) -> return (UserRingtoneAudioR uid mime)
                         Nothing -> do
                             defaultIcomingCallRingtone <- liftHandler $ runDB $ selectOne $ do
                                 x :& t <- from $ table @Ringtone `E.innerJoin` table @DefaultRingtone
@@ -321,6 +316,7 @@ instance Yesod App where
               Just vapidKeys -> do
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
                   authenicated <- A.Bool . isJust <$> maybeAuth
+                  idOverlay <- newIdent
                   $(widgetFile "default-layout")
               Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 

@@ -1,12 +1,13 @@
 
-<header.fixed.primary>
-  <nav.responsive.max>
-    <a.button.circle.transparent.no-margin href=@{backlink} role=button title=_{MsgBack}>
-      <i>arrow_back
-      
-    <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
+<header.fixed.primary>              
+  <nav.responsive.max.no-space>
+    <div.row.no-space>
+      <a.button.circle.transparent.no-margin href=@{backlink} role=button title=_{MsgBack}>
+        <i>arrow_back
+        
+      <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
 
-    <div.max.interlocutor>
+    <div.max.small-margin.interlocutor>
       <div.interlocutor>
         $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
           $maybe name <- name
@@ -64,8 +65,8 @@
             <time.time-bubble.small-text datetime=#{show time}>
             <i.tiny.tiny-margin>done_all
             
-          <span.bubble-tail-out>
-            <span.bubble-tail>
+          <span.bubble-tail-out.no-round>
+            <span.bubble-tail.no-round>
 
 
 <footer.fixed>

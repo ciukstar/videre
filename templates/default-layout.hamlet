@@ -1,28 +1,30 @@
 
 ^{widget}
 
+<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+
 <dialog ##{idDialogChatNotification}>
   <h6>
     _{MsgNewMessage}
 
-  <form method=dialog>
+  <div>
 
-    <figure ##{idFigureSenderPhoto}>
-      <img ##{idImgSenderPhoto} width=48 height=48>
-      <figcaption.large-text ##{idFigcaptionSenderInfo}>
+    <figure.center-align.margin ##{idFigureSenderPhoto}>
+      <img.extra.circle.margin ##{idImgSenderPhoto}>
+      <figcaption ##{idFigcaptionSenderInfo}>
 
-    <p.medium-text ##{idNotificationBody}>
+    <p ##{idNotificationBody}>
   
     <audio loop ##{idAudioIncomingChatRingtone} preload=none>
       $with (ringtone, mime) <- incomingChatRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <nav.right-align>
+  <nav.right-align.no-space>
 
-    <button.transparent.link ##{idButtonIgnoreNotification} type=button>
+    <button.transparent.link type=button data-ui=##{idDialogChatNotification}>
       _{MsgIgnore}
 
-    <button ##{idButtonReplyNotification} type=button>
+    <a.button ##{idButtonReplyNotification} role=button>
       <i>reply
       _{MsgReply}
 
@@ -36,7 +38,7 @@
     <figure.margin ##{idFigureVideoCallerPhoto}>
       <div.img-wrapper>
       
-        <img.circle.extra ##{idImgVideoCallerPhoto}>
+        <img.circle.extra ##{idImgVideoCallerPhoto} loading=lazy>
 
         <div.soundwave.one>
         <div.soundwave.two>
@@ -49,7 +51,7 @@
 
   <nav.right-align>
 
-    <button.circle.error ##{idButtonVideoCallDecline} type=button title=_{MsgDecline}>
+    <button.circle.error ##{idButtonVideoCallDecline} type=button title=_{MsgDecl}>
       <i>call_end
 
     <button.circle.green ##{idButtonVideoCallAcceptAudio} type=button title=_{MsgAudioCall}>
@@ -66,15 +68,15 @@
 
   <div>
 
-    <figure ##{idFigureAudioCallerPhoto}>
+    <figure.margin ##{idFigureAudioCallerPhoto}>
       <div.img-wrapper>
       
-        <img ##{idImgAudioCallerPhoto} width=64 height=64>
+        <img.circle.extra ##{idImgAudioCallerPhoto} loading=lazy>
 
-        <div.circle.one>
-        <div.circle.two>
+        <div.soundwave.one>
+        <div.soundwave.two>
       
-      <figcaption.large-text ##{idFigcaptionAudioCallerPhoto}>
+      <figcaption.margin.large-text ##{idFigcaptionAudioCallerPhoto}>
   
     <audio loop ##{idAudioIncomingAudioCallRingtone} preload=none>
       $with (ringtone, mime) <- incomingCallRingtone
@@ -82,13 +84,13 @@
 
   <nav.right-align>
 
-    <button.circle.fill ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
+    <button.circle.error ##{idButtonAudioCallDecline} type=button title=_{MsgDecline}>
       <i>call_end
 
-    <button.circle.fill ##{idButtonAudioCallAcceptVideo} type=button title=_{MsgVideoCall}>
+    <button.circle.green ##{idButtonAudioCallAcceptVideo} type=button title=_{MsgVideoCall}>
       <i>videocam
 
-    <button.fill ##{idButtonAudioCallAccept} type=button>
+    <button.green ##{idButtonAudioCallAccept} type=button>
       <i>call
       _{MsgAccept}
 
@@ -99,10 +101,9 @@
     <button.transparent.circle type=button title=_{MsgClose} data-ui=##{idDialogMissedCall}>
       <i>close
 
-  <form method=dialog>
-    <p.large-text>
-      _{MsgMissedCall},&nbsp;
-      <span ##{idMissedCallCaller}>
+  <p.large-text>
+    _{MsgMissedCall},&nbsp;
+    <span ##{idMissedCallCaller}>
 
   <nav.right-align>
     <button type=button data-ui=##{idDialogMissedCall}>

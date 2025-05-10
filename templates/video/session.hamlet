@@ -6,17 +6,17 @@
 
     <div.max>
 
-    <button.transparent.circle.border ##{idButtonSwitchVideocam} toggle selected data-facing-mode=user>
+    <button.transparent.circle.border ##{idButtonSwitchVideocam} selected data-facing-mode=user>
       <i>video_camera_front
 
-    <button.transparent.circle.border ##{idButtonVideoSwitch} toggle :videos:selected>
+    <button.transparent.circle.border ##{idButtonVideoSwitch} :videos:selected>
       <i>
         $if videos
           videocam
         $else
           videocam_off
 
-    <button.transparent.circle.border ##{idButtonAudioSwitch} toggle :audios:selected>
+    <button.transparent.circle.border ##{idButtonAudioSwitch} :audios:selected>
       <i>
         $if audios
           mic
@@ -28,7 +28,7 @@
 
 <main.responsive.no-padding>
 
-  <div ##{idWrapperVideoRemote}>
+  <div.no-padding.no-margin ##{idWrapperVideoRemote}>
     <video autoplay ##{idVideoRemote} poster=@{toParent $ PhotoR rid}
            controlslist="nofullscreen noremoteplayback" disablepictureinpicture>
     <img src=@{toParent $ PhotoR rid} loading=lazy ##{idImgVideoRemotePlaceholder}>

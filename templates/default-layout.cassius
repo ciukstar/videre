@@ -27,17 +27,28 @@ body
 
         .soundwave.one
             animation: soundwave 6s 2s infinite linear
-            background: forestgreen
+            background: var(--secondary-container, forestgreen)
 
         .soundwave.two
             animation: soundwave 6s 0s infinite linear
-            background: dodgerblue
+            background: var(--tertiary-container, dodgerblue)
 
     ##{idDialogChatNotification}
+        max-width: 90%
+        h6 
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+            
         ##{idFigureSenderPhoto}
             text-align: center
 
     ##{idDialogIncomingVideoCall}
+        max-width: 90%
+        h6 
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
 
         ##{idFigureVideoCallerPhoto}
             text-align: center
@@ -46,6 +57,11 @@ body
                 z-index: 1
 
     ##{idDialogIncomingAudioCall}
+        max-width: 90%
+        h6 
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
 
         ##{idFigureAudioCallerPhoto}
             text-align: center

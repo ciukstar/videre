@@ -130,7 +130,7 @@ import Yesod.Core.Handler
     , getMessageRender
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Core.Widget ()
+import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields (FormMessage, intField)
 import Yesod.Form.Input (runInputPost, ireq)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))

@@ -1,4 +1,3 @@
-
 TakePhoto: Take a photo
 UploadPhoto: Upload photo
 Home: Home

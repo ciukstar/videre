@@ -56,13 +56,13 @@
               $if media
                 $case ctype
                   $of CallTypeVideo
-                    <i>videocam
+                    <i.small>videocam
                     _{MsgVideoCall}
                   $of CallTypeAudio
-                    <i>call
+                    <i.small>call
                     _{MsgAudioCall}
               $else
-                <i>done_all
+                <i.small>done_all
                 #{message}
 
         <i.secondary-text>arrow_forward_ios

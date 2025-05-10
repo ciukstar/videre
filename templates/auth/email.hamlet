@@ -8,7 +8,7 @@
   <form.center-align.large-padding method=post action=@{parent loginR} enctype=#{et} ##{idFormEmailLogin}>
     ^{fw}
     
-    <nav.right-align>
+    <nav.right-align.no-margin>
       <a.button.transparent.link href=@{parent forgotPasswordR} role=button>
         _{MsgForgotYourPassword}
       
@@ -17,7 +17,7 @@
         _{MsgSignIn}
 
 <nav.vertical.center-align>
-  <p.small-text.secondary-text>
+  <p.small-text.secondary-text.no-margin>
     _{MsgDoNotHaveAnAccount}
     
   <a.button.transparent.link href=@{parent registerR} role=button>
