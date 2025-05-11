@@ -75,9 +75,17 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
 
 navigator.serviceWorker.addEventListener('message', (message) => {
 
-  [ [#{idButtonVideoCallDecline}, #{idDialogIncomingVideoCall}],
-    [#{idButtonAudioCallDecline}, #{idDialogIncomingAudioCall}]
-  ].forEach(([buttonId, dialogId]) => {
+  [ [ #{idButtonVideoCallDecline},
+      #{idDialogIncomingVideoCall},
+      #{idOverlayDialogIncomingVideoCall},
+      #{idAudioIncomingVideoCallRingtone}
+    ],
+    [ #{idButtonAudioCallDecline},
+      #{idDialogIncomingAudioCall},
+      #{idOverlayDialogIncomingAudioCall},
+      #{idAudioIncomingAudioCallRingtone}
+    ]
+  ].forEach(([buttonId, dialogId, overlayId, ringtoneId]) => {
     document.getElementById(buttonId).onclick = function (event) {
       fetch(message.data.targetPush, {
         method: 'POST',
@@ -94,14 +102,24 @@ navigator.serviceWorker.addEventListener('message', (message) => {
           callId: message.data.callId
         })
       }).then(function (result) {
+        document.getElementById(ringtoneId).pause();
         document.getElementById(dialogId).close();
+        document.getElementById(overlayId).classList.remove('active');
       });
     }
   });
 
-  [ [#{idButtonVideoCallAcceptAudio}, #{idDialogIncomingVideoCall}, { audio: true, video: false }],
-    [#{idButtonAudioCallAcceptVideo}, #{idDialogIncomingAudioCall}, { audio: true, video: true }]
-  ].forEach(([buttonId, dialogId, { audio, video }]) => {
+  [ [ #{idButtonVideoCallAcceptAudio},
+      #{idDialogIncomingVideoCall},
+      #{idOverlayDialogIncomingVideoCall},
+      { audio: true, video: false }
+    ],
+    [ #{idButtonAudioCallAcceptVideo},
+      #{idDialogIncomingAudioCall},
+      #{idOverlayDialogIncomingAudioCall},
+      { audio: true, video: true }
+    ]
+  ].forEach(([buttonId, dialogId, overlayId, { audio, video }]) => {
     document.getElementById(buttonId).onclick = (event) => {
       fetch(message.data.targetPush, {
         method: 'POST',
@@ -120,6 +138,7 @@ navigator.serviceWorker.addEventListener('message', (message) => {
       }).then((result) => {
 
         document.getElementById(dialogId).close();
+        document.getElementById(overlayId).classList.remove('active');
 
         const params = new URLSearchParams({
           videor: message.data.videor,
@@ -181,51 +200,41 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idFigcaptionSenderInfo}).textContent = message.data.senderName;
     document.getElementById(#{idNotificationBody}).textContent = message.data.body;
     document.getElementById(#{idButtonReplyNotification}).href = message.data.targetRoom;
+
+    document.getElementById(#{idOverlayDialogChatNotification}).classList.add('active');
     document.getElementById(#{idDialogChatNotification}).show();
-    document.getElementById(#{idDialogChatNotification}).dispatchEvent(new Event('open'));
+    document.getElementById(#{idAudioIncomingChatRingtone}).play();
 
   } else if (message.data.messageType === #{PushMsgTypeCancel}) {
 
+    document.getElementById(#{idAudioIncomingVideoCallRingtone}).pause();
     document.getElementById(#{idDialogIncomingVideoCall}).close();
-    document.getElementById(#{idDialogIncomingVideoCall}).dispatchEvent(new Event('close'));
+    document.getElementById(#{idOverlayDialogIncomingVideoCall}).classList.remove('active');
+    
+    document.getElementById(#{idAudioIncomingAudioCallRingtone}).pause();
     document.getElementById(#{idDialogIncomingAudioCall}).close();
-    document.getElementById(#{idDialogIncomingAudioCall}).dispatchEvent(new Event('close'));
+    document.getElementById(#{idOverlayDialogIncomingAudioCall}).classList.remove('active');
+    
     document.getElementById(#{idMissedCallCaller}).textContent = message.data.senderName;
+    document.getElementById(#{idOverlayDialogMissedCall}).classList.add('active');
     document.getElementById(#{idDialogMissedCall}).show();
-    document.getElementById(#{idDialogMissedCall}).dispatchEvent(new Event('open'));
 
   } else if (message.data.messageType === #{PushMsgTypeVideoCall}) {
     
     document.getElementById(#{idImgVideoCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
+    document.getElementById(#{idOverlayDialogIncomingVideoCall}).classList.add('active');
     document.getElementById(#{idDialogIncomingVideoCall}).show();
-    document.getElementById(#{idDialogIncomingVideoCall}).dispatchEvent(new Event('open'));
+    document.getElementById(#{idAudioIncomingVideoCallRingtone}).play();
 
   } else if (message.data.messageType === #{PushMsgTypeAudioCall}) {
     
     document.getElementById(#{idImgAudioCallerPhoto}).src = message.data.image;
     document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;
+    document.getElementById(#{idOverlayDialogIncomingAudioCall}).classList.add('active');
     document.getElementById(#{idDialogIncomingAudioCall}).show();
-    document.getElementById(#{idDialogIncomingAudioCall}).dispatchEvent(new Event('open'));
+    document.getElementById(#{idAudioIncomingAudioCallRingtone}).play();
 
   }
 
-});
-
-
-[ [ #{idDialogChatNotification}, #{idAudioIncomingChatRingtone} ]
-, [ #{idDialogIncomingVideoCall}, #{idAudioIncomingVideoCallRingtone} ]
-, [ #{idDialogIncomingAudioCall}, #{idAudioIncomingAudioCallRingtone} ]
-].forEach(([dialog,ringtone]) => {
-  
-  document.getElementById(dialog).addEventListener('open', (e) => {
-    document.getElementById(#{idOverlay}).classList.add('active');
-    document.getElementById(ringtone).play();
-  });
-  
-  document.getElementById(dialog).addEventListener('close', (e) => {
-    document.getElementById(ringtone).pause();
-    document.getElementById(#{idOverlay}).classList.remove('active');
-  });
-  
 });

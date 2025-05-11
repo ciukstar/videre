@@ -1,7 +1,8 @@
 
 ^{widget}
 
-<div.overlay.no-round ##{idOverlay}>
+
+<div.overlay.no-round ##{idOverlayDialogChatNotification}>
 
 <dialog ##{idDialogChatNotification}>
   <h6>
@@ -28,6 +29,8 @@
       <i>reply
       _{MsgReply}
 
+
+<div.overlay.no-round ##{idOverlayDialogIncomingVideoCall}>
 
 <dialog ##{idDialogIncomingVideoCall}>
   <h6>
@@ -62,6 +65,8 @@
       _{MsgAccept}
       
 
+<div.overlay.no-round ##{idOverlayDialogIncomingAudioCall}>
+
 <dialog ##{idDialogIncomingAudioCall}>
   <h6>
     _{MsgIncomingAudioCall}
@@ -94,6 +99,8 @@
       <i>call
       _{MsgAccept}
 
+
+<div.overlay.no-round ##{idOverlayDialogMissedCall}>
 
 <dialog ##{idDialogMissedCall}>
   <div.row>

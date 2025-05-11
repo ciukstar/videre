@@ -123,8 +123,9 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
       audios: true
     })
   }).then(function (result) {
+    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
     document.getElementById(#{idDialogOutgoingCall}).show();
-    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('open'));
+    document.getElementById(#{idAudioOutgoingCallRingtone}).play();
   }).catch(function (err) {
     console.error(err);
   });
@@ -147,8 +148,9 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
       audios: true
     })
   }).then(function (result) {
+    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
     document.getElementById(#{idDialogOutgoingCall}).show();
-    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('open'));
+    document.getElementById(#{idAudioOutgoingCallRingtone}).play();
   }).catch(function (err) {
     console.error(err);
   });
@@ -171,8 +173,9 @@ document.getElementById(#{idButtonOutgoingCallCancel}).addEventListener('click',
       audios: false
     })
   }).then(function (result) {
+    document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
     document.getElementById(#{idDialogOutgoingCall}).close();
-    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
+    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.remove('active');
   }).catch(function (err) {
     console.error(err);
   });
@@ -184,8 +187,9 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   
   if (message.data.messageType === #{PushMsgTypeAccept}) {
     
+    document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
     document.getElementById(#{idDialogOutgoingCall}).close();
-    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
+    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.remove('active');
     
     const params = new URLSearchParams({
       backlink: '@{backlink}',
@@ -199,10 +203,12 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     
   } else if (message.data.messageType === #{PushMsgTypeDecline}) {
 
+    document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
     document.getElementById(#{idDialogOutgoingCall}).close();
-    document.getElementById(#{idDialogOutgoingCall}).dispatchEvent(new Event('close'));
+    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.remove('active');
+    
+    document.getElementById(#{idOverlayDialogCallDeclined}).classList.add('active');
     document.getElementById(#{idDialogCallDeclined}).show();
-    document.getElementById(#{idDialogCallDeclined}).dispatchEvent(new Event('open'));
     
   } else if (message.data.messageType === #{PushMsgTypeRefresh}) {
     
@@ -210,24 +216,4 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     
   }
   
-});
-
-
-document.getElementById(#{idDialogCallDeclined}).addEventListener('open', (e) => {
-  document.getElementById(#{idOverlay}).classList.add('active');
-});
-
-document.getElementById(#{idDialogOutgoingCall}).addEventListener('open', (e) => {
-  document.getElementById(#{idOverlay}).classList.add('active');
-  document.getElementById(#{idAudioOutgoingCallRingtone}).play();
-});
-
-
-document.getElementById(#{idDialogCallDeclined}).addEventListener('close', (e) => {
-  document.getElementById(#{idOverlay}).classList.remove('active');
-});
-
-document.getElementById(#{idDialogOutgoingCall}).addEventListener('close', (e) => {
-  document.getElementById(#{idAudioOutgoingCallRingtone}).pause();
-  document.getElementById(#{idOverlay}).classList.remove('active');
 });

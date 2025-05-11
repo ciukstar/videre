@@ -86,7 +86,7 @@
       <source src=@{ringtone} type=#{mime}>
 
 
-<div.overlay.no-round ##{idOverlay}>
+<div.overlay.no-round ##{idOverlayDialogOutgoingCall}>
 
 <dialog ##{idDialogOutgoingCall}>
   <h6>
@@ -142,9 +142,11 @@
       _{MsgCancel}
 
 
+<div.overlay.no-round ##{idOverlayDialogCallDeclined}>
+
 <dialog ##{idDialogCallDeclined}>
   <h6>
-    _{MsgCallDeclined}XXX
+    _{MsgCallDeclined}
 
   <figure.center-align.vertical-margin>
     <i.extra.margin>phone_disabled

@@ -355,7 +355,6 @@ getChatRoomR sid cid rid = do
         idButtonSend <- newIdent
         idAudioOutgoingChat <- newIdent
         idAudioIncomingChat <- newIdent
-        idOverlay <- newIdent
         idDialogOutgoingCall <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
         idButtonOutgoingCallCancel <- newIdent

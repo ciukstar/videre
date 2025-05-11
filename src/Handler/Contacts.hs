@@ -80,7 +80,7 @@ import Foundation
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
-      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe, MsgMyContacts
+      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe
       , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
       , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser
@@ -455,7 +455,7 @@ formSubscribe backlink vapidKeys sid pid cid notif extra = do
     idFormFieldSubscribe <- newIdent
 
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
-    return (r, $(widgetFile "my/contacts/push/subscription/form")) 
+    return (r, $(widgetFile "contacts/push/subscription/form")) 
 
 
 postContactRemoveR :: UserId -> UserId -> ContactId -> Handler Html
@@ -538,7 +538,7 @@ getContactR sid pid cid = do
               setTitleI MsgViewContact
               idOverlay <- newIdent
               idDialogRemove <- newIdent
-              $(widgetFile "my/contacts/contact")
+              $(widgetFile "contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
@@ -634,7 +634,7 @@ getMyContactsR uid = do
         setTitleI MsgAppName
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
-        $(widgetFile "my/contacts/contacts")
+        $(widgetFile "contacts/contacts")
   where
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
                                   (Just (t1,_), Just (t2,_)) -> compare t2 t1

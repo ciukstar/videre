@@ -316,8 +316,8 @@ instance Yesod App where
               Just vapidKeys -> do
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
                   authenicated <- A.Bool . isJust <$> maybeAuth
-                  idOverlay <- newIdent
                   $(widgetFile "default-layout")
+                  
               Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
         lang <- fromMaybe "en" . headMay <$> languages
