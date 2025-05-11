@@ -1,28 +1,81 @@
 
-<header.fixed>
+^{widgetMainMenu idOverlay idDialogMainMenu}
+
+<header.fixed.primary>
   <nav.responsive.max>
-    <a.button.circle.transparent href=#{backlink} role=button>
-      <i>arrow_back
+    <button.circle.transparent data-ui=##{idDialogMainMenu}>
+      <i>menu
 
     <h1.title.max>
       _{MsgContacts}
 
+    ^{widgetAccount}
+
 <main.responsive.no-padding>
 
-  $if null users
-    <figure.center-align.margin>
+  $if null entries
+    <figure.margin.center-align>
       <i.extra.margin>folder_open
-      <figcaption>
-        _{MsgNoRegisteredUsersYet}
         
+      <figcaption>
+        <p>_{MsgYourContactListIsEmpty}
+        <p.secondary-text>
+          _{MsgYouMightWantToAddAFew}
+          
   $else
-
-    <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
-      ^{fw}
-
-  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd} data-ui=##{idDialogSubscribe}>
-    <i>add
-    _{MsgAdd}
     
+    $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
+      <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
+
+        <div>
+          <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
+          
+          $if ns < 1
+            <i.absolute.tiny.circle.tiny-padding.error.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
+              notifications_off
+          $elseif nl > 0
+            <i.absolute.tiny.circle.tiny-padding.error.call-loop #idBadgePhoto#{fromSqlKey rid}>
+              repeat
+          $elseif na < 1
+            <i.absolute.tiny.circle.tiny-padding.error.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
+              phone_disabled
+
+        <div.content.max>
+          <div.headline.large-text>
+            $maybe name <- name
+              #{name}
+            $nothing
+              #{email}
+              
+          $maybe (time, (message, (ctype, media))) <- content
+            <div.supporting-text.secondary-text>
+              $with dt <- iso8601Show time
+                <time.daytime datetime=#{dt}>#{dt}
+
+            <div.supporting-text.secondary-text.row.no-padding.no-margin>
+              $if media
+                $case ctype
+                  $of CallTypeVideo
+                    <i.small>videocam
+                    _{MsgVideoCall}
+                  $of CallTypeAudio
+                    <i.small>call
+                    _{MsgAudioCall}
+              $else
+                <i.small>done_all
+                #{message}
+
+        <i.secondary-text>arrow_forward_ios
+ 
+      $maybe attrib <- attrib
+        <div.app-attribution>
+          <div.app-attribution-wrapper>
+            #{attrib}
+
+      <hr>
+
+  $with backlink <- rndr $ MyContactsR uid
+    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@?{(ContactsR uid,[("backlink",backlink)])}>
+      <i>add
 
 ^{widgetSnackbar msgs}

@@ -80,7 +80,7 @@ import Foundation
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
-      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe
+      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe, MsgMyContacts
       , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
       , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser
@@ -90,7 +90,7 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers
       )
     )
 
@@ -732,7 +732,7 @@ postContactsR uid = do
                 msgs <- getMessages
                 idFabAdd <- newIdent
                 backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
-                $(widgetFile "contacts/contacts")
+                $(widgetFile "users/contacts")
                 
             FormMissing -> defaultLayout $ do
                 setTitleI MsgContacts
@@ -740,7 +740,7 @@ postContactsR uid = do
                 msgs <- getMessages
                 idFabAdd <- newIdent
                 backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
-                $(widgetFile "contacts/contacts")
+                $(widgetFile "users/contacts")
                 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
@@ -772,7 +772,7 @@ getContactsR uid = do
           defaultLayout $ do
               setTitleI MsgContacts
               idFabAdd <- newIdent
-              $(widgetFile "contacts/contacts")
+              $(widgetFile "users/contacts")
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -793,7 +793,7 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverla
     let applicationServerKey = vapidPublicKeyBytes vapidKeys
 
     return ( (,,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR) <*> locationR
-           , $(widgetFile "contacts/form")
+           , $(widgetFile "users/form")
            )
   where
       option e@(Entity _ (User email _ _ _ _ _ _ _)) = (email,e)

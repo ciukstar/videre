@@ -144,7 +144,7 @@
 
 <dialog ##{idDialogCallDeclined}>
   <h6>
-    _{MsgCallDeclined}
+    _{MsgCallDeclined}XXX
 
   <figure.center-align.vertical-margin>
     <i.extra.margin>phone_disabled
@@ -157,5 +157,5 @@
           _{MsgCalleeDeclinedTheCall email}
 
   <nav.right-align>
-    <button.transparent.link type=button data-ui=##{idDialogCallDeclined}>
+    <button type=button data-ui=##{idDialogCallDeclined}>
       _{MsgClose}

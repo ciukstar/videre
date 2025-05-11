@@ -1,0 +1,28 @@
+
+<header.fixed>
+  <nav.responsive.max>
+    <a.button.circle.transparent href=#{backlink} role=button>
+      <i>arrow_back
+
+    <h1.title.max>
+      _{MsgUsers}
+
+<main.responsive.no-padding>
+
+  $if null users
+    <figure.center-align.margin>
+      <i.extra.margin>folder_open
+      <figcaption>
+        _{MsgNoRegisteredUsersYet}
+        
+  $else
+
+    <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
+      ^{fw}
+
+  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd} data-ui=##{idDialogSubscribe}>
+    <i>add
+    _{MsgAdd}
+    
+
+^{widgetSnackbar msgs}

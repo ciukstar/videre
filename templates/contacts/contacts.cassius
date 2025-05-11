@@ -1,11 +1,20 @@
 
 main
+
+    .notifications-disabled, .call-loop, .phone-disabled
+        top: -0.5rem
+        right: -0.5rem
+
+    div.content
+        min-width: 0
         
+        div.headline
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+
     .app-attribution
         position: relative
-        margin: 0
-        padding: 0
-        line-height: 0
         
         .app-attribution-wrapper
             position: absolute
