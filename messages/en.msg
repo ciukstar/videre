@@ -1,3 +1,5 @@
+Theme: Theme
+Appearance: Appearance
 TakePhoto: Take a photo
 UploadPhoto: Upload photo
 Home: Home
@@ -169,7 +171,9 @@ BackToHomepage: Go back to homepage
 InvalidUrlOrRemoved: Invalid URL or resource removed
 Authentication: Authentication
 AccessDeniedAdminsOnly: Only administrators have access to this page. Please log in with an administrator account
-LoginPlease: Please log in to access this page
+LoginPlease: Please log in
+LoginPleaseToAccess: Please log in to access
+LoginPleaseToAccessThisPage: Please log in to access this page
 Welcome: Welcome
 Tokens: Tokens
 MainMenu: Main menu

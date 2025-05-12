@@ -68,6 +68,13 @@ body
             ##{idImgAudioCallerPhoto}
                 z-index: 1
 
+    ##{idDialogMissedCall}
+        max-width: 90%
+        h6 
+            white-space: nowrap
+            overflow: hidden
+            text-overflow: ellipsis
+            
 
 @keyframes soundwave
     from

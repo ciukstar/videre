@@ -1,3 +1,5 @@
+Theme: Thème
+Appearance: Apparence
 TakePhoto: Prendre une photo
 UploadPhoto: Télécharger une photo
 Home: Accueil
@@ -168,7 +170,9 @@ BackToHomepage: Retournez à la page d'accueil
 InvalidUrlOrRemoved: URL invalide ou ressource supprimée
 Authentication: Authentification
 AccessDeniedAdminsOnly: Seuls les administrateurs ont accès à cette page. Veuillez vous connecter avec un compte administrateur
-LoginPlease: Veuillez vous connecter pour accéder à cette page
+LoginPlease: Veuillez vous connecter
+LoginPleaseToAccess: Veuillez vous connecter pour accéder
+LoginPleaseToAccessThisPage: Veuillez vous connecter pour accéder à cette page
 Welcome: Bienvenu
 Tokens: Jetons
 MainMenu: Menu principal

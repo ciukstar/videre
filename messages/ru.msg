@@ -1,3 +1,5 @@
+Theme: Тема
+Appearance: Внешний вид
 TakePhoto: Сфотографироваться
 UploadPhoto: Загрузить фото
 Home: Главная
@@ -165,11 +167,13 @@ SignInWithGoogle: Войти через Google
 PageNotFound: Страница не найдена
 PermissionDenied: Доступ запрещен
 InvalidArguments: Неверные аргументы
-BackToHomepage: Вернуться на домашнюю страницу
+BackToHomepage: Вернуться на главную
 InvalidUrlOrRemoved: Неверный URL-адрес или ресурс удален
 Authentication: Аутентификация
 AccessDeniedAdminsOnly: Доступ к этой странице имеют только администраторы. Пожалуйста, войдите под учетной записью администратора
-LoginPlease: Пожалуйста, войдите для доступа к этой странице
+LoginPlease: Пожалуйста, войдите в систему
+LoginPleaseToAccess: Пожалуйста, войдите в систему, чтобы получить доступ
+LoginPleaseToAccessThisPage: Пожалуйста, войдите в систему, чтобы получить доступ к этой странице
 Welcome: Добро пожаловать
 Tokens: Токены
 MainMenu: Главное меню

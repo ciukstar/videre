@@ -212,6 +212,8 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         pc <- widgetToPageContent $ do
+            
+            idOverlayDialogChatNotification <- newIdent
             idDialogChatNotification <- newIdent
             idFigureSenderPhoto <- newIdent
             idImgSenderPhoto <- newIdent

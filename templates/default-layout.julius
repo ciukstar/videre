@@ -192,6 +192,14 @@ navigator.serviceWorker.addEventListener('message', (message) => {
   
 });
 
+
+document.getElementById(#{idButtonChatNotificationIgnore}).addEventListener('click', e => {
+  document.getElementById(#{idAudioIncomingChatRingtone}).pause();
+  document.getElementById(#{idDialogChatNotification}).close();
+  document.getElementById(#{idOverlayDialogChatNotification}).classList.remove('active');
+});
+
+
 navigator.serviceWorker.addEventListener('message', function (message) {
 
   if (message.data.messageType === #{PushMsgTypeChat}) {

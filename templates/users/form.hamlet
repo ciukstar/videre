@@ -8,7 +8,7 @@
 
 ^{fvInput usersV}
 
-<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+<div.overlay.no-round ##{idOverlay}>
 
 <dialog ##{idDialogSubscribe}>
 
@@ -19,7 +19,7 @@
       <i>close
     
   <p ##{idDialogSubscribeContent}>
-    _{MsgAllowToBeNotifiedBySelectedUsers}.
+    _{MsgAllowToBeNotifiedBySelectedUsers}.  
 
   <nav.right-align.no-space>
 

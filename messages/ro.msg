@@ -1,3 +1,5 @@
+Theme: Tema
+Appearance: Aspect
 TakePhoto: Faceți o poză
 UploadPhoto: Încărcați o fotografie
 Home: Acasă
@@ -169,7 +171,9 @@ BackToHomepage: Reveniți la pagina de pornire
 InvalidUrlOrRemoved: Adresă URL nevalidă sau resursă eliminată
 Authentication: Autentificare
 AccessDeniedAdminsOnly: Doar administratorii au acces la această pagină. Vă rugăm să vă conectați cu un cont de administrator
-LoginPlease: Vă rugăm să vă conectați pentru a accesa această pagină
+LoginPlease: Vă rugăm să vă conectați
+LoginPleaseToAccess: Vă rugăm să vă conectați pentru a accesa
+LoginPleaseToAccessThisPage: Vă rugăm să vă conectați pentru a accesa această pagină
 Welcome: Bine ați venit
 Tokens: Jetoane
 MainMenu: Meniu principal

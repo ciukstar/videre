@@ -355,9 +355,11 @@ getChatRoomR sid cid rid = do
         idButtonSend <- newIdent
         idAudioOutgoingChat <- newIdent
         idAudioIncomingChat <- newIdent
+        idOverlayDialogOutgoingCall <- newIdent
         idDialogOutgoingCall <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
         idButtonOutgoingCallCancel <- newIdent
+        idOverlayDialogCallDeclined <- newIdent
         idDialogCallDeclined <- newIdent
 
         $(widgetFile "chat/room")

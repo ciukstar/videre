@@ -22,22 +22,31 @@ import Prelude ((*))
 import Foundation
     ( Handler
     , Route (HomeR, StaticR, DocsR)
-    , AppMessage (MsgAppName, MsgMetaDescription, MsgTextChat, MsgContactList)
+    , AppMessage
+      ( MsgAppName, MsgMetaDescription, MsgTextChat, MsgContactList
+      , MsgFeatures, MsgVideoCall
+      )
     )
     
 import Settings.StaticFiles
     ( img_video_chat_FILL0_wght400_GRAD0_opsz144_svg
     , img_screenshot_1_narrow_png, img_screenshot_1_wide_png
     , img_screenshot_2_narrow_png, img_screenshot_2_wide_png
+    , img_screenshot_3_narrow_png, img_screenshot_3_wide_png
+    , img_screenshot_4_narrow_png, img_screenshot_4_wide_png
     )
 
 import Yesod.Core.Content
-    ( TypedContent (TypedContent), typePlain, ToContent (toContent) )
+    ( TypedContent (TypedContent), typePlain, ToContent (toContent)
+    )
 import Yesod.Core.Handler
-    ( cacheSeconds, selectRep, getUrlRender, getMessageRender )
+    ( cacheSeconds, selectRep, getUrlRender, getMessageRender
+    )
 import Yesod.Core.Json (array, provideJson)
 import Yesod.Sitemap
-    (sitemap, SitemapUrl (SitemapUrl), SitemapChangeFreq (Monthly))
+    (sitemap, SitemapUrl (SitemapUrl), SitemapChangeFreq (Monthly)
+    )
+
 
 getWebAppManifestR :: Handler TypedContent
 getWebAppManifestR = do
@@ -64,41 +73,68 @@ getWebAppManifestR = do
                                     ]
                            ]
         , "screenshots" .= array [ object [ "src" .= urlr (StaticR img_screenshot_1_narrow_png)
-                                          , "sizes" .= String "474x826"
+                                          , "sizes" .= String "440x783"
                                           , "type" .= String "image/png"
                                           , "form_factor" .= String "narrow"
-                                          , "label" .= msgr MsgTextChat
+                                          , "label" .= msgr MsgFeatures
                                           ]
                                  , object [ "src" .= urlr (StaticR img_screenshot_1_wide_png)
-                                          , "sizes" .= String "1920x930"
+                                          , "sizes" .= String "1918x926"
                                           , "type" .= String "image/png"
                                           , "form_factor" .= String "wide"
                                           , "label" .= msgr MsgContactList
                                           ]
                                  , object [ "src" .= urlr (StaticR img_screenshot_2_narrow_png)
-                                          , "sizes" .= String "474x826"
+                                          , "sizes" .= String "440x783"
                                           , "type" .= String "image/png"
                                           , "form_factor" .= String "narrow"
                                           , "label" .= msgr MsgContactList
                                           ]
                                  , object [ "src" .= urlr (StaticR img_screenshot_2_wide_png)
-                                          , "sizes" .= String "1920x930"
+                                          , "sizes" .= String "1918x926"
                                           , "type" .= String "image/png"
                                           , "form_factor" .= String "wide"
                                           , "label" .= msgr MsgContactList
                                           ]
+                                 , object [ "src" .= urlr (StaticR img_screenshot_3_narrow_png)
+                                          , "sizes" .= String "440x783"
+                                          , "type" .= String "image/png"
+                                          , "form_factor" .= String "narrow"
+                                          , "label" .= msgr MsgVideoCall
+                                          ]
+                                 , object [ "src" .= urlr (StaticR img_screenshot_3_wide_png)
+                                          , "sizes" .= String "1918x926"
+                                          , "type" .= String "image/png"
+                                          , "form_factor" .= String "wide"
+                                          , "label" .= msgr MsgVideoCall
+                                          ]
+                                 , object [ "src" .= urlr (StaticR img_screenshot_4_narrow_png)
+                                          , "sizes" .= String "440x783"
+                                          , "type" .= String "image/png"
+                                          , "form_factor" .= String "narrow"
+                                          , "label" .= msgr MsgTextChat
+                                          ]
+                                 , object [ "src" .= urlr (StaticR img_screenshot_4_wide_png)
+                                          , "sizes" .= String "1918x926"
+                                          , "type" .= String "image/png"
+                                          , "form_factor" .= String "wide"
+                                          , "label" .= msgr MsgTextChat
+                                          ]
                                  ]
         ]
+
 
 getSitemapR :: Handler TypedContent
 getSitemapR = sitemap $ do
     yield $ SitemapUrl HomeR Nothing (Just Monthly) (Just 1.0)
     yield $ SitemapUrl DocsR Nothing (Just Monthly) (Just 1.0)
 
+
 getFaviconR :: Handler TypedContent
 getFaviconR = do cacheSeconds $ 60 * 60 * 24 * 30 -- cache for a month
                  return $ TypedContent "image/x-icon"
                         $ toContent $(embedFile "config/favicon.ico")
+
 
 getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain

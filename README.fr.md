@@ -37,7 +37,7 @@ Un compte superutilisateur est défini au moment du déploiement. Le superutilis
     ```$YESOD_GOOGLE_CLIENT_ID```
   * Secret client  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
-	
+    
 * Communication en temps réel pour le Web: [L'API WebRTC](https://developer.mozilla.org/fr/docs/Web/API/WebRTC_API)
 
   * Configuration  
@@ -98,4 +98,4 @@ Les utilisateurs peuvent modifier leurs sonneries préférées dans les paramèt
 
 [Cliquez ici pour voir la démo](https://viderefr-2pg7fq7tgq-de.a.run.app)
 
-_* Cliquez sur le bouton [![Comptes d'utilisateurs de démonstration](demo/button-demo-accounts.png)](https://viderefr-2pg7fq7tgq-de.a.run.app/auth/login) pour obtenir une liste des comptes d'utilisateurs de démonstration_
+_* Cliquez sur le bouton [![Comptes d'utilisateurs de démonstration](demo/button-demo-accounts-fr.png)](https://viderefr-2pg7fq7tgq-de.a.run.app/auth/login) pour obtenir une liste des comptes d'utilisateurs de démonstration_

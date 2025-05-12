@@ -10,7 +10,7 @@ document.getElementById(#{idButtonSubmitWithSubscription}).onclick = (e) => {
       if (permission === 'granted') {
 
         const progress = document.createElement('progress');
-        progress.classList.add('circle','absolute');
+        progress.classList.add('circle','absolute','center','middle');
         document.getElementById(#{idDialogSubscribeContent}).appendChild(progress);
         
         registration.pushManager.subscribe({

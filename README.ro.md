@@ -98,4 +98,4 @@ Utilizatorii își pot schimba tonurile de apel preferate în setările contului
 
 [Click aici pentru a vedea demo](https://viderero-2pg7fq7tgq-de.a.run.app)
 
-_* Faceți clic pe butonul [![Conturi de utilizator demonstrative](demo/button-demo-accounts.png)](https://viderero-2pg7fq7tgq-de.a.run.app/auth/login) pentru a obține o listă de conturi de utilizator demonstrativem_
+_* Faceți clic pe butonul [![Conturi de utilizator demonstrative](demo/button-demo-accounts-ro.png)](https://viderero-2pg7fq7tgq-de.a.run.app/auth/login) pentru a obține o listă de conturi de utilizator demonstrativem_
