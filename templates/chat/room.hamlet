@@ -38,13 +38,14 @@
 
   <div ##{idChatOutput}>
 
-    $forall (day,messages) <- chats
+    $forall (i,(day,messages)) <- zip naturals chats
       $with dt <- show day
         <time.day-bubble.small-text datetime=#{dt}>
           #{dt}
         
-      $forall (Value userId, _, Value time, Value msg, Value callType, Value media) <- messages
-        <p.bubble :sid == userId:.atright.user :sid /= userId:.atleft.interlocutor>
+      $forall (j,(Value xid, Value userId, _, Value time, Value msg, Value callType, Value media)) <- zip naturals messages
+        
+        <div.bubble :sid /= userId:.atleft.interlocutor :sid == userId:.atright.user data-ui=#idMenu#{i}#{j}>
           <span.bubble-content>
             $if media
               $case callType
@@ -67,6 +68,16 @@
             
           <span.bubble-tail-out.no-round>
             <span.bubble-tail.no-round>
+
+          <menu.no-wrap :sid /= userId:.right :sid == userId:.left #idMenu#{i}#{j}>
+            <li>
+              <a href=@{ChatRemoveR sid cid rid xid}>
+                <i>delete
+                _{MsgDele}
+                
+            <li>
+              <i>content_copy
+              _{MsgCopy}
 
 
 <footer.fixed>

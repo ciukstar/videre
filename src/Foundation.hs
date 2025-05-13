@@ -220,8 +220,10 @@ instance Yesod App where
             idFigcaptionSenderInfo <- newIdent
             idNotificationBody <- newIdent
             idAudioIncomingChatRingtone <- newIdent
+            idButtonChatNotificationIgnore <- newIdent
             idButtonReplyNotification <- newIdent
 
+            idOverlayDialogIncomingVideoCall <- newIdent
             idDialogIncomingVideoCall <- newIdent
             idFigureVideoCallerPhoto <- newIdent
             idImgVideoCallerPhoto <- newIdent
@@ -231,6 +233,7 @@ instance Yesod App where
             idButtonVideoCallAcceptAudio <- newIdent
             idButtonVideoCallAccept <- newIdent
 
+            idOverlayDialogIncomingAudioCall <- newIdent
             idDialogIncomingAudioCall <- newIdent
             idFigureAudioCallerPhoto <- newIdent
             idImgAudioCallerPhoto <- newIdent
@@ -240,6 +243,7 @@ instance Yesod App where
             idButtonAudioCallAcceptVideo <- newIdent
             idButtonAudioCallAccept <- newIdent
 
+            idOverlayDialogMissedCall <- newIdent
             idDialogMissedCall <- newIdent
             idMissedCallCaller <- newIdent
 

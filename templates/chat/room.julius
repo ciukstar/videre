@@ -15,7 +15,7 @@ Array.from(
   );
 });
 
-const output = document.getElementById(#{idChatOutput});
+const chatOutput = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
 const conn = new WebSocket('@{toParent $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
@@ -31,7 +31,7 @@ conn.onmessage = function (e) {
   
   const data = JSON.parse(e.data);
   
-  output.appendChild((() => {
+  chatOutput.appendChild((() => {
     const bubble = document.createElement('p');
     bubble.classList.add('bubble');
     bubble.classList.add(... data.user == #{pack $ show $ fromSqlKey sid} ? ['user','atright'] : ['interlocutor','atleft']);
@@ -73,7 +73,41 @@ conn.onmessage = function (e) {
       
       return bubbleTailOut;
     }) ());
+
+    const menu = bubble.appendChild((() => {
+      const menu = document.createElement('menu');
+      menu.id = 'cMenu' + (chatOutput.querySelectorAll('.bubble').length + 1);
+      menu.classList.add('no-wrap');
+      menu.appendChild((() => {
+        const li = document.createElement('li');
+        li.appendChild((() => {
+          const i = document.createElement('i');
+          i.textContent = 'delete';
+          
+          return i;
+        }) ());
+        li.appendChild((() => {
+          const span = document.createElement('span');
+          span.textContent = #{msgr MsgDele};
+          return span;
+        }) ());
+        
+        return li;
+      }) ());
+      
+      return menu;
+    }) ());
+
+    bubble.setAttribute('data-ui','#' + menu.id);
     
+    bubble.addEventListener('click', e => {
+      const menu = bubble.querySelector('menu');
+      const v = e.clientY > (chatOutput.clientHeight / 2) ? 'top' : 'bottom';
+      const h = e.clientX > (chatOutput.clientWidth / 2) ? 'left' : 'right';
+      menu.classList.remove('top','bottom','left','right');
+      menu.classList.add(v,h);
+    });
+
     return bubble;
   }) ());
   
@@ -217,3 +251,19 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   }
   
 });
+
+
+Array.from(
+  chatOutput.querySelectorAll('.bubble')
+).forEach(x => {
+  x.addEventListener('click', e => {
+    
+    const menu = x.querySelector('menu');
+    const v = e.clientY > (chatOutput.clientHeight / 2) ? 'top' : 'bottom';
+    const h = e.clientX > (chatOutput.clientWidth / 2) ? 'left' : 'right';
+    menu.classList.remove('top','bottom','left','right');
+    menu.classList.add(v,h);
+    
+  });
+});
+

@@ -114,10 +114,10 @@ import Model
       )
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
-      , ContactId, ChatInterlocutor, ChatCreated, PushSubscriptionSubscriber
+      , ContactId, ChatRecipient, ChatCreated, PushSubscriptionSubscriber
       , PushSubscriptionEndpoint
       , PushSubscriptionP256dh, PushSubscriptionAuth, PushSubscriptionPublisher
-      , ChatUser, UserName, UserEmail, CallCaller, CallCallee
+      , ChatAuthor, UserName, UserEmail, CallCaller, CallCallee
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
       , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType
       , DefaultRingtoneRingtone      
@@ -586,14 +586,14 @@ getMyContactsR uid = do
             y@(time, (_, (_, _))) <- from $ ( do
                     z <- from $ ( do
                                       chat <- from $ table @Chat
-                                      where_ $ chat ^. ChatUser ==. val uid
-                                      where_ $ chat ^. ChatInterlocutor ==. val iid
+                                      where_ $ chat ^. ChatAuthor ==. val uid
+                                      where_ $ chat ^. ChatRecipient ==. val iid
                                       return chat
                                 )
                          `unionAll_` ( do
                                            chat <- from $ table @Chat
-                                           where_ $ chat ^. ChatUser ==. val iid
-                                           where_ $ chat ^. ChatInterlocutor ==. val uid
+                                           where_ $ chat ^. ChatAuthor ==. val iid
+                                           where_ $ chat ^. ChatRecipient ==. val uid
                                            return chat
                                      )
                     return ( z ^. ChatCreated

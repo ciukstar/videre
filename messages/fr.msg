@@ -1,3 +1,5 @@
+Copy: Copier
+Features: Fonctionnalités
 Theme: Thème
 Appearance: Apparence
 TakePhoto: Prendre une photo

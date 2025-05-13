@@ -19,13 +19,15 @@ Ringtone
     UniqueRingtone name
 
 Chat json
-    user UserId OnDeleteCascade
-    interlocutor UserId
+    author UserId OnDeleteCascade
+    recipient UserId
     created UTCTime
     message Text
     status ChatMessageStatus
     received UTCTime Maybe
     notified Bool
+    removedAuthor Bool
+    removedRecipient Bool
 
 Call
     caller UserId OnDeleteCascade

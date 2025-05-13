@@ -220,3 +220,6 @@ localStorageEndpoint = "VIDERE_WEB_PUSH_SUBSCRIPTION_ENDPOINT"
 
 keyScrollLeft :: Text
 keyScrollLeft = "tabsScrollLeft"
+
+keyThemeMode :: Text
+keyThemeMode = "videre_theme_mode"

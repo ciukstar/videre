@@ -1,3 +1,5 @@
+Copy: Копировать
+Features: Возможности
 Theme: Тема
 Appearance: Внешний вид
 TakePhoto: Сфотографироваться

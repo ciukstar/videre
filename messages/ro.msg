@@ -1,3 +1,5 @@
+Copy: Copiere
+Features: Funcții
 Theme: Tema
 Appearance: Aspect
 TakePhoto: Faceți o poză

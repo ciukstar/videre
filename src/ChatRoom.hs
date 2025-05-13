@@ -18,7 +18,7 @@ module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
-    , Route (ChatRoomR, AcknowledgeR, ChatChannelR)
+    , Route (ChatRoomR, AcknowledgeR, ChatChannelR, ChatRemoveR)
     )
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
@@ -46,7 +46,7 @@ import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
     )
 import Data.Maybe (fromMaybe, isJust)
-import qualified Data.Set as S
+import qualified Data.Set as S (fromList)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Text.Lazy (toStrict)
@@ -60,7 +60,7 @@ import Foundation
       , MsgCancel, MsgClose, MsgCallCanceledByCaller, MsgIncomingAudioCallFrom
       , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
-      , MsgSubscribe
+      , MsgSubscribe, MsgDele, MsgCopy
       )
     )
 
@@ -70,7 +70,7 @@ import Network.HTTP.Types (extractPath)
 import Model
     ( statusError, paramEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
-    , Chat (Chat, chatMessage, chatCreated, chatUser, chatInterlocutor)
+    , ChatId, Chat (Chat, chatMessage, chatCreated, chatAuthor, chatRecipient)
     , ChatMessageStatus (ChatMessageStatusRead, ChatMessageStatusUnread)
     , PushSubscription (PushSubscription)
     , ContactId, Call, Ringtone (Ringtone)
@@ -82,9 +82,10 @@ import Model
     , CallType (CallTypeAudio, CallTypeVideo)
     , RingtoneId, UserRingtone, DefaultRingtone
     , RingtoneType
-      ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming)
+      ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming
+      )
     , EntityField
-      ( UserId, ChatStatus, ChatInterlocutor, ChatUser, ChatCreated
+      ( UserId, ChatStatus, ChatAuthor, ChatRecipient, ChatCreated
       , PushSubscriptionSubscriber
       , ChatReceived, ChatId, ChatNotified, PushSubscriptionPublisher, CallType
       , CallCaller, CallCallee, CallStart, ChatMessage, PushSubscriptionEndpoint
@@ -159,6 +160,10 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
 
 
+postChatRemoveR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Html
+postChatRemoveR aid cid rid xid = undefined
+
+
 postAcknowledgeR :: ChatHandler ()
 postAcknowledgeR = do
 
@@ -224,28 +229,29 @@ getChatRoomR sid cid rid = do
 
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatStatus =. val ChatMessageStatusRead]
-        where_ $ x ^. ChatInterlocutor ==. val sid
-        where_ $ x ^. ChatUser ==. val rid
+        where_ $ x ^. ChatRecipient ==. val sid
+        where_ $ x ^. ChatAuthor ==. val rid
         where_ $ x ^. ChatStatus ==. val ChatMessageStatusUnread
 
-    chats <- liftHandler $ groupByDay <$> runDB ( select $ do
-        (uid,iid,time,msg,ctype,media) <- from $
+    chats <- liftHandler $ (groupByDay <$>) $ runDB $ select $ do
+        (xid,uid,iid,time,msg,ctype,media) <- from $
             ( do
                   x <- from $ ( do
                                     x <- from $ table @Chat
-                                    where_ $ x ^. ChatUser ==. val sid
-                                    where_ $ x ^. ChatInterlocutor ==. val rid
+                                    where_ $ x ^. ChatAuthor ==. val sid
+                                    where_ $ x ^. ChatRecipient ==. val rid
                                     return x
                               )
                        `unionAll_`
                        ( do
                              x <- from $ table @Chat
-                             where_ $ x ^. ChatInterlocutor ==. val sid
-                             where_ $ x ^. ChatUser ==. val rid
+                             where_ $ x ^. ChatRecipient ==. val sid
+                             where_ $ x ^. ChatAuthor ==. val rid
                              return x
                        )
-                  return ( x ^. ChatUser
-                         , x ^. ChatInterlocutor
+                  return ( x ^. ChatId
+                         , x ^. ChatAuthor
+                         , x ^. ChatRecipient
                          , x ^. ChatCreated
                          , x ^. ChatMessage
                          , val CallTypeAudio
@@ -276,7 +282,7 @@ getChatRoomR sid cid rid = do
                          )
             )
         orderBy [desc time]
-        return (uid,iid,time,msg,ctype,media) )
+        return (xid,uid,iid,time,msg,ctype,media)
     
     toParent <- getRouteToParent
     curr <- (toParent <$>) <$> getSubCurrentRoute
@@ -361,23 +367,22 @@ getChatRoomR sid cid rid = do
         idButtonOutgoingCallCancel <- newIdent
         idOverlayDialogCallDeclined <- newIdent
         idDialogCallDeclined <- newIdent
-
+        
         $(widgetFile "chat/room")
 
     where
+      
+      naturals = [ 0 :: Int .. ]
+      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
       groupByDay = M.toList . groupByKey (\(_, _, Value t, _, _, _) -> utctDay t)
 
 
-chatApp :: YesodChat m
-        => UserId -- ^ user
-        -> UserId -- ^ interlocutor
-        -> ContactId
-        -> WebSocketsT (SubHandlerFor ChatRoom m) ()
-chatApp userId interlocutorId contactId = do
+chatApp :: YesodChat m => UserId -> UserId -> ContactId -> WebSocketsT (SubHandlerFor ChatRoom m) ()
+chatApp authorId recipientId contactId = do
 
-    let channelId = S.fromList [userId, interlocutorId]
+    let channelId = S.fromList [authorId, recipientId]
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -401,12 +406,12 @@ chatApp userId interlocutorId contactId = do
         (runConduit (sourceWS .| mapM_C (
              \msg -> do
                  now <- liftIO getCurrentTime
-                 let chat = Chat userId interlocutorId now msg ChatMessageStatusUnread Nothing False
+                 let chat = Chat authorId recipientId now msg ChatMessageStatusUnread Nothing False False False
                  cid <- liftHandler (runDB $ insert chat)
                  atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
                      [ "cid" .= cid
-                     , "user" .= chatUser chat
-                     , "interlocutor" .= chatInterlocutor chat
+                     , "user" .= chatAuthor chat
+                     , "interlocutor" .= chatRecipient chat
                      , "created" .= chatCreated chat
                      , "message" .= chatMessage chat
                      ]
@@ -422,7 +427,7 @@ chatApp userId interlocutorId contactId = do
                          return x
 
                      case chat' of
-                       Just (Entity _ (Chat uid iid _ message _ _ _)) -> do
+                       Just (Entity _ (Chat aid rid _ message _ _ _ _ _)) -> do
 
                            mVapidKeys <- liftHandler getVapidKeys
                            case mVapidKeys of
@@ -430,13 +435,13 @@ chatApp userId interlocutorId contactId = do
 
                                  subscriptions <- liftHandler $ runDB $ select $ do
                                      x <- from $ table @PushSubscription
-                                     where_ $ x ^. PushSubscriptionPublisher ==. val uid
-                                     where_ $ x ^. PushSubscriptionSubscriber ==. val iid
+                                     where_ $ x ^. PushSubscriptionPublisher ==. val aid
+                                     where_ $ x ^. PushSubscriptionSubscriber ==. val rid
                                      return x
 
                                  sender <- liftHandler $ runDB $ selectOne $ do
                                      x <- from $ table @User
-                                     where_ $ x ^. UserId ==. val uid
+                                     where_ $ x ^. UserId ==. val aid
                                      return x
 
                                  
