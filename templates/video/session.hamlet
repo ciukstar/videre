@@ -40,7 +40,7 @@
       <img src=@{toParent $ PhotoR sid} loading=lazy ##{idImgVideoSelfPlaceholder}>
 
 
-<div.overlay.no-round ##{idOverlay}>
+<div.overlay ##{idOverlay}>
 
 <dialog ##{idDialogCallEnded}>
   <h6>

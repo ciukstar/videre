@@ -1,3 +1,8 @@
+MessageDeleted: Сообщение удалено
+MessageRemoved: Сообщение удалено
+Removed: Удалено
+ContentCopied: Содержимое скопировано
+RemovedByRecipient: Удалено получателем
 Copy: Копировать
 Features: Возможности
 Theme: Тема

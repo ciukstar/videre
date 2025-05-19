@@ -108,21 +108,16 @@ instance ToJavascript PushMsgType where
     toJavascript = toJavascript . String . pack . show
 
 
-data ChatMessageStatus = ChatMessageStatusRead | ChatMessageStatusUnread
+data ChatMessageType = ChatMessageTypeChat
+                     | ChatMessageTypeDelivered
+                     | ChatMessageTypeRead
+                     | ChatMessageTypeRemove
+                     | ChatMessageTypeDelete
     deriving (Show, Read, Eq, Ord)
-derivePersistField "ChatMessageStatus"
 
-
-instance ToJSON ChatMessageStatus where
-    toJSON :: ChatMessageStatus -> Value
-    toJSON ChatMessageStatusRead = "Read"
-    toJSON ChatMessageStatusUnread = "Unread"
-
-instance FromJSON ChatMessageStatus where
-    parseJSON :: Value -> Parser ChatMessageStatus
-    parseJSON (String "Read") = pure ChatMessageStatusRead
-    parseJSON (String "Unread") = pure ChatMessageStatusUnread
-    parseJSON invalid = prependFailure "parsing ChatMessageStatus failed" (typeMismatch "String" invalid)
+instance ToJSON ChatMessageType where
+    toJSON :: ChatMessageType -> Value
+    toJSON = String . pack . show
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager

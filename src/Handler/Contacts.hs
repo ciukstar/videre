@@ -99,7 +99,8 @@ import Material3 (md3widgetSwitch)
 import Model
     ( statusError, statusSuccess
     , paramEndpoint, paramBacklink, localStorageEndpoint
-    , UserId, User (User, userName, userEmail), UserPhoto, Chat
+    , UserId, User (User, userName, userEmail), UserPhoto
+    , Chat (chatDelivered, chatRead)
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , RingtoneId, Ringtone (Ringtone), UserRingtone
@@ -159,7 +160,7 @@ import Web.WebPush
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
-import Yesod.Auth (maybeAuth)
+import Yesod.Auth (maybeAuth, YesodAuth (maybeAuthId))
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)

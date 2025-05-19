@@ -1,3 +1,8 @@
+MessageDeleted: Mesajul a fost șters
+MessageRemoved: Mesajul a fost eliminat
+Removed: Eliminat
+ContentCopied: Conținut copiat
+RemovedByRecipient: Șters de destinatar
 Copy: Copiere
 Features: Funcții
 Theme: Tema

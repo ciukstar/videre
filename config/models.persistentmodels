@@ -16,16 +16,13 @@ Ringtone
     name Text
     mime Text
     audio ByteString
-    UniqueRingtone name
+    UniqueRingtone name    
 
 Chat json
     author UserId OnDeleteCascade
     recipient UserId
     created UTCTime
     message Text
-    status ChatMessageStatus
-    received UTCTime Maybe
-    notified Bool
     removedAuthor Bool
     removedRecipient Bool
 

@@ -38,46 +38,93 @@
 
   <div ##{idChatOutput}>
 
-    $forall (i,(day,messages)) <- zip naturals chats
+    $forall (i,(day,logs)) <- zip naturals dayLogs
       $with dt <- show day
         <time.day-bubble.small-text datetime=#{dt}>
           #{dt}
         
-      $forall (j,(Value xid, Value userId, _, Value time, Value msg, Value callType, Value media)) <- zip naturals messages
-        
-        <div.bubble :sid /= userId:.atleft.interlocutor :sid == userId:.atright.user data-ui=#idMenu#{i}#{j}>
-          <span.bubble-content>
-            $if media
-              $case callType
-                $of CallTypeVideo
+      $forall (j,(Log xid time author recipient msg logType delivered tDelivered read tRead rmByA rmByR)) <- zip naturals logs
+
+        $with (incoming, outgoing) <- (sid == recipient, sid == author)
+          <div.bubble :incoming:.incoming :outgoing:.outgoing :read:ack
+              #idChat#{either (show . fromSqlKey) (show . fromSqlKey) xid} data-menu=#idMenu#{i}#{j}>
+
+            <span.bubble-content>
+              $case logType
+                $of LogTypeVideoCall
                   <i.tiny.tiny-margin style="vertical-align:bottom">
                     videocam
                   _{MsgVideoCall}
-                  
-                $of CallTypeAudio
+
+                $of LogTypeAudioCall
                   <i.tiny.tiny-margin style="vertical-align:bottom">
                     call
                   _{MsgAudioCall}
-                  
-            $else
-              #{msg}
-              
-          <span.bubble-status-line>
-            <time.time-bubble.small-text datetime=#{show time}>
-            <i.tiny.tiny-margin>done_all
-            
-          <span.bubble-tail-out.no-round>
-            <span.bubble-tail.no-round>
 
-          <menu.no-wrap :sid /= userId:.right :sid == userId:.left #idMenu#{i}#{j}>
-            <li>
-              <a href=@{ChatRemoveR sid cid rid xid}>
-                <i>delete
-                _{MsgDele}
-                
-            <li>
-              <i>content_copy
-              _{MsgCopy}
+                $of LogTypeMessage
+                  $if not (rmByA || rmByR)
+                    $maybe msg <- msg
+                      #{msg}
+
+                  $elseif all id [outgoing, rmByA]
+                    <div>
+                      <small.secondary-text.small-text>
+                        Removed
+
+                  $elseif all id [incoming, rmByA, not rmByR]
+                    <div>
+                      <small.secondary-text.small-text>
+                        _{MsgRemoved}
+
+                  $elseif all id [outgoing, not rmByA, rmByR]
+                    $maybe msg <- msg
+                      <small.secondary-text.small-text>
+                        #{msg}
+
+                  $else
+
+            <span.bubble-status-line.secondary-text>
+
+              $with dt <- show time
+                <time.time-bubble.small-text datetime=#{dt}>
+                  #{dt}
+
+              $if outgoing
+                $if read
+                  <i.bubble-status.tiny.no-margin.green-text>
+                    done_all
+
+                $elseif delivered
+                  <i.bubble-status.tiny.no-margin>
+                    done_all
+                    
+                $else
+                  <i.bubble-status.tiny.no-margin>
+                    check
+
+              $if all id [outgoing, not rmByA, rmByR]
+                <i.tiny.tiny-margin.secondary-text title=_{MsgRemovedByRecipient}>
+                  delete_sweep
+
+              <button.menu-anchor.small.transparent.square.no-margin data-ui=#idMenu#{i}#{j}>
+                <i.tiny>more_vert
+
+                <menu.no-wrap :incoming:.right :outgoing:.left #idMenu#{i}#{j}>
+
+                  <li.action-copy.wave data-ui=#idMenu#{i}#{j}>
+                    <i>content_copy
+                    _{MsgCopy}
+
+                  $case xid
+                    $of Right chatId
+                      <li.action-delete.wave data-href=@{toParent $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
+                        <i>delete
+                        _{MsgDele}
+
+                    $of Left callId
+
+            <span.bubble-tail-out>
+              <span.bubble-tail>
 
 
 <footer.fixed>
@@ -97,7 +144,15 @@
       <source src=@{ringtone} type=#{mime}>
 
 
-<div.overlay.no-round ##{idOverlayDialogOutgoingCall}>
+$forall (s,msg) <- msgs
+  <div.snackbar.active :s == msgError:.error>
+    <div.max>
+      #{msg}
+    <button.close.transparent.circle.small>
+      <i>close
+
+
+<div.overlay ##{idOverlayDialogOutgoingCall}>
 
 <dialog ##{idDialogOutgoingCall}>
   <h6>
@@ -153,7 +208,7 @@
       _{MsgCancel}
 
 
-<div.overlay.no-round ##{idOverlayDialogCallDeclined}>
+<div.overlay ##{idOverlayDialogCallDeclined}>
 
 <dialog ##{idDialogCallDeclined}>
   <h6>

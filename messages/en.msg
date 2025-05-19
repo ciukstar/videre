@@ -1,3 +1,8 @@
+MessageDeleted: Message deleted
+MessageRemoved: Message removed
+Removed: Removed
+ContentCopied: Content copied
+RemovedByRecipient: Removed by recipient
 Copy: Copy
 Features: Features
 Theme: Theme

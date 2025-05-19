@@ -24,7 +24,7 @@
           
   $else
     
-    $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
+    $forall (Entity cid chat,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),contentX))) <- entries
       <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
 
         <div>
@@ -52,7 +52,7 @@
               $with dt <- iso8601Show time
                 <time.daytime datetime=#{dt}>#{dt}
 
-            <div.supporting-text.secondary-text.row.no-padding.no-margin>
+            <div.supporting-text.secondary-text.no-padding.no-margin>
               $if media
                 $case ctype
                   $of CallTypeVideo
@@ -62,7 +62,16 @@
                     <i.small>call
                     _{MsgAudioCall}
               $else
-                <i.small>done_all
+                $if chatRead chat
+                  <i.small.green-text>
+                    done_all
+                $elseif chatDelivered chat
+                  <i.small>
+                    done_all
+                $else
+                  <i.small>
+                    check
+      
                 #{message}
 
         <i.secondary-text>arrow_forward_ios

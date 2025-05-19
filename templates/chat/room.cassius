@@ -37,20 +37,18 @@ main
             width: fit-content
             max-width: 80%
             margin: 0.2rem
+            padding: 0.5rem 0 0 0.5rem
             border: 0
-            padding: 0.5rem
             position: relative
 
-            menu[popover]
-                position: relative
-                inset: 1rem 1rem
+            .bubble-content
+                overflow-wrap: break-word
 
             .bubble-status-line
-                display: flex
-                justify-content: flex-end
-                align-items: center
+                float: inline-end
+                margin-left: 0.5rem
 
-        .bubble.atright
+        .bubble.outgoing
             border-radius: 8px 0 8px 8px
             align-self: flex-end
             background-color: var(--tertiary-container)
@@ -73,7 +71,7 @@ main
                     height: 13px
                     clip-path: polygon(0 0, 100% 0, 75% 15%, 60% 25%, 48% 35%, 38% 45%, 30% 55%, 0 100%)
           
-        .bubble.atleft
+        .bubble.incoming
             border-radius: 0 8px 8px 8px
             align-self: flex-start
             background-color: var(--secondary-container)

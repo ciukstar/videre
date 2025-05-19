@@ -1,3 +1,8 @@
+MessageDeleted: Message supprimé
+MessageRemoved: Message supprimé
+Removed: Supprimé
+ContentCopied: Contenu copié
+RemovedByRecipient: Supprimé par le destinataire
 Copy: Copier
 Features: Fonctionnalités
 Theme: Thème

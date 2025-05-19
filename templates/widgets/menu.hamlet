@@ -1,11 +1,11 @@
 
-<div.overlay.no-round ##{idOverlay}>
+<div.overlay ##{idOverlay}>
 
-<dialog.left.no-padding.primary ##{idDialogMainMenu}>
+<dialog.left.no-padding ##{idDialogMainMenu}>
 
   <header.fixed.max>
     <nav.margin>
-      <img.large src=@{StaticR img_logo_svg} loading=lazy alt=_{MsgLogo}>
+      <img.large src=@{StaticR img_logo_primary_svg} loading=lazy alt=_{MsgLogo}>
       <h6.max>
         _{MsgAppName}
       <button.transparent.circle.large ##{idButtonMainMenuClose} data-ui=##{idDialogMainMenu}>

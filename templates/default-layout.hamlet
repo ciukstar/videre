@@ -2,7 +2,7 @@
 ^{widget}
 
 
-<div.overlay.no-round ##{idOverlayDialogChatNotification}>
+<div.overlay ##{idOverlayDialogChatNotification}>
 
 <dialog ##{idDialogChatNotification}>
   <h6>
@@ -30,7 +30,7 @@
       _{MsgReply}
 
 
-<div.overlay.no-round ##{idOverlayDialogIncomingVideoCall}>
+<div.overlay ##{idOverlayDialogIncomingVideoCall}>
 
 <dialog ##{idDialogIncomingVideoCall}>
   <h6>
@@ -65,7 +65,7 @@
       _{MsgAccept}
       
 
-<div.overlay.no-round ##{idOverlayDialogIncomingAudioCall}>
+<div.overlay ##{idOverlayDialogIncomingAudioCall}>
 
 <dialog ##{idDialogIncomingAudioCall}>
   <h6>
@@ -100,7 +100,7 @@
       _{MsgAccept}
 
 
-<div.overlay.no-round ##{idOverlayDialogMissedCall}>
+<div.overlay ##{idOverlayDialogMissedCall}>
 
 <dialog ##{idDialogMissedCall}>
   <div.row>

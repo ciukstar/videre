@@ -18,7 +18,7 @@
   $maybe (Entity uid (User email authType _ verkey verified name super admin),attrib) <- user
     
     <figure.center-align>
-      <img src=@{DataR $ UserPhotoR uid} width=auto height=56 loading=lazy alt=_{MsgPhoto}>
+      <img.large.circle src=@{DataR $ UserPhotoR uid} loading=lazy alt=_{MsgPhoto}>
       <figcaption>
         $maybe attrib <- attrib
           <small.app-attribution.secondary-text.small-text>
@@ -79,7 +79,7 @@
 ^{widgetSnackbar msgs}
 
 
-<div.overlay.no-round ##{idOverlay} data-ui=##{idOverlay}>
+<div.overlay ##{idOverlay} data-ui=##{idOverlay}>
 
 <dialog ##{idDialogDelete}>
   <div.title>

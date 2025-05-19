@@ -13,30 +13,36 @@ self.onpush = function (e) {
 
   }).then(([notify, message]) => {
 
+    console.log('message: ', message);
+    
     let actions;
     if (message.messageType === #{PushMsgTypeAudioCall} || message.messageType === #{PushMsgTypeVideoCall}) {
       actions = [ { action: #{declineCall}, title: #{msgr MsgDecline} },
-		  { action: #{acceptCall}, title: #{msgr MsgAnswer} }
-		];
+                  { action: #{acceptCall}, title: #{msgr MsgAnswer} }
+                ];
     } else if (message.messageType === #{PushMsgTypeChat}) {
       actions = [ { action: #{ignoreChat}, title: #{msgr MsgIgnore} },
-		  { action: #{replyChat}, title: #{msgr MsgReply} }
-		];
+                  { action: #{replyChat}, title: #{msgr MsgReply} }
+                ];
     } else {
       actions = [];
     }
-
+    
+    if (message.messageType === #{PushMsgTypeChat}) {
+      fetch(message.links.delivered, { method: 'POST' });
+    }
+    
     return !notify
       ? Promise.resolve()
       : self.registration.showNotification(message.title, {
-	requireInteraction: true,
+        requireInteraction: true,
         tag: message.messageType,
         renotify: true,
         icon: message.icon,
         body: message.body,
         image: message.image,
-	data: message,
-	actions: actions
+        data: message,
+        actions: actions
       });
 
   });
@@ -56,15 +62,15 @@ self.addEventListener('notificationclick', (e) => {
       method: 'POST',
       headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	messageType: #{PushMsgTypeDecline},
-	title: #{msgr MsgAppName},
-	icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
-	body: #{msgr MsgCallDeclined},
-	videor: e.notification.data.videor,
-	audior: e.notification.data.audior,
-	videos: e.notification.data.videos,
-	audios: e.notification.data.audios,
-	callId: e.notification.data.callId
+        messageType: #{PushMsgTypeDecline},
+        title: #{msgr MsgAppName},
+        icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+        body: #{msgr MsgCallDeclined},
+        videor: e.notification.data.videor,
+        audior: e.notification.data.audior,
+        videos: e.notification.data.videos,
+        audios: e.notification.data.audios,
+        callId: e.notification.data.callId
       })
     });
 
@@ -82,96 +88,96 @@ self.addEventListener('notificationclick', (e) => {
 
       if (targets.length > 0) {
 
-	targets[0].focus().then((client) => {
-	  fetch(e.notification.data.targetPush, {
-	    method: 'POST',
-	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	    body: new URLSearchParams({
+        targets[0].focus().then((client) => {
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
               messageType: #{PushMsgTypeAccept},
-	      title: #{msgr MsgAppName},
+              title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
-	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-	      videor: e.notification.data.videor,
-	      audior: e.notification.data.audior,
-	      videos: e.notification.data.videos,
-	      audios: e.notification.data.audios,
-	      callId: e.notification.data.callId,
-	      backlink: client.url
-	    })
-	  });
+              body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+              videor: e.notification.data.videor,
+              audior: e.notification.data.audior,
+              videos: e.notification.data.videos,
+              audios: e.notification.data.audios,
+              callId: e.notification.data.callId,
+              backlink: client.url
+            })
+          });
 
-	  const params = new URLSearchParams({
-	    videor: e.notification.data.videor,
-	    audior: e.notification.data.audior,
-	    videos: e.notification.data.videos,
-	    audios: e.notification.data.audios,
-	    backlink: client.url
-	  });
+          const params = new URLSearchParams({
+            videor: e.notification.data.videor,
+            audior: e.notification.data.audior,
+            videos: e.notification.data.videos,
+            audios: e.notification.data.audios,
+            backlink: client.url
+          });
 
-	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
 
-	});
+        });
 
       } else if (clients.length > 0) {
-	clients[0].focus().then((client) => {
+        clients[0].focus().then((client) => {
 
-	  fetch(e.notification.data.targetPush, {
-	    method: 'POST',
-	    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	    body: new URLSearchParams({
+          fetch(e.notification.data.targetPush, {
+            method: 'POST',
+            headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
               messageType: #{PushMsgTypeAccept},
-	      title: #{msgr MsgAppName},
+              title: #{msgr MsgAppName},
               icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
-	      body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-	      videor: e.notification.data.videor,
-	      audior: e.notification.data.audior,
-	      videos: e.notification.data.videos,
-	      audios: e.notification.data.audios,
-	      callId: e.notification.data.callId,
-	      backlink: client.url
-	    })
-	  });
+              body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+              videor: e.notification.data.videor,
+              audior: e.notification.data.audior,
+              videos: e.notification.data.videos,
+              audios: e.notification.data.audios,
+              callId: e.notification.data.callId,
+              backlink: client.url
+            })
+          });
 
-	  const params = new URLSearchParams({
-	    videor: e.notification.data.videor,
-	    audior: e.notification.data.audior,
-	    videos: e.notification.data.videos,
-	    audios: e.notification.data.audios,
-	    backlink: client.url
-	  });
+          const params = new URLSearchParams({
+            videor: e.notification.data.videor,
+            audior: e.notification.data.audior,
+            videos: e.notification.data.videos,
+            audios: e.notification.data.audios,
+            backlink: client.url
+          });
 
-	  return client.navigate(`${e.notification.data.targetRoom}?${params}`);
+          return client.navigate(`${e.notification.data.targetRoom}?${params}`);
 
-	});
+        });
 
       } else {
 
-	fetch(e.notification.data.targetPush, {
-	  method: 'POST',
-	  headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	  body: new URLSearchParams({
+        fetch(e.notification.data.targetPush, {
+          method: 'POST',
+          headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
             messageType: #{PushMsgTypeAccept},
-	    title: #{msgr MsgAppName},
+            title: #{msgr MsgAppName},
             icon: '@{StaticR img_phone_in_talk_FILL0_wght400_GRAD0_opsz24_svg}',
-	    body: #{msgr $ MsgInterlocutorStartedSession calleeName},
-	    videor: e.notification.data.videor,
-	    audior: e.notification.data.audior,
-	    videos: e.notification.data.videos,
-	    audios: e.notification.data.audios,
-	    callId: e.notification.data.callId,
-	    backlink: self.location.origin
-	  })
-	});
+            body: #{msgr $ MsgInterlocutorStartedSession calleeName},
+            videor: e.notification.data.videor,
+            audior: e.notification.data.audior,
+            videos: e.notification.data.videos,
+            audios: e.notification.data.audios,
+            callId: e.notification.data.callId,
+            backlink: self.location.origin
+          })
+        });
 
-	const params = new URLSearchParams({
-	  videor: e.notification.data.videor,
-	  audior: e.notification.data.audior,
-	  videos: e.notification.data.videos,
-	  audios: e.notification.data.audios,
-	  backlink: self.location.origin
-	});
+        const params = new URLSearchParams({
+          videor: e.notification.data.videor,
+          audior: e.notification.data.audior,
+          videos: e.notification.data.videos,
+          audios: e.notification.data.audios,
+          backlink: self.location.origin
+        });
 
-	return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
+        return self.clients.openWindow(`${e.notification.data.targetRoom}?${params}`);
 
       }
 
@@ -196,11 +202,11 @@ self.addEventListener('notificationclick', (e) => {
     }).then(([targets, clients]) => {
 
       return targets.length > 0
-	? targets[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
-	: ( clients.length > 0
-	    ? clients[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
-	    : self.clients.openWindow(e.notification.data.targetRoom)
-	  );
+        ? targets[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
+        : ( clients.length > 0
+            ? clients[0].focus().then((client) => client.navigate(e.notification.data.targetRoom))
+            : self.clients.openWindow(e.notification.data.targetRoom)
+          );
 
     });
 
@@ -215,12 +221,12 @@ self.addEventListener('notificationclick', (e) => {
     ).then((clients) => {
 
       return clients.length > 0
-	? clients[0].focus().then((client) => {
-	  client.postMessage(e.notification.data);
-	})
-	: self.clients.openWindow(self.location.origin).then((client) => {
-	  client.postMessage(e.notification.data);
-	});
+        ? clients[0].focus().then((client) => {
+          client.postMessage(e.notification.data);
+        })
+        : self.clients.openWindow(self.location.origin).then((client) => {
+          client.postMessage(e.notification.data);
+        });
 
     });
 
@@ -256,24 +262,24 @@ self.addEventListener('fetch', function (e) {
   let endpointNeeded = e.request.method === 'GET'
       && url.origin === self.location.origin
       && (    /^\/callees\/\d+$/.test(url.pathname)
-	   || /^\/calls\/\d+$/.test(url.pathname)
-	   || /^\/subscribers\/\d+\/publishers\/\d+$/.test(url.pathname)
-	   || /^\/my\/contacts\/\d+\/\d+\/\d+$/.test(url.pathname)
-	   || /^\/my\/contacts\/\d+$/.test(url.pathname)
-	   || /^\/chat\/room\/\d+\/\d+\/\d+$/.test(url.pathname)
-	 );
+           || /^\/calls\/\d+$/.test(url.pathname)
+           || /^\/subscribers\/\d+\/publishers\/\d+$/.test(url.pathname)
+           || /^\/my\/contacts\/\d+\/\d+\/\d+$/.test(url.pathname)
+           || /^\/my\/contacts\/\d+$/.test(url.pathname)
+           || /^\/chat\/room\/\d+\/\d+\/\d+$/.test(url.pathname)
+         );
   
   if (endpointNeeded) {
 
     e.respondWith(
       self.registration.pushManager.getSubscription().then(function (subscription) {
 
-	if (!subscription) {
-	  return fetch(e.request);
-	} else {	  
-	  url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
-	  return fetch(url.href);
-	}
+        if (!subscription) {
+          return fetch(e.request);
+        } else {          
+          url.searchParams.set(#{paramEndpoint}, subscription.endpoint);
+          return fetch(url.href);
+        }
 
       })
     );
@@ -296,10 +302,10 @@ self.addEventListener('pushsubscriptionchange', (event) => {
       method: 'PUT',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams({
-	endpoint: newSubscr.endpoint,
-	p256dh: newSubscr.keys.p256dh,
-	auth: newSubscr.keys.auth,
-	oldendpoint: oldSubscr.endpoint
+        endpoint: newSubscr.endpoint,
+        p256dh: newSubscr.keys.p256dh,
+        auth: newSubscr.keys.auth,
+        oldendpoint: oldSubscr.endpoint
       })
     }).then((response) => {
       localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
@@ -309,28 +315,28 @@ self.addEventListener('pushsubscriptionchange', (event) => {
 
     registration.pushManager.getSubscription().then((subscription) => {
       subscription.unsubscribe().then((sccess) => {
-	registration.pushManager.subscribe({
-	  userVisibleOnly: true,
-	  applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-	}).then((subscription) => {
+        registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+        }).then((subscription) => {
 
-	  const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
-	  const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
+          const newSubscr = JSON.parse(JSON.stringify(event.newSubscription));
+          const oldSubscr = JSON.parse(JSON.stringify(event.oldSubscription));
 
-	  fetch('@{PushSubscriptionEndpointR}', {
-	    method: 'PUT',
-	    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-	    body: new URLSearchParams({
-	      endpoint: newSubscr.endpoint,
-	      p256dh: newSubscr.keys.p256dh,
-	      auth: newSubscr.keys.auth,
-	      oldendpoint: oldSubscr.endpoint
-	    })
-	  }).then((response) => {
-	    localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
-	  });
+          fetch('@{PushSubscriptionEndpointR}', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              endpoint: newSubscr.endpoint,
+              p256dh: newSubscr.keys.p256dh,
+              auth: newSubscr.keys.auth,
+              oldendpoint: oldSubscr.endpoint
+            })
+          }).then((response) => {
+            localStorage.setItem(#{localStorageEndpoint}, newSubscr.endpoint);
+          });
 
-	});
+        });
       });
     });
 

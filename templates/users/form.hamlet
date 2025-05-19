@@ -8,7 +8,7 @@
 
 ^{fvInput usersV}
 
-<div.overlay.no-round ##{idOverlay}>
+<div.overlay ##{idOverlay}>
 
 <dialog ##{idDialogSubscribe}>
 
