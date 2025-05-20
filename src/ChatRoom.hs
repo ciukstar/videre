@@ -35,6 +35,7 @@ import Control.Concurrent.STM.TChan
 
 import Data.Aeson (object, (.=), Value)
 import Data.Aeson.Text (encodeToLazyText)
+import Data.Either (isRight)
 import Data.Function ((&))
 import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
@@ -54,7 +55,7 @@ import Database.Esqueleto.Experimental
     , innerJoin, on, delete, isNothing_
     )
 import Database.Persist (Entity (Entity), insert)
-import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
+import Database.Persist.Sql (SqlBackend, fromSqlKey)
 
 import Foundation
     ( AppMessage
@@ -75,7 +76,7 @@ import Network.HTTP.Types (extractPath)
 import Model
     ( msgError, statusError, paramEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
-    , ChatId, Chat (Chat, chatMessage, chatCreated, chatAuthor, chatRecipient, chatDelivered, chatRead)
+    , ChatId, Chat (Chat, chatMessage, chatCreated, chatAuthor, chatRecipient)
     , PushSubscription (PushSubscription)
     , ContactId
     , CallId, Call (Call), Ringtone (Ringtone)
@@ -426,8 +427,8 @@ getChatRoomR sid cid rid = do
              $ (sortBy (\(Log _ t1 _ _ _ _ _ _ _ _ _ _) (Log _ t2 _ _ _ _ _ _ _ _ _ _) -> compare t1 t2) <$>)
              <$> groupByDay ((chatToLog <$> chats) <> (callToLog <$> calls))
     
-    toParent <- getRouteToParent
-    curr <- (toParent <$>) <$> getSubCurrentRoute
+    rtp <- getRouteToParent
+    curr <- (rtp <$>) <$> getSubCurrentRoute
     rndr <- getUrlRender
 
     callerName <- liftHandler $ (resolveName <$>) $ runDB $ selectOne $ do
@@ -496,7 +497,6 @@ getChatRoomR sid cid rid = do
     msgs <- getMessages
     liftHandler $ defaultLayout $ do
         setTitleI MsgChats
-        
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idChatOutput <- newIdent
@@ -515,6 +515,9 @@ getChatRoomR sid cid rid = do
         $(widgetFile "chat/room") 
 
     where
+
+      rightOrError (Right x) = x
+      rightOrError (Left _) = error "Should not happen!"
       
       naturals = [ 0 :: Int .. ]
       
@@ -522,8 +525,8 @@ getChatRoomR sid cid rid = do
 
       groupByDay = M.toList . groupByKey (\(Log _ t _ _ _ _ _ _ _ _ _ _) -> utctDay t)
       
-      chatToLog (Entity cid' (Chat aid' rid' created msg delivered timeDelivered read timeRead rma rmr)) =
-          Log (Right cid') created aid' rid' (Just msg) LogTypeMessage delivered timeDelivered read timeRead rma rmr
+      chatToLog (Entity cid' (Chat aid' rid' created msg delivered timeDelivered read' timeRead rma rmr)) =
+          Log (Right cid') created aid' rid' (Just msg) LogTypeMessage delivered timeDelivered read' timeRead rma rmr
           
             
       callToLog (Entity cid' (Call er ee start _ typ _)) =
@@ -531,6 +534,7 @@ getChatRoomR sid cid rid = do
                                                   CallTypeAudio -> LogTypeAudioCall
                                                   CallTypeVideo -> LogTypeVideoCall
                                               ) False Nothing False Nothing False False
+
 
 
 chatApp :: YesodChat m => UserId -> ContactId -> UserId -> WebSocketsT (SubHandlerFor ChatRoom m) ()
@@ -554,8 +558,6 @@ chatApp authorId contactId recipientId = do
           return writeChan
 
     readChan <- atomically $ dupTChan writeChan
-
-    
 
     (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)

@@ -100,7 +100,7 @@ import Model
     ( statusError, statusSuccess
     , paramEndpoint, paramBacklink, localStorageEndpoint
     , UserId, User (User, userName, userEmail), UserPhoto
-    , Chat (chatDelivered, chatRead)
+    , Chat
     , ContactId, Contact (Contact), PushSubscription (PushSubscription)
     , Call (Call), CallType (CallTypeAudio, CallTypeVideo)
     , RingtoneId, Ringtone (Ringtone), UserRingtone
@@ -121,7 +121,7 @@ import Model
       , ChatAuthor, UserName, UserEmail, CallCaller, CallCallee
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
       , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType
-      , DefaultRingtoneRingtone      
+      , DefaultRingtoneRingtone, ChatDelivered, ChatRead
       )
     )
 
@@ -160,7 +160,7 @@ import Web.WebPush
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
-import Yesod.Auth (maybeAuth, YesodAuth (maybeAuthId))
+import Yesod.Auth (maybeAuth)
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
@@ -171,6 +171,7 @@ import Yesod.Core.Handler
     , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet, toWidget)
+import Yesod.Form (Textarea)
 import Yesod.Form.Input (runInputGet, ireq, runInputPost, iopt)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField
@@ -582,8 +583,10 @@ getMyContactsR uid = do
         where_ $ x ^. ContactOwner ==. val uid
         return (x, (u, (p ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
 
+    let unValeAll = (bimap unValue (bimap unValue (bimap unValue (bimap unValue (bimap unValue unValue)))) <$>)
+
     entries <- (sortDescByTime <$>) <$> forM contacts $ \(c,(i@(Entity iid _),p)) -> do
-        x <- (bimap unValue (bimap unValue (bimap unValue unValue)) <$>) <$> runDB ( selectOne $ do
+        x <- (unValeAll <$>) $ runDB $ selectOne $ do
             y@(time, (_, (_, _))) <- from $ ( do
                     z <- from $ ( do
                                       chat <- from $ table @Chat
@@ -600,7 +603,9 @@ getMyContactsR uid = do
                     return ( z ^. ChatCreated
                            , (z ^. ChatMessage
                              , ( val CallTypeAudio
-                               , val False
+                               , ( val False
+                                 , (z ^. ChatDelivered, z ^. ChatRead)
+                                 )
                                )
                              )
                            ) )
@@ -618,14 +623,16 @@ getMyContactsR uid = do
                                            return call
                                      )
                     return ( z ^. CallStart
-                           , ( val ("Media call" :: Text)
+                           , ( val "Media call"
                              , ( z ^. CallType
-                               , val True
+                               , ( val True
+                                 , (val True, val True)
+                                 )
                                )
                              )
                            ) )
             orderBy [desc time]
-            return y )
+            return y 
         return (c,(i,(p,x)))
 
     rndr <- getUrlRender

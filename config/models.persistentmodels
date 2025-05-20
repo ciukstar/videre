@@ -23,8 +23,6 @@ Chat json
     recipient UserId
     created UTCTime
     message Text
-    removedAuthor Bool
-    removedRecipient Bool
 
 Call
     caller UserId OnDeleteCascade

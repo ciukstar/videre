@@ -14,22 +14,26 @@ document.body.querySelectorAll('time.time-bubble[datetime]').forEach(function (x
 const chatOutput = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
-const conn = new WebSocket('@{toParent $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
+const conn = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 const ackObsever = new IntersectionObserver(
   function (entries, obsever) {
-
-    console.log('entries: ',entries);
     
     entries.forEach(x => {
-      fetch(x.target.dataset.read, { method: 'POST' });
+      fetch(x.target.dataset.read, { method: 'POST' }).then(() => {
+        x.target.removeAttribute('notread');
+      });
     });
     
   },
   { root: chatOutput,
-    threshold: 1.0
+    threshold: 0.8
   }
 );
+
+chatOutput.querySelectorAll('.bubble.incoming[notread]').forEach(x => {
+  ackObsever.observe(x);
+});
 
 window.scrollTo(0, document.body.scrollHeight);
 
@@ -315,9 +319,6 @@ conn.onmessage = function (e) {
 
     if (isRecipient) {
       fetch(data.links.delivered, { method: 'POST' });
-    }
-    
-    if (data.recipient === #{rawJS $ pack $ show $ fromSqlKey sid}) {
       ackObsever.observe(bubble);
     }
     
@@ -336,13 +337,16 @@ conn.onerror = function (e) {
 }; 
 
 form.addEventListener('submit', function(e) {
+  e.preventDefault();
+  
   conn.send( input.value );
   input.value = '';
   const btnSubmit = document.getElementById(#{idButtonSend});
   btnSubmit.disabled = true;
   input.focus();
-  e.preventDefault();
-  setTimeout(() => document.getElementById(#{idAudioOutgoingChat}).play(), 0);
+  
+  setTimeout(() => { document.getElementById(#{idAudioOutgoingChat}).play(); }, 0);
+  
 });
 
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {

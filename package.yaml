@@ -64,6 +64,7 @@ dependencies:
 - safe-exceptions
 - transformers
 - stm
+- websockets
 - yesod-websockets
 - unliftio
 - http-types

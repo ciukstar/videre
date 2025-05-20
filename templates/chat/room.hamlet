@@ -40,13 +40,14 @@
 
     $forall (i,(day,logs)) <- zip naturals dayLogs
       $with dt <- show day
-        <time.day-bubble.small-text datetime=#{dt}>
+        <time.day-bubble.small-text.tiny-padding.tiny-margin.small-elevate.round datetime=#{dt}>
           #{dt}
         
       $forall (j,(Log xid time author recipient msg logType delivered tDelivered read tRead rmByA rmByR)) <- zip naturals logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
-          <div.bubble :incoming:.incoming :outgoing:.outgoing :read:ack
+          <div.bubble :incoming:.incoming :outgoing:.outgoing :not read:notread 
+              data-read=@{rtp $ ChatReadR sid cid rid xid}
               #idChat#{either (show . fromSqlKey) (show . fromSqlKey) xid} data-menu=#idMenu#{i}#{j}>
 
             <span.bubble-content>
@@ -117,7 +118,7 @@
 
                   $case xid
                     $of Right chatId
-                      <li.action-delete.wave data-href=@{toParent $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
+                      <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
                         <i>delete
                         _{MsgDele}
 
@@ -139,7 +140,7 @@
     $with (ringtone, mime) <- outgoingChatRingtoneR
       <source src=@{ringtone} type=#{mime}>
 
-  <audio ##{idAudioIncomingChat} preload=none>
+  <audio ##{idAudioIncomingChat} preload=none playsinline>
     $with (ringtone, mime) <- incomingChatRingtoneR
       <source src=@{ringtone} type=#{mime}>
 

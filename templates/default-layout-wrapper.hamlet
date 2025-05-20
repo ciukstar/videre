@@ -23,11 +23,11 @@ $doctype 5
     <link rel=manifest href=@{WebAppManifestR}>
 
     <link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.1/dist/cdn/beer.min.css" rel=stylesheet>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.2/dist/cdn/beer.min.css" rel=stylesheet>
 
     ^{pageHead pc}
 
-    <script type=module src="https://cdn.jsdelivr.net/npm/beercss@3.11.1/dist/cdn/beer.min.js">
+    <script type=module src="https://cdn.jsdelivr.net/npm/beercss@3.11.2/dist/cdn/beer.min.js">
 
     <script type=module src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
 

@@ -12,8 +12,6 @@ self.onpush = function (e) {
     return [focused.length < 1, message];
 
   }).then(([notify, message]) => {
-
-    console.log('message: ', message);
     
     let actions;
     if (message.messageType === #{PushMsgTypeAudioCall} || message.messageType === #{PushMsgTypeVideoCall}) {
@@ -237,22 +235,31 @@ self.addEventListener('notificationclick', (e) => {
 });
 
 
-self.addEventListener('notificationclose', (e) => {
-  fetch(e.notification.data.targetPush, {
-    method: 'POST',
-    headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      messageType: #{PushMsgTypeIgnore},
-      title: #{msgr MsgAppName},
-      icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
-      body: #{msgr MsgCallDeclined},
-      videor: e.notification.data.videor,
-      audior: e.notification.data.audior,
-      videos: e.notification.data.videos,
-      audios: e.notification.data.audios,
-      callId: e.notification.data.audios
-    })
-  });
+self.addEventListener('notificationclose', function (e) {
+
+  if (e.notification.data.messageType === #{PushMsgTypeChat}) {
+    
+    fetch(message.links.delivered, { method: 'POST' });
+    
+  } else {
+    
+    fetch(e.notification.data.targetPush, {
+      method: 'POST',
+      headders: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        messageType: #{PushMsgTypeIgnore},
+        title: #{msgr MsgAppName},
+        icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+        body: #{msgr MsgCallDeclined},
+        videor: e.notification.data.videor,
+        audior: e.notification.data.audior,
+        videos: e.notification.data.videos,
+        audios: e.notification.data.audios,
+        callId: e.notification.data.audios
+      })
+    });
+    
+  }
 });
 
 

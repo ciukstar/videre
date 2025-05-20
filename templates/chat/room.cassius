@@ -28,10 +28,6 @@ main
 
         time.day-bubble
           align-self: center
-          padding: 0.5rem
-          border-radius: 0.5rem
-          box-shadow: 1px 1px 1px rgba(0,0,0,0.2)
-          background-color: var(--background)
 
         .bubble
             width: fit-content
@@ -42,6 +38,7 @@ main
             position: relative
 
             .bubble-content
+                white-space: pre-line
                 overflow-wrap: break-word
 
             .bubble-status-line

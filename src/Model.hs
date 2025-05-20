@@ -11,12 +11,11 @@
 {-# LANGUAGE StandaloneDeriving         #-}
 {-# LANGUAGE UndecidableInstances       #-}
 {-# LANGUAGE DataKinds                  #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeOperators              #-}
+{-# LANGUAGE InstanceSigs               #-}
 
 module Model where
 
-import Control.Applicative (pure)
 import Control.Monad (return)
 
 import ClassyPrelude.Yesod
@@ -28,7 +27,7 @@ import Data.Aeson
     ( Value (String), ToJSON, toJSON, FromJSON, parseJSON, withObject
     , (.:)
     )
-import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
+import Data.Aeson.Types (Parser)
 
 import Data.Bool (Bool)
 import Data.ByteString (ByteString)
@@ -44,13 +43,13 @@ import Data.Time.Clock (UTCTime)
 import Database.Persist.Quasi ( lowerCaseSettings )
 import Database.Persist.TH (derivePersistField)
 
-import Text.Read (Read, readMaybe)
-import Text.Show (Show (show))
+import Text.Blaze.Html (Markup, ToMarkup (toMarkup))
 import Text.Hamlet (Html)
+import Text.Julius (ToJavascript (toJavascript), Javascript)
+import Text.Show (Show (show))
+import Text.Read (Read, readMaybe)
 
 import Yesod.Core.Dispatch (PathPiece, toPathPiece, fromPathPiece)
-import Text.Julius (ToJavascript (toJavascript), Javascript)
-import Text.Blaze.Html (Markup, ToMarkup (toMarkup))
 
 
 data RingtoneType = RingtoneTypeCallOutgoing | RingtoneTypeCallIncoming
