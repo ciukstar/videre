@@ -31,3 +31,4 @@ mkYesodSubData "ChatRoom" [parseRoutes|
 
 /room/#UserId/#ContactId/#UserId ChatRoomR GET
 |]
+

@@ -46,86 +46,91 @@
       $forall (j,(Log xid time author recipient msg logType delivered tDelivered read tRead rmByA rmByR)) <- zip naturals logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
-          <div.bubble :incoming:.incoming :outgoing:.outgoing :not read:notread 
-              data-read=@{rtp $ ChatReadR sid cid rid xid}
-              #idChat#{either (show . fromSqlKey) (show . fromSqlKey) xid} data-menu=#idMenu#{i}#{j}>
+          $if incoming && rmByR
 
-            <span.bubble-content>
-              $case logType
-                $of LogTypeVideoCall
-                  <i.tiny.tiny-margin style="vertical-align:bottom">
-                    videocam
-                  _{MsgVideoCall}
+          $else
+            <div.bubble :incoming:.incoming :outgoing:.outgoing :not read:notread
+                :rmByA || rmByR:.secondary-text.small-text
+                :isRight xid:data-read=@{rtp $ ChatReadR sid cid rid (rightOrError xid)}
+                #idChat#{either (show . fromSqlKey) (show . fromSqlKey) xid} data-menu=#idMenu#{i}#{j}>
 
-                $of LogTypeAudioCall
-                  <i.tiny.tiny-margin style="vertical-align:bottom">
-                    call
-                  _{MsgAudioCall}
+              <span.bubble-content>
+                $case logType
+                  $of LogTypeVideoCall
+                    <i.tiny.tiny-margin style="vertical-align:bottom">
+                      videocam
+                    _{MsgVideoCall}
 
-                $of LogTypeMessage
-                  $if not (rmByA || rmByR)
-                    $maybe msg <- msg
-                      #{msg}
+                  $of LogTypeAudioCall
+                    <i.tiny.tiny-margin style="vertical-align:bottom">
+                      call
+                    _{MsgAudioCall}
 
-                  $elseif all id [outgoing, rmByA]
-                    <div>
-                      <small.secondary-text.small-text>
-                        Removed
-
-                  $elseif all id [incoming, rmByA, not rmByR]
-                    <div>
-                      <small.secondary-text.small-text>
-                        _{MsgRemoved}
-
-                  $elseif all id [outgoing, not rmByA, rmByR]
-                    $maybe msg <- msg
-                      <small.secondary-text.small-text>
+                  $of LogTypeMessage
+                    $if not (rmByA || rmByR)
+                      $maybe msg <- msg
                         #{msg}
 
+                    $elseif all id [outgoing, rmByA]
+                      _{MsgRemoved}
+
+                    $elseif all id [incoming, rmByA, not rmByR]
+                      _{MsgRemoved}
+
+                    $elseif all id [outgoing, not rmByA, rmByR]
+                      $maybe msg <- msg
+                        #{msg}
+
+                    $else
+
+              <span.bubble-status-line.secondary-text>
+
+                $with dt <- show time
+                  <time.time-bubble.small-text datetime=#{dt}>
+                    #{dt}
+
+                $if outgoing
+                  $if read
+                    <i.bubble-status.tiny.no-margin.green-text>
+                      done_all
+
+                  $elseif delivered
+                    <i.bubble-status.tiny.no-margin>
+                      done_all
+
                   $else
+                    <i.bubble-status.tiny.no-margin>
+                      check
 
-            <span.bubble-status-line.secondary-text>
+                $if all id [outgoing, not rmByA, rmByR]
+                  <i.bubble-status.tiny.no-margin title=_{MsgRemovedByRecipient}>
+                    delete_sweep
 
-              $with dt <- show time
-                <time.time-bubble.small-text datetime=#{dt}>
-                  #{dt}
+                <button.menu-anchor.small.transparent.square.no-margin data-ui=#idMenu#{i}#{j}>
+                  <i.tiny>more_vert
 
-              $if outgoing
-                $if read
-                  <i.bubble-status.tiny.no-margin.green-text>
-                    done_all
+                  <menu.no-wrap.top :incoming:.right :outgoing:.left #idMenu#{i}#{j}>
 
-                $elseif delivered
-                  <i.bubble-status.tiny.no-margin>
-                    done_all
-                    
-                $else
-                  <i.bubble-status.tiny.no-margin>
-                    check
+                    <li.action-copy.wave data-ui=#idMenu#{i}#{j}>
+                      <i>content_copy
+                      _{MsgCopy}
 
-              $if all id [outgoing, not rmByA, rmByR]
-                <i.tiny.tiny-margin.secondary-text title=_{MsgRemovedByRecipient}>
-                  delete_sweep
+                    $case xid
+                      $of Right chatId
+                        $if incoming
+                          <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
+                            <i>delete
+                            _{MsgDele}
 
-              <button.menu-anchor.small.transparent.square.no-margin data-ui=#idMenu#{i}#{j}>
-                <i.tiny>more_vert
+                        $elseif outgoing
+                          <li.action-delete.wave data-href=@{rtp $ ChatDeleteR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
+                            <i>delete
+                            _{MsgDele}
 
-                <menu.no-wrap :incoming:.right :outgoing:.left #idMenu#{i}#{j}>
+                      $of Left callId
 
-                  <li.action-copy.wave data-ui=#idMenu#{i}#{j}>
-                    <i>content_copy
-                    _{MsgCopy}
-
-                  $case xid
-                    $of Right chatId
-                      <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
-                        <i>delete
-                        _{MsgDele}
-
-                    $of Left callId
-
-            <span.bubble-tail-out>
-              <span.bubble-tail>
+              <span.bubble-tail-out>
+                <span.bubble-tail>
 
 
 <footer.fixed>

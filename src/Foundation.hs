@@ -406,7 +406,7 @@ instance Yesod App where
     isAuthorized r@(DataR UsersR) _ = setUltDest r >> isAdmin
 
     -- Routes not requiring authentication.
-    isAuthorized HomeR _ = return Authorized
+    isAuthorized r@HomeR _ = setUltDest r >> return Authorized
     isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
 

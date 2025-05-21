@@ -9,9 +9,8 @@ header
 
 main
 
-    height: calc(100dvh - 4rem)
     display: flex
-    flex-direction: column
+    flex-direction: column-reverse
     
     margin: 0
     padding: 0
@@ -20,8 +19,8 @@ main
     
         padding: 0 1rem
         box-sizing: border-box
-        overflow: auto
-        flex: 1
+        overflow: visible
+        height: fit-content
         
         display: flex
         flex-direction: column

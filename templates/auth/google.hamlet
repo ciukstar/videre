@@ -1,5 +1,5 @@
 
-<button class="gsi-material-button">
+<div class="button gsi-material-button">
   <div class="gsi-material-button-state">
   <div class="gsi-material-button-content-wrapper">
     <div class="gsi-material-button-icon">

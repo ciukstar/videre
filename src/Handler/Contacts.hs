@@ -29,6 +29,7 @@ import ChatRoom
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
       , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute, getAppSettings
       , getUserRingtoneAudioRoute, getDefaultRingtoneAudioRoute, getVapidKeys
+      , getMaybeAuthId, getHomeRoute
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
@@ -160,7 +161,7 @@ import Web.WebPush
     , pushUrgency, PushUrgency (PushUrgencyHigh)
     )
 
-import Yesod.Auth (maybeAuth)
+import Yesod.Auth (maybeAuth, YesodAuth (maybeAuthId))
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
     , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
@@ -875,6 +876,9 @@ instance YesodChat App where
 
     getAppHttpManager :: Handler Manager
     getAppHttpManager = getYesod >>= \app -> return $ appHttpManager app
+    
+    getHomeRoute :: Handler (Route App)
+    getHomeRoute = return HomeR
 
     getBacklink :: UserId -> UserId -> Handler (Route App)
     getBacklink sid _ = return $ MyContactsR sid
@@ -905,3 +909,6 @@ instance YesodChat App where
 
     getVapidKeys :: Handler (Maybe VAPIDKeys)
     getVapidKeys = getVAPIDKeys
+
+    getMaybeAuthId :: Handler (Maybe UserId)
+    getMaybeAuthId = maybeAuthId

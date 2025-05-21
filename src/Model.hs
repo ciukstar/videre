@@ -19,8 +19,7 @@ module Model where
 import Control.Monad (return)
 
 import ClassyPrelude.Yesod
-    ( Typeable, mkMigrate, mkPersist, persistFileWith
-    , share, sqlSettings
+    ( Typeable, mkMigrate, mkPersist, persistFileWith, share, sqlSettings
     )
 
 import Data.Aeson
@@ -45,11 +44,12 @@ import Database.Persist.TH (derivePersistField)
 
 import Text.Blaze.Html (Markup, ToMarkup (toMarkup))
 import Text.Hamlet (Html)
-import Text.Julius (ToJavascript (toJavascript), Javascript)
+import Text.Julius (ToJavascript (toJavascript), Javascript, RawJS (rawJS))
 import Text.Show (Show (show))
 import Text.Read (Read, readMaybe)
 
 import Yesod.Core.Dispatch (PathPiece, toPathPiece, fromPathPiece)
+import Database.Persist.Sql (fromSqlKey)
 
 
 data RingtoneType = RingtoneTypeCallOutgoing | RingtoneTypeCallIncoming
@@ -116,7 +116,7 @@ data ChatMessageType = ChatMessageTypeChat
 
 instance ToJSON ChatMessageType where
     toJSON :: ChatMessageType -> Value
-    toJSON = String . pack . show
+    toJSON = toJSON . show
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager

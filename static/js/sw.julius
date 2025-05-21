@@ -239,7 +239,7 @@ self.addEventListener('notificationclose', function (e) {
 
   if (e.notification.data.messageType === #{PushMsgTypeChat}) {
     
-    fetch(message.links.delivered, { method: 'POST' });
+    fetch(e.notification.data.links.delivered, { method: 'POST' });
     
   } else {
     

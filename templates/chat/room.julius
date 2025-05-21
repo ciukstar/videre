@@ -46,35 +46,60 @@ conn.onmessage = function (e) {
   
   const data = JSON.parse(e.data);
 
-  const isAuthor = data.author === #{rawJS $ pack $ show $ fromSqlKey sid};
-  const isRecipient = data.recipient === #{rawJS $ pack $ show $ fromSqlKey sid};
+  const isOutgoing = data.author === #{sid};
+  const isIncoming = data.recipient === #{sid};
   
-  if (data.type === #{show ChatMessageTypeDelivered} && isAuthor) {
-
-    const icon = document.getElementById(`idChat${data.chatId}`).querySelector('i.bubble-status');
-    icon.classList.add('tiny','tiny-margin');
-    icon.textContent = 'done_all';
+  if (data.type === #{ChatMessageTypeDelivered} && isOutgoing) {
     
-  } else if (data.type === #{show ChatMessageTypeRead} && isAuthor) {
-
-    const icon = document.getElementById(`idChat${data.chatId}`).querySelector('i.bubble-status');
-    icon.classList.add('tiny','tiny-margin','green-text');
-    icon.textContent = 'done_all';
+    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    if (!bubbleDeleted) {
+      const icon = bubble.querySelector('i.bubble-status');
+      icon.classList.add('tiny','tiny-margin');
+      icon.textContent = 'done_all';
+    }
     
-  } else if (data.type === #{show ChatMessageTypeRemove}) {
+  } else if (data.type === #{ChatMessageTypeRead} && isOutgoing) {
 
-    document.getElementById(`idChat${data.chatId}`).querySelector('span.bubble-content').replaceWith((() => {
-      const span = document.createElement('span');
-      span.classList.add('bubble-content','small-text','secondary-text');
-      span.textContent = #{msgr MsgRemoved};
-      return span;
-    }) ());
+    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    if (!bubbleDeleted) {
+      const icon = bubble.querySelector('i.bubble-status');
+      icon.classList.add('tiny','tiny-margin','green-text');
+      icon.textContent = 'done_all';
+    }
     
-  } else if (data.type === #{show ChatMessageTypeDelete}) {
-    
-    document.getElementById(`idChat${data.chatId}`).remove();
+  } else if (data.type === #{ChatMessageTypeRemove}) {
 
-  } else if (data.type === #{show ChatMessageTypeChat}) {
+    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    
+    if (!bubbleDeleted && bubble.hasAttribute('removed')) {
+      
+      bubble.remove();
+      
+    } else if (!bubbleDeleted) {
+      
+      bubble.setAttribute('removed','');
+      
+      bubble.querySelector('span.bubble-content').replaceWith((() => {
+        const span = document.createElement('span');
+        span.classList.add('bubble-content','small-text','secondary-text');
+        span.textContent = #{msgr MsgRemoved};
+        return span;
+      }) ());
+      
+    }
+    
+  } else if (data.type === #{ChatMessageTypeDelete}) {
+
+    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    if (! bubbleDeleted) {
+      bubble.remove();
+    }
+
+  } else if (data.type === #{ChatMessageTypeChat}) {
     
     const bubble = chatOutput.appendChild((() => {
       
@@ -106,7 +131,7 @@ conn.onmessage = function (e) {
           return time;
         }) ());
 
-        if (isAuthor) {
+        if (isOutgoing) {
           statusLine.appendChild((() => {
             const icon = document.createElement('i');
             icon.classList.add('bubble-status','tiny','tiny-margin');
@@ -210,7 +235,7 @@ conn.onmessage = function (e) {
 
               itemDelete.onclick = function (e) {
 
-                const xref = data.author == #{pack $ show $ fromSqlKey sid} ? data['delete'] : data['remove'];
+                const xref = data.author == #{pack $ show $ fromSqlKey sid} ? data.links['delete'] : data.links['remove'];
                 
                 fetch(xref, {
                   method: 'DELETE',
@@ -317,16 +342,15 @@ conn.onmessage = function (e) {
       return bubble;
     }) ());
 
-    if (isRecipient) {
+    if (isIncoming) {
       fetch(data.links.delivered, { method: 'POST' });
       ackObsever.observe(bubble);
+      setTimeout(() => { document.getElementById(#{idAudioIncomingChat}).play(); }, 0);
     }
     
     if (!document.hidden) {
       window.scrollTo(0, document.body.scrollHeight);
     }
-    
-    setTimeout(() => { document.getElementById(#{idAudioIncomingChat}).play(); }, 0);
 
   }
   
@@ -335,6 +359,7 @@ conn.onmessage = function (e) {
 conn.onerror = function (e) {
   location.reload();
 }; 
+
 
 form.addEventListener('submit', function(e) {
   e.preventDefault();
@@ -348,6 +373,7 @@ form.addEventListener('submit', function(e) {
   setTimeout(() => { document.getElementById(#{idAudioOutgoingChat}).play(); }, 0);
   
 });
+
 
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
 

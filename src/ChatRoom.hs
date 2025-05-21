@@ -66,7 +66,8 @@ import Foundation
       , MsgIncomingVideoCallFrom, MsgCallerCalleeSubscriptionLoopWarning
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
       , MsgSubscribe, MsgDele, MsgCopy, MsgRemovedByRecipient, MsgContentCopied
-      , MsgRemoved, MsgMessageRemoved, MsgMessageDeleted
+      , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
+      , MsgMessageRemoved, MsgAuthenticationRequired
       )
     )
 
@@ -96,12 +97,12 @@ import Model
       )
     , EntityField
       ( UserId, ChatAuthor, ChatRecipient
-      , PushSubscriptionSubscriber
+      , PushSubscriptionSubscriber, ChatTimeDelivered
       , ChatId, PushSubscriptionPublisher
       , CallCaller, CallCallee, PushSubscriptionEndpoint
       , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType
       , DefaultRingtoneType, DefaultRingtoneRingtone, ChatRemovedAuthor
-      , ChatRemovedRecipient, ChatTimeRead, ChatRead, ChatDelivered, ChatTimeDelivered
+      , ChatRemovedRecipient, ChatTimeRead, ChatRead, ChatDelivered
       )
     )
 
@@ -123,7 +124,6 @@ import Settings.StaticFiles
     )
 
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS))
 
 import Web.WebPush
     ( mkPushNotification, pushUrgency
@@ -136,7 +136,7 @@ import Yesod.Core
     ( Yesod (defaultLayout), mkYesodSubDispatch, SubHandlerFor
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
     , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
-    , lookupGetParam, getSubCurrentRoute, getMessages
+    , lookupGetParam, getSubCurrentRoute, getMessages, permissionDeniedI
     )
 import Yesod.Core.Handler
     ( getUrlRender, getRouteToParent, addMessageI
@@ -155,6 +155,7 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
       ) => YesodChat m where
 
     getAppHttpManager :: HandlerFor m Manager
+    getHomeRoute :: HandlerFor m (Route m)
     getBacklink :: UserId -> UserId -> HandlerFor m (Route m)
     getAccountPhotoRoute :: UserId -> HandlerFor m (Route m)
     getContactRoute :: UserId -> UserId -> ContactId -> HandlerFor m (Route m)
@@ -165,27 +166,30 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getDefaultRingtoneAudioRoute :: RingtoneId -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
     getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
+    getMaybeAuthId :: HandlerFor m (Maybe UserId)
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
 
 
 deleteChatRemoveR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatRemoveR rid _ aid xid = do
+deleteChatRemoveR sid _ rid xid = do
+
+    checkAuthorized sid
     
     liftHandler $ runDB $ update $ \x -> do
         set x [ChatRemovedRecipient =. val True]
         where_ $ x ^. ChatId ==. val xid
-        where_ $ x ^. ChatRecipient ==. val aid
+        where_ $ x ^. ChatRecipient ==. val sid
 
-    let channelId = S.fromList [aid, rid]
+    let channelId = S.fromList [sid, rid]
 
     ChatRoom channelMapTVar <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
 
     let maybeChan = M.lookup channelId channelMap
-
+    
     let response = object [ "chatId" .= xid, "type" .= ChatMessageTypeRemove ]
 
     atomically $ case maybeChan of
@@ -199,12 +203,14 @@ deleteChatRemoveR rid _ aid xid = do
 
 
 deleteChatDeleteR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatDeleteR aid _ rid xid = do
+deleteChatDeleteR sid _ rid xid = do
+
+    checkAuthorized sid
     
     removed <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @Chat
         where_ $ x ^. ChatId ==. val xid
-        where_ $ x ^. ChatAuthor ==. val aid
+        where_ $ x ^. ChatAuthor ==. val sid
         where_ $ x ^. ChatRemovedAuthor ==. val True
 
     msgType <- case removed of
@@ -212,7 +218,7 @@ deleteChatDeleteR aid _ rid xid = do
           liftHandler $ runDB $ delete $ do
               x <- from $ table @Chat
               where_ $ x ^. ChatId ==. val xid
-              where_ $ x ^. ChatAuthor ==. val aid
+              where_ $ x ^. ChatAuthor ==. val sid
               where_ $ x ^. ChatRemovedAuthor ==. val True
 
           return ChatMessageTypeDelete
@@ -221,12 +227,12 @@ deleteChatDeleteR aid _ rid xid = do
           liftHandler $ runDB $ update $ \x -> do
               set x [ChatRemovedAuthor =. val True]
               where_ $ x ^. ChatId ==. val xid
-              where_ $ x ^. ChatAuthor ==. val aid
+              where_ $ x ^. ChatAuthor ==. val sid
               where_ $ x ^. ChatRemovedAuthor ==. val False
 
           return ChatMessageTypeRemove
 
-    let channelId = S.fromList [aid, rid]
+    let channelId = S.fromList [sid, rid]
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -248,6 +254,8 @@ deleteChatDeleteR aid _ rid xid = do
 
 postChatReadR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
 postChatReadR sid _cid rid xid = do
+
+    checkAuthorized sid
     
     now <- liftIO getCurrentTime
 
@@ -294,6 +302,8 @@ postChatReadR sid _cid rid xid = do
 
 postChatDeliveredR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
 postChatDeliveredR sid _cid rid xid = do
+
+    checkAuthorized sid
     
     now <- liftIO getCurrentTime
 
@@ -327,7 +337,10 @@ postChatDeliveredR sid _cid rid xid = do
 
 
 getChatChannelR :: UserId -> ContactId -> UserId -> ChatHandler ()
-getChatChannelR sid cid rid = webSockets (chatApp sid cid rid)
+getChatChannelR sid cid rid = do
+    checkAuthorized sid
+    webSockets (chatApp sid cid rid)
+
 
 data LogType = LogTypeMessage | LogTypeVideoCall | LogTypeAudioCall 
 
@@ -346,9 +359,22 @@ data Log = Log { logId :: !(Either CallId ChatId)
                }
 
 
+checkAuthorized :: UserId -> ChatHandler ()
+checkAuthorized sid = do
+
+    muid <- liftHandler getMaybeAuthId
+
+    case muid of
+      Nothing -> permissionDeniedI MsgAuthenticationRequired
+      Just uid | uid /= sid -> permissionDeniedI MsgAnotherAccountAccessProhibited
+               | otherwise -> return ()
+
+
 getChatRoomR :: UserId -> ContactId -> UserId -> ChatHandler Html
 getChatRoomR sid cid rid = do
 
+    checkAuthorized sid
+    
     backlink <- liftHandler $ getBacklink sid rid
     
     photos <- liftHandler $ getAccountPhotoRoute sid
@@ -545,7 +571,7 @@ chatApp authorId contactId recipientId = do
     ChatRoom channelMapTVar <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
-
+    
     let maybeChan = M.lookup channelId channelMap
 
     writeChan <- atomically $ case maybeChan of
@@ -553,6 +579,7 @@ chatApp authorId contactId recipientId = do
           chan <- newBroadcastTChan
           writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
           return chan
+          
       Just (writeChan,_) -> do
           writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
           return writeChan
@@ -656,6 +683,7 @@ chatApp authorId contactId recipientId = do
                                        Right () -> liftHandler $ runDB $ update $ \x -> do
                                            set x [ChatDelivered =. val True]
                                            where_ $ x ^. ChatId ==. val cid
+                                           
                              Nothing -> do
                                  liftIO $ print @Text "No VAPID details"
                                  liftHandler $ addMessageI statusError MsgPushNotificationExcception
