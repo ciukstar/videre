@@ -103,7 +103,7 @@
                       check
 
                 $if all id [outgoing, not rmByA, rmByR]
-                  <i.bubble-status.tiny.no-margin title=_{MsgRemovedByRecipient}>
+                  <i.removed.tiny.no-margin title=_{MsgRemovedByRecipient}>
                     delete_sweep
 
                 <button.menu-anchor.small.transparent.square.no-margin data-ui=#idMenu#{i}#{j}>

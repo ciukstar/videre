@@ -11,6 +11,7 @@ document.body.querySelectorAll('time.time-bubble[datetime]').forEach(function (x
   );
 });
 
+const main = document.querySelector('main');
 const chatOutput = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
@@ -35,11 +36,7 @@ chatOutput.querySelectorAll('.bubble.incoming[notread]').forEach(x => {
   ackObsever.observe(x);
 });
 
-window.scrollTo(0, document.body.scrollHeight);
-
-input.addEventListener('input',function (e) {
-  document.getElementById(#{idButtonSend}).disabled = !(this.value && this.value.trim());
-});
+main.scroll(0, main.scrollHeight);
 
 
 conn.onmessage = function (e) {
@@ -74,11 +71,11 @@ conn.onmessage = function (e) {
     const bubble = document.getElementById(`idChat${data.chatId}`);
     const bubbleDeleted = !bubble;
     
-    if (!bubbleDeleted && bubble.hasAttribute('removed')) {
+    if (!bubbleDeleted && bubble.classList.contains('incoming') && bubble.hasAttribute('removed')) {
       
       bubble.remove();
       
-    } else if (!bubbleDeleted) {
+    } else if (!bubbleDeleted && bubble.classList.contains('incoming')) {
       
       bubble.setAttribute('removed','');
       
@@ -88,6 +85,21 @@ conn.onmessage = function (e) {
         span.textContent = #{msgr MsgRemoved};
         return span;
       }) ());
+      
+    } else if (!bubbleDeleted && bubble.classList.contains('outgoing')) {
+      
+      bubble.classList.add('secondary-text','small-text');
+      const statusLine = bubble.querySelector('.bubble-status-line');
+      
+      if (!statusLine.querySelector('.removed')) {
+        statusLine.querySelector('.bubble-status').after((() => {
+          const icon = document.createElement('i');
+          icon.classList.add('removed','tiny','tiny-margin');
+          bubble.setAttribute('title',#{msgr MsgRemovedByRecipient});
+          icon.textContent = 'delete_sweep';   
+          return icon;
+        }) ());
+      }
       
     }
     
@@ -345,11 +357,13 @@ conn.onmessage = function (e) {
     if (isIncoming) {
       fetch(data.links.delivered, { method: 'POST' });
       ackObsever.observe(bubble);
-      setTimeout(() => { document.getElementById(#{idAudioIncomingChat}).play(); }, 0);
+      setTimeout(() => {
+        document.getElementById(#{idAudioIncomingChat}).play().catch(_ => {});
+      }, 0);
     }
     
     if (!document.hidden) {
-      window.scrollTo(0, document.body.scrollHeight);
+      main.scroll(0, main.scrollHeight);
     }
 
   }
@@ -370,8 +384,15 @@ form.addEventListener('submit', function(e) {
   btnSubmit.disabled = true;
   input.focus();
   
-  setTimeout(() => { document.getElementById(#{idAudioOutgoingChat}).play(); }, 0);
+  setTimeout(() => {
+    document.getElementById(#{idAudioOutgoingChat}).play().catch(_ => {});
+  }, 0);
   
+});
+
+
+input.addEventListener('input',function (e) {
+  document.getElementById(#{idButtonSend}).disabled = !(this.value && this.value.trim());
 });
 
 

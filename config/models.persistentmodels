@@ -23,6 +23,10 @@ Chat json
     recipient UserId
     created UTCTime
     message Text
+    delivered Bool
+    timeDelivered UTCTime Maybe
+    read Bool
+    timeRead UTCTime Maybe
     removedAuthor Bool
     removedRecipient Bool
 

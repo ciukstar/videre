@@ -114,6 +114,10 @@ data ChatMessageType = ChatMessageTypeChat
                      | ChatMessageTypeDelete
     deriving (Show, Read, Eq, Ord)
 
+instance ToJavascript ChatMessageType where
+    toJavascript :: ChatMessageType -> Javascript
+    toJavascript = toJavascript . show
+
 instance ToJSON ChatMessageType where
     toJSON :: ChatMessageType -> Value
     toJSON = toJSON . show
@@ -135,6 +139,11 @@ derivePersistField "AuthenticationType"
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
+
+
+instance ToJavascript UserId where
+    toJavascript :: UserId -> Javascript
+    toJavascript = toJavascript . rawJS . show . fromSqlKey
 
 
 instance FromJSON PushSubscription where
