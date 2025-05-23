@@ -190,7 +190,11 @@ deleteChatRemoveR sid _ rid xid = do
 
     let maybeChan = M.lookup channelId channelMap
     
-    let response = object [ "chatId" .= xid, "type" .= ChatMessageTypeRemove ]
+    let response = object [ "chatId" .= xid
+                          , "type" .= ChatMessageTypeRemove
+                          , "source" .= sid
+                          , "recipient" .= rid
+                          ]
 
     atomically $ case maybeChan of
       Nothing -> return ()
@@ -240,7 +244,11 @@ deleteChatDeleteR sid _ rid xid = do
 
     let maybeChan = M.lookup channelId channelMap
 
-    let response = object [ "chatId" .= xid, "type" .= msgType ]
+    let response = object [ "chatId" .= xid
+                          , "type" .= msgType 
+                          , "source" .= sid
+                          , "recipient" .= rid
+                          ]
 
     atomically $ case maybeChan of
       Nothing -> return ()

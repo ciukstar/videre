@@ -133,8 +133,8 @@
                 <span.bubble-tail>
 
 
-<footer.fixed>
-  <form.row ##{idMessageForm}>
+<footer>
+  <form.row.tiny-space ##{idMessageForm}>
     <div.responsive.max.field.textarea.min.border.round>
       <textarea ##{idMessageInput} autofocus placeholder=_{MsgMessage}>
       

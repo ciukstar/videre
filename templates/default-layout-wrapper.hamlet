@@ -10,11 +10,14 @@ $doctype 5
     <meta name="author" content="Sergiu Starciuc, ciukstar@gmail.com">
     <meta name="theme-color" content="#6750a4">
     <meta name="color-scheme" content="light dark">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+    
     $maybe gsv <- seoGoogleSiteVerification $ appSeo $ appSettings master
       <meta name="google-site-verification" content=#{gsv}>
+      
     $maybe msv <- seoMsvalidate $ appSeo $ appSettings master
       <meta name="msvalidate.01" content=#{msv}>
+      
     $maybe yv <- seoYandexVerification $ appSeo $ appSettings master
       <meta name="yandex-verification" content=#{yv}>
 

@@ -15,7 +15,8 @@ const main = document.querySelector('main');
 const chatOutput = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
-const conn = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
+const buttonSend = document.getElementById(#{idButtonSend});
+const ws = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 const ackObsever = new IntersectionObserver(
   function (entries, obsever) {
@@ -39,7 +40,7 @@ chatOutput.querySelectorAll('.bubble.incoming[notread]').forEach(x => {
 main.scroll(0, main.scrollHeight);
 
 
-conn.onmessage = function (e) {
+ws.onmessage = function (e) {
   
   const data = JSON.parse(e.data);
 
@@ -86,7 +87,7 @@ conn.onmessage = function (e) {
         return span;
       }) ());
       
-    } else if (!bubbleDeleted && bubble.classList.contains('outgoing')) {
+    } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{rid}) {
       
       bubble.classList.add('secondary-text','small-text');
       const statusLine = bubble.querySelector('.bubble-status-line');
@@ -100,6 +101,15 @@ conn.onmessage = function (e) {
           return icon;
         }) ());
       }
+      
+    } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{sid}) {
+      
+      bubble.querySelector('span.bubble-content').replaceWith((() => {
+        const span = document.createElement('span');
+        span.classList.add('bubble-content','small-text','secondary-text');
+        span.textContent = #{msgr MsgRemoved};
+        return span;
+      }) ());
       
     }
     
@@ -370,7 +380,7 @@ conn.onmessage = function (e) {
   
 };
 
-conn.onerror = function (e) {
+ws.onerror = function (e) {
   location.reload();
 }; 
 
@@ -378,10 +388,9 @@ conn.onerror = function (e) {
 form.addEventListener('submit', function(e) {
   e.preventDefault();
   
-  conn.send( input.value );
+  ws.send( input.value );
   input.value = '';
-  const btnSubmit = document.getElementById(#{idButtonSend});
-  btnSubmit.disabled = true;
+  buttonSend.disabled = true;
   input.focus();
   
   setTimeout(() => {
@@ -392,7 +401,7 @@ form.addEventListener('submit', function(e) {
 
 
 input.addEventListener('input',function (e) {
-  document.getElementById(#{idButtonSend}).disabled = !(this.value && this.value.trim());
+  buttonSend.disabled = !(this.value && this.value.trim());
 });
 
 
