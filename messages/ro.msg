@@ -278,3 +278,5 @@ Doc020 link: Tonuri de apel noi pot fi adăugate de un administrator în secțiu
 Doc021: Un administrator poate seta, de asemenea, tonuri de apel implicite pentru fiecare tip de apel, apel de ieșire sau de intrare.
 
 Doc022: Utilizatorii își pot schimba tonurile de apel preferate în setările contului lor.
+
+Doc023: Suport pentru formatarea textului folosind Markdown

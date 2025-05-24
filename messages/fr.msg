@@ -277,3 +277,5 @@ Doc020 link: De nouvelles sonneries peuvent être ajoutées par un administrateu
 Doc021: Un administrateur peut également définir des sonneries par défaut pour chaque type d'appel, appel sortant ou entrant.
 
 Doc022: Les utilisateurs peuvent modifier leurs sonneries préférées dans les paramètres de leur compte.
+
+Doc023: Prise en charge du formatage de texte à l'aide de Markdown

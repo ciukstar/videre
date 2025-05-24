@@ -83,6 +83,8 @@ Entitatea Apel reprezintă apelurile efectuate și primite către utilizator.
 ### Entitatea „Chat”
 Entitatea Chat reprezintă mesajele schimbate între doi utilizatori. În mod implicit, mesajele de chat sunt schimbate și stocate folosind protocolul WebSockets. Mesageria peer-to-peer fără stocare intermediară este planificată pentru versiunile viitoare.
 
+Suport pentru formatarea textului folosind Markdown.
+
 ### Ton de apel
 Tonuri de apel noi pot fi adăugate de un administrator în secțiunea [„Tonuri de apel”](https://viderero-2pg7fq7tgq-de.a.run.app/data/ringtones) din meniul „Date”.
 

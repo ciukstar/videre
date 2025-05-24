@@ -134,7 +134,7 @@ ws.onmessage = function (e) {
       const content = bubble.appendChild((() => {
         const content = document.createElement('span');
         content.classList.add('bubble-content');
-        content.appendChild(document.createTextNode(data.message));
+        content.innerHTML = data.message;
         return content;
       }) ());
 

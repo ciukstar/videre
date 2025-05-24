@@ -1,7 +1,7 @@
 
 <div.overlay ##{idOverlay}>
 
-<dialog.left.no-padding ##{idDialogMainMenu}>
+<dialog.left.no-padding.primary ##{idDialogMainMenu}>
 
   <header.fixed.max>
     <nav.margin>

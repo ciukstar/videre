@@ -83,6 +83,8 @@ L'entité Appel représente les appels sortants et entrants vers l'utilisateur.
 ### L'entité « Chat »
 L'entité Chat représente les messages échangés entre deux utilisateurs. Par défaut, les messages de chat sont échangés et stockés à l'aide du protocole WebSockets. La messagerie peer-to-peer sans stockage intermédiaire est prévue pour les prochaines versions.
 
+Prise en charge du formatage de texte à l'aide de Markdown.
+
 ### Sonnerie
 De nouvelles sonneries peuvent être ajoutées par un administrateur dans la section [« Sonneries »](https://viderefr-2pg7fq7tgq-de.a.run.app/data/ringtones) du menu « Données ».
 

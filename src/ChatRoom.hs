@@ -35,7 +35,7 @@ import Control.Concurrent.STM.TChan
 
 import Data.Aeson (object, (.=), Value)
 import Data.Aeson.Text (encodeToLazyText)
-import Data.Either (isRight)
+import Data.Either (isRight, isLeft)
 import Data.Function ((&))
 import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
@@ -120,7 +120,7 @@ import Settings.StaticFiles
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     , ringtones_outgoing_call_galaxy_ringtones_1_mp3
     , ringtones_outgoing_message_ringtone_1_mp3
-    , ringtones_incoming_message_ringtone_1_mp3
+    , ringtones_incoming_message_ringtone_1_mp3, img_wallpaper_pattern_svg
     )
 
 import Text.Hamlet (Html)
@@ -148,6 +148,8 @@ import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
+import CMark (commonmarkToHtml)
+import Text.Blaze.Html (preEscapedText)
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
@@ -374,6 +376,7 @@ checkAuthorized sid = do
 
     case muid of
       Nothing -> permissionDeniedI MsgAuthenticationRequired
+      
       Just uid | uid /= sid -> permissionDeniedI MsgAnotherAccountAccessProhibited
                | otherwise -> return ()
 
@@ -392,6 +395,7 @@ getChatRoomR sid cid rid = do
     iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     video <- liftHandler $ getVideoPushRoute sid cid rid
     outgoing <- liftHandler $ getVideoOutgoingRoute sid cid rid False
+    wallpaper <- liftHandler $ getStaticRoute img_wallpaper_pattern_svg
 
     user <- liftHandler $ runDB $ selectOne $ do
         x <- from $ table @User
@@ -586,8 +590,7 @@ chatApp authorId contactId recipientId = do
       Nothing -> do
           chan <- newBroadcastTChan
           writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
-          return chan
-          
+          return chan 
       Just (writeChan,_) -> do
           writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
           return writeChan
@@ -611,7 +614,7 @@ chatApp authorId contactId recipientId = do
                      , "author" .= chatAuthor chat
                      , "recipient" .= chatRecipient chat
                      , "created" .= chatCreated chat
-                     , "message" .= chatMessage chat
+                     , "message" .= commonmarkToHtml [] (chatMessage chat)
                      , "type" .= ChatMessageTypeChat
                      , "links" .= object
                        [ "delivered" .= expath (rtp $ ChatDeliveredR recipientId contactId authorId cid)

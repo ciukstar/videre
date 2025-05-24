@@ -278,3 +278,5 @@ Doc020 link@Text: New ringtones can be added by an administrator in the <a href=
 Doc021: An administrator can also set default ringtones for each call type, outgoing or incoming call.
 
 Doc022: Users can change their preferred ringtones in their account settings.
+
+Doc023: Support for text formatting using Markdown

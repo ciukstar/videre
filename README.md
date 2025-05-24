@@ -37,11 +37,11 @@ A superuser account is defined at deployment time. The superuser manages other u
     ```$YESOD_GOOGLE_CLIENT_ID```
   * Client secret  
     ```$YESOD_GOOGLE_CLIENT_SECRET```
-	
+    
 * Web Real-Time Communication: [WebRTC API](https://developer.mozilla.org/en-US/docs/Web/API/WebRTC_API)
   * Configuration  
     ```$YESOD_RTC_PEER_CONNECTION_CONFIG```  
-	
+    
     The configuration can be provided as a textual representation of a JSON object as described in [RTCPeerConnection() constructor](https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnection/RTCPeerConnection).  
 
     Mainly used to specify STUN and TURN servers.
@@ -82,6 +82,8 @@ The entity Call represents outgoing and incoming calls to the currently logged i
 
 ### Chat
 The Chat entity represents messages exchanged between two users. By default, chat messages are exchanged and stored using the WebSockets protocol. Peer-to-peer messaging without intermediate storage is planned for future releases.
+
+Support for text formatting using Markdown.
 
 ### Ringtone
 
