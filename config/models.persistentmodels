@@ -18,9 +18,11 @@ Ringtone
     audio ByteString
     UniqueRingtone name    
 
+
 Chat json
     author UserId OnDeleteCascade
     recipient UserId
+    type ChatType
     created UTCTime
     message Text
     delivered Bool
@@ -29,6 +31,8 @@ Chat json
     timeRead UTCTime Maybe
     removedAuthor Bool
     removedRecipient Bool
+    call CallId Maybe OnDeleteCascade
+    
 
 Call
     caller UserId OnDeleteCascade

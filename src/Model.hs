@@ -107,6 +107,11 @@ instance ToJavascript PushMsgType where
     toJavascript = toJavascript . String . pack . show
 
 
+data ChatType = ChatTypeMessage | ChatTypeCall
+    deriving (Eq, Show, Read)
+derivePersistField "ChatType"
+
+
 data ChatMessageType = ChatMessageTypeChat
                      | ChatMessageTypeDelivered
                      | ChatMessageTypeRead

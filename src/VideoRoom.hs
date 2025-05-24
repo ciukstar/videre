@@ -29,7 +29,7 @@ import Database.Esqueleto.Experimental
     , (^.), (==.), (=.)
     , just, update, set
     )
-import Database.Persist (Entity (Entity), entityVal, insert)
+import Database.Persist (Entity (Entity), entityVal, insert, insert_)
 import Database.Persist.Sql (SqlBackend, fromSqlKey, toSqlKey)
 
 import Data.Aeson (object, (.=))
@@ -44,7 +44,7 @@ import Data.Time.Clock (getCurrentTime)
 import Foundation
     ( AppMessage
       ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
-      , MsgEndSession, MsgAppName, MsgBack
+      , MsgEndSession, MsgAppName, MsgBack, MsgVideoCall, MsgAudioCall
       )
     )
 
@@ -67,7 +67,7 @@ import Model
       ( UserId
       , UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
-      )
+      ), Chat (Chat)
     )
 
 import Network.HTTP.Client (Manager)
@@ -223,6 +223,8 @@ postPushMessageR sid cid rid = do
     manager <- liftHandler getAppHttpManager
     mVapidKeys <- liftHandler getVapidKeys
 
+    msgr <- getMessageRender
+
     case mVapidKeys of
       Just vapidKeys -> do
 
@@ -231,22 +233,30 @@ postPushMessageR sid cid rid = do
           now <- liftIO getCurrentTime
 
           call <- case messageType of
-            Just PushMsgTypeVideoCall ->
-                liftHandler $ pure <$> runDB (insert $ Call { callCaller = sid
-                                                            , callCallee = rid
-                                                            , callStart = now
-                                                            , callEnd = Nothing
-                                                            , callType = CallTypeVideo
-                                                            , callStatus = Nothing
-                                                            })
-            Just PushMsgTypeAudioCall ->
-                liftHandler $ pure <$> runDB (insert $ Call { callCaller = sid
-                                                            , callCallee = rid
-                                                            , callStart = now
-                                                            , callEnd = Nothing
-                                                            , callType = CallTypeAudio
-                                                            , callStatus = Nothing
-                                                            })
+            Just PushMsgTypeVideoCall -> do
+                liftHandler $ (pure <$>) $ runDB $ do
+                    let call@(Call {..}) = Call { callCaller = sid
+                                                , callCallee = rid
+                                                , callStart = now
+                                                , callEnd = Nothing
+                                                , callType = CallTypeVideo
+                                                , callStatus = Nothing
+                                                }
+                    insert_ $ Chat callCaller callCallee now (msgr MsgVideoCall) False Nothing False Nothing False False
+                    insert call
+                    
+            Just PushMsgTypeAudioCall -> do
+                let call@(Call {..}) = Call { callCaller = sid
+                                            , callCallee = rid
+                                            , callStart = now
+                                            , callEnd = Nothing
+                                            , callType = CallTypeAudio
+                                            , callStatus = Nothing
+                                            }
+                liftHandler $ (pure <$>) $ runDB $ do
+                    insert_ $ Chat callCaller callCallee now (msgr MsgAudioCall) False Nothing False Nothing False False
+                    insert call
+                    
             _otherwise -> return Nothing
 
           let expath = decodeUtf8 . extractPath . encodeUtf8 . urlr

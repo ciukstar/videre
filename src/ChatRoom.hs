@@ -15,6 +15,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
+import CMark (commonmarkToHtml)
 
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
@@ -123,6 +124,7 @@ import Settings.StaticFiles
     , ringtones_incoming_message_ringtone_1_mp3, img_wallpaper_pattern_svg
     )
 
+import Text.Blaze.Html (preEscapedText)
 import Text.Hamlet (Html)
 
 import Web.WebPush
@@ -148,8 +150,6 @@ import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
-import CMark (commonmarkToHtml)
-import Text.Blaze.Html (preEscapedText)
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage

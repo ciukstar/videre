@@ -73,7 +73,7 @@ main
                     color: var(--on-tertiary-container)
                     width: 10px
                     height: 13px
-                    clip-path: polygon(0 0, 100% 0, 75% 15%, 60% 25%, 48% 35%, 38% 45%, 30% 55%, 0 100%)
+                    clip-path: polygon(100% 0, 71% 10%, 54% 17%, 39% 27%, 29% 38%, 19% 52%, 11% 68%, 7% 78%, 0 100%, 0 0)
           
         .bubble.incoming
             border-radius: 0 8px 8px 8px
@@ -96,7 +96,7 @@ main
                     color: var(--on-secondary-container)
                     width: 10px
                     height: 13px
-                    clip-path: polygon(0 0, 100% 0, 100% 100%, 75% 60%, 67% 50%, 57% 40%, 45% 30%)
+                    clip-path: polygon(100% 0, 100% 100%, 93% 77%, 86% 58%, 80% 45%, 69% 31%, 54% 21%, 33% 11%, 0 0)
                     
 
 ##{idDialogOutgoingCall}
