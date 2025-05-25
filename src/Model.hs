@@ -158,7 +158,17 @@ derivePersistField "AuthenticationType"
 -- http://www.yesodweb.com/book/persistent/
 share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models.persistentmodels")
+    
 
+instance ToJavascript ChatId where
+    toJavascript :: ChatId -> Javascript
+    toJavascript = toJavascript . rawJS . show . fromSqlKey
+
+
+instance ToMarkup ChatId where
+    toMarkup :: ChatId -> Markup
+    toMarkup = toMarkup . show . fromSqlKey
+    
 
 instance ToJavascript UserId where
     toJavascript :: UserId -> Javascript

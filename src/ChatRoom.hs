@@ -526,8 +526,6 @@ getChatRoomR sid cid rid = do
 
     where
       
-      naturals = [ 0 :: Int .. ]
-      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
       groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _)) -> utctDay t)

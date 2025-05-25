@@ -20,17 +20,14 @@ const ws = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "w
 
 const ackObsever = new IntersectionObserver(
   function (entries, obsever) {
-    
     entries.forEach(x => {
       fetch(x.target.dataset.read, { method: 'POST' }).then(() => {
         x.target.removeAttribute('notread');
       });
     });
-    
-  },
-  { root: chatOutput,
-    threshold: 0.8
-  }
+  },{ root: chatOutput,
+      threshold: 0.8
+    }
 );
 
 chatOutput.querySelectorAll('.bubble.incoming[notread]').forEach(x => {
@@ -49,7 +46,7 @@ ws.onmessage = function (e) {
   
   if (data.type === #{ChatMessageTypeDelivered} && isOutgoing) {
     
-    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (!bubbleDeleted) {
       const icon = bubble.querySelector('i.bubble-status');
@@ -59,7 +56,7 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeRead} && isOutgoing) {
 
-    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (!bubbleDeleted) {
       const icon = bubble.querySelector('i.bubble-status');
@@ -69,7 +66,7 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeRemove}) {
 
-    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
     if (!bubbleDeleted && bubble.classList.contains('incoming') && bubble.hasAttribute('removed')) {
@@ -115,7 +112,7 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeDelete}) {
 
-    const bubble = document.getElementById(`idChat${data.chatId}`);
+    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (! bubbleDeleted) {
       bubble.remove();
@@ -126,7 +123,7 @@ ws.onmessage = function (e) {
     const bubble = chatOutput.appendChild((() => {
       
       const bubble = document.createElement('div');
-      bubble.id = `idChat${data.chatId}`;
+      bubble.id = `#{idBubblePref}${data.chatId}`;
       bubble.classList.add('bubble');
       bubble.classList.add(data.author == #{pack $ show $ fromSqlKey sid} ? 'outgoing' : 'incoming');
       bubble.setAttribute('data-read',data.links.read);
@@ -176,7 +173,7 @@ ws.onmessage = function (e) {
           const menu = anchor.appendChild((() => {
             
             const menu = document.createElement('menu');
-            menu.id = `ctxMenu${chatOutput.querySelectorAll('.bubble').length + 1}`;
+            menu.id = `#{idBubbleMenuPref}${data.chatId}`;
             menu.classList.add('left','top','no-wrap');
             
             const itemCopy = menu.appendChild((() => {
