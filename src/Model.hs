@@ -16,6 +16,7 @@
 
 module Model where
 
+import Control.Applicative (pure)
 import Control.Monad (return)
 
 import ClassyPrelude.Yesod
@@ -26,7 +27,7 @@ import Data.Aeson
     ( Value (String), ToJSON, toJSON, FromJSON, parseJSON, withObject
     , (.:)
     )
-import Data.Aeson.Types (Parser)
+import Data.Aeson.Types (Parser, prependFailure, typeMismatch)
 
 import Data.Bool (Bool)
 import Data.ByteString (ByteString)
@@ -107,9 +108,22 @@ instance ToJavascript PushMsgType where
     toJavascript = toJavascript . String . pack . show
 
 
-data ChatType = ChatTypeMessage | ChatTypeCall
+data ChatType = ChatTypeMessage | ChatTypeVideoCall | ChatTypeAudioCall
     deriving (Eq, Show, Read)
 derivePersistField "ChatType"
+
+
+instance ToJSON ChatType where
+    toJSON :: ChatType -> Data.Aeson.Value
+    toJSON = String . pack . show
+
+
+instance FromJSON ChatType where
+    parseJSON :: Value -> Parser ChatType
+    parseJSON (String "ChatTypeMessage") = pure ChatTypeMessage
+    parseJSON (String "ChatTypeVideoCall") = pure ChatTypeVideoCall
+    parseJSON (String "ChatTypeAudioCall") = pure ChatTypeAudioCall
+    parseJSON invalid = prependFailure "parsing ChatType failed" (typeMismatch "String" invalid)
 
 
 data ChatMessageType = ChatMessageTypeChat

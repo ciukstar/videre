@@ -36,7 +36,6 @@ import Control.Concurrent.STM.TChan
 
 import Data.Aeson (object, (.=), Value)
 import Data.Aeson.Text (encodeToLazyText)
-import Data.Either (isRight, isLeft)
 import Data.Function ((&))
 import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
@@ -81,13 +80,12 @@ import Model
     , ChatId, Chat (Chat, chatMessage, chatCreated, chatAuthor, chatRecipient)
     , PushSubscription (PushSubscription)
     , ContactId
-    , CallId, Call (Call), Ringtone (Ringtone)
+    , Ringtone (Ringtone)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
       , PushMsgTypeRefresh
       )
-    , CallType (CallTypeAudio, CallTypeVideo)
     , RingtoneId, UserRingtone, DefaultRingtone
     , RingtoneType
       ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming
@@ -96,11 +94,12 @@ import Model
       ( ChatMessageTypeChat, ChatMessageTypeDelete, ChatMessageTypeRemove
       , ChatMessageTypeDelivered, ChatMessageTypeRead
       )
+    , ChatType (ChatTypeMessage, ChatTypeVideoCall, ChatTypeAudioCall)
     , EntityField
       ( UserId, ChatAuthor, ChatRecipient
       , PushSubscriptionSubscriber, ChatTimeDelivered
       , ChatId, PushSubscriptionPublisher
-      , CallCaller, CallCallee, PushSubscriptionEndpoint
+      , PushSubscriptionEndpoint
       , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType
       , DefaultRingtoneType, DefaultRingtoneRingtone, ChatRemovedAuthor
       , ChatRemovedRecipient, ChatTimeRead, ChatRead, ChatDelivered
@@ -121,7 +120,8 @@ import Settings.StaticFiles
     , img_call_end_FILL0_wght400_GRAD0_opsz24_svg
     , ringtones_outgoing_call_galaxy_ringtones_1_mp3
     , ringtones_outgoing_message_ringtone_1_mp3
-    , ringtones_incoming_message_ringtone_1_mp3, img_wallpaper_pattern_svg
+    , ringtones_incoming_message_ringtone_1_mp3
+    , img_wallpaper_pattern_svg
     )
 
 import Text.Blaze.Html (preEscapedText)
@@ -352,23 +352,6 @@ getChatChannelR sid cid rid = do
     webSockets (chatApp sid cid rid)
 
 
-data LogType = LogTypeMessage | LogTypeVideoCall | LogTypeAudioCall 
-
-data Log = Log { logId :: !(Either CallId ChatId)
-               , logTime :: !UTCTime
-               , logOid :: !UserId
-               , logFid :: !UserId
-               , logMsg :: !(Maybe Text)
-               , logType :: !LogType
-               , logDelivered :: !Bool
-               , logTimeDelivered :: !(Maybe UTCTime)
-               , logRead :: !Bool
-               , logTimeRead :: !(Maybe UTCTime) 
-               , logRemovedA :: !Bool
-               , logRemovedR :: !Bool
-               }
-
-
 checkAuthorized :: UserId -> ChatHandler ()
 checkAuthorized sid = do
 
@@ -446,24 +429,13 @@ getChatRoomR sid cid rid = do
               return x
         )
 
-    calls <- liftHandler $ runDB $ select $ from $
-        ( do
-              x <- from $ table @Call
-              where_ $ x ^. CallCaller ==. val sid
-              where_ $ x ^. CallCallee ==. val rid
-              return x
-        )
-        `unionAll_`
-        ( do
-              x <- from $ table @Call
-              where_ $ x ^. CallCallee ==. val sid
-              where_ $ x ^. CallCaller ==. val rid
-              return x
-        )
-
     let dayLogs = sortBy (\(d1,_) (d2,_) -> compare d1 d2)
-             $ (sortBy (\(Log _ t1 _ _ _ _ _ _ _ _ _ _) (Log _ t2 _ _ _ _ _ _ _ _ _ _) -> compare t1 t2) <$>)
-             <$> groupByDay ((chatToLog <$> chats) <> (callToLog <$> calls))
+             $ (sortBy (\
+                             (Entity _ (Chat _ _ _ _ t1 _ _ _ _ _ _ _))
+                             (Entity _ (Chat _ _ _ _ t2 _ _ _ _ _ _ _)) -> compare t1 t2
+                       ) <$>
+               )
+             <$> groupByDay chats
     
     rtp <- getRouteToParent
     curr <- (rtp <$>) <$> getSubCurrentRoute
@@ -550,28 +522,15 @@ getChatRoomR sid cid rid = do
         idOverlayDialogCallDeclined <- newIdent
         idDialogCallDeclined <- newIdent
         
-        $(widgetFile "chat/room") 
+        $(widgetFile "chat/room")
 
     where
-
-      rightOrError (Right x) = x
-      rightOrError (Left _) = error "Should not happen!"
       
       naturals = [ 0 :: Int .. ]
       
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
-      groupByDay = M.toList . groupByKey (\(Log _ t _ _ _ _ _ _ _ _ _ _) -> utctDay t)
-      
-      chatToLog (Entity cid' (Chat aid' rid' created msg delivered timeDelivered read' timeRead rma rmr)) =
-          Log (Right cid') created aid' rid' (Just msg) LogTypeMessage delivered timeDelivered read' timeRead rma rmr
-          
-            
-      callToLog (Entity cid' (Call er ee start _ typ _)) =
-          Log (Left cid') start er ee Nothing ( case typ of
-                                                  CallTypeAudio -> LogTypeAudioCall
-                                                  CallTypeVideo -> LogTypeVideoCall
-                                              ) False Nothing False Nothing False False
+      groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _)) -> utctDay t)
 
 
 
@@ -602,7 +561,7 @@ chatApp authorId contactId recipientId = do
         (runConduit (sourceWS .| mapM_C (
              \msg -> do
                  now <- liftIO getCurrentTime
-                 let chat = Chat authorId recipientId now msg False Nothing False Nothing False False
+                 let chat = Chat authorId recipientId ChatTypeMessage now msg False Nothing False Nothing False False Nothing
                  cid <- liftHandler (runDB $ insert chat)
                  rndr <- getUrlRender
                  rtp <- getRouteToParent
@@ -635,7 +594,7 @@ chatApp authorId contactId recipientId = do
                          return x
 
                      case chat' of
-                       Just (Entity _ (Chat aid rid _ message _ _ _ _ _ _)) -> do
+                       Just (Entity _ (Chat aid rid _ _ message _ _ _ _ _ _ _)) -> do
 
                            mVapidKeys <- liftHandler getVapidKeys
                            case mVapidKeys of

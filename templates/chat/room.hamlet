@@ -43,38 +43,32 @@
         <time.day-bubble.small-text.tiny-padding.tiny-margin.small-elevate.round datetime=#{dt}>
           #{dt}
         
-      $forall (j,(Log xid time author recipient msg logType delivered tDelivered read tRead rmByA rmByR)) <- zip naturals logs
+      $forall (j,(Entity xid (Chat author recipient logType time msg delivered tDelivered read tRead rmByA rmByR _))) <- zip naturals logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
           $if incoming && rmByR
 
           $else
-            <div.bubble 
-                :isRight xid:.chat
-                :isLeft xid:.call
-                :incoming:.incoming 
-                :outgoing:.outgoing 
-                :not read:notread
+            <div.bubble :incoming:.incoming :outgoing:.outgoing :not read:notread
                 :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text
-                :isRight xid:data-read=@{rtp $ ChatReadR sid cid rid (rightOrError xid)}
-                #idChat#{either (show . fromSqlKey) (show . fromSqlKey) xid} data-menu=#idMenu#{i}#{j}>
+                data-read=@{rtp $ ChatReadR sid cid rid xid}
+                #idChat#{(show . fromSqlKey) xid}>
 
               <span.bubble-content>
                 $case logType
-                  $of LogTypeVideoCall
+                  $of ChatTypeVideoCall
                     <i.tiny.tiny-margin style="vertical-align:bottom">
                       videocam
                     _{MsgVideoCall}
 
-                  $of LogTypeAudioCall
+                  $of ChatTypeAudioCall
                     <i.tiny.tiny-margin style="vertical-align:bottom">
                       call
                     _{MsgAudioCall}
 
-                  $of LogTypeMessage
+                  $of ChatTypeMessage
                     $if not (rmByA || rmByR)
-                      $maybe msg <- msg
-                        #{preEscapedText $ commonmarkToHtml [] msg}
+                      #{preEscapedText $ commonmarkToHtml [] msg}
 
                     $elseif all id [outgoing, rmByA]
                       _{MsgRemoved}
@@ -83,8 +77,7 @@
                       _{MsgRemoved}
 
                     $elseif all id [outgoing, not rmByA, rmByR]
-                      $maybe msg <- msg
-                        #{msg}
+                      #{msg}
 
                     $else
 
@@ -120,28 +113,15 @@
                       <i>content_copy
                       _{MsgCopy}
 
-                    $case xid
-                      $of Right chatId
-                        $if incoming
-                          <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
-                            <i>delete
-                            _{MsgDele}
+                    $if incoming
+                      <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid xid} data-ui=#idMenu#{i}#{j}>
+                        <i>delete
+                        _{MsgDele}
 
-                        $elseif outgoing
-                          <li.action-delete.wave data-href=@{rtp $ ChatDeleteR sid cid rid chatId} data-ui=#idMenu#{i}#{j}>
-                            <i>delete
-                            _{MsgDele}
-
-                      $of Left callId
-                        $if incoming
-                          <li.action-delete.wave data-href=# data-ui=#idMenu#{i}#{j}>
-                            <i>delete
-                            _{MsgDele}
-
-                        $elseif outgoing
-                          <li.action-delete.wave data-href=# data-ui=#idMenu#{i}#{j}>
-                            <i>delete
-                            _{MsgDele}
+                    $elseif outgoing
+                      <li.action-delete.wave data-href=@{rtp $ ChatDeleteR sid cid rid xid} data-ui=#idMenu#{i}#{j}>
+                        <i>delete
+                        _{MsgDele}
 
               <span.bubble-tail-out>
                 <span.bubble-tail>

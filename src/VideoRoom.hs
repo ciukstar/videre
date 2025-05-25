@@ -59,6 +59,7 @@ import Model
       ( CallStatusAccepted, CallStatusDeclined, CallStatusEnded
       , CallStatusCanceled
       )
+    , Chat (Chat), ChatType (ChatTypeVideoCall, ChatTypeAudioCall)
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeEndSession, PushMsgTypeAudioCall
       , PushMsgTypeAccept, PushMsgTypeDecline, PushMsgTypeCancel
@@ -67,7 +68,7 @@ import Model
       ( UserId
       , UserPhotoUser, PushSubscriptionSubscriber
       , PushSubscriptionPublisher, CallId, CallStatus, CallEnd
-      ), Chat (Chat)
+      )
     )
 
 import Network.HTTP.Client (Manager)
@@ -242,8 +243,12 @@ postPushMessageR sid cid rid = do
                                                 , callType = CallTypeVideo
                                                 , callStatus = Nothing
                                                 }
-                    insert_ $ Chat callCaller callCallee now (msgr MsgVideoCall) False Nothing False Nothing False False
-                    insert call
+                    cId <- insert call
+                    insert_ $ Chat
+                        callCaller callCallee ChatTypeVideoCall now (msgr MsgVideoCall)
+                        False Nothing False Nothing False False
+                        (Just cId)
+                    return cId
                     
             Just PushMsgTypeAudioCall -> do
                 let call@(Call {..}) = Call { callCaller = sid
@@ -253,9 +258,12 @@ postPushMessageR sid cid rid = do
                                             , callType = CallTypeAudio
                                             , callStatus = Nothing
                                             }
-                liftHandler $ (pure <$>) $ runDB $ do
-                    insert_ $ Chat callCaller callCallee now (msgr MsgAudioCall) False Nothing False Nothing False False
-                    insert call
+                liftHandler $ (pure <$>) $ runDB $ do   
+                    cId <- insert call
+                    insert_ $ Chat
+                        callCaller callCallee ChatTypeAudioCall now (msgr MsgAudioCall)
+                        False Nothing False Nothing False False (Just cId)
+                    return cId                        
                     
             _otherwise -> return Nothing
 
