@@ -1,3 +1,4 @@
+Undo: Défaire
 MessageDeleted: Message supprimé
 MessageRemoved: Message supprimé
 Removed: Supprimé

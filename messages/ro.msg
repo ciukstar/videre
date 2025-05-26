@@ -1,3 +1,4 @@
+Undo: Anulează
 MessageDeleted: Mesajul a fost șters
 MessageRemoved: Mesajul a fost eliminat
 Removed: Eliminat

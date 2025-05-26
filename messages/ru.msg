@@ -1,3 +1,4 @@
+Undo: Отменить
 MessageDeleted: Сообщение удалено
 MessageRemoved: Сообщение удалено
 Removed: Удалено

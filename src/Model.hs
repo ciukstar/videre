@@ -131,6 +131,7 @@ data ChatMessageType = ChatMessageTypeChat
                      | ChatMessageTypeRead
                      | ChatMessageTypeRemove
                      | ChatMessageTypeDelete
+                     | ChatMessageTypeUndo
     deriving (Show, Read, Eq, Ord)
 
 instance ToJavascript ChatMessageType where

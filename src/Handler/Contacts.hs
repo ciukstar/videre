@@ -172,7 +172,6 @@ import Yesod.Core.Handler
     , getUrlRender
     )
 import Yesod.Core.Widget (setTitleI, whamlet, toWidget)
-import Yesod.Form (Textarea)
 import Yesod.Form.Input (runInputGet, ireq, runInputPost, iopt)
 import Yesod.Form.Fields
     ( OptionList(olOptions), optionsPairs, multiSelectField, hiddenField

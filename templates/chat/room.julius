@@ -56,7 +56,7 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeRead} && isOutgoing) {
 
-    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
+    const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (!bubbleDeleted) {
       const icon = bubble.querySelector('i.bubble-status');
@@ -66,18 +66,12 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeRemove}) {
 
-    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
+    const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
-    if (!bubbleDeleted && bubble.classList.contains('incoming') && bubble.hasAttribute('removed')) {
+    if (!bubbleDeleted && bubble.classList.contains('incoming')) {
       
-      bubble.remove();
-      
-    } else if (!bubbleDeleted && bubble.classList.contains('incoming')) {
-      
-      bubble.setAttribute('removed','');
-      
-      bubble.querySelector('span.bubble-content').replaceWith((() => {
+      bubble.querySelector('.bubble-content').replaceWith((() => {
         const span = document.createElement('span');
         span.classList.add('bubble-content','small-text','secondary-text');
         span.textContent = #{msgr MsgRemoved};
@@ -85,8 +79,8 @@ ws.onmessage = function (e) {
       }) ());
       
     } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{rid}) {
-      
-      bubble.classList.add('secondary-text','small-text');
+
+      bubble.querySelector('.bubble-content').classList.add('secondary-text','small-text');
       const statusLine = bubble.querySelector('.bubble-status-line');
       
       if (!statusLine.querySelector('.removed')) {
@@ -101,7 +95,7 @@ ws.onmessage = function (e) {
       
     } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{sid}) {
       
-      bubble.querySelector('span.bubble-content').replaceWith((() => {
+      bubble.querySelector('.bubble-content').replaceWith((() => {
         const span = document.createElement('span');
         span.classList.add('bubble-content','small-text','secondary-text');
         span.textContent = #{msgr MsgRemoved};
@@ -112,10 +106,40 @@ ws.onmessage = function (e) {
     
   } else if (data.type === #{ChatMessageTypeDelete}) {
 
-    const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
+    const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (! bubbleDeleted) {
       bubble.remove();
+    }
+
+  } else if (data.type === #{ChatMessageTypeUndo} && data.source === #{sid}) {
+
+    const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    
+    if (! bubbleDeleted) {
+      const content = bubble.querySelector('.bubble-content');
+      content.classList.remove('small-text','secondary-text')
+      content.innerHTML = data.message;      
+    }
+
+  } else if (data.type === #{ChatMessageTypeUndo} && data.source === #{rid}) {
+
+    const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
+    const bubbleDeleted = !bubble;
+    
+    if (! bubbleDeleted) {
+      const content = bubble.querySelector('.bubble-content');
+      content.classList.remove('small-text','secondary-text')
+      content.innerHTML = data.message;
+      
+      const statusLine = bubble.querySelector('.bubble-status-line');
+      const icon = statusLine.querySelector('.removed');
+      
+      if (icon) {
+        icon.remove();
+      }
+      
     }
 
   } else if (data.type === #{ChatMessageTypeChat}) {
@@ -123,9 +147,9 @@ ws.onmessage = function (e) {
     const bubble = chatOutput.appendChild((() => {
       
       const bubble = document.createElement('div');
-      bubble.id = `#{idBubblePref}${data.chatId}`;
+      bubble.id = `#{rawJS idBubblePref}${data.chatId}`;
       bubble.classList.add('bubble');
-      bubble.classList.add(data.author == #{pack $ show $ fromSqlKey sid} ? 'outgoing' : 'incoming');
+      bubble.classList.add(isOutgoing ? 'outgoing' : 'incoming');
       bubble.setAttribute('data-read',data.links.read);
 
       const content = bubble.appendChild((() => {
@@ -173,7 +197,7 @@ ws.onmessage = function (e) {
           const menu = anchor.appendChild((() => {
             
             const menu = document.createElement('menu');
-            menu.id = `#{idBubbleMenuPref}${data.chatId}`;
+            menu.id = `#{rawJS idBubbleMenuPref}${data.chatId}`;
             menu.classList.add('left','top','no-wrap');
             
             const itemCopy = menu.appendChild((() => {
@@ -254,7 +278,7 @@ ws.onmessage = function (e) {
 
               itemDelete.onclick = function (e) {
 
-                const xref = data.author == #{pack $ show $ fromSqlKey sid} ? data.links['delete'] : data.links['remove'];
+                const xref = isOutgoing ? data.links['delete'] : data.links['remove'];
                 
                 fetch(xref, {
                   method: 'DELETE',
@@ -262,6 +286,8 @@ ws.onmessage = function (e) {
                 }).then(res => {
                   
                   res.json().then(function (data) {
+
+                    document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
                     
                     const snackbar = document.createElement('div');
                     snackbar.classList.add('snackbar','active');
@@ -269,9 +295,24 @@ ws.onmessage = function (e) {
                     snackbar.appendChild((() => {
                       const content = document.createElement('div');
                       content.classList.add('max');
-                      content.textContent = data.type === #{show ChatMessageTypeRemove}
+                      content.textContent = data.type === #{ChatMessageTypeRemove}
                         ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
                       return content;
+                    }) ());
+                    
+                    snackbar.appendChild((() => {
+                      const undo = document.createElement('button');
+                      undo.classList.add('transparent','inverse-link');
+                      undo.textContent = #{msgr MsgUndo};
+                      undo.onclick = function (e) {
+                        fetch(data.links.undo, {
+                          method: 'POST',
+                          headers: { 'Accept': 'application/json' }
+                        }).then(_ => {
+                          snackbar.remove();
+                        });
+                      };
+                      return undo;
                     }) ());
                     
                     snackbar.appendChild((() => {
@@ -533,6 +574,8 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
     }).then(res => {
       
       res.json().then(function (data) {
+
+        document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
         
         const snackbar = document.createElement('div');
         snackbar.classList.add('snackbar','active');
@@ -540,9 +583,24 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
         snackbar.appendChild((() => {
           const content = document.createElement('div');
           content.classList.add('max');
-          content.textContent = data.type === #{show ChatMessageTypeRemove}
+          content.textContent = data.type === #{ChatMessageTypeRemove}
             ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
           return content;
+        }) ());
+
+        snackbar.appendChild((() => {
+          const undo = document.createElement('button');
+          undo.classList.add('transparent','inverse-link');
+          undo.textContent = #{msgr MsgUndo};
+          undo.onclick = function (e) {
+            fetch(data.links.undo, {
+              method: 'POST',
+              headers: { 'Accept': 'application/json' }
+            }).then(_ => {
+              snackbar.remove();
+            });
+          };
+          return undo;
         }) ());
         
         snackbar.appendChild((() => {
@@ -554,7 +612,7 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
           close.appendChild((() => {
             const icon = document.createElement('i');
             icon.textContent = 'close';
-            return icon; 
+            return icon;
           }) ());         
           return close;
         }) ());
@@ -643,6 +701,7 @@ Array.from(
 ).forEach(([snackbar,buttons]) => {
   buttons.forEach(x => x.addEventListener('click', e => { snackbar.classList.remove('active'); }));
 });
+
 
 setTimeout(() => {
   document.querySelectorAll('.snackbar').forEach(x => { x.classList.remove('active'); });

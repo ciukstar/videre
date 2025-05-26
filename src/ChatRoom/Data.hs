@@ -24,6 +24,7 @@ newtype ChatRoom = ChatRoom (TVar (M.Map (S.Set UserId) (TChan Text, Int)))
 mkYesodSubData "ChatRoom" [parseRoutes|
 /room/#UserId/#ContactId/#UserId/channel ChatChannelR     GET
 
+/room/#UserId/#ContactId/#UserId/#ChatId/undo      ChatUndoR      POST
 /room/#UserId/#ContactId/#UserId/#ChatId/remove    ChatRemoveR    DELETE
 /room/#UserId/#ContactId/#UserId/#ChatId/delete    ChatDeleteR    DELETE
 /room/#UserId/#ContactId/#UserId/#ChatId/read      ChatReadR      POST

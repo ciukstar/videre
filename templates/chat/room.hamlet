@@ -51,10 +51,9 @@
           $else
             <div.bubble ##{idBubblePref}#{(show . fromSqlKey) xid} 
                 :incoming:.incoming :outgoing:.outgoing :not read:notread
-                :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text
                 data-read=@{rtp $ ChatReadR sid cid rid xid}>
 
-              <span.bubble-content>
+              <span.bubble-content :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text>
                 $case logType
                   $of ChatTypeVideoCall
                     <i.tiny.tiny-margin style="vertical-align:bottom">

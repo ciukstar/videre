@@ -21,7 +21,7 @@ import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route
       ( ChatRoomR, ChatChannelR, ChatRemoveR
-      , ChatDeleteR, ChatReadR, ChatDeliveredR
+      , ChatDeleteR, ChatReadR, ChatDeliveredR, ChatUndoR
       )
     )
 
@@ -67,7 +67,7 @@ import Foundation
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
       , MsgSubscribe, MsgDele, MsgCopy, MsgRemovedByRecipient, MsgContentCopied
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
-      , MsgMessageRemoved, MsgAuthenticationRequired
+      , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo
       )
     )
 
@@ -92,7 +92,7 @@ import Model
       )
     , ChatMessageType
       ( ChatMessageTypeChat, ChatMessageTypeDelete, ChatMessageTypeRemove
-      , ChatMessageTypeDelivered, ChatMessageTypeRead
+      , ChatMessageTypeDelivered, ChatMessageTypeRead, ChatMessageTypeUndo
       )
     , ChatType (ChatTypeMessage, ChatTypeVideoCall, ChatTypeAudioCall)
     , EntityField
@@ -111,8 +111,8 @@ import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM (atomically, readTVarIO, writeTVar)
 
 import Settings
-    ( widgetFile, Superuser (Superuser, superuserUsername)
-    , AppSettings (appSuperuser)
+    ( AppSettings (appSuperuser), Superuser (Superuser, superuserUsername)
+    , widgetFile
     )
 import Settings.StaticFiles
     ( img_chat_FILL0_wght400_GRAD0_opsz24_svg
@@ -126,6 +126,7 @@ import Settings.StaticFiles
 
 import Text.Blaze.Html (preEscapedText)
 import Text.Hamlet (Html)
+import Text.Julius (RawJS(rawJS))
 
 import Web.WebPush
     ( mkPushNotification, pushUrgency
@@ -174,8 +175,53 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
 
 
+postChatUndoR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
+postChatUndoR sid _cid rid xid = do
+
+    checkAuthorized sid
+    
+    liftHandler $ runDB $ update $ \x -> do
+        set x [ChatRemovedRecipient =. val False]
+        where_ $ x ^. ChatId ==. val xid
+        where_ $ x ^. ChatRecipient ==. val sid
+    
+    liftHandler $ runDB $ update $ \x -> do
+        set x [ChatRemovedAuthor =. val False]
+        where_ $ x ^. ChatId ==. val xid
+        where_ $ x ^. ChatAuthor ==. val sid
+
+    chat <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @Chat
+        where_ $ x ^. ChatId ==. val xid
+        return x
+
+    let channelId = S.fromList [sid, rid]
+
+    ChatRoom channelMapTVar <- getSubYesod
+
+    channelMap <- readTVarIO channelMapTVar
+
+    let maybeChan = M.lookup channelId channelMap
+    
+    let response = object [ "chatId" .= xid
+                          , "type" .= ChatMessageTypeUndo
+                          , "source" .= sid
+                          , "recipient" .= rid
+                          , "message" .= (commonmarkToHtml [] . chatMessage . entityVal <$> chat)
+                          ]
+
+    atomically $ case maybeChan of
+      Nothing -> return ()
+      
+      Just (writeChan,_) -> do
+          writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
+          writeTChan writeChan $ toStrict $ encodeToLazyText response
+
+    return response
+
+
 deleteChatRemoveR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatRemoveR sid _ rid xid = do
+deleteChatRemoveR sid cid rid xid = do
 
     checkAuthorized sid
     
@@ -191,11 +237,17 @@ deleteChatRemoveR sid _ rid xid = do
     channelMap <- readTVarIO channelMapTVar
 
     let maybeChan = M.lookup channelId channelMap
+    rndr <- getUrlRender
+    rtp <- getRouteToParent
+    let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
     
     let response = object [ "chatId" .= xid
                           , "type" .= ChatMessageTypeRemove
                           , "source" .= sid
                           , "recipient" .= rid
+                          , "links" .= object
+                            [ "undo" .= expath (rtp $ ChatUndoR sid cid rid xid) 
+                            ]
                           ]
 
     atomically $ case maybeChan of
@@ -209,7 +261,7 @@ deleteChatRemoveR sid _ rid xid = do
 
 
 deleteChatDeleteR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatDeleteR sid _ rid xid = do
+deleteChatDeleteR sid cid rid xid = do
 
     checkAuthorized sid
     
@@ -245,11 +297,17 @@ deleteChatDeleteR sid _ rid xid = do
     channelMap <- readTVarIO channelMapTVar
 
     let maybeChan = M.lookup channelId channelMap
+    rndr <- getUrlRender
+    rtp <- getRouteToParent
+    let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
 
     let response = object [ "chatId" .= xid
                           , "type" .= msgType 
                           , "source" .= sid
                           , "recipient" .= rid
+                          , "links" .= object
+                            [ "undo" .= expath (rtp $ ChatUndoR sid cid rid xid) 
+                            ]
                           ]
 
     atomically $ case maybeChan of
@@ -430,10 +488,7 @@ getChatRoomR sid cid rid = do
         )
 
     let dayLogs = sortBy (\(d1,_) (d2,_) -> compare d1 d2)
-             $ (sortBy (\
-                             (Entity _ (Chat _ _ _ _ t1 _ _ _ _ _ _ _))
-                             (Entity _ (Chat _ _ _ _ t2 _ _ _ _ _ _ _)) -> compare t1 t2
-                       ) <$>
+             $ (sortBy (\(Entity _ c1) (Entity _ c2) -> compare (chatCreated c1) (chatCreated c2)) <$>
                )
              <$> groupByDay chats
     
@@ -510,6 +565,8 @@ getChatRoomR sid cid rid = do
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idChatOutput <- newIdent
+        idBubblePref <- newIdent
+        idBubbleMenuPref <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
