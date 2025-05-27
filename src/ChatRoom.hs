@@ -232,7 +232,7 @@ deleteChatRemoveR sid cid rid xid = do
         return x
 
     case chat of
-      Just (Entity _ (Chat aid' rid' _ _ _ _ _ _ _ _ _ _))
+      Just (Entity _ (Chat aid' rid' _ _ _ _ _ _ _ _ _ _ _))
           | aid' == sid -> liftHandler $ runDB $ update $ \x -> do
                 set x [ ChatRemovedAuthor =. val True ]
                 where_ $ x ^. ChatId ==. val xid
@@ -251,7 +251,6 @@ deleteChatRemoveR sid cid rid xid = do
     let channelId = S.fromList [sid, rid]
 
     ChatRoom channelMapTVar <- getSubYesod
-
     channelMap <- readTVarIO channelMapTVar
     let maybeChan = M.lookup channelId channelMap
     rndr <- getUrlRender
@@ -556,6 +555,7 @@ getChatRoomR sid cid rid = do
         setTitleI MsgChats
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
+        idMain <- newIdent
         idChatOutput <- newIdent
         idBubblePref <- newIdent
         idBubbleMenuPref <- newIdent
@@ -583,7 +583,7 @@ getChatRoomR sid cid rid = do
       
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
-      groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _)) -> utctDay t)
+      groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _ _)) -> utctDay t)
 
 
 
@@ -614,7 +614,8 @@ chatApp authorId contactId recipientId = do
         (runConduit (sourceWS .| mapM_C (
              \msg -> do
                  now <- liftIO getCurrentTime
-                 let chat = Chat authorId recipientId ChatTypeMessage now msg False Nothing False Nothing False False Nothing
+                 let chat = Chat authorId recipientId ChatTypeMessage now msg
+                                 False Nothing False Nothing False False Nothing Nothing
                  cid <- liftHandler (runDB $ insert chat)
                  rndr <- getUrlRender
                  rtp <- getRouteToParent

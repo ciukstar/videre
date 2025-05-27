@@ -244,10 +244,8 @@ postPushMessageR sid cid rid = do
                                                 , callStatus = Nothing
                                                 }
                     cId <- insert call
-                    insert_ $ Chat
-                        callCaller callCallee ChatTypeVideoCall now (msgr MsgVideoCall)
-                        False Nothing False Nothing False False
-                        (Just cId)
+                    insert_ $ Chat callCaller callCallee ChatTypeVideoCall now (msgr MsgVideoCall)
+                                   False Nothing False Nothing False False (Just cId) Nothing
                     return cId
                     
             Just PushMsgTypeAudioCall -> do
@@ -260,9 +258,8 @@ postPushMessageR sid cid rid = do
                                             }
                 liftHandler $ (pure <$>) $ runDB $ do   
                     cId <- insert call
-                    insert_ $ Chat
-                        callCaller callCallee ChatTypeAudioCall now (msgr MsgAudioCall)
-                        False Nothing False Nothing False False (Just cId)
+                    insert_ $ Chat callCaller callCallee ChatTypeAudioCall now (msgr MsgAudioCall)
+                                   False Nothing False Nothing False False (Just cId) Nothing
                     return cId                        
                     
             _otherwise -> return Nothing

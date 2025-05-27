@@ -97,7 +97,20 @@ main
                     width: 10px
                     height: 13px
                     clip-path: polygon(100% 0, 100% 100%, 93% 77%, 86% 58%, 80% 45%, 69% 31%, 54% 21%, 33% 11%, 0 0)
-                    
+
+    blockquote
+        position: sticky
+        bottom: 0
+        z-index: 2
+        background-color: var(--surface-container)
+
+        p
+            margin: 0
+
+footer
+    ##{idMessageForm}
+        margin: 0
+
 
 ##{idDialogOutgoingCall}
 

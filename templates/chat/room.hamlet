@@ -34,7 +34,7 @@
               _{MsgViewContact}
               
 
-<main.responsive.no-padding>
+<main.responsive.no-padding ##{idMain}>
 
   <div ##{idChatOutput}>
 
@@ -43,7 +43,7 @@
         <time.day-bubble.small-text.tiny-padding.tiny-margin.small-elevate.round datetime=#{dt}>
           #{dt}
         
-      $forall Entity xid (Chat author recipient logType time msg delivered tDelivered read tRead rmByA rmByR _) <- logs
+      $forall Entity xid (Chat author recipient logType time msg delivered tDelivered read tRead rmByA rmByR _ _) <- logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
           $if incoming && rmByR

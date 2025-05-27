@@ -11,11 +11,12 @@ document.body.querySelectorAll('time.time-bubble[datetime]').forEach(function (x
   );
 });
 
-const main = document.querySelector('main');
+const main = document.getElementById(#{idMain});
 const chatOutput = document.getElementById(#{idChatOutput});
 const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
 const buttonSend = document.getElementById(#{idButtonSend});
+
 const ws = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
 
 const ackObsever = new IntersectionObserver(
@@ -219,7 +220,39 @@ ws.onmessage = function (e) {
               }) ());
 
               itemReply.onclick = function (e) {
-                throw new Error('Not implemented');
+                main.prepend((() => {
+                  const blockquote = document.createElement('blockquote');
+                  blockquote.innerHTML = content.innerHTML;
+
+                  blockquote.prepend((() => {
+                    const span = document.createElement('span');
+                    span.classList.add('primary-text','small-text');
+                    span.textContent = 'Author Name here...';
+
+                    span.appendChild((() => {
+                      const button = document.createElement('button');
+                      button.classList.add('small','transparent','circle');
+                      button.style.float = 'inline-end';
+                      button.appendChild((() => {
+                        const icon = document.createElement('i');
+                        icon.textContent = 'close';
+                        return icon;
+                      }) ());
+
+                      button.onclick = function (e) {
+                        blockquote.remove();
+                      };
+                      
+                      return button;
+                    }) ());
+                    
+                    return span;
+                  }) ());
+                  
+                  return blockquote;
+                }) ());
+                
+                main.scroll(0, main.scrollHeight);                
               };
               
               return itemReply;
@@ -714,7 +747,7 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
   };
 
   menu.querySelector('li.#{rawJS classActionReply}').onclick = function (e) {
-    console.log('REPLY');
+    throw new Error('No implemented yet');
   };
     
   menu.querySelector('li.#{rawJS classActionCopy}').onclick = function (e) {
