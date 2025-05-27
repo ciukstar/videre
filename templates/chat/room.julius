@@ -200,10 +200,35 @@ ws.onmessage = function (e) {
             menu.id = `#{rawJS idBubbleMenuPref}${data.chatId}`;
             menu.classList.add('left','top','no-wrap');
             
+            const itemReply = menu.appendChild((() => {
+              
+              const itemReply = document.createElement('li');
+              itemReply.classList.add(#{classActionReply},'wave');
+              itemReply.setAttribute('data-ui',`#${menu.id}`);
+              
+              itemReply.appendChild((() => {
+                const icon = document.createElement('i');
+                icon.textContent = 'reply';                
+                return icon;
+              }) ());
+              
+              itemReply.appendChild((() => {
+                const span = document.createElement('span');
+                span.textContent = #{msgr MsgReply};
+                return span;
+              }) ());
+
+              itemReply.onclick = function (e) {
+                throw new Error('Not implemented');
+              };
+              
+              return itemReply;
+            }) ());
+            
             const itemCopy = menu.appendChild((() => {
               
               const itemCopy = document.createElement('li');
-              itemCopy.classList.add('action-copy','wave');
+              itemCopy.classList.add(#{classActionCopy},'wave');
               itemCopy.setAttribute('data-ui',`#${menu.id}`);
               
               itemCopy.appendChild((() => {
@@ -261,7 +286,7 @@ ws.onmessage = function (e) {
             const itemDelete = menu.appendChild((() => {
               
               const itemDelete = document.createElement('li');
-              itemDelete.classList.add('action-delete','wave');
+              itemDelete.classList.add(#{classActionDelete},'wave');
               itemDelete.setAttribute('data-ui',`#${menu.id}`);
               
               itemDelete.appendChild((() => {
@@ -276,7 +301,7 @@ ws.onmessage = function (e) {
                 return span;
               }) ());
 
-              itemDelete.setAttribute('data-ui', `##{rawJS idDialogDelete}${data.chatId}`);
+              itemDelete.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
               
               return itemDelete;
             }) ());
@@ -298,7 +323,7 @@ ws.onmessage = function (e) {
 
         statusLine.appendChild((() => {
           const dialog = document.createElement('dialog');
-          dialog.id = `#{rawJS idDialogDelete}${data.chatId}`;
+          dialog.id = `#{rawJS idDialogDeletePref}${data.chatId}`;
           
           dialog.appendChild((() => {
             const title = document.createElement('h6');
@@ -320,7 +345,7 @@ ws.onmessage = function (e) {
               const cancel = document.createElement('button');
               cancel.classList.add('transparent','link');
               cancel.textContent = #{msgr MsgCancel};
-              cancel.setAttribute('data-ui', `##{rawJS idDialogDelete}${data.chatId}`);
+              cancel.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
               return cancel;
             }) ());
 
@@ -330,7 +355,7 @@ ws.onmessage = function (e) {
                 const del = document.createElement('button');
                 del.classList.add('error');
                 del.textContent = #{msgr MsgDele};
-                del.setAttribute('data-ui',`##{rawJS idDialogDelete}${data.chatId}`);
+                del.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
                 del.onclick = function (e) {
                   
                   fetch(data.links['delete'], {
@@ -408,7 +433,7 @@ ws.onmessage = function (e) {
             const buttonRemove = nav.appendChild((() => {
               const remove = document.createElement('button');
               remove.textContent = #{msgr MsgRemove};
-              remove.setAttribute('data-ui',`##{rawJS idDialogDelete}${data.chatId}`);
+              remove.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
               remove.onclick = function (e) {
                 
                 const xref = isOutgoing ? data.links['remove'] : data.links['dismiss'];
@@ -582,7 +607,7 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
   }).then(function (result) {
     document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
     document.getElementById(#{idDialogOutgoingCall}).show();
-    document.getElementById(#{idAudioOutgoingCallRingtone}).play();
+    document.getElementById(#{idAudioOutgoingCallRingtone}).play().catch(_ => {});
   }).catch(function (err) {
     console.error(err);
   });
@@ -607,7 +632,7 @@ document.getElementById(#{idButtonAudioCall}).addEventListener('click', function
   }).then(function (result) {
     document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
     document.getElementById(#{idDialogOutgoingCall}).show();
-    document.getElementById(#{idAudioOutgoingCallRingtone}).play();
+    document.getElementById(#{idAudioOutgoingCallRingtone}).play().catch(_ => {});
   }).catch(function (err) {
     console.error(err);
   });
@@ -687,8 +712,49 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
     menu.classList.remove('top','bottom','left','right');
     menu.classList.add(v,h);
   };
+
+  menu.querySelector('li.#{rawJS classActionReply}').onclick = function (e) {
+    console.log('REPLY');
+  };
+    
+  menu.querySelector('li.#{rawJS classActionCopy}').onclick = function (e) {
+    
+    navigator.clipboard.writeText(
+      bubble.querySelector('.bubble-content').textContent
+    ).then(() => {
+      
+      const snackbar = document.createElement('div');
+      snackbar.classList.add('snackbar','active');
+      
+      snackbar.appendChild((() => {
+        const content = document.createElement('div');
+        content.classList.add('max');
+        content.textContent = #{msgr MsgContentCopied};
+        return content;
+      }) ());
+      
+      snackbar.appendChild((() => {
+        const close = document.createElement('button');
+        close.classList.add('close','transparent','circle','small');
+        close.addEventListener('click', e => {
+          snackbar.remove();
+        });
+        close.appendChild((() => {
+          const icon = document.createElement('i');
+          icon.textContent = 'close';
+          return icon; 
+        }) ());         
+        return close;
+      }) ());
+      
+      document.body.appendChild(snackbar);
+
+      setTimeout(() => { snackbar.remove(); }, 2000);
+      
+    });
+  };
   
-  bubble.querySelectorAll('dialog.actions button[data-action]').forEach(button => {
+  bubble.querySelectorAll('dialog.#{rawJS classDeleteActions} button[data-action]').forEach(button => {
     
     button.onclick = function (e) {
       
@@ -781,44 +847,6 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
       
     };
   });
-
-  
-  menu.querySelector('li.action-copy').onclick = function (e) {
-    
-    navigator.clipboard.writeText(
-      bubble.querySelector('.bubble-content').textContent
-    ).then(() => {
-      
-      const snackbar = document.createElement('div');
-      snackbar.classList.add('snackbar','active');
-      
-      snackbar.appendChild((() => {
-        const content = document.createElement('div');
-        content.classList.add('max');
-        content.textContent = #{msgr MsgContentCopied};
-        return content;
-      }) ());
-      
-      snackbar.appendChild((() => {
-        const close = document.createElement('button');
-        close.classList.add('close','transparent','circle','small');
-        close.addEventListener('click', e => {
-          snackbar.remove();
-        });
-        close.appendChild((() => {
-          const icon = document.createElement('i');
-          icon.textContent = 'close';
-          return icon; 
-        }) ());         
-        return close;
-      }) ());
-      
-      document.body.appendChild(snackbar);
-
-      setTimeout(() => { snackbar.remove(); }, 2000);
-      
-    });
-  };
 
 });
 

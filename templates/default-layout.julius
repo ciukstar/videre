@@ -211,7 +211,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
     document.getElementById(#{idOverlayDialogChatNotification}).classList.add('active');
     document.getElementById(#{idDialogChatNotification}).show();
-    document.getElementById(#{idAudioIncomingChatRingtone}).play();
+    document.getElementById(#{idAudioIncomingChatRingtone}).play().catch(_ => {});
 
   } else if (message.data.messageType === #{PushMsgTypeCancel}) {
 
@@ -233,7 +233,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idFigcaptionVideoCallerPhoto}).textContent = message.data.senderName;
     document.getElementById(#{idOverlayDialogIncomingVideoCall}).classList.add('active');
     document.getElementById(#{idDialogIncomingVideoCall}).show();
-    document.getElementById(#{idAudioIncomingVideoCallRingtone}).play();
+    document.getElementById(#{idAudioIncomingVideoCallRingtone}).play().catch(_ => {});
 
   } else if (message.data.messageType === #{PushMsgTypeAudioCall}) {
     
@@ -241,7 +241,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idFigcaptionAudioCallerPhoto}).textContent = message.data.senderName;
     document.getElementById(#{idOverlayDialogIncomingAudioCall}).classList.add('active');
     document.getElementById(#{idDialogIncomingAudioCall}).show();
-    document.getElementById(#{idAudioIncomingAudioCallRingtone}).play();
+    document.getElementById(#{idAudioIncomingAudioCallRingtone}).play().catch(_ => {});
 
   }
 

@@ -32,6 +32,7 @@ Chat json
     removedAuthor Bool
     removedRecipient Bool
     call CallId Maybe OnDeleteCascade
+    reply ChatId Maybe OnDeleteSetNull
     
 
 Call

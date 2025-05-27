@@ -67,7 +67,7 @@ import Foundation
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
       , MsgSubscribe, MsgDele, MsgCopy, MsgRemovedByRecipient, MsgContentCopied
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
-      , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele
+      , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele, MsgReply
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgRemove
       )
     )
@@ -559,8 +559,12 @@ getChatRoomR sid cid rid = do
         idChatOutput <- newIdent
         idBubblePref <- newIdent
         idBubbleMenuPref <- newIdent
-        idOverlayDialogDelete <- newIdent
-        idDialogDelete <- newIdent
+        classActionReply <- newIdent
+        classActionCopy <- newIdent
+        classActionDelete <- newIdent
+        idOverlayDialogDeletePref <- newIdent
+        classDeleteActions <- newIdent
+        idDialogDeletePref <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
@@ -644,7 +648,7 @@ chatApp authorId contactId recipientId = do
                          return x
 
                      case chat' of
-                       Just (Entity _ (Chat aid rid _ _ message _ _ _ _ _ _ _)) -> do
+                       Just (Entity _ (Chat aid rid _ _ message _ _ _ _ _ _ _ _)) -> do
 
                            mVapidKeys <- liftHandler getVapidKeys
                            case mVapidKeys of

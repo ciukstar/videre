@@ -108,18 +108,22 @@
 
                   <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid}>
 
-                    <li.action-copy.wave data-ui=##{idBubbleMenuPref}#{xid}>
+                    <li.#{classActionReply}.wave data-ui=##{idBubbleMenuPref}#{xid}>
+                      <i>reply
+                      _{MsgReply}
+
+                    <li.#{classActionCopy}.wave data-ui=##{idBubbleMenuPref}#{xid}>
                       <i>content_copy
                       _{MsgCopy}
 
-                    <li.action-delete.wave data-ui=##{idDialogDelete}#{xid}>
+                    <li.#{classActionDelete}.wave data-ui=##{idDialogDeletePref}#{xid}>
                       <i>delete
                       _{MsgDele}
 
 
-                <div.overlay ##{idOverlayDialogDelete}#{xid}>
+                <div.overlay ##{idOverlayDialogDeletePref}#{xid}>
 
-                <dialog.actions ##{idDialogDelete}#{xid}>
+                <dialog.#{classDeleteActions} ##{idDialogDeletePref}#{xid}>
                   <h6>
                     _{MsgConfirmPlease}
 
@@ -127,16 +131,16 @@
                     _{MsgDeleteAreYouSure}
 
                   <nav.right-align>
-                    <button.transparent.link data-ui=##{idDialogDelete}#{xid}>
+                    <button.transparent.link data-ui=##{idDialogDeletePref}#{xid}>
                       _{MsgCancel}
 
                     $if outgoing
                       <button.error data-action=@{rtp $ ChatDeleteR sid cid rid xid} role=button 
-                                    data-ui=##{idDialogDelete}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                                    data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
                         _{MsgDele}
         
                     <button data-action=@{rtp $ ChatRemoveR sid cid rid xid} role=button 
-                            data-ui=##{idDialogDelete}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                            data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
                       _{MsgRemove}
 
               <span.bubble-tail-out>
