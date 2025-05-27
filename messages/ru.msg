@@ -105,7 +105,7 @@ SubscriptionCanceled: Подписка отменена
 SubscriptionFailed: Подписка не удалась
 SubscriptionSucceeded: Подписка прошла успешно
 RemoveAreYouSure: Вы уверены, что хотите удалить?
-Remove: Удалить
+Remove: Очистить
 CalleeDeclinedTheCall callee: #{callee} отклонил(а) звонок
 CallDeclined: Вызов отклонен
 IncomingAudioCall: Входящий аудиовызов
@@ -215,8 +215,8 @@ RecordEdited: Запись отредактирована
 SuperuserCannotBeDeleted: Суперпользователя нельзя удалить
 Attribution: Атрибуция
 AnotherAccountAccessProhibited: Доступ к учетной записи другого пользователя запрещен
-PersonalInfo: Персональные данные
-Account: Учетная запись
+PersonalInfo: Личные данные
+Account: Логин
 Birthday: День рождения
 NotIndicated: Не указано
 Initialize: Инициализировать

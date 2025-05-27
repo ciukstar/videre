@@ -112,15 +112,32 @@
                       <i>content_copy
                       _{MsgCopy}
 
-                    $if incoming
-                      <li.action-delete.wave data-href=@{rtp $ ChatRemoveR sid cid rid xid} data-ui=##{idBubbleMenuPref}#{xid}>
-                        <i>delete
-                        _{MsgDele}
+                    <li.action-delete.wave data-ui=##{idDialogDelete}#{xid}>
+                      <i>delete
+                      _{MsgDele}
 
-                    $elseif outgoing
-                      <li.action-delete.wave data-href=@{rtp $ ChatDeleteR sid cid rid xid} data-ui=##{idBubbleMenuPref}#{xid}>
-                        <i>delete
+
+                <div.overlay ##{idOverlayDialogDelete}#{xid}>
+
+                <dialog.actions ##{idDialogDelete}#{xid}>
+                  <h6>
+                    _{MsgConfirmPlease}
+
+                  <p>
+                    _{MsgDeleteAreYouSure}
+
+                  <nav.right-align>
+                    <button.transparent.link data-ui=##{idDialogDelete}#{xid}>
+                      _{MsgCancel}
+
+                    $if outgoing
+                      <button.error data-action=@{rtp $ ChatDeleteR sid cid rid xid} role=button 
+                                    data-ui=##{idDialogDelete}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
                         _{MsgDele}
+        
+                    <button data-action=@{rtp $ ChatRemoveR sid cid rid xid} role=button 
+                            data-ui=##{idDialogDelete}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                      _{MsgRemove}
 
               <span.bubble-tail-out>
                 <span.bubble-tail>

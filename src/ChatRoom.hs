@@ -67,7 +67,8 @@ import Foundation
       , MsgUserYouSeemsUnsubscribed, MsgUserAppearsToBeUnavailable, MsgAppName
       , MsgSubscribe, MsgDele, MsgCopy, MsgRemovedByRecipient, MsgContentCopied
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
-      , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo
+      , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele
+      , MsgDeleteAreYouSure, MsgConfirmPlease, MsgRemove
       )
     )
 
@@ -225,17 +226,33 @@ deleteChatRemoveR sid cid rid xid = do
 
     checkAuthorized sid
     
-    liftHandler $ runDB $ update $ \x -> do
-        set x [ChatRemovedRecipient =. val True]
+    chat <- liftHandler $ runDB $ selectOne $ do
+        x <- from $ table @Chat
         where_ $ x ^. ChatId ==. val xid
-        where_ $ x ^. ChatRecipient ==. val sid
+        return x
+
+    case chat of
+      Just (Entity _ (Chat aid' rid' _ _ _ _ _ _ _ _ _ _))
+          | aid' == sid -> liftHandler $ runDB $ update $ \x -> do
+                set x [ ChatRemovedAuthor =. val True ]
+                where_ $ x ^. ChatId ==. val xid
+                where_ $ x ^. ChatAuthor ==. val sid
+                                                                 
+          | rid' == rid -> liftHandler $ runDB $ update $ \x -> do
+                set x [ ChatRemovedRecipient =. val True ]
+                where_ $ x ^. ChatId ==. val xid
+                where_ $ x ^. ChatRecipient ==. val sid
+      
+          | otherwise -> return ()
+          
+      Nothing -> return ()
+    
 
     let channelId = S.fromList [sid, rid]
 
     ChatRoom channelMapTVar <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
-
     let maybeChan = M.lookup channelId channelMap
     rndr <- getUrlRender
     rtp <- getRouteToParent
@@ -261,34 +278,14 @@ deleteChatRemoveR sid cid rid xid = do
 
 
 deleteChatDeleteR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatDeleteR sid cid rid xid = do
+deleteChatDeleteR sid _cid rid xid = do
 
     checkAuthorized sid
-    
-    removed <- liftHandler $ runDB $ selectOne $ do
+
+    liftHandler $ runDB $ delete $ do
         x <- from $ table @Chat
         where_ $ x ^. ChatId ==. val xid
         where_ $ x ^. ChatAuthor ==. val sid
-        where_ $ x ^. ChatRemovedAuthor ==. val True
-
-    msgType <- case removed of
-      Just _ -> do
-          liftHandler $ runDB $ delete $ do
-              x <- from $ table @Chat
-              where_ $ x ^. ChatId ==. val xid
-              where_ $ x ^. ChatAuthor ==. val sid
-              where_ $ x ^. ChatRemovedAuthor ==. val True
-
-          return ChatMessageTypeDelete
-
-      Nothing -> do
-          liftHandler $ runDB $ update $ \x -> do
-              set x [ChatRemovedAuthor =. val True]
-              where_ $ x ^. ChatId ==. val xid
-              where_ $ x ^. ChatAuthor ==. val sid
-              where_ $ x ^. ChatRemovedAuthor ==. val False
-
-          return ChatMessageTypeRemove
 
     let channelId = S.fromList [sid, rid]
 
@@ -297,17 +294,12 @@ deleteChatDeleteR sid cid rid xid = do
     channelMap <- readTVarIO channelMapTVar
 
     let maybeChan = M.lookup channelId channelMap
-    rndr <- getUrlRender
-    rtp <- getRouteToParent
-    let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
 
     let response = object [ "chatId" .= xid
-                          , "type" .= msgType 
+                          , "type" .= ChatMessageTypeDelete
                           , "source" .= sid
                           , "recipient" .= rid
-                          , "links" .= object
-                            [ "undo" .= expath (rtp $ ChatUndoR sid cid rid xid) 
-                            ]
+                          , "links" .= object []
                           ]
 
     atomically $ case maybeChan of
@@ -567,6 +559,8 @@ getChatRoomR sid cid rid = do
         idChatOutput <- newIdent
         idBubblePref <- newIdent
         idBubbleMenuPref <- newIdent
+        idOverlayDialogDelete <- newIdent
+        idDialogDelete <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
@@ -633,7 +627,8 @@ chatApp authorId contactId recipientId = do
                      , "links" .= object
                        [ "delivered" .= expath (rtp $ ChatDeliveredR recipientId contactId authorId cid)
                        , "read" .= expath (rtp $ ChatReadR recipientId contactId authorId cid)
-                       , "remove" .= expath (rtp $ ChatRemoveR recipientId contactId authorId cid)
+                       , "dismiss" .= expath (rtp $ ChatRemoveR recipientId contactId authorId cid)
+                       , "remove" .= expath (rtp $ ChatRemoveR authorId contactId recipientId cid)
                        , "delete" .= expath (rtp $ ChatDeleteR authorId contactId recipientId cid)
                        ]
                      ]

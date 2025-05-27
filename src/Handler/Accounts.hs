@@ -99,7 +99,8 @@ import Yesod.Core
     , invalidArgsI, handlerToWidget
     )
 import Yesod.Core.Content
-    (TypedContent (TypedContent), ToContent (toContent))
+    ( TypedContent (TypedContent), ToContent (toContent)
+    )
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields
     ( fileField, optionsPairs, radioField', OptionList (olOptions)

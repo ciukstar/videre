@@ -11,16 +11,17 @@
       <i>edit
 
 <main.responsive.no-padding>
-  
-  <div.tabs.min>
-    <a.active href=@{AccountR uid}>
-      _{MsgAccount}
-    
-    <a href=@{AccountInfoR uid}>
-      _{MsgPersonalInfo}
-    
-    <a href=@{AccountSubscriptionsR uid}>
-      _{MsgSubscriptions}
+
+  <div.scroll>
+    <div.tabs.min>
+      <a.active href=@{AccountR uid}>
+        _{MsgAccount}
+
+      <a href=@{AccountInfoR uid}>
+        _{MsgPersonalInfo}
+
+      <a href=@{AccountSubscriptionsR uid}>
+        _{MsgSubscriptions}
 
   <div.page.active.padding>
   
@@ -40,7 +41,7 @@
                   _{role} #
 
     <nav.center-align>
-      <button.transparent.link href=@{AuthR LogoutR}>
+      <a.button.transparent.link href=@{AuthR LogoutR} role=button>
         _{MsgSignOut}
 
 ^{widgetSnackbar msgs}

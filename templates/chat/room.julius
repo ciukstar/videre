@@ -276,10 +276,143 @@ ws.onmessage = function (e) {
                 return span;
               }) ());
 
-              itemDelete.onclick = function (e) {
+              itemDelete.setAttribute('data-ui', `##{rawJS idDialogDelete}${data.chatId}`);
+              
+              return itemDelete;
+            }) ());
+            
+            return menu;
+          }) ());
 
-                const xref = isOutgoing ? data.links['delete'] : data.links['remove'];
+          anchor.setAttribute('data-ui',`#${menu.id}`);
+                  
+          anchor.onclick = function (e) {
+            const v = anchor.getBoundingClientRect().top > (window.innerHeight / 2) ? 'top' : 'bottom';
+            const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
+            menu.classList.remove('top','bottom','left','right');
+            menu.classList.add(v,h);
+          };
+          
+          return anchor;
+        }) ());
+
+        statusLine.appendChild((() => {
+          const dialog = document.createElement('dialog');
+          dialog.id = `#{rawJS idDialogDelete}${data.chatId}`;
+          
+          dialog.appendChild((() => {
+            const title = document.createElement('h6');
+            title.textContent = #{msgr MsgConfirmPlease};
+            return title;
+          }) ());
+
+          dialog.appendChild((() => {
+            const content = document.createElement('p');
+            content.textContent = #{msgr MsgDeleteAreYouSure};
+            return content;
+          }) ());
+
+          dialog.appendChild((() => {
+            const nav = document.createElement('nav');
+            nav.classList.add('right-align');
+            
+            nav.appendChild((() => {
+              const cancel = document.createElement('button');
+              cancel.classList.add('transparent','link');
+              cancel.textContent = #{msgr MsgCancel};
+              cancel.setAttribute('data-ui', `##{rawJS idDialogDelete}${data.chatId}`);
+              return cancel;
+            }) ());
+
+            if (isOutgoing) {
+              
+              nav.appendChild((() => {
+                const del = document.createElement('button');
+                del.classList.add('error');
+                del.textContent = #{msgr MsgDele};
+                del.setAttribute('data-ui',`##{rawJS idDialogDelete}${data.chatId}`);
+                del.onclick = function (e) {
+                  
+                  fetch(data.links['delete'], {
+                    method: 'DELETE',
+                    headers: { 'Accept': 'application/json' }
+                  }).then(res => {
+                    
+                    res.json().then(function (data) {
+
+                      document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
+                      
+                      const snackbar = document.createElement('div');
+                      snackbar.classList.add('snackbar','active');
+                      
+                      snackbar.appendChild((() => {
+                        const content = document.createElement('div');
+                        content.classList.add('max');
+                        content.textContent = #{msgr MsgMessageDeleted};
+                        return content;
+                      }) ());
+                      
+                      snackbar.appendChild((() => {
+                        const close = document.createElement('button');
+                        close.classList.add('close','transparent','circle','small');
+                        close.addEventListener('click', e => {
+                          snackbar.remove();
+                        });
+                        close.appendChild((() => {
+                          const icon = document.createElement('i');
+                          icon.textContent = 'close';
+                          return icon; 
+                        }) ());         
+                        return close;
+                      }) ());
+                      
+                      document.body.appendChild(snackbar);
+                      setTimeout(() => { snackbar.remove(); }, 6000);
+                    });
+                    
+                  }).catch(err => {
+                    
+                    const snackbar = document.createElement('div');
+                    snackbar.classList.add('snackbar','error','active');
+                    
+                    snackbar.appendChild((() => {
+                      const content = document.createElement('div');
+                      content.classList.add('max');
+                      content.textContent = err.message;
+                      return content;
+                    }) ());
+                    
+                    snackbar.appendChild((() => {
+                      const close = document.createElement('button');
+                      close.classList.add('close','transparent','circle','small');
+                      close.addEventListener('click', e => {
+                        snackbar.remove();
+                      });
+                      close.appendChild((() => {
+                        const icon = document.createElement('i');
+                        icon.textContent = 'close';
+                        return icon; 
+                      }) ());         
+                      return close;
+                    }) ());
+                    
+                    document.body.appendChild(snackbar);
+                    setTimeout(() => { snackbar.remove(); }, 6000); 
+                  });
+                };
                 
+                return del;
+              }) ());
+            }
+            
+            const buttonRemove = nav.appendChild((() => {
+              const remove = document.createElement('button');
+              remove.textContent = #{msgr MsgRemove};
+              remove.setAttribute('data-ui',`##{rawJS idDialogDelete}${data.chatId}`);
+              remove.onclick = function (e) {
+                
+                const xref = isOutgoing ? data.links['remove'] : data.links['dismiss'];
+
                 fetch(xref, {
                   method: 'DELETE',
                   headers: { 'Accept': 'application/json' }
@@ -295,8 +428,7 @@ ws.onmessage = function (e) {
                     snackbar.appendChild((() => {
                       const content = document.createElement('div');
                       content.classList.add('max');
-                      content.textContent = data.type === #{ChatMessageTypeRemove}
-                        ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
+                      content.textContent = #{msgr MsgMessageRemoved};
                       return content;
                     }) ());
                     
@@ -361,27 +493,16 @@ ws.onmessage = function (e) {
                   
                   document.body.appendChild(snackbar);
                   setTimeout(() => { snackbar.remove(); }, 6000); 
-                }).finally(() => {
-                  menu.classList.remove('active');
                 });
               };
               
-              return itemDelete;
+              return remove;
             }) ());
             
-            return menu;
+            return nav;
           }) ());
-
-          anchor.setAttribute('data-ui',`#${menu.id}`);
-                  
-          anchor.onclick = function (e) {
-            const v = anchor.getBoundingClientRect().top > (window.innerHeight / 2) ? 'top' : 'bottom';
-            const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
-            menu.classList.remove('top','bottom','left','right');
-            menu.classList.add(v,h);
-          };
           
-          return anchor;
+          return dialog; 
         }) ());
         
         return statusLine;
@@ -566,41 +687,76 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
     menu.classList.remove('top','bottom','left','right');
     menu.classList.add(v,h);
   };
-
-  menu.querySelector('li.action-delete').onclick = function (e) {
-    fetch(e.target.dataset.href, {
-      method: 'DELETE',
-      headers: { 'Accept': 'application/json' }
-    }).then(res => {
+  
+  bubble.querySelectorAll('dialog.actions button[data-action]').forEach(button => {
+    
+    button.onclick = function (e) {
       
-      res.json().then(function (data) {
+      fetch(e.target.dataset.action, {
+        method: 'DELETE',
+        headers: { 'Accept': 'application/json' }
+      }).then(res => {
+        
+        res.json().then(function (data) {
 
-        document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
+          document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
+          
+          const snackbar = document.createElement('div');
+          snackbar.classList.add('snackbar','active');
+          
+          snackbar.appendChild((() => {
+            const content = document.createElement('div');
+            content.classList.add('max');
+            content.textContent = data.type === #{ChatMessageTypeRemove}
+              ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
+            return content;
+          }) ());
+
+          if (data.type === #{ChatMessageTypeRemove}) {
+            snackbar.appendChild((() => {
+              const undo = document.createElement('button');
+              undo.classList.add('transparent','inverse-link');
+              undo.textContent = #{msgr MsgUndo};
+              undo.onclick = function (e) {
+                fetch(data.links.undo, {
+                  method: 'POST',
+                  headers: { 'Accept': 'application/json' }
+                }).then(_ => {
+                  snackbar.remove();
+                });
+              };
+              return undo;
+            }) ());
+          }
+          
+          snackbar.appendChild((() => {
+            const close = document.createElement('button');
+            close.classList.add('close','transparent','circle','small');
+            close.addEventListener('click', e => {
+              snackbar.remove();
+            });
+            close.appendChild((() => {
+              const icon = document.createElement('i');
+              icon.textContent = 'close';
+              return icon;
+            }) ());         
+            return close;
+          }) ());
+          
+          document.body.appendChild(snackbar);
+          setTimeout(() => { snackbar.remove(); }, 6000);
+        });
+        
+      }).catch(err => {
         
         const snackbar = document.createElement('div');
-        snackbar.classList.add('snackbar','active');
+        snackbar.classList.add('snackbar','error','active');
         
         snackbar.appendChild((() => {
           const content = document.createElement('div');
           content.classList.add('max');
-          content.textContent = data.type === #{ChatMessageTypeRemove}
-            ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
+          content.textContent = err.message;
           return content;
-        }) ());
-
-        snackbar.appendChild((() => {
-          const undo = document.createElement('button');
-          undo.classList.add('transparent','inverse-link');
-          undo.textContent = #{msgr MsgUndo};
-          undo.onclick = function (e) {
-            fetch(data.links.undo, {
-              method: 'POST',
-              headers: { 'Accept': 'application/json' }
-            }).then(_ => {
-              snackbar.remove();
-            });
-          };
-          return undo;
         }) ());
         
         snackbar.appendChild((() => {
@@ -612,48 +768,21 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
           close.appendChild((() => {
             const icon = document.createElement('i');
             icon.textContent = 'close';
-            return icon;
+            return icon; 
           }) ());         
           return close;
         }) ());
         
         document.body.appendChild(snackbar);
-        setTimeout(() => { snackbar.remove(); }, 6000);
+        setTimeout(() => { snackbar.remove(); }, 6000); 
+      }).finally(() => {
+        menu.classList.remove('active');
       });
       
-    }).catch(err => {
-      
-      const snackbar = document.createElement('div');
-      snackbar.classList.add('snackbar','error','active');
-      
-      snackbar.appendChild((() => {
-        const content = document.createElement('div');
-        content.classList.add('max');
-        content.textContent = err.message;
-        return content;
-      }) ());
-      
-      snackbar.appendChild((() => {
-        const close = document.createElement('button');
-        close.classList.add('close','transparent','circle','small');
-        close.addEventListener('click', e => {
-          snackbar.remove();
-        });
-        close.appendChild((() => {
-          const icon = document.createElement('i');
-          icon.textContent = 'close';
-          return icon; 
-        }) ());         
-        return close;
-      }) ());
-      
-      document.body.appendChild(snackbar);
-      setTimeout(() => { snackbar.remove(); }, 6000); 
-    }).finally(() => {
-      menu.classList.remove('active');
-    });
-  };
+    };
+  });
 
+  
   menu.querySelector('li.action-copy').onclick = function (e) {
     
     navigator.clipboard.writeText(
