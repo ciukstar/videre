@@ -43,17 +43,30 @@
         <time.day-bubble.small-text.tiny-padding.tiny-margin.small-elevate.round datetime=#{dt}>
           #{dt}
         
-      $forall Entity xid (Chat author recipient logType time msg delivered tDelivered read tRead rmByA rmByR _ _) <- logs
+      $forall (Entity xid (Chat author recipient logType time msg delivered _ read _ rmByA rmByR _ _),reply) <- logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
           $if incoming && rmByR
 
           $else
-            <div.bubble ##{idBubblePref}#{(show . fromSqlKey) xid} 
+            <div.#{classBubble} ##{idBubblePref}#{(show . fromSqlKey) xid}
                 :incoming:.incoming :outgoing:.outgoing :not read:notread
                 data-read=@{rtp $ ChatReadR sid cid rid xid}>
 
-              <span.bubble-content :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text>
+              $with (chat,author) <- reply
+                $maybe Entity yid (Chat _ _ _ _ msg _ _ _ _ _ _ _ _) <- chat
+                  <a.#{classReplyRef} href=##{idBubblePref}#{(show . fromSqlKey) yid}>
+                    <blockquote.#{classBlockquoteReplyRef}>
+                      $maybe Entity _ (User email _ _ _ _ name _ _) <- author
+                        <span.small-text.primary-text>
+                          $maybe name <- name
+                            #{name}
+                          $nothing
+                            #{email}
+
+                      #{msg}
+
+              <span.#{classBubbleContent} :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text>
                 $case logType
                   $of ChatTypeVideoCall
                     <i.tiny.tiny-margin style="vertical-align:bottom">
@@ -80,7 +93,7 @@
 
                     $else
 
-              <span.bubble-status-line.secondary-text>
+              <span.#{classBubbleStatusLine}.secondary-text>
 
                 $with dt <- show time
                   <time.time-bubble.small-text datetime=#{dt}>
@@ -88,22 +101,22 @@
 
                 $if outgoing
                   $if read
-                    <i.bubble-status.tiny.no-margin.green-text>
+                    <i.#{classBubbleStatus}.tiny.no-margin.green-text>
                       done_all
 
                   $elseif delivered
-                    <i.bubble-status.tiny.no-margin>
+                    <i.#{classBubbleStatus}.tiny.no-margin>
                       done_all
 
                   $else
-                    <i.bubble-status.tiny.no-margin>
+                    <i.#{classBubbleStatus}.tiny.no-margin>
                       check
 
                 $if all id [outgoing, not rmByA, rmByR]
-                  <i.removed.tiny.no-margin title=_{MsgRemovedByRecipient}>
+                  <i.#{classRemoved}.tiny.no-margin title=_{MsgRemovedByRecipient}>
                     delete_sweep
 
-                <button.menu-anchor.small.transparent.square.no-margin data-ui=##{idBubbleMenuPref}#{xid}>
+                <button.#{classMenuAnchor}.small.transparent.square.no-margin data-ui=##{idBubbleMenuPref}#{xid}>
                   <i.tiny>more_vert
 
                   <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid}>

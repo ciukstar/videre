@@ -7,7 +7,7 @@ header
         overflow: hidden
         text-overflow: ellipsis
 
-main
+main##{idMain}
 
     margin: 0
     padding: 0
@@ -34,7 +34,7 @@ main
         time.day-bubble
           align-self: center
 
-        .bubble
+        .#{classBubble}
             width: fit-content
             max-width: 80%
             margin: 0
@@ -42,17 +42,31 @@ main
             border: 0
             position: relative
 
-            .bubble-content
+            .#{classReplyRef}
+                display: block
+
+            .#{classBlockquoteReplyRef}
+                padding: 0.25rem
+                border-radius: 0.25rem
+                overflow-wrap: break-word
+                white-space: pre-line
+
+                overflow: hidden
+                display: -webkit-box
+                -webkit-line-clamp: 3
+                -webkit-box-orient: vertical
+
+            .#{classBubbleContent}
                 p
                     display: inline
                     white-space: pre-line
                     overflow-wrap: break-word
 
-            .bubble-status-line
+            .#{classBubbleStatusLine}
                 float: inline-end
                 margin-left: 0.5rem
 
-        .bubble.outgoing
+        .#{classBubble}.outgoing
             border-radius: 8px 0 8px 8px
             align-self: flex-end
             background-color: var(--tertiary-container)
@@ -75,7 +89,7 @@ main
                     height: 13px
                     clip-path: polygon(100% 0, 71% 10%, 54% 17%, 39% 27%, 29% 38%, 19% 52%, 11% 68%, 7% 78%, 0 100%, 0 0)
           
-        .bubble.incoming
+        .#{classBubble}.incoming
             border-radius: 0 8px 8px 8px
             align-self: flex-start
             background-color: var(--secondary-container)
@@ -102,10 +116,20 @@ main
         position: sticky
         bottom: 0
         z-index: 2
+        border-radius: 0.25rem
+        padding: 0.25rem
         background-color: var(--surface-container)
 
         p
-            margin: 0
+            margin-block-start: 0.25rem
+            background-color: var(--background)
+            overflow-wrap: break-word
+            white-space: pre-line
+
+            overflow: hidden
+            display: -webkit-box
+            -webkit-line-clamp: 2
+            -webkit-box-orient: vertical
 
 footer
     ##{idMessageForm}

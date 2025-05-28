@@ -126,20 +126,20 @@ instance FromJSON ChatType where
     parseJSON invalid = prependFailure "parsing ChatType failed" (typeMismatch "String" invalid)
 
 
-data ChatMessageType = ChatMessageTypeChat
-                     | ChatMessageTypeDelivered
-                     | ChatMessageTypeRead
-                     | ChatMessageTypeRemove
-                     | ChatMessageTypeDelete
-                     | ChatMessageTypeUndo
+data WsMessageType = WsMessageTypeChat
+                   | WsMessageTypeDelivered
+                   | WsMessageTypeRead
+                   | WsMessageTypeRemove
+                   | WsMessageTypeDelete
+                   | WsMessageTypeUndo
     deriving (Show, Read, Eq, Ord)
 
-instance ToJavascript ChatMessageType where
-    toJavascript :: ChatMessageType -> Javascript
+instance ToJavascript WsMessageType where
+    toJavascript :: WsMessageType -> Javascript
     toJavascript = toJavascript . show
 
-instance ToJSON ChatMessageType where
-    toJSON :: ChatMessageType -> Value
+instance ToJSON WsMessageType where
+    toJSON :: WsMessageType -> Value
     toJSON = toJSON . show
 
 

@@ -11,6 +11,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE InstanceSigs #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -34,8 +35,13 @@ import Control.Concurrent.STM.TChan
     ( writeTChan, dupTChan, readTChan, newBroadcastTChan
     )
 
-import Data.Aeson (object, (.=), Value)
+import Data.Aeson
+    ( decode, object, Value, ToJSON (toJSON), FromJSON (parseJSON)
+    , (.=), (.:), (.:?)
+    , withObject
+    )
 import Data.Aeson.Text (encodeToLazyText)
+import Data.Aeson.Types (Parser)
 import Data.Function ((&))
 import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
@@ -50,9 +56,9 @@ import Data.Time.Clock (getCurrentTime, UTCTime (utctDay))
 
 import Database.Esqueleto.Experimental
     ( selectOne, from, table, where_, val, update, set, select
-    , (^.), (==.), (!=.), (=.), (:&)((:&))
+    , (^.), (?.), (==.), (!=.), (=.), (:&)((:&))
     , just, Entity (entityVal), not_, unionAll_
-    , innerJoin, on, delete, isNothing_
+    , innerJoin, leftJoin, on, delete, isNothing_
     )
 import Database.Persist (Entity (Entity), insert)
 import Database.Persist.Sql (SqlBackend, fromSqlKey)
@@ -91,9 +97,9 @@ import Model
     , RingtoneType
       ( RingtoneTypeCallOutgoing, RingtoneTypeChatOutgoing, RingtoneTypeChatIncoming
       )
-    , ChatMessageType
-      ( ChatMessageTypeChat, ChatMessageTypeDelete, ChatMessageTypeRemove
-      , ChatMessageTypeDelivered, ChatMessageTypeRead, ChatMessageTypeUndo
+    , WsMessageType
+      ( WsMessageTypeChat, WsMessageTypeDelete, WsMessageTypeRemove
+      , WsMessageTypeDelivered, WsMessageTypeRead, WsMessageTypeUndo
       )
     , ChatType (ChatTypeMessage, ChatTypeVideoCall, ChatTypeAudioCall)
     , EntityField
@@ -103,7 +109,7 @@ import Model
       , PushSubscriptionEndpoint
       , RingtoneId, UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType
       , DefaultRingtoneType, DefaultRingtoneRingtone, ChatRemovedAuthor
-      , ChatRemovedRecipient, ChatTimeRead, ChatRead, ChatDelivered
+      , ChatRemovedRecipient, ChatTimeRead, ChatRead, ChatDelivered, ChatReply
       )
     )
 
@@ -152,6 +158,7 @@ import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
+import qualified Data.Text.Lazy.Encoding as TL
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
@@ -205,7 +212,7 @@ postChatUndoR sid _cid rid xid = do
     let maybeChan = M.lookup channelId channelMap
     
     let response = object [ "chatId" .= xid
-                          , "type" .= ChatMessageTypeUndo
+                          , "type" .= WsMessageTypeUndo
                           , "source" .= sid
                           , "recipient" .= rid
                           , "message" .= (commonmarkToHtml [] . chatMessage . entityVal <$> chat)
@@ -258,7 +265,7 @@ deleteChatRemoveR sid cid rid xid = do
     let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
     
     let response = object [ "chatId" .= xid
-                          , "type" .= ChatMessageTypeRemove
+                          , "type" .= WsMessageTypeRemove
                           , "source" .= sid
                           , "recipient" .= rid
                           , "links" .= object
@@ -295,7 +302,7 @@ deleteChatDeleteR sid _cid rid xid = do
     let maybeChan = M.lookup channelId channelMap
 
     let response = object [ "chatId" .= xid
-                          , "type" .= ChatMessageTypeDelete
+                          , "type" .= WsMessageTypeDelete
                           , "source" .= sid
                           , "recipient" .= rid
                           , "links" .= object []
@@ -346,7 +353,7 @@ postChatReadR sid _cid rid xid = do
     let maybeChan = M.lookup channelId channelMap
 
     let response = object [ "chatId" .= xid
-                          , "type" .= ChatMessageTypeRead
+                          , "type" .= WsMessageTypeRead
                           , "author" .= rid
                           , "recipient" .= sid
                           ]
@@ -382,7 +389,7 @@ postChatDeliveredR sid _cid rid xid = do
     let maybeChan = M.lookup channelId channelMap
 
     let response = object [ "chatId" .= xid
-                          , "type" .= ChatMessageTypeDelivered
+                          , "type" .= WsMessageTypeDelivered
                           , "author" .= rid
                           , "recipient" .= sid
                           ]
@@ -464,24 +471,27 @@ getChatRoomR sid cid rid = do
 
     chats <- liftHandler $ runDB $ select $ from $
         ( do
-              x <- from $ table @Chat
+              x :& r :& a <- from $ table @Chat
+                  `leftJoin` table @Chat `on` (\(x :& r) -> x ^. ChatReply ==. r ?. ChatId)
+                  `leftJoin` table @User `on` (\(_ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
               where_ $ x ^. ChatAuthor ==. val sid
               where_ $ x ^. ChatRecipient ==. val rid
-              return x
+              return (x,(r,a))
         )
         `unionAll_`
         ( do
-              x <- from $ table @Chat
+              x :& r :& a <- from $ table @Chat
+                  `leftJoin` table @Chat `on` (\(x :& r) -> x ^. ChatReply ==. r ?. ChatId)
+                  `leftJoin` table @User `on` (\(_ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
               where_ $ x ^. ChatRecipient ==. val sid
               where_ $ x ^. ChatAuthor ==. val rid
               where_ $ not_ $ x ^. ChatRemovedRecipient
-              return x
+              return (x,(r,a))
         )
 
     let dayLogs = sortBy (\(d1,_) (d2,_) -> compare d1 d2)
-             $ (sortBy (\(Entity _ c1) (Entity _ c2) -> compare (chatCreated c1) (chatCreated c2)) <$>
-               )
-             <$> groupByDay chats
+             $ (sortBy (\(Entity _ c1,_) (Entity _ c2,_) -> compare (chatCreated c1) (chatCreated c2)) <$>)
+            <$> groupByDay chats
     
     rtp <- getRouteToParent
     curr <- (rtp <$>) <$> getSubCurrentRoute
@@ -558,6 +568,14 @@ getChatRoomR sid cid rid = do
         idMain <- newIdent
         idChatOutput <- newIdent
         idBubblePref <- newIdent
+        classBubble <- newIdent
+        classReplyRef <- newIdent
+        classBlockquoteReplyRef <- newIdent
+        classBubbleContent <- newIdent
+        classBubbleStatusLine <- newIdent
+        classBubbleStatus <- newIdent
+        classRemoved <- newIdent
+        classMenuAnchor <- newIdent
         idBubbleMenuPref <- newIdent
         classActionReply <- newIdent
         classActionCopy <- newIdent
@@ -583,8 +601,31 @@ getChatRoomR sid cid rid = do
       
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
-      groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _ _)) -> utctDay t)
+      groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _ _),_) -> utctDay t)
 
+
+data WsocketsMessage = WsocketsMessage
+    { wsmType :: !Text
+    , wsmMessage :: !Text
+    , wsmReply :: !(Maybe ChatId)
+    }
+    deriving (Show, Read)
+
+instance FromJSON WsocketsMessage where
+    parseJSON :: Value -> Parser WsocketsMessage
+    parseJSON = withObject "WsocketsMessage" $ \o -> do
+        wsmType <- o .: "type"
+        wsmMessage <- o .: "message"
+        wsmReply <- o .:? "reply"
+        return WsocketsMessage {..}
+
+
+instance ToJSON WsocketsMessage where
+    toJSON :: WsocketsMessage -> Value
+    toJSON (WsocketsMessage {..}) = object [ "type" .= wsmType
+                                           , "message" .= wsmMessage
+                                           , "reply" .= wsmReply
+                                           ]
 
 
 chatApp :: YesodChat m => UserId -> ContactId -> UserId -> WebSocketsT (SubHandlerFor ChatRoom m) ()
@@ -610,113 +651,119 @@ chatApp authorId contactId recipientId = do
     readChan <- atomically $ dupTChan writeChan
 
     (e :: Either SomeException ()) <- try $ race_
+    
         (forever $ atomically (readTChan readChan) >>= sendTextData)
-        (runConduit (sourceWS .| mapM_C (
-             \msg -> do
-                 now <- liftIO getCurrentTime
-                 let chat = Chat authorId recipientId ChatTypeMessage now msg
-                                 False Nothing False Nothing False False Nothing Nothing
-                 cid <- liftHandler (runDB $ insert chat)
-                 rndr <- getUrlRender
-                 rtp <- getRouteToParent
+        
+        (runConduit $ (sourceWS .|) $ mapM_C $ \json -> do
+              let input = decode (TL.encodeUtf8 json)
+              case input of
+                Nothing -> return ()
+                
+                Just (WsocketsMessage _type msg reply) -> do
+                  now <- liftIO getCurrentTime
+                  let chat = Chat authorId recipientId ChatTypeMessage now msg
+                                  False Nothing False Nothing False False Nothing reply
+                  cid <- liftHandler (runDB $ insert chat)
+                  rndr <- getUrlRender
+                  rtp <- getRouteToParent
 
-                 let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
-                 
-                 atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
-                     [ "chatId" .= cid
-                     , "author" .= chatAuthor chat
-                     , "recipient" .= chatRecipient chat
-                     , "created" .= chatCreated chat
-                     , "message" .= commonmarkToHtml [] (chatMessage chat)
-                     , "type" .= ChatMessageTypeChat
-                     , "links" .= object
-                       [ "delivered" .= expath (rtp $ ChatDeliveredR recipientId contactId authorId cid)
-                       , "read" .= expath (rtp $ ChatReadR recipientId contactId authorId cid)
-                       , "dismiss" .= expath (rtp $ ChatRemoveR recipientId contactId authorId cid)
-                       , "remove" .= expath (rtp $ ChatRemoveR authorId contactId recipientId cid)
-                       , "delete" .= expath (rtp $ ChatDeleteR authorId contactId recipientId cid)
-                       ]
-                     ]
+                  let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
 
-                 _ <- forkIO $ do
-                     threadDelay (3 * 1000000)
+                  atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
+                      [ "type" .= WsMessageTypeChat
+                      , "chatId" .= cid
+                      , "author" .= chatAuthor chat
+                      , "recipient" .= chatRecipient chat
+                      , "created" .= chatCreated chat
+                      , "message" .= commonmarkToHtml [] (chatMessage chat)
+                      , "links" .= object
+                        [ "delivered" .= expath (rtp $ ChatDeliveredR recipientId contactId authorId cid)
+                        , "read" .= expath (rtp $ ChatReadR recipientId contactId authorId cid)
+                        , "dismiss" .= expath (rtp $ ChatRemoveR recipientId contactId authorId cid)
+                        , "remove" .= expath (rtp $ ChatRemoveR authorId contactId recipientId cid)
+                        , "delete" .= expath (rtp $ ChatDeleteR authorId contactId recipientId cid)
+                        ]
+                      ]
 
-                     chat' <- liftHandler $ runDB $ selectOne $ do
-                         x <- from $ table @Chat
-                         where_ $ x ^. ChatId ==. val cid
-                         where_ $ not_ $ x ^. ChatDelivered
-                         where_ $ not_ $ x ^. ChatRead
-                         return x
+                  _ <- forkIO $ do
+                      threadDelay (3 * 1000000)
 
-                     case chat' of
-                       Just (Entity _ (Chat aid rid _ _ message _ _ _ _ _ _ _ _)) -> do
+                      chat' <- liftHandler $ runDB $ selectOne $ do
+                          x <- from $ table @Chat
+                          where_ $ x ^. ChatId ==. val cid
+                          where_ $ not_ $ x ^. ChatDelivered
+                          where_ $ not_ $ x ^. ChatRead
+                          return x
 
-                           mVapidKeys <- liftHandler getVapidKeys
-                           case mVapidKeys of
-                             Just vapidKeys -> do
+                      case chat' of
+                        Just (Entity _ (Chat aid rid _ _ message _ _ _ _ _ _ _ _)) -> do
 
-                                 subscriptions <- liftHandler $ runDB $ select $ do
-                                     x <- from $ table @PushSubscription
-                                     where_ $ x ^. PushSubscriptionPublisher ==. val aid
-                                     where_ $ x ^. PushSubscriptionSubscriber ==. val rid
-                                     return x
+                            mVapidKeys <- liftHandler getVapidKeys
+                            case mVapidKeys of
+                              Just vapidKeys -> do
 
-                                 sender <- liftHandler $ runDB $ selectOne $ do
-                                     x <- from $ table @User
-                                     where_ $ x ^. UserId ==. val aid
-                                     return x
+                                  subscriptions <- liftHandler $ runDB $ select $ do
+                                      x <- from $ table @PushSubscription
+                                      where_ $ x ^. PushSubscriptionPublisher ==. val aid
+                                      where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+                                      return x
 
-                                 
-                                 iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
-                                 msgr <- getMessageRender
-                                 Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
+                                  sender <- liftHandler $ runDB $ selectOne $ do
+                                      x <- from $ table @User
+                                      where_ $ x ^. UserId ==. val aid
+                                      return x
 
-                                 forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth _)) -> do
-                                     photor <- liftHandler $ getAccountPhotoRoute pid
-                                     let notification = mkPushNotification endpoint p256dh auth
-                                             & pushMessage .~ object
-                                                 [ "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
-                                                 , "icon" .= expath iconr
-                                                 , "image" .= expath photor
-                                                 , "body" .= message
-                                                 , "messageType" .= PushMsgTypeChat
-                                                 , "targetRoom" .= (expath . rtp $ ChatRoomR sid contactId pid)
-                                                 , "senderId" .= pid
-                                                 , "senderName" .= (
-                                                       (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender
-                                                                   )
-                                                 , "recipientId" .= sid
-                                                 , "links" .= object
-                                                   [ "delivered" .= ( expath . rtp $
-                                                                      ChatDeliveredR recipientId contactId authorId cid
+
+                                  iconr <- liftHandler $ getStaticRoute img_chat_FILL0_wght400_GRAD0_opsz24_svg
+                                  msgr <- getMessageRender
+                                  Superuser {..} <- liftHandler $ appSuperuser <$> getAppSettings
+
+                                  forM_ subscriptions $ \(Entity _ (PushSubscription sid pid endpoint p256dh auth _)) -> do
+                                      photor <- liftHandler $ getAccountPhotoRoute pid
+                                      let notification = mkPushNotification endpoint p256dh auth
+                                              & pushMessage .~ object
+                                                  [ "title" .= (msgr MsgAppName <> ": " <> msgr MsgNewMessage)
+                                                  , "icon" .= expath iconr
+                                                  , "image" .= expath photor
+                                                  , "body" .= message
+                                                  , "messageType" .= PushMsgTypeChat
+                                                  , "targetRoom" .= (expath . rtp $ ChatRoomR sid contactId pid)
+                                                  , "senderId" .= pid
+                                                  , "senderName" .= (
+                                                        (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> sender
                                                                     )
-                                                   ]
-                                                 ]
-                                             & pushSenderEmail .~ superuserUsername
-                                             & pushExpireInSeconds .~ 30 * 60
-                                             & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeChat)
-                                             & pushUrgency ?~ PushUrgencyHigh
+                                                  , "recipientId" .= sid
+                                                  , "links" .= object
+                                                    [ "delivered" .= ( expath . rtp $
+                                                                       ChatDeliveredR recipientId contactId authorId cid
+                                                                     )
+                                                    ]
+                                                  ]
+                                              & pushSenderEmail .~ superuserUsername
+                                              & pushExpireInSeconds .~ 30 * 60
+                                              & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeChat)
+                                              & pushUrgency ?~ PushUrgencyHigh
 
-                                     manager <- liftHandler getAppHttpManager
+                                      manager <- liftHandler getAppHttpManager
 
-                                     result <- sendPushNotification vapidKeys manager notification
+                                      result <- sendPushNotification vapidKeys manager notification
 
-                                     case result of
-                                       Left ex -> do
-                                           liftIO $ print ex
-                                           liftHandler $ addMessageI statusError MsgPushNotificationExcception
-                                       Right () -> liftHandler $ runDB $ update $ \x -> do
-                                           set x [ChatDelivered =. val True]
-                                           where_ $ x ^. ChatId ==. val cid
-                                           
-                             Nothing -> do
-                                 liftIO $ print @Text "No VAPID details"
-                                 liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                      case result of
+                                        Left ex -> do
+                                            liftIO $ print ex
+                                            liftHandler $ addMessageI statusError MsgPushNotificationExcception
+                                        Right () -> liftHandler $ runDB $ update $ \x -> do
+                                            set x [ChatDelivered =. val True]
+                                            where_ $ x ^. ChatId ==. val cid
 
-                       Nothing -> return ()
+                              Nothing -> do
+                                  liftIO $ print @Text "No VAPID details"
+                                  liftHandler $ addMessageI statusError MsgPushNotificationExcception
 
-                 return ()
-             ) ))
+                        Nothing -> return ()
+
+                  return ()
+        )
     case e of
       Left _ -> do
           m <- readTVarIO channelMapTVar

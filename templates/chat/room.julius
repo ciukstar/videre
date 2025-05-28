@@ -26,12 +26,12 @@ const ackObsever = new IntersectionObserver(
         x.target.removeAttribute('notread');
       });
     });
-  },{ root: chatOutput,
-      threshold: 0.8
-    }
+  }, { root: chatOutput,
+       threshold: 0.8
+     }
 );
 
-chatOutput.querySelectorAll('.bubble.incoming[notread]').forEach(x => {
+chatOutput.querySelectorAll('.#{rawJS classBubble}.incoming[notread]').forEach(x => {
   ackObsever.observe(x);
 });
 
@@ -45,49 +45,49 @@ ws.onmessage = function (e) {
   const isOutgoing = data.author === #{sid};
   const isIncoming = data.recipient === #{sid};
   
-  if (data.type === #{ChatMessageTypeDelivered} && isOutgoing) {
+  if (data.type === #{WsMessageTypeDelivered} && isOutgoing) {
     
     const bubble = document.getElementById(`#{idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (!bubbleDeleted) {
-      const icon = bubble.querySelector('i.bubble-status');
+      const icon = bubble.querySelector('i.#{rawJS classBubbleStatus}');
       icon.classList.add('tiny','tiny-margin');
       icon.textContent = 'done_all';
     }
     
-  } else if (data.type === #{ChatMessageTypeRead} && isOutgoing) {
+  } else if (data.type === #{WsMessageTypeRead} && isOutgoing) {
 
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     if (!bubbleDeleted) {
-      const icon = bubble.querySelector('i.bubble-status');
+      const icon = bubble.querySelector('i.#{rawJS classBubbleStatus}');
       icon.classList.add('tiny','tiny-margin','green-text');
       icon.textContent = 'done_all';
     }
     
-  } else if (data.type === #{ChatMessageTypeRemove}) {
+  } else if (data.type === #{WsMessageTypeRemove}) {
 
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
     if (!bubbleDeleted && bubble.classList.contains('incoming')) {
       
-      bubble.querySelector('.bubble-content').replaceWith((() => {
+      bubble.querySelector('.#{rawJS classBubbleContent}').replaceWith((() => {
         const span = document.createElement('span');
-        span.classList.add('bubble-content','small-text','secondary-text');
+        span.classList.add(#{classBubbleContent},'small-text','secondary-text');
         span.textContent = #{msgr MsgRemoved};
         return span;
       }) ());
       
     } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{rid}) {
 
-      bubble.querySelector('.bubble-content').classList.add('secondary-text','small-text');
-      const statusLine = bubble.querySelector('.bubble-status-line');
+      bubble.querySelector('.#{rawJS classBubbleContent}').classList.add('secondary-text','small-text');
+      const statusLine = bubble.querySelector('.#{rawJS classBubbleStatusLine}');
       
-      if (!statusLine.querySelector('.removed')) {
-        statusLine.querySelector('.bubble-status').after((() => {
+      if (!statusLine.querySelector('.#{rawJS classRemoved}')) {
+        statusLine.querySelector('.#{rawJS classBubbleStatus}').after((() => {
           const icon = document.createElement('i');
-          icon.classList.add('removed','tiny','tiny-margin');
+          icon.classList.add(#{classRemoved},'tiny','tiny-margin');
           bubble.setAttribute('title',#{msgr MsgRemovedByRecipient});
           icon.textContent = 'delete_sweep';   
           return icon;
@@ -96,16 +96,16 @@ ws.onmessage = function (e) {
       
     } else if (!bubbleDeleted && bubble.classList.contains('outgoing') && data.source === #{sid}) {
       
-      bubble.querySelector('.bubble-content').replaceWith((() => {
+      bubble.querySelector('.#{rawJS classBubbleContent}').replaceWith((() => {
         const span = document.createElement('span');
-        span.classList.add('bubble-content','small-text','secondary-text');
+        span.classList.add(#{classBubbleContent},'small-text','secondary-text');
         span.textContent = #{msgr MsgRemoved};
         return span;
       }) ());
       
     }
     
-  } else if (data.type === #{ChatMessageTypeDelete}) {
+  } else if (data.type === #{WsMessageTypeDelete}) {
 
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
@@ -113,29 +113,29 @@ ws.onmessage = function (e) {
       bubble.remove();
     }
 
-  } else if (data.type === #{ChatMessageTypeUndo} && data.source === #{sid}) {
+  } else if (data.type === #{WsMessageTypeUndo} && data.source === #{sid}) {
 
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
     if (! bubbleDeleted) {
-      const content = bubble.querySelector('.bubble-content');
+      const content = bubble.querySelector('.#{rawJS classBubbleContent}');
       content.classList.remove('small-text','secondary-text')
       content.innerHTML = data.message;      
     }
 
-  } else if (data.type === #{ChatMessageTypeUndo} && data.source === #{rid}) {
+  } else if (data.type === #{WsMessageTypeUndo} && data.source === #{rid}) {
 
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
     if (! bubbleDeleted) {
-      const content = bubble.querySelector('.bubble-content');
+      const content = bubble.querySelector('.#{rawJS classBubbleContent}');
       content.classList.remove('small-text','secondary-text')
       content.innerHTML = data.message;
       
-      const statusLine = bubble.querySelector('.bubble-status-line');
-      const icon = statusLine.querySelector('.removed');
+      const statusLine = bubble.querySelector('.#{rawJS classBubbleStatusLine}');
+      const icon = statusLine.querySelector('.#{rawJS classRemoved}');
       
       if (icon) {
         icon.remove();
@@ -143,19 +143,19 @@ ws.onmessage = function (e) {
       
     }
 
-  } else if (data.type === #{ChatMessageTypeChat}) {
+  } else if (data.type === #{WsMessageTypeChat}) {
     
     const bubble = chatOutput.appendChild((() => {
       
       const bubble = document.createElement('div');
       bubble.id = `#{rawJS idBubblePref}${data.chatId}`;
-      bubble.classList.add('bubble');
+      bubble.classList.add(#{classBubble});
       bubble.classList.add(isOutgoing ? 'outgoing' : 'incoming');
       bubble.setAttribute('data-read',data.links.read);
 
       const content = bubble.appendChild((() => {
         const content = document.createElement('span');
-        content.classList.add('bubble-content');
+        content.classList.add(#{classBubbleContent});
         content.innerHTML = data.message;
         return content;
       }) ());
@@ -163,7 +163,7 @@ ws.onmessage = function (e) {
       const statusLine = bubble.appendChild((() => {
         
         const statusLine = document.createElement('div');
-        statusLine.classList.add('bubble-status-line','secondary-text');
+        statusLine.classList.add(#{classBubbleStatusLine},'secondary-text');
 
         statusLine.appendChild((() => {
           const time = document.createElement('time');
@@ -178,7 +178,7 @@ ws.onmessage = function (e) {
         if (isOutgoing) {
           statusLine.appendChild((() => {
             const icon = document.createElement('i');
-            icon.classList.add('bubble-status','tiny','tiny-margin');
+            icon.classList.add(#{classBubbleStatus},'tiny','tiny-margin');
             icon.textContent = 'check';   
             return icon;
           }) ());
@@ -186,7 +186,7 @@ ws.onmessage = function (e) {
 
         statusLine.appendChild((() => {
           const anchor = document.createElement('button');
-          anchor.classList.add('menu-anchor','small','transparent','square','no-margin');
+          anchor.classList.add(#{classMenuAnchor},'small','transparent','square','no-margin');
           
           anchor.appendChild((() => {
             const icon = document.createElement('i');
@@ -222,31 +222,33 @@ ws.onmessage = function (e) {
               itemReply.onclick = function (e) {
                 main.prepend((() => {
                   const blockquote = document.createElement('blockquote');
+                  blockquote.setAttribute('data-reply',data.chatId);
                   blockquote.innerHTML = content.innerHTML;
 
                   blockquote.prepend((() => {
                     const span = document.createElement('span');
                     span.classList.add('primary-text','small-text');
                     span.textContent = 'Author Name here...';
-
-                    span.appendChild((() => {
-                      const button = document.createElement('button');
-                      button.classList.add('small','transparent','circle');
-                      button.style.float = 'inline-end';
-                      button.appendChild((() => {
-                        const icon = document.createElement('i');
-                        icon.textContent = 'close';
-                        return icon;
-                      }) ());
-
-                      button.onclick = function (e) {
-                        blockquote.remove();
-                      };
-                      
-                      return button;
-                    }) ());
                     
                     return span;
+                  }) ());
+
+                  blockquote.appendChild((() => {
+                    const close = document.createElement('button');
+                    close.classList.add('small','transparent','circle');
+                    close.style.position = 'absolute';
+                    close.style.inset = '0 0 auto auto';
+                    close.appendChild((() => {
+                      const icon = document.createElement('i');
+                      icon.textContent = 'close';
+                      return icon;
+                    }) ());
+
+                    close.onclick = function (e) {
+                      blockquote.remove();
+                    };
+                    
+                    return close;
                   }) ());
                   
                   return blockquote;
@@ -279,7 +281,7 @@ ws.onmessage = function (e) {
               itemCopy.onclick = function (e) {
                 
                 navigator.clipboard.writeText(
-                  bubble.querySelector('.bubble-content').textContent
+                  bubble.querySelector('.#{rawJS classBubbleContent}').textContent
                 ).then(() => {
                   
                   const snackbar = document.createElement('div');
@@ -604,8 +606,15 @@ ws.onerror = function (e) {
 
 form.addEventListener('submit', function(e) {
   e.preventDefault();
+
+  const reply = main.querySelector('blockquote[data-reply]')?.dataset.reply;
   
-  ws.send( input.value );
+  ws.send( JSON.stringify({ type: #{WsMessageTypeChat},
+                            message: input.value,
+                            ... (!isNaN(reply) && { reply: Number(reply) })
+                          })
+         );
+  
   input.value = '';
   buttonSend.disabled = true;
   input.focus();
@@ -734,9 +743,9 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 });
 
 
-chatOutput.querySelectorAll('.bubble').forEach(bubble => {
+chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
 
-  const anchor = bubble.querySelector('button.menu-anchor');
+  const anchor = bubble.querySelector('button.#{rawJS classMenuAnchor}');
   const menu = anchor.querySelector('menu');
   
   anchor.onclick = function (e) {
@@ -753,7 +762,7 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
   menu.querySelector('li.#{rawJS classActionCopy}').onclick = function (e) {
     
     navigator.clipboard.writeText(
-      bubble.querySelector('.bubble-content').textContent
+      bubble.querySelector('.#{rawJS classBubbleContent}').textContent
     ).then(() => {
       
       const snackbar = document.createElement('div');
@@ -806,12 +815,12 @@ chatOutput.querySelectorAll('.bubble').forEach(bubble => {
           snackbar.appendChild((() => {
             const content = document.createElement('div');
             content.classList.add('max');
-            content.textContent = data.type === #{ChatMessageTypeRemove}
+            content.textContent = data.type === #{WsMessageTypeRemove}
               ? #{msgr MsgMessageRemoved} : #{msgr MsgMessageDeleted};
             return content;
           }) ());
 
-          if (data.type === #{ChatMessageTypeRemove}) {
+          if (data.type === #{WsMessageTypeRemove}) {
             snackbar.appendChild((() => {
               const undo = document.createElement('button');
               undo.classList.add('transparent','inverse-link');
