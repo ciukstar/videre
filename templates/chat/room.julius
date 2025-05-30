@@ -247,23 +247,23 @@ ws.onmessage = function (e) {
               
               const itemReply = menu.appendChild((() => {
                 
-                const itemReply = document.createElement('li');
-                itemReply.classList.add(#{classActionReply},'wave');
-                itemReply.setAttribute('data-ui',`#${menu.id}`);
+                const reply = document.createElement('li');
+                reply.classList.add(#{classActionReply},'wave');
+                reply.setAttribute('data-ui',`#${menu.id}`);
                 
-                itemReply.appendChild((() => {
+                reply.appendChild((() => {
                   const icon = document.createElement('i');
                   icon.textContent = 'reply';                
                   return icon;
                 }) ());
                 
-                itemReply.appendChild((() => {
+                reply.appendChild((() => {
                   const span = document.createElement('span');
                   span.textContent = #{msgr MsgReply};
                   return span;
                 }) ());
 
-                itemReply.onclick = function (e) {
+                reply.onclick = function (e) {
                   main.prepend((() => {
                     const blockquote = document.createElement('blockquote');
                     blockquote.setAttribute('data-reply',data.chatId);
@@ -273,7 +273,6 @@ ws.onmessage = function (e) {
                       const span = document.createElement('span');
                       span.classList.add('primary-text','small-text');
                       span.textContent = data.authorName;
-                      
                       return span;
                     }) ());
 
@@ -298,10 +297,13 @@ ws.onmessage = function (e) {
                     return blockquote;
                   }) ());
                   
-                  main.scroll(0, main.scrollHeight);                
+                  main.scroll(0, main.scrollHeight);
+                  
+                  setTimeout(() => { input.focus(); }, 90 + 10);
+                  
                 };
                 
-                return itemReply;
+                return reply;
               }) ());
               
               const itemCopy = menu.appendChild((() => {
@@ -797,7 +799,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 });
 
 
-chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
+chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach( bubble => {
 
   const content = bubble.querySelector('.#{rawJS classBubbleContent}');
   const anchor = bubble.querySelector('button.#{rawJS classMenuAnchor}');
@@ -847,6 +849,8 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
       return blockquote;
     }) ());
 
+    setTimeout(() => { input.focus(); }, 90 + 10);
+    
   };
     
   menu.querySelector('li.#{rawJS classActionCopy}').onclick = function (e) {

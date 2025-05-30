@@ -601,8 +601,7 @@ getChatRoomR sid cid rid = do
         
         $(widgetFile "chat/room")
 
-    where
-      
+    where      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
       groupByDay = M.toList . groupByKey (\(Entity _ (Chat _ _ _ t _ _ _ _ _ _ _ _ _),_) -> utctDay t)
@@ -636,7 +635,7 @@ chatApp :: YesodChat m => UserId -> ContactId -> UserId -> WebSocketsT (SubHandl
 chatApp authorId contactId recipientId = do
 
     let channelId = S.fromList [authorId, recipientId]
-
+    
     ChatRoom channelMapTVar <- getSubYesod
 
     channelMap <- readTVarIO channelMapTVar
@@ -647,7 +646,8 @@ chatApp authorId contactId recipientId = do
       Nothing -> do
           chan <- newBroadcastTChan
           writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
-          return chan 
+          return chan
+          
       Just (writeChan,_) -> do
           writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
           return writeChan
