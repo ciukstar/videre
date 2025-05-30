@@ -19,8 +19,8 @@ module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route
-      ( ChatRoomR, ChatChannelR, ChatRemoveR
-      , ChatDeleteR, ChatReadR, ChatDeliveredR, ChatUndoR
+      ( ChatRoomR, ChatChannelR, ChatMsgRemoveR
+      , ChatMsgDeleteR, ChatMsgReadR, ChatMsgDeliveredR, ChatMsgRemoveUndoR
       )
     )
     
@@ -567,6 +567,7 @@ getChatRoomR sid cid rid = do
         setTitleI MsgChats
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
+        idMenuChat <- newIdent
         idMain <- newIdent
         idChatOutput <- newIdent
         classBubbleRow <- newIdent
@@ -633,7 +634,6 @@ instance ToJSON WsocketsMessage where
 
 chatApp :: YesodChat m => UserId -> ContactId -> UserId -> WebSocketsT (SubHandlerFor ChatRoom m) ()
 chatApp authorId contactId recipientId = do
-
     let channelId = S.fromList [authorId, recipientId]
     
     ChatRoom channelMapTVar <- getSubYesod

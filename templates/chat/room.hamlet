@@ -27,11 +27,15 @@
 
     <button.circle.transparent type=button title=_{MsgActions}>
       <i>more_vert
-      <menu.no-wrap.left>
+      <menu.no-wrap.left ##{idMenuChat}>
         $maybe backlink <- rndr <$> curr
           <li>
+            <i>info
             <a href=@?{(contact,[(paramBacklink, backlink)])}>
               _{MsgViewContact}
+        <li data-ui=##{idMenuChat}>
+          <i>delete
+          _{MsgDele}
               
 
 <main.responsive.no-padding ##{idMain}>
