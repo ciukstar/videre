@@ -37,6 +37,16 @@ main##{idMain}
         time.day-bubble
           align-self: center
 
+        .#{classBubbleRow}
+            display: flex
+            flex-direction: row
+
+        .#{classBubbleRow}.outgoing
+            justify-content: flex-end
+
+        .#{classBubbleRow}.incoming
+            justify-content: flex-start
+
         .#{classBubble}
             width: fit-content
             max-width: 80%
@@ -44,6 +54,7 @@ main##{idMain}
             padding: 0.5rem 0.5rem 0 0.5rem
             border: 0
             position: relative
+            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
 
             .#{classReplyRef}
                 display: block
@@ -62,13 +73,12 @@ main##{idMain}
             .#{classBubbleStatusLine}
                 float: inline-end
                 margin-left: 0.5rem
+         
 
         .#{classBubble}.outgoing
             border-radius: 8px 0 8px 8px
-            align-self: flex-end
             background-color: var(--tertiary-container)
             color: var(--on-tertiary-container)
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
             .bubble-tail-out
                 filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))
@@ -88,10 +98,8 @@ main##{idMain}
           
         .#{classBubble}.incoming
             border-radius: 0 8px 8px 8px
-            align-self: flex-start
             background-color: var(--secondary-container)
             color: var(--on-secondary-container)
-            box-shadow: 0 1px 0 rgba(0,0,0,0.2)
             
             .bubble-tail-out
                 filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2))

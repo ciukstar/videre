@@ -569,8 +569,10 @@ getChatRoomR sid cid rid = do
         idButtonAudioCall <- newIdent
         idMain <- newIdent
         idChatOutput <- newIdent
-        idBubblePref <- newIdent
+        classBubbleRow <- newIdent
+        idBubbleRowPref <- newIdent
         classBubble <- newIdent
+        idBubblePref <- newIdent
         classReplyRef <- newIdent
         classBlockquoteReplyRef <- newIdent
         classBubbleContent <- newIdent
@@ -652,10 +654,8 @@ chatApp authorId contactId recipientId = do
 
     readChan <- atomically $ dupTChan writeChan
 
-    (e :: Either SomeException ()) <- try $ race_
-    
+    (e :: Either SomeException ()) <- try $ race_    
         (forever $ atomically (readTChan readChan) >>= sendTextData)
-        
         (runConduit $ (sourceWS .|) $ mapM_C $ \json -> do
               let input = decode (TL.encodeUtf8 json)
               case input of

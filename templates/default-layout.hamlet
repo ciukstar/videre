@@ -20,7 +20,7 @@
       $with (ringtone, mime) <- incomingChatRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <nav.right-align.no-space>
+  <nav.right-align>
 
     <button.transparent.link type=button ##{idButtonChatNotificationIgnore}>
       _{MsgIgnore}

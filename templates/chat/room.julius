@@ -147,283 +147,380 @@ ws.onmessage = function (e) {
 
   } else if (data.type === #{WsMessageTypeChat}) {
     
-    const bubble = chatOutput.appendChild((() => {
+    const bubbleRow = chatOutput.appendChild((() => {
       
-      const bubble = document.createElement('div');
-      bubble.id = `#{rawJS idBubblePref}${data.chatId}`;
-      bubble.classList.add(#{classBubble});
-      bubble.classList.add(isOutgoing ? 'outgoing' : 'incoming');
-      bubble.setAttribute('data-read',data.links.read);
-
-      if ('replied' in data) {
+      const row = document.createElement('div');
+      row.id = `#{rawJS idBubbleRowPref}${data.chatId}`;
+      row.classList.add(#{classBubbleRow}, 'small-round', isOutgoing ? 'outgoing' : 'incoming');
+      
+      const bubble = row.appendChild((() => {
         
-        const link = bubble.appendChild((() => {
-          const link = document.createElement('a');
-          link.classList.add(#{classReplyRef});
-          link.href = `##{rawJS idBubblePref}${data.replied.chatId}`;
+        const bubble = document.createElement('div');
+        bubble.id = `#{rawJS idBubblePref}${data.chatId}`;
+        bubble.classList.add(#{classBubble}, isOutgoing ? 'outgoing' : 'incoming');
+        bubble.setAttribute('data-read',data.links.read);
 
-          link.appendChild((() => {
-            const blockquote = document.createElement('blockquote');
-            blockquote.classList.add(#{classBlockquoteReplyRef});
-            blockquote.innerHTML = data.replied.message;
-            blockquote.prepend((() => {
-              const span = document.createElement('span');
-              span.classList.add('small-text','primary-text');
-              span.textContent = data.replied.authorName;
+        if ('replied' in data) {
+          
+          const link = bubble.appendChild((() => {
+            const link = document.createElement('a');
+            link.classList.add(#{classReplyRef});
+            link.href = `##{rawJS idBubblePref}${data.replied.chatId}`;
 
-              return span;
+            link.appendChild((() => {
+              const blockquote = document.createElement('blockquote');
+              blockquote.classList.add(#{classBlockquoteReplyRef});
+              blockquote.innerHTML = data.replied.message;
+              blockquote.prepend((() => {
+                const span = document.createElement('span');
+                span.classList.add('small-text','primary-text');
+                span.textContent = data.replied.authorName;
+
+                return span;
+              }) ());
+
+              blockquote.onmouseenter = function (e) {
+                const ref = document.getElementById(`#{rawJS idBubbleRowPref}${data.replied.chatId}`);
+                ref.style.backgroundColor = 'rgba(0,0,0,0.2)';
+              };
+
+              blockquote.onmouseleave = function (e) {
+                const ref = document.getElementById(`#{rawJS idBubbleRowPref}${data.replied.chatId}`);
+                ref.style.backgroundColor = 'transparent';
+              };
+              
+              return blockquote;
             }) ());
             
-            return blockquote;
-          }) ());
-          
-          return link;
-        }) ());
-      }
-      
-      const content = bubble.appendChild((() => {
-        const content = document.createElement('span');
-        content.classList.add(#{classBubbleContent});
-        content.innerHTML = data.message;
-        return content;
-      }) ());
-
-      const statusLine = bubble.appendChild((() => {
-        
-        const statusLine = document.createElement('div');
-        statusLine.classList.add(#{classBubbleStatusLine},'secondary-text');
-
-        statusLine.appendChild((() => {
-          const time = document.createElement('time');
-          time.setAttribute('datetime', data.created);
-          time.classList.add('time-bubble','small-text');
-          time.appendChild(document.createTextNode(new Date(data.created).toLocaleTimeString(
-            navigator.language, { hour: 'numeric', minute: 'numeric' }
-          )));
-          return time;
-        }) ());
-
-        if (isOutgoing) {
-          statusLine.appendChild((() => {
-            const icon = document.createElement('i');
-            icon.classList.add(#{classBubbleStatus},'tiny','tiny-margin');
-            icon.textContent = 'check';   
-            return icon;
+            return link;
           }) ());
         }
-
-        statusLine.appendChild((() => {
-          const anchor = document.createElement('button');
-          anchor.classList.add(#{classMenuAnchor},'small','transparent','square','no-margin');
-          
-          anchor.appendChild((() => {
-            const icon = document.createElement('i');
-            icon.classList.add('tiny');
-            icon.appendChild(document.createTextNode('more_vert'));
-            return icon;            
-          }) ());
-
-          const menu = anchor.appendChild((() => {
-            
-            const menu = document.createElement('menu');
-            menu.id = `#{rawJS idBubbleMenuPref}${data.chatId}`;
-            menu.classList.add('left','top','no-wrap');
-            menu.style.display = 'none';
-            
-            const itemReply = menu.appendChild((() => {
-              
-              const itemReply = document.createElement('li');
-              itemReply.classList.add(#{classActionReply},'wave');
-              itemReply.setAttribute('data-ui',`#${menu.id}`);
-              
-              itemReply.appendChild((() => {
-                const icon = document.createElement('i');
-                icon.textContent = 'reply';                
-                return icon;
-              }) ());
-              
-              itemReply.appendChild((() => {
-                const span = document.createElement('span');
-                span.textContent = #{msgr MsgReply};
-                return span;
-              }) ());
-
-              itemReply.onclick = function (e) {
-                main.prepend((() => {
-                  const blockquote = document.createElement('blockquote');
-                  blockquote.setAttribute('data-reply',data.chatId);
-                  blockquote.innerHTML = content.innerHTML;
-
-                  blockquote.prepend((() => {
-                    const span = document.createElement('span');
-                    span.classList.add('primary-text','small-text');
-                    span.textContent = data.authorName;
-                    
-                    return span;
-                  }) ());
-
-                  blockquote.appendChild((() => {
-                    const close = document.createElement('button');
-                    close.classList.add('small','transparent','circle');
-                    close.style.position = 'absolute';
-                    close.style.inset = '0 0 auto auto';
-                    close.appendChild((() => {
-                      const icon = document.createElement('i');
-                      icon.textContent = 'close';
-                      return icon;
-                    }) ());
-
-                    close.onclick = function (e) {
-                      blockquote.remove();
-                    };
-                    
-                    return close;
-                  }) ());
-                  
-                  return blockquote;
-                }) ());
-                
-                main.scroll(0, main.scrollHeight);                
-              };
-              
-              return itemReply;
-            }) ());
-            
-            const itemCopy = menu.appendChild((() => {
-              
-              const itemCopy = document.createElement('li');
-              itemCopy.classList.add(#{classActionCopy},'wave');
-              itemCopy.setAttribute('data-ui',`#${menu.id}`);
-              
-              itemCopy.appendChild((() => {
-                const i = document.createElement('i');
-                i.textContent = 'content_copy';                
-                return i;
-              }) ());
-              
-              itemCopy.appendChild((() => {
-                const span = document.createElement('span');
-                span.textContent = #{msgr MsgCopy};
-                return span;
-              }) ());
-
-              itemCopy.onclick = function (e) {
-                
-                navigator.clipboard.writeText(
-                  bubble.querySelector('.#{rawJS classBubbleContent}').textContent
-                ).then(() => {
-                  
-                  const snackbar = document.createElement('div');
-                  snackbar.classList.add('snackbar','active');
-                  
-                  snackbar.appendChild((() => {
-                    const content = document.createElement('div');
-                    content.classList.add('max');
-                    content.textContent = #{msgr MsgContentCopied};
-                    return content;
-                  }) ());
-                  
-                  snackbar.appendChild((() => {
-                    const close = document.createElement('button');
-                    close.classList.add('close','transparent','circle','small');
-                    close.addEventListener('click', e => {
-                      snackbar.remove();
-                    });
-                    close.appendChild((() => {
-                      const icon = document.createElement('i');
-                      icon.textContent = 'close';
-                      return icon; 
-                    }) ());         
-                    return close;
-                  }) ());
-                  
-                  document.body.appendChild(snackbar);
-
-                  setTimeout(() => { snackbar.remove(); }, 2000);
-                  
-                });
-              };
-              
-              return itemCopy;
-            }) ());
-            
-            const itemDelete = menu.appendChild((() => {
-              
-              const itemDelete = document.createElement('li');
-              itemDelete.classList.add(#{classActionDelete},'wave');
-              itemDelete.setAttribute('data-ui',`#${menu.id}`);
-              
-              itemDelete.appendChild((() => {
-                const i = document.createElement('i');
-                i.textContent = 'delete';
-                return i;
-              }) ());
-              
-              itemDelete.appendChild((() => {
-                const span = document.createElement('span');
-                span.textContent = #{msgr MsgDele};
-                return span;
-              }) ());
-
-              itemDelete.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
-              
-              return itemDelete;
-            }) ());
-            
-            return menu;
-          }) ());
-
-          anchor.setAttribute('data-ui',`#${menu.id}`);
-                  
-          anchor.onclick = function (e) {
-            const v = anchor.getBoundingClientRect().top > (window.innerHeight / 2) ? 'top' : 'bottom';
-            const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
-            menu.classList.remove('top','bottom','left','right');
-            menu.classList.add(v,h);
-            menu.style.display = 'block';
-          };
-          
-          return anchor;
+        
+        const content = bubble.appendChild((() => {
+          const content = document.createElement('span');
+          content.classList.add(#{classBubbleContent});
+          content.innerHTML = data.message;
+          return content;
         }) ());
 
-        statusLine.appendChild((() => {
-          const dialog = document.createElement('dialog');
-          dialog.id = `#{rawJS idDialogDeletePref}${data.chatId}`;
+        const statusLine = bubble.appendChild((() => {
           
-          dialog.appendChild((() => {
-            const title = document.createElement('h6');
-            title.textContent = #{msgr MsgConfirmPlease};
-            return title;
+          const statusLine = document.createElement('div');
+          statusLine.classList.add(#{classBubbleStatusLine},'secondary-text');
+
+          statusLine.appendChild((() => {
+            const time = document.createElement('time');
+            time.setAttribute('datetime', data.created);
+            time.classList.add('time-bubble','small-text');
+            time.appendChild(document.createTextNode(new Date(data.created).toLocaleTimeString(
+              navigator.language, { hour: 'numeric', minute: 'numeric' }
+            )));
+            return time;
           }) ());
 
-          dialog.appendChild((() => {
-            const content = document.createElement('p');
-            content.textContent = #{msgr MsgDeleteAreYouSure};
-            return content;
-          }) ());
+          if (isOutgoing) {
+            statusLine.appendChild((() => {
+              const icon = document.createElement('i');
+              icon.classList.add(#{classBubbleStatus},'tiny','tiny-margin');
+              icon.textContent = 'check';   
+              return icon;
+            }) ());
+          }
 
-          dialog.appendChild((() => {
-            const nav = document.createElement('nav');
-            nav.classList.add('right-align');
+          statusLine.appendChild((() => {
+            const anchor = document.createElement('button');
+            anchor.classList.add(#{classMenuAnchor},'small','transparent','square','no-margin');
             
-            nav.appendChild((() => {
-              const cancel = document.createElement('button');
-              cancel.classList.add('transparent','link');
-              cancel.textContent = #{msgr MsgCancel};
-              cancel.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
-              return cancel;
+            anchor.appendChild((() => {
+              const icon = document.createElement('i');
+              icon.classList.add('tiny');
+              icon.appendChild(document.createTextNode('more_vert'));
+              return icon;            
             }) ());
 
-            if (isOutgoing) {
+            const menu = anchor.appendChild((() => {
+              
+              const menu = document.createElement('menu');
+              menu.id = `#{rawJS idBubbleMenuPref}${data.chatId}`;
+              menu.classList.add('left','top','no-wrap');
+              menu.style.display = 'none';
+              
+              const itemReply = menu.appendChild((() => {
+                
+                const itemReply = document.createElement('li');
+                itemReply.classList.add(#{classActionReply},'wave');
+                itemReply.setAttribute('data-ui',`#${menu.id}`);
+                
+                itemReply.appendChild((() => {
+                  const icon = document.createElement('i');
+                  icon.textContent = 'reply';                
+                  return icon;
+                }) ());
+                
+                itemReply.appendChild((() => {
+                  const span = document.createElement('span');
+                  span.textContent = #{msgr MsgReply};
+                  return span;
+                }) ());
+
+                itemReply.onclick = function (e) {
+                  main.prepend((() => {
+                    const blockquote = document.createElement('blockquote');
+                    blockquote.setAttribute('data-reply',data.chatId);
+                    blockquote.innerHTML = content.innerHTML;
+
+                    blockquote.prepend((() => {
+                      const span = document.createElement('span');
+                      span.classList.add('primary-text','small-text');
+                      span.textContent = data.authorName;
+                      
+                      return span;
+                    }) ());
+
+                    blockquote.appendChild((() => {
+                      const close = document.createElement('button');
+                      close.classList.add('small','transparent','circle');
+                      close.style.position = 'absolute';
+                      close.style.inset = '0 0 auto auto';
+                      close.appendChild((() => {
+                        const icon = document.createElement('i');
+                        icon.textContent = 'close';
+                        return icon;
+                      }) ());
+
+                      close.onclick = function (e) {
+                        blockquote.remove();
+                      };
+                      
+                      return close;
+                    }) ());
+                    
+                    return blockquote;
+                  }) ());
+                  
+                  main.scroll(0, main.scrollHeight);                
+                };
+                
+                return itemReply;
+              }) ());
+              
+              const itemCopy = menu.appendChild((() => {
+                
+                const itemCopy = document.createElement('li');
+                itemCopy.classList.add(#{classActionCopy},'wave');
+                itemCopy.setAttribute('data-ui',`#${menu.id}`);
+                
+                itemCopy.appendChild((() => {
+                  const i = document.createElement('i');
+                  i.textContent = 'content_copy';                
+                  return i;
+                }) ());
+                
+                itemCopy.appendChild((() => {
+                  const span = document.createElement('span');
+                  span.textContent = #{msgr MsgCopy};
+                  return span;
+                }) ());
+
+                itemCopy.onclick = function (e) {
+                  
+                  navigator.clipboard.writeText(
+                    bubble.querySelector('.#{rawJS classBubbleContent}').textContent
+                  ).then(() => {
+                    
+                    const snackbar = document.createElement('div');
+                    snackbar.classList.add('snackbar','active');
+                    
+                    snackbar.appendChild((() => {
+                      const content = document.createElement('div');
+                      content.classList.add('max');
+                      content.textContent = #{msgr MsgContentCopied};
+                      return content;
+                    }) ());
+                    
+                    snackbar.appendChild((() => {
+                      const close = document.createElement('button');
+                      close.classList.add('close','transparent','circle','small');
+                      close.addEventListener('click', e => {
+                        snackbar.remove();
+                      });
+                      close.appendChild((() => {
+                        const icon = document.createElement('i');
+                        icon.textContent = 'close';
+                        return icon; 
+                      }) ());         
+                      return close;
+                    }) ());
+                    
+                    document.body.appendChild(snackbar);
+
+                    setTimeout(() => { snackbar.remove(); }, 2000);
+                    
+                  });
+                };
+                
+                return itemCopy;
+              }) ());
+              
+              const itemDelete = menu.appendChild((() => {
+                
+                const itemDelete = document.createElement('li');
+                itemDelete.classList.add(#{classActionDelete},'wave');
+                itemDelete.setAttribute('data-ui',`#${menu.id}`);
+                
+                itemDelete.appendChild((() => {
+                  const i = document.createElement('i');
+                  i.textContent = 'delete';
+                  return i;
+                }) ());
+                
+                itemDelete.appendChild((() => {
+                  const span = document.createElement('span');
+                  span.textContent = #{msgr MsgDele};
+                  return span;
+                }) ());
+
+                itemDelete.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
+                
+                return itemDelete;
+              }) ());
+              
+              return menu;
+            }) ());
+
+            anchor.setAttribute('data-ui',`#${menu.id}`);
+            
+            anchor.onclick = function (e) {
+              const v = anchor.getBoundingClientRect().top > (window.innerHeight / 2) ? 'top' : 'bottom';
+              const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
+              menu.classList.remove('top','bottom','left','right');
+              menu.classList.add(v,h);
+              menu.style.display = 'block';
+            };
+            
+            return anchor;
+          }) ());
+
+          statusLine.appendChild((() => {
+            const dialog = document.createElement('dialog');
+            dialog.id = `#{rawJS idDialogDeletePref}${data.chatId}`;
+            
+            dialog.appendChild((() => {
+              const title = document.createElement('h6');
+              title.textContent = #{msgr MsgConfirmPlease};
+              return title;
+            }) ());
+
+            dialog.appendChild((() => {
+              const content = document.createElement('p');
+              content.textContent = #{msgr MsgDeleteAreYouSure};
+              return content;
+            }) ());
+
+            dialog.appendChild((() => {
+              const nav = document.createElement('nav');
+              nav.classList.add('right-align');
               
               nav.appendChild((() => {
-                const del = document.createElement('button');
-                del.classList.add('error');
-                del.textContent = #{msgr MsgDele};
-                del.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
-                del.onclick = function (e) {
+                const cancel = document.createElement('button');
+                cancel.classList.add('transparent','link');
+                cancel.textContent = #{msgr MsgCancel};
+                cancel.setAttribute('data-ui', `##{rawJS idDialogDeletePref}${data.chatId}`);
+                return cancel;
+              }) ());
+
+              if (isOutgoing) {
+                
+                nav.appendChild((() => {
+                  const del = document.createElement('button');
+                  del.classList.add('error');
+                  del.textContent = #{msgr MsgDele};
+                  del.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
                   
-                  fetch(data.links['delete'], {
+                  del.onclick = function (e) {
+                    
+                    fetch(data.links['delete'], {
+                      method: 'DELETE',
+                      headers: { 'Accept': 'application/json' }
+                    }).then(res => {
+                      
+                      res.json().then(function (data) {
+
+                        document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
+                        
+                        const snackbar = document.createElement('div');
+                        snackbar.classList.add('snackbar','active');
+                        
+                        snackbar.appendChild((() => {
+                          const content = document.createElement('div');
+                          content.classList.add('max');
+                          content.textContent = #{msgr MsgMessageDeleted};
+                          return content;
+                        }) ());
+                        
+                        snackbar.appendChild((() => {
+                          const close = document.createElement('button');
+                          close.classList.add('close','transparent','circle','small');
+                          close.addEventListener('click', e => {
+                            snackbar.remove();
+                          });
+                          close.appendChild((() => {
+                            const icon = document.createElement('i');
+                            icon.textContent = 'close';
+                            return icon; 
+                          }) ());         
+                          return close;
+                        }) ());
+                        
+                        document.body.appendChild(snackbar);
+                        setTimeout(() => { snackbar.remove(); }, 6000);
+                      });
+                      
+                    }).catch(err => {
+                      
+                      const snackbar = document.createElement('div');
+                      snackbar.classList.add('snackbar','error','active');
+                      
+                      snackbar.appendChild((() => {
+                        const content = document.createElement('div');
+                        content.classList.add('max');
+                        content.textContent = err.message;
+                        return content;
+                      }) ());
+                      
+                      snackbar.appendChild((() => {
+                        const close = document.createElement('button');
+                        close.classList.add('close','transparent','circle','small');
+                        close.addEventListener('click', e => {
+                          snackbar.remove();
+                        });
+                        close.appendChild((() => {
+                          const icon = document.createElement('i');
+                          icon.textContent = 'close';
+                          return icon; 
+                        }) ());         
+                        return close;
+                      }) ());
+                      
+                      document.body.appendChild(snackbar);
+                      setTimeout(() => { snackbar.remove(); }, 6000); 
+                    });
+                  };
+                  
+                  return del;
+                }) ());
+              }
+              
+              const buttonRemove = nav.appendChild((() => {
+                const remove = document.createElement('button');
+                remove.textContent = #{msgr MsgRemove};
+                remove.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
+                
+                remove.onclick = function (e) {
+                  
+                  const xref = isOutgoing ? data.links['remove'] : data.links['dismiss'];
+
+                  fetch(xref, {
                     method: 'DELETE',
                     headers: { 'Accept': 'application/json' }
                   }).then(res => {
@@ -438,8 +535,23 @@ ws.onmessage = function (e) {
                       snackbar.appendChild((() => {
                         const content = document.createElement('div');
                         content.classList.add('max');
-                        content.textContent = #{msgr MsgMessageDeleted};
+                        content.textContent = #{msgr MsgMessageRemoved};
                         return content;
+                      }) ());
+                      
+                      snackbar.appendChild((() => {
+                        const undo = document.createElement('button');
+                        undo.classList.add('transparent','inverse-link');
+                        undo.textContent = #{msgr MsgUndo};
+                        undo.onclick = function (e) {
+                          fetch(data.links.undo, {
+                            method: 'POST',
+                            headers: { 'Accept': 'application/json' }
+                          }).then(_ => {
+                            snackbar.remove();
+                          });
+                        };
+                        return undo;
                       }) ());
                       
                       snackbar.appendChild((() => {
@@ -491,135 +603,43 @@ ws.onmessage = function (e) {
                   });
                 };
                 
-                return del;
+                return remove;
               }) ());
-            }
-            
-            const buttonRemove = nav.appendChild((() => {
-              const remove = document.createElement('button');
-              remove.textContent = #{msgr MsgRemove};
-              remove.setAttribute('data-ui',`##{rawJS idDialogDeletePref}${data.chatId}`);
-              remove.onclick = function (e) {
-                
-                const xref = isOutgoing ? data.links['remove'] : data.links['dismiss'];
-
-                fetch(xref, {
-                  method: 'DELETE',
-                  headers: { 'Accept': 'application/json' }
-                }).then(res => {
-                  
-                  res.json().then(function (data) {
-
-                    document.querySelectorAll('.snackbar').forEach(x => { x.remove(); });
-                    
-                    const snackbar = document.createElement('div');
-                    snackbar.classList.add('snackbar','active');
-                    
-                    snackbar.appendChild((() => {
-                      const content = document.createElement('div');
-                      content.classList.add('max');
-                      content.textContent = #{msgr MsgMessageRemoved};
-                      return content;
-                    }) ());
-                    
-                    snackbar.appendChild((() => {
-                      const undo = document.createElement('button');
-                      undo.classList.add('transparent','inverse-link');
-                      undo.textContent = #{msgr MsgUndo};
-                      undo.onclick = function (e) {
-                        fetch(data.links.undo, {
-                          method: 'POST',
-                          headers: { 'Accept': 'application/json' }
-                        }).then(_ => {
-                          snackbar.remove();
-                        });
-                      };
-                      return undo;
-                    }) ());
-                    
-                    snackbar.appendChild((() => {
-                      const close = document.createElement('button');
-                      close.classList.add('close','transparent','circle','small');
-                      close.addEventListener('click', e => {
-                        snackbar.remove();
-                      });
-                      close.appendChild((() => {
-                        const icon = document.createElement('i');
-                        icon.textContent = 'close';
-                        return icon; 
-                      }) ());         
-                      return close;
-                    }) ());
-                    
-                    document.body.appendChild(snackbar);
-                    setTimeout(() => { snackbar.remove(); }, 6000);
-                  });
-                  
-                }).catch(err => {
-                  
-                  const snackbar = document.createElement('div');
-                  snackbar.classList.add('snackbar','error','active');
-                  
-                  snackbar.appendChild((() => {
-                    const content = document.createElement('div');
-                    content.classList.add('max');
-                    content.textContent = err.message;
-                    return content;
-                  }) ());
-                  
-                  snackbar.appendChild((() => {
-                    const close = document.createElement('button');
-                    close.classList.add('close','transparent','circle','small');
-                    close.addEventListener('click', e => {
-                      snackbar.remove();
-                    });
-                    close.appendChild((() => {
-                      const icon = document.createElement('i');
-                      icon.textContent = 'close';
-                      return icon; 
-                    }) ());         
-                    return close;
-                  }) ());
-                  
-                  document.body.appendChild(snackbar);
-                  setTimeout(() => { snackbar.remove(); }, 6000); 
-                });
-              };
               
-              return remove;
+              return nav;
             }) ());
             
-            return nav;
+            return dialog; 
           }) ());
           
-          return dialog; 
+          return statusLine;
         }) ());
+
+        const bubbleTailOut = bubble.appendChild((() => {
+          const bubbleTailOut = document.createElement('span');
+          bubbleTailOut.classList.add('bubble-tail-out');
+          bubbleTailOut.appendChild((() => {
+            const bubbleTail = document.createElement('span');
+            bubbleTail.classList.add('bubble-tail');
+            return bubbleTail;
+          }) ());
+          
+          return bubbleTailOut;
+        }) ());
+
+        if (isIncoming) {
+          fetch(data.links.delivered, { method: 'POST' });
+          ackObsever.observe(bubble);
+          setTimeout(() => {
+            document.getElementById(#{idAudioIncomingChat}).play().catch(_ => {});
+          }, 0);
+        }
         
-        return statusLine;
+        return bubble;
       }) ());
 
-      const bubbleTailOut = bubble.appendChild((() => {
-        const bubbleTailOut = document.createElement('span');
-        bubbleTailOut.classList.add('bubble-tail-out');
-        bubbleTailOut.appendChild((() => {
-          const bubbleTail = document.createElement('span');
-          bubbleTail.classList.add('bubble-tail');
-          return bubbleTail;
-        }) ());
-        
-        return bubbleTailOut;
-      }) ());
-      
-      return bubble;
+      return row;
     }) ());
-
-    if (isIncoming) {
-      fetch(data.links.delivered, { method: 'POST' });
-      ackObsever.observe(bubble);
-      setTimeout(() => {
-        document.getElementById(#{idAudioIncomingChat}).play().catch(_ => {});
-      }, 0);
-    }
     
     if (!document.hidden) {
       main.scroll(0, main.scrollHeight);
@@ -960,6 +980,19 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
     };
   });
 
+  bubble.querySelectorAll('blockquote.#{rawJS classBlockquoteReplyRef}').forEach(blockquote => {
+
+    blockquote.onmouseenter = function (e) {
+      const ref = document.getElementById(e.target.dataset.ref.substring(1));
+      ref.style.backgroundColor = 'rgba(0,0,0,0.2)';
+    };
+
+    blockquote.onmouseleave = function (e) {
+      const ref = document.getElementById(e.target.dataset.ref.substring(1));
+      ref.style.backgroundColor = 'transparent';
+    };
+  });
+  
 });
 
 

@@ -39,7 +39,11 @@ body
             white-space: nowrap
             overflow: hidden
             text-overflow: ellipsis
-            
+            border-radius: 0
+
+        ##{idNotificationBody}
+            word-wrap: break-word
+
         ##{idFigureSenderPhoto}
             text-align: center
 
