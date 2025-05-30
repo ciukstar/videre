@@ -37,7 +37,7 @@ import Control.Concurrent.STM.TChan
 
 import Data.Aeson
     ( decode, object, Value, ToJSON (toJSON), FromJSON (parseJSON)
-    , (.=), (.?=), (.:), (.:?)
+    , (.=), (.:), (.:?)
     , withObject
     )
 import Data.Aeson.Text (encodeToLazyText)
@@ -47,7 +47,7 @@ import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
     )
 import Data.List (sortBy)
-import Data.Maybe (maybe, fromMaybe, isJust)
+import Data.Maybe (fromMaybe, isJust)
 import qualified Data.Set as S (fromList)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)

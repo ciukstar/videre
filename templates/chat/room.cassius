@@ -1,4 +1,7 @@
 
+html
+    overflow: hidden
+
 header
 
     .interlocutor

@@ -25,7 +25,6 @@ $doctype 5
     <link rel=icon type="image/svg+xml" href=@{StaticR img_video_chat_primary_icon_svg}>
     <link rel=manifest href=@{WebAppManifestR}>
 
-    <link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
     <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.6/dist/cdn/beer.min.css" rel=stylesheet>
 
     ^{pageHead pc}

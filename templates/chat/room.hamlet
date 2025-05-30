@@ -121,7 +121,7 @@
                   <button.#{classMenuAnchor}.small.transparent.square.no-margin data-ui=##{idBubbleMenuPref}#{xid}>
                     <i.tiny>more_vert
 
-                    <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid}>
+                    <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid} style="display:none">
 
                       <li.#{classActionReply}.wave data-ui=##{idBubbleMenuPref}#{xid}>
                         <i>reply

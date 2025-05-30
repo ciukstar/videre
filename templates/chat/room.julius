@@ -17,7 +17,9 @@ const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
 const buttonSend = document.getElementById(#{idButtonSend});
 
-const ws = new WebSocket('@{rtp $ ChatChannelR sid cid rid}'.replace("http:", "ws:").replace("https:", "wss:"));
+const ws = new WebSocket(
+  '@{rtp $ ChatChannelR sid cid rid}'.replace('http:', 'ws:').replace('https:', 'wss:')
+);
 
 const ackObsever = new IntersectionObserver(
   function (entries, obsever) {
@@ -226,6 +228,7 @@ ws.onmessage = function (e) {
             const menu = document.createElement('menu');
             menu.id = `#{rawJS idBubbleMenuPref}${data.chatId}`;
             menu.classList.add('left','top','no-wrap');
+            menu.style.display = 'none';
             
             const itemReply = menu.appendChild((() => {
               
@@ -377,6 +380,7 @@ ws.onmessage = function (e) {
             const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
             menu.classList.remove('top','bottom','left','right');
             menu.classList.add(v,h);
+            menu.style.display = 'block';
           };
           
           return anchor;
@@ -784,6 +788,7 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
     const h = anchor.getBoundingClientRect().left > (window.innerWidth / 2) ? 'left' : 'right';
     menu.classList.remove('top','bottom','left','right');
     menu.classList.add(v,h);
+    menu.style.display = 'block';
   };
 
   menu.querySelector('li.#{rawJS classActionReply}').onclick = function (e) {
