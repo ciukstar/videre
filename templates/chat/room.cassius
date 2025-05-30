@@ -46,15 +46,9 @@ main##{idMain}
                 display: block
 
             .#{classBlockquoteReplyRef}
-                padding: 0.25rem
+                position: static
+                z-index: auto
                 border-radius: 0.25rem
-                overflow-wrap: break-word
-                white-space: pre-line
-
-                overflow: hidden
-                display: -webkit-box
-                -webkit-line-clamp: 3
-                -webkit-box-orient: vertical
 
             .#{classBubbleContent}
                 p
@@ -116,13 +110,11 @@ main##{idMain}
         position: sticky
         bottom: 0
         z-index: 2
-        border-radius: 0.25rem
         padding: 0.25rem
         background-color: var(--surface-container)
 
         p
             margin-block-start: 0.25rem
-            background-color: var(--background)
             overflow-wrap: break-word
             white-space: pre-line
 

@@ -43,17 +43,19 @@
         <time.day-bubble.small-text.tiny-padding.tiny-margin.small-elevate.round datetime=#{dt}>
           #{dt}
         
-      $forall (Entity xid (Chat author recipient logType time msg delivered _ read _ rmByA rmByR _ _),reply) <- logs
+      $forall (Entity xid (Chat author recipient logType time msg delivered _ read _ rmByA rmByR _ _),(owner,replied)) <- logs
 
         $with (incoming, outgoing) <- (sid == recipient, sid == author)
           $if incoming && rmByR
 
           $else
+
             <div.#{classBubble} ##{idBubblePref}#{(show . fromSqlKey) xid}
                 :incoming:.incoming :outgoing:.outgoing :not read:notread
-                data-read=@{rtp $ ChatReadR sid cid rid xid}>
+                data-read=@{rtp $ ChatReadR sid cid rid xid} data-chat-id=#{xid}
+                data-author=#{fromMaybe (((.) userEmail entityVal) owner) (((.) userName entityVal) owner)}>
 
-              $with (chat,author) <- reply
+              $with (chat,author) <- replied
                 $maybe Entity yid (Chat _ _ _ _ msg _ _ _ _ _ _ _ _) <- chat
                   <a.#{classReplyRef} href=##{idBubblePref}#{(show . fromSqlKey) yid}>
                     <blockquote.#{classBlockquoteReplyRef}>
@@ -64,100 +66,100 @@
                           $nothing
                             #{email}
 
-                      #{msg}
-
-              <span.#{classBubbleContent} :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text>
-                $case logType
-                  $of ChatTypeVideoCall
-                    <i.tiny.tiny-margin style="vertical-align:bottom">
-                      videocam
-                    _{MsgVideoCall}
-
-                  $of ChatTypeAudioCall
-                    <i.tiny.tiny-margin style="vertical-align:bottom">
-                      call
-                    _{MsgAudioCall}
-
-                  $of ChatTypeMessage
-                    $if not (rmByA || rmByR)
                       #{preEscapedText $ commonmarkToHtml [] msg}
 
-                    $elseif all id [outgoing, rmByA]
-                      _{MsgRemoved}
+                <span.#{classBubbleContent} :rmByA || rmByR:.secondary-text :rmByA || rmByR:.small-text>
+                  $case logType
+                    $of ChatTypeVideoCall
+                      <i.tiny.tiny-margin style="vertical-align:bottom">
+                        videocam
+                      _{MsgVideoCall}
 
-                    $elseif all id [incoming, rmByA, not rmByR]
-                      _{MsgRemoved}
+                    $of ChatTypeAudioCall
+                      <i.tiny.tiny-margin style="vertical-align:bottom">
+                        call
+                      _{MsgAudioCall}
 
-                    $elseif all id [outgoing, not rmByA, rmByR]
-                      #{msg}
+                    $of ChatTypeMessage
+                      $if not (rmByA || rmByR)
+                        #{preEscapedText $ commonmarkToHtml [] msg}
+
+                      $elseif all id [outgoing, rmByA]
+                        _{MsgRemoved}
+
+                      $elseif all id [incoming, rmByA, not rmByR]
+                        _{MsgRemoved}
+
+                      $elseif all id [outgoing, not rmByA, rmByR]
+                        #{msg}
+
+                      $else
+
+                <span.#{classBubbleStatusLine}.secondary-text>
+
+                  $with dt <- show time
+                    <time.time-bubble.small-text datetime=#{dt}>
+                      #{dt}
+
+                  $if outgoing
+                    $if read
+                      <i.#{classBubbleStatus}.tiny.no-margin.green-text>
+                        done_all
+
+                    $elseif delivered
+                      <i.#{classBubbleStatus}.tiny.no-margin>
+                        done_all
 
                     $else
+                      <i.#{classBubbleStatus}.tiny.no-margin>
+                        check
 
-              <span.#{classBubbleStatusLine}.secondary-text>
+                  $if all id [outgoing, not rmByA, rmByR]
+                    <i.#{classRemoved}.tiny.no-margin title=_{MsgRemovedByRecipient}>
+                      delete_sweep
 
-                $with dt <- show time
-                  <time.time-bubble.small-text datetime=#{dt}>
-                    #{dt}
+                  <button.#{classMenuAnchor}.small.transparent.square.no-margin data-ui=##{idBubbleMenuPref}#{xid}>
+                    <i.tiny>more_vert
 
-                $if outgoing
-                  $if read
-                    <i.#{classBubbleStatus}.tiny.no-margin.green-text>
-                      done_all
+                    <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid}>
 
-                  $elseif delivered
-                    <i.#{classBubbleStatus}.tiny.no-margin>
-                      done_all
+                      <li.#{classActionReply}.wave data-ui=##{idBubbleMenuPref}#{xid}>
+                        <i>reply
+                        _{MsgReply}
 
-                  $else
-                    <i.#{classBubbleStatus}.tiny.no-margin>
-                      check
+                      <li.#{classActionCopy}.wave data-ui=##{idBubbleMenuPref}#{xid}>
+                        <i>content_copy
+                        _{MsgCopy}
 
-                $if all id [outgoing, not rmByA, rmByR]
-                  <i.#{classRemoved}.tiny.no-margin title=_{MsgRemovedByRecipient}>
-                    delete_sweep
-
-                <button.#{classMenuAnchor}.small.transparent.square.no-margin data-ui=##{idBubbleMenuPref}#{xid}>
-                  <i.tiny>more_vert
-
-                  <menu.no-wrap.top :incoming:.right :outgoing:.left ##{idBubbleMenuPref}#{xid}>
-
-                    <li.#{classActionReply}.wave data-ui=##{idBubbleMenuPref}#{xid}>
-                      <i>reply
-                      _{MsgReply}
-
-                    <li.#{classActionCopy}.wave data-ui=##{idBubbleMenuPref}#{xid}>
-                      <i>content_copy
-                      _{MsgCopy}
-
-                    <li.#{classActionDelete}.wave data-ui=##{idDialogDeletePref}#{xid}>
-                      <i>delete
-                      _{MsgDele}
-
-
-                <div.overlay ##{idOverlayDialogDeletePref}#{xid}>
-
-                <dialog.#{classDeleteActions} ##{idDialogDeletePref}#{xid}>
-                  <h6>
-                    _{MsgConfirmPlease}
-
-                  <p>
-                    _{MsgDeleteAreYouSure}
-
-                  <nav.right-align>
-                    <button.transparent.link data-ui=##{idDialogDeletePref}#{xid}>
-                      _{MsgCancel}
-
-                    $if outgoing
-                      <button.error data-action=@{rtp $ ChatDeleteR sid cid rid xid} role=button 
-                                    data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                      <li.#{classActionDelete}.wave data-ui=##{idDialogDeletePref}#{xid}>
+                        <i>delete
                         _{MsgDele}
-        
-                    <button data-action=@{rtp $ ChatRemoveR sid cid rid xid} role=button 
-                            data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
-                      _{MsgRemove}
 
-              <span.bubble-tail-out>
-                <span.bubble-tail>
+
+                  <div.overlay ##{idOverlayDialogDeletePref}#{xid}>
+
+                  <dialog.#{classDeleteActions} ##{idDialogDeletePref}#{xid}>
+                    <h6>
+                      _{MsgConfirmPlease}
+
+                    <p>
+                      _{MsgDeleteAreYouSure}
+
+                    <nav.right-align>
+                      <button.transparent.link data-ui=##{idDialogDeletePref}#{xid}>
+                        _{MsgCancel}
+
+                      $if outgoing
+                        <button.error data-action=@{rtp $ ChatDeleteR sid cid rid xid} role=button 
+                                      data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                          _{MsgDele}
+
+                      <button data-action=@{rtp $ ChatRemoveR sid cid rid xid} role=button 
+                              data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
+                        _{MsgRemove}
+
+                <span.bubble-tail-out>
+                  <span.bubble-tail>
 
 
 <footer>

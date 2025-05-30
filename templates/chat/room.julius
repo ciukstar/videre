@@ -153,6 +153,32 @@ ws.onmessage = function (e) {
       bubble.classList.add(isOutgoing ? 'outgoing' : 'incoming');
       bubble.setAttribute('data-read',data.links.read);
 
+      if ('replied' in data) {
+        
+        const link = bubble.appendChild((() => {
+          const link = document.createElement('a');
+          link.classList.add(#{classReplyRef});
+          link.href = `##{rawJS idBubblePref}${data.replied.chatId}`;
+
+          link.appendChild((() => {
+            const blockquote = document.createElement('blockquote');
+            blockquote.classList.add(#{classBlockquoteReplyRef});
+            blockquote.innerHTML = data.replied.message;
+            blockquote.prepend((() => {
+              const span = document.createElement('span');
+              span.classList.add('small-text','primary-text');
+              span.textContent = data.replied.authorName;
+
+              return span;
+            }) ());
+            
+            return blockquote;
+          }) ());
+          
+          return link;
+        }) ());
+      }
+      
       const content = bubble.appendChild((() => {
         const content = document.createElement('span');
         content.classList.add(#{classBubbleContent});
@@ -228,7 +254,7 @@ ws.onmessage = function (e) {
                   blockquote.prepend((() => {
                     const span = document.createElement('span');
                     span.classList.add('primary-text','small-text');
-                    span.textContent = 'Author Name here...';
+                    span.textContent = data.authorName;
                     
                     return span;
                   }) ());
@@ -607,16 +633,20 @@ ws.onerror = function (e) {
 form.addEventListener('submit', function(e) {
   e.preventDefault();
 
-  const reply = main.querySelector('blockquote[data-reply]')?.dataset.reply;
+  const replied = main.querySelector('* > blockquote[data-reply]');
+  
+  const chatIdRep = replied?.dataset.reply;
   
   ws.send( JSON.stringify({ type: #{WsMessageTypeChat},
                             message: input.value,
-                            ... (!isNaN(reply) && { reply: Number(reply) })
+                            ... (!isNaN(chatIdRep) && { reply: Number(chatIdRep) })
                           })
          );
-  
+
+  replied?.remove();
   input.value = '';
   buttonSend.disabled = true;
+  
   input.focus();
   
   setTimeout(() => {
@@ -745,6 +775,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
 
+  const content = bubble.querySelector('.#{rawJS classBubbleContent}');
   const anchor = bubble.querySelector('button.#{rawJS classMenuAnchor}');
   const menu = anchor.querySelector('menu');
   
@@ -756,7 +787,41 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}').forEach(bubble => {
   };
 
   menu.querySelector('li.#{rawJS classActionReply}').onclick = function (e) {
-    throw new Error('No implemented yet');
+    
+    main.prepend((() => {
+      const blockquote = document.createElement('blockquote');
+      blockquote.setAttribute('data-reply', bubble.dataset.chatId);
+      blockquote.innerHTML = content.innerHTML;
+
+      blockquote.prepend((() => {
+        const span = document.createElement('span');
+        span.classList.add('primary-text','small-text');
+        span.textContent = bubble.dataset.author;
+        
+        return span;
+      }) ());
+
+      blockquote.appendChild((() => {
+        const close = document.createElement('button');
+        close.classList.add('small','transparent','circle');
+        close.style.position = 'absolute';
+        close.style.inset = '0 0 auto auto';
+        close.appendChild((() => {
+          const icon = document.createElement('i');
+          icon.textContent = 'close';
+          return icon;
+        }) ());
+
+        close.onclick = function (e) {
+          blockquote.remove();
+        };
+        
+        return close;
+      }) ());
+      
+      return blockquote;
+    }) ());
+
   };
     
   menu.querySelector('li.#{rawJS classActionCopy}').onclick = function (e) {

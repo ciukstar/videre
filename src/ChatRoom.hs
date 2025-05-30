@@ -11,12 +11,10 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE InstanceSigs #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
-import CMark (commonmarkToHtml)
 
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
@@ -25,6 +23,8 @@ import ChatRoom.Data
       , ChatDeleteR, ChatReadR, ChatDeliveredR, ChatUndoR
       )
     )
+    
+import CMark (commonmarkToHtml)
 
 import Conduit ((.|), mapM_C, runConduit, MonadIO (liftIO))
 
@@ -37,7 +37,7 @@ import Control.Concurrent.STM.TChan
 
 import Data.Aeson
     ( decode, object, Value, ToJSON (toJSON), FromJSON (parseJSON)
-    , (.=), (.:), (.:?)
+    , (.=), (.?=), (.:), (.:?)
     , withObject
     )
 import Data.Aeson.Text (encodeToLazyText)
@@ -47,7 +47,7 @@ import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
     )
 import Data.List (sortBy)
-import Data.Maybe (fromMaybe, isJust)
+import Data.Maybe (maybe, fromMaybe, isJust)
 import qualified Data.Set as S (fromList)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
@@ -471,22 +471,24 @@ getChatRoomR sid cid rid = do
 
     chats <- liftHandler $ runDB $ select $ from $
         ( do
-              x :& r :& a <- from $ table @Chat
-                  `leftJoin` table @Chat `on` (\(x :& r) -> x ^. ChatReply ==. r ?. ChatId)
-                  `leftJoin` table @User `on` (\(_ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
+              x :& o :& r :& a <- from $ table @Chat
+                  `innerJoin` table @User `on` (\(x :& o) -> x ^. ChatAuthor ==. o ^. UserId)
+                  `leftJoin` table @Chat `on` (\(x :& _ :& r) -> x ^. ChatReply ==. r ?. ChatId)
+                  `leftJoin` table @User `on` (\(_ :& _ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
               where_ $ x ^. ChatAuthor ==. val sid
               where_ $ x ^. ChatRecipient ==. val rid
-              return (x,(r,a))
+              return (x,(o,(r,a)))
         )
         `unionAll_`
         ( do
-              x :& r :& a <- from $ table @Chat
-                  `leftJoin` table @Chat `on` (\(x :& r) -> x ^. ChatReply ==. r ?. ChatId)
-                  `leftJoin` table @User `on` (\(_ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
+              x :& o :& r :& a <- from $ table @Chat
+                  `innerJoin` table @User `on` (\(x :& o) -> x ^. ChatAuthor ==. o ^. UserId)
+                  `leftJoin` table @Chat `on` (\(x :& _ :& r) -> x ^. ChatReply ==. r ?. ChatId)
+                  `leftJoin` table @User `on` (\(_ :& _ :& r :& a) -> r ?. ChatAuthor ==. a ?. UserId)
               where_ $ x ^. ChatRecipient ==. val sid
               where_ $ x ^. ChatAuthor ==. val rid
               where_ $ not_ $ x ^. ChatRemovedRecipient
-              return (x,(r,a))
+              return (x,(o,(r,a)))
         )
 
     let dayLogs = sortBy (\(d1,_) (d2,_) -> compare d1 d2)
@@ -663,16 +665,31 @@ chatApp authorId contactId recipientId = do
                   now <- liftIO getCurrentTime
                   let chat = Chat authorId recipientId ChatTypeMessage now msg
                                   False Nothing False Nothing False False Nothing reply
-                  cid <- liftHandler (runDB $ insert chat)
+                  cid <- liftHandler $ runDB $ insert chat
+
+                  author <- liftHandler $ runDB $ selectOne $ do
+                      x <- from $ table @User
+                      where_ $ x ^. UserId ==. val (chatAuthor chat)
+                      return x
+
+                  replied <- case reply of
+                    Nothing -> return Nothing
+                    Just rid' -> liftHandler $ runDB $ selectOne $ do
+                        x :& o <- from $ table @Chat
+                            `innerJoin` table @User `on` (\(x :& o) -> x ^. ChatAuthor ==. o ^. UserId)
+                        where_ $ x ^. ChatId ==. val rid'
+                        return (x,o)
+                  
                   rndr <- getUrlRender
                   rtp <- getRouteToParent
 
                   let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
 
-                  atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
+                  atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object $
                       [ "type" .= WsMessageTypeChat
                       , "chatId" .= cid
                       , "author" .= chatAuthor chat
+                      , "authorName" .= resolveName author
                       , "recipient" .= chatRecipient chat
                       , "created" .= chatCreated chat
                       , "message" .= commonmarkToHtml [] (chatMessage chat)
@@ -683,10 +700,19 @@ chatApp authorId contactId recipientId = do
                         , "remove" .= expath (rtp $ ChatRemoveR authorId contactId recipientId cid)
                         , "delete" .= expath (rtp $ ChatDeleteR authorId contactId recipientId cid)
                         ]
-                      ]
-
-                  _ <- forkIO $ do
-                      threadDelay (3 * 1000000)
+                      ] <> maybe [] (\(Entity cid' (Chat aid _ _ _ msg' _ _ _ _ _ _ _ _),a) ->
+                                       ["replied" .= object
+                                        [ "type" .= WsMessageTypeChat
+                                        , "chatId" .= cid'
+                                        , "author" .= aid             
+                                        , "authorName" .= resolveName (Just a)
+                                        , "message" .= commonmarkToHtml [] msg'
+                                        ]
+                                       ]
+                                    ) replied
+                      
+                  _ <- forkIO $ do                      
+                      threadDelay 2000000
 
                       chat' <- liftHandler $ runDB $ selectOne $ do
                           x <- from $ table @Chat
@@ -770,6 +796,9 @@ chatApp authorId contactId recipientId = do
           let newChannelMap = M.alter userLeftChannel channelId m
           atomically $ writeTVar channelMapTVar newChannelMap
       Right () -> return ()
+
+  where
+      resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)
