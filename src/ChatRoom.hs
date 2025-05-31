@@ -11,6 +11,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -19,8 +20,8 @@ module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 import ChatRoom.Data
     ( ChatRoom (ChatRoom), resourcesChatRoom
     , Route
-      ( ChatRoomR, ChatChannelR, ChatMsgRemoveR
-      , ChatMsgDeleteR, ChatMsgReadR, ChatMsgDeliveredR, ChatMsgRemoveUndoR
+      ( ChatRoomR, ChatChannelR, ChatMsgRemoveR, ChatMsgRemoveUndoR
+      , ChatMsgDeleteR, ChatMsgReadR, ChatMsgDeliveredR, ChatDeleteR
       )
     )
     
@@ -74,7 +75,8 @@ import Foundation
       , MsgSubscribe, MsgDele, MsgCopy, MsgRemovedByRecipient, MsgContentCopied
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
       , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele, MsgReply
-      , MsgDeleteAreYouSure, MsgConfirmPlease, MsgRemove
+      , MsgDeleteAreYouSure, MsgConfirmPlease, MsgChatDeletedSuccessfully
+      , MsgRemove, MsgInvalidFormData, MsgDeleteChat
       )
     )
 
@@ -82,7 +84,7 @@ import Network.HTTP.Client.Conduit (Manager)
 import Network.HTTP.Types (extractPath)
 
 import Model
-    ( msgError, statusError, paramEndpoint, paramBacklink
+    ( msgError, msgSuccess, statusError, paramEndpoint, paramBacklink
     , UserId, User (User, userName, userEmail)
     , ChatId, Chat (Chat, chatMessage, chatCreated, chatAuthor, chatRecipient)
     , PushSubscription (PushSubscription)
@@ -147,18 +149,21 @@ import Yesod.Core
     , YesodSubDispatch (yesodSubDispatch), MonadHandler (liftHandler)
     , Application, RenderMessage, HandlerFor, getSubYesod, newIdent
     , lookupGetParam, getSubCurrentRoute, getMessages, permissionDeniedI
+    , redirect
     )
 import Yesod.Core.Handler
     ( getUrlRender, getRouteToParent, addMessageI
     , getMessageRender
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Core.Widget (setTitleI)
+import Yesod.Core.Widget (setTitleI, whamlet, WidgetFor)
 import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
 import Yesod.WebSockets (WebSocketsT, sourceWS, sendTextData, race_, webSockets)
 import qualified Data.Text.Lazy.Encoding as TL
+import Yesod.Form.Functions (runFormPost, generateFormPost)
+import Yesod.Form.Types (MForm, FormResult (FormSuccess))
 
 
 class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
@@ -183,8 +188,31 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
 
 
-postChatUndoR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-postChatUndoR sid _cid rid xid = do
+postChatDeleteR :: UserId -> ContactId -> UserId -> ChatHandler ()
+postChatDeleteR sid cid rid = do
+
+    checkAuthorized sid
+
+    ((fr,_),_) <- runFormPost formChatDelete
+
+    rtp <- getRouteToParent
+    
+    case fr of
+      FormSuccess () -> do
+          addMessageI msgSuccess MsgChatDeletedSuccessfully
+          redirect $ rtp $ ChatRoomR sid cid rid
+          
+      _otherwise -> do
+          addMessageI msgError MsgInvalidFormData
+          redirect $ rtp $ ChatRoomR sid cid rid
+
+
+formChatDelete :: forall m. Html -> MForm (SubHandlerFor ChatRoom m) (FormResult (), WidgetFor m ())
+formChatDelete extra = return (pure (), [whamlet|^{extra}|])
+
+
+postChatMsgRemoveUndoR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
+postChatMsgRemoveUndoR sid _cid rid xid = do
 
     checkAuthorized sid
     
@@ -228,8 +256,8 @@ postChatUndoR sid _cid rid xid = do
     return response
 
 
-deleteChatRemoveR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatRemoveR sid cid rid xid = do
+deleteChatMsgRemoveR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
+deleteChatMsgRemoveR sid cid rid xid = do
 
     checkAuthorized sid
     
@@ -269,7 +297,7 @@ deleteChatRemoveR sid cid rid xid = do
                           , "source" .= sid
                           , "recipient" .= rid
                           , "links" .= object
-                            [ "undo" .= expath (rtp $ ChatUndoR sid cid rid xid) 
+                            [ "undo" .= expath (rtp $ ChatMsgRemoveUndoR sid cid rid xid) 
                             ]
                           ]
 
@@ -283,8 +311,8 @@ deleteChatRemoveR sid cid rid xid = do
     return response
 
 
-deleteChatDeleteR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
-deleteChatDeleteR sid _cid rid xid = do
+deleteChatMsgDeleteR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler Value
+deleteChatMsgDeleteR sid _cid rid xid = do
 
     checkAuthorized sid
 
@@ -318,8 +346,8 @@ deleteChatDeleteR sid _cid rid xid = do
     return response
 
 
-postChatReadR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
-postChatReadR sid _cid rid xid = do
+postChatMsgReadR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
+postChatMsgReadR sid _cid rid xid = do
 
     checkAuthorized sid
     
@@ -366,8 +394,8 @@ postChatReadR sid _cid rid xid = do
           writeTChan writeChan $ toStrict $ encodeToLazyText response
 
 
-postChatDeliveredR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
-postChatDeliveredR sid _cid rid xid = do
+postChatMsgDeliveredR :: UserId -> ContactId -> UserId -> ChatId -> ChatHandler ()
+postChatMsgDeliveredR sid _cid rid xid = do
 
     checkAuthorized sid
     
@@ -469,6 +497,8 @@ getChatRoomR sid cid rid = do
         where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
         return x 
 
+    (fw0,et0) <- generateFormPost formChatDelete
+
     chats <- liftHandler $ runDB $ select $ from $
         ( do
               x :& o :& r :& a <- from $ table @Chat
@@ -568,6 +598,7 @@ getChatRoomR sid cid rid = do
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idMenuChat <- newIdent
+        idItemDleteChat <- newIdent
         idMain <- newIdent
         idChatOutput <- newIdent
         classBubbleRow <- newIdent
@@ -593,6 +624,7 @@ getChatRoomR sid cid rid = do
         idButtonSend <- newIdent
         idAudioOutgoingChat <- newIdent
         idAudioIncomingChat <- newIdent
+        idFormDeleteChat <- newIdent
         idOverlayDialogOutgoingCall <- newIdent
         idDialogOutgoingCall <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
@@ -694,11 +726,11 @@ chatApp authorId contactId recipientId = do
                       , "created" .= chatCreated chat
                       , "message" .= commonmarkToHtml [] (chatMessage chat)
                       , "links" .= object
-                        [ "delivered" .= expath (rtp $ ChatDeliveredR recipientId contactId authorId cid)
-                        , "read" .= expath (rtp $ ChatReadR recipientId contactId authorId cid)
-                        , "dismiss" .= expath (rtp $ ChatRemoveR recipientId contactId authorId cid)
-                        , "remove" .= expath (rtp $ ChatRemoveR authorId contactId recipientId cid)
-                        , "delete" .= expath (rtp $ ChatDeleteR authorId contactId recipientId cid)
+                        [ "delivered" .= expath (rtp $ ChatMsgDeliveredR recipientId contactId authorId cid)
+                        , "read" .= expath (rtp $ ChatMsgReadR recipientId contactId authorId cid)
+                        , "dismiss" .= expath (rtp $ ChatMsgRemoveR recipientId contactId authorId cid)
+                        , "remove" .= expath (rtp $ ChatMsgRemoveR authorId contactId recipientId cid)
+                        , "delete" .= expath (rtp $ ChatMsgDeleteR authorId contactId recipientId cid)
                         ]
                       ] <> maybe [] (\(Entity cid' (Chat aid _ _ _ msg' _ _ _ _ _ _ _ _),a) ->
                                        ["replied" .= object
@@ -761,7 +793,7 @@ chatApp authorId contactId recipientId = do
                                                   , "recipientId" .= sid
                                                   , "links" .= object
                                                     [ "delivered" .= ( expath . rtp $
-                                                                       ChatDeliveredR recipientId contactId authorId cid
+                                                                       ChatMsgDeliveredR recipientId contactId authorId cid
                                                                      )
                                                     ]
                                                   ]

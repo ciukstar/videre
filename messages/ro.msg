@@ -1,3 +1,5 @@
+DeleteChat: Șterge chatul
+ChatDeletedSuccessfully: Chatul a fost șters cu succes
 Undo: Anulează
 MessageDeleted: Mesajul a fost șters
 MessageRemoved: Mesajul a fost eliminat

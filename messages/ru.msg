@@ -1,3 +1,5 @@
+DeleteChat: Удалить чат
+ChatDeletedSuccessfully: Чат успешно удален
 Undo: Отменить
 MessageDeleted: Сообщение удалено
 MessageRemoved: Сообщение удалено

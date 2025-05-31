@@ -1,3 +1,5 @@
+DeleteChat: Supprimer le chat
+ChatDeletedSuccessfully: Chat supprimé avec succès
 Undo: Défaire
 MessageDeleted: Message supprimé
 MessageRemoved: Message supprimé

@@ -33,9 +33,9 @@
             <i>info
             <a href=@?{(contact,[(paramBacklink, backlink)])}>
               _{MsgViewContact}
-        <li data-ui=##{idMenuChat}>
+        <li data-ui=##{idMenuChat} ##{idItemDleteChat}>
           <i>delete
-          _{MsgDele}
+          _{MsgDeleteChat}
               
 
 <main.responsive.no-padding ##{idMain}>
@@ -59,7 +59,7 @@
                 
               <div.#{classBubble} ##{idBubblePref}#{(show . fromSqlKey) xid}
                   :incoming:.incoming :outgoing:.outgoing :not read:notread
-                  data-read=@{rtp $ ChatReadR sid cid rid xid} data-chat-id=#{xid}
+                  data-read=@{rtp $ ChatMsgReadR sid cid rid xid} data-chat-id=#{xid}
                   data-author=#{fromMaybe (((.) userEmail entityVal) owner) (((.) userName entityVal) owner)}>
 
                 $with (chat,author) <- replied
@@ -157,11 +157,11 @@
                           _{MsgCancel}
 
                         $if outgoing
-                          <button.error data-action=@{rtp $ ChatDeleteR sid cid rid xid} role=button 
+                          <button.error data-action=@{rtp $ ChatMsgDeleteR sid cid rid xid} role=button 
                                         data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
                             _{MsgDele}
 
-                        <button data-action=@{rtp $ ChatRemoveR sid cid rid xid} role=button 
+                        <button data-action=@{rtp $ ChatMsgRemoveR sid cid rid xid} role=button 
                                 data-ui=##{idDialogDeletePref}#{xid} data-ui=##{idBubbleMenuPref}#{xid}>
                           _{MsgRemove}
 
@@ -192,6 +192,10 @@ $forall (s,msg) <- msgs
       #{msg}
     <button.close.transparent.circle.small>
       <i>close
+
+
+<form method=post action=@{rtp $ ChatDeleteR sid cid rid} enctype=#{et0} ##{idFormDeleteChat}>
+  ^{fw0}
 
 
 <div.overlay ##{idOverlayDialogOutgoingCall}>

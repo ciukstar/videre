@@ -1,3 +1,5 @@
+DeleteChat: Delete chat
+ChatDeletedSuccessfully: Chat successfully deleted
 Undo: Undo
 MessageDeleted: Message deleted
 MessageRemoved: Message removed
