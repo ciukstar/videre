@@ -1,5 +1,5 @@
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE ViewPatterns      #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
@@ -199,6 +199,17 @@ postChatDeleteR sid cid rid = do
     
     case fr of
       FormSuccess () -> do
+
+          liftHandler $ runDB $ delete $ do
+              x <- from $ table @Chat
+              where_ $ x ^. ChatAuthor ==. val sid
+              where_ $ x ^. ChatRecipient ==. val rid
+
+          liftHandler $ runDB $ update $ \x -> do
+              set x [ ChatRemovedRecipient =. val True ]
+              where_ $ x ^. ChatAuthor ==. val rid
+              where_ $ x ^. ChatRecipient ==. val sid
+          
           addMessageI msgSuccess MsgChatDeletedSuccessfully
           redirect $ rtp $ ChatRoomR sid cid rid
           
@@ -631,6 +642,8 @@ getChatRoomR sid cid rid = do
         idButtonOutgoingCallCancel <- newIdent
         idOverlayDialogCallDeclined <- newIdent
         idDialogCallDeclined <- newIdent
+        idOverlayDialogDeleteChat <- newIdent
+        idDialogDeleteChat <- newIdent
         
         $(widgetFile "chat/room")
 

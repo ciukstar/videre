@@ -1,8 +1,4 @@
 
-document.getElementById(#{idItemDleteChat}).addEventListener('click', function (e) {
-  document.getElementById(#{idFormDeleteChat}).submit();
-});
-
 document.body.querySelectorAll('time.day-bubble[datetime]').forEach(function (x) {
   x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
     navigator.language, { weekday: 'short',year: 'numeric',month: 'long',day: 'numeric' }

@@ -138,6 +138,11 @@ footer
     ##{idMessageForm}
         margin: 0
 
+##{idFormDeleteChat}
+    margin: 0
+    padding: 0
+    height: 0
+
 
 ##{idDialogOutgoingCall}
 

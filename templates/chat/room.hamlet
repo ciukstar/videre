@@ -33,7 +33,7 @@
             <i>info
             <a href=@?{(contact,[(paramBacklink, backlink)])}>
               _{MsgViewContact}
-        <li data-ui=##{idMenuChat} ##{idItemDleteChat}>
+        <li data-ui=##{idDialogDeleteChat} data-ui=##{idMenuChat} ##{idItemDleteChat}>
           <i>delete
           _{MsgDeleteChat}
               
@@ -194,10 +194,6 @@ $forall (s,msg) <- msgs
       <i>close
 
 
-<form method=post action=@{rtp $ ChatDeleteR sid cid rid} enctype=#{et0} ##{idFormDeleteChat}>
-  ^{fw0}
-
-
 <div.overlay ##{idOverlayDialogOutgoingCall}>
 
 <dialog ##{idDialogOutgoingCall}>
@@ -273,3 +269,24 @@ $forall (s,msg) <- msgs
   <nav.right-align>
     <button type=button data-ui=##{idDialogCallDeclined}>
       _{MsgClose}
+
+
+
+<div.overlay ##{idOverlayDialogDeleteChat}>
+
+<dialog ##{idDialogDeleteChat}>
+  <h6>
+    _{MsgConfirmPlease}
+
+  <form method=post action=@{rtp $ ChatDeleteR sid cid rid} enctype=#{et0} ##{idFormDeleteChat}>
+    ^{fw0}
+
+  <p>
+    _{MsgDeleteAreYouSure}
+
+  <nav.right-align>
+    <button.transparent.link type=button data-ui=##{idDialogDeleteChat}>
+      _{MsgCancel}
+      
+    <button.error type=submit form=#{idFormDeleteChat}>
+      _{MsgDele}
