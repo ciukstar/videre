@@ -17,9 +17,7 @@ const form = document.getElementById(#{idMessageForm});
 const input = document.getElementById(#{idMessageInput});
 const buttonSend = document.getElementById(#{idButtonSend});
 
-const ws = new WebSocket(
-  '@{rtp $ ChatChannelR sid cid rid}'.replace('http:', 'ws:').replace('https:', 'wss:')
-);
+const ws = new WebSocket('@{rtp $ ChatChannelR sid cid rid}');
 
 const ackObsever = new IntersectionObserver(
   function (entries, obsever) {
@@ -32,6 +30,8 @@ const ackObsever = new IntersectionObserver(
        threshold: 0.8
      }
 );
+
+var idTimeoutTyping = null;
 
 chatOutput.querySelectorAll('.#{rawJS classBubble}.incoming[notread]').forEach(x => {
   ackObsever.observe(x);
@@ -145,7 +145,57 @@ ws.onmessage = function (e) {
       
     }
 
+  } else if (data.type === #{WsMessageTypeTyping} && isIncoming) {
+
+    window.clearTimeout(idTimeoutTyping);
+
+    const row = document.getElementById(#{idTypingIndicatorRow});
+    
+    const typingIndicatorRow = row ? row : chatOutput.appendChild((() => {
+      
+      const typingIndicatorRow = document.createElement('div');
+      typingIndicatorRow.id = #{idTypingIndicatorRow};
+      typingIndicatorRow.classList.add('incoming','small-round');
+      
+      const typingIndicator = typingIndicatorRow.appendChild((() => {
+        
+        const typingIndicator = document.createElement('div');
+        typingIndicator.id = #{idTypingIndicator};
+        typingIndicator.classList.add('incoming');
+        typingIndicator.appendChild((() => {
+          const typingDots = document.createElement('div');
+          typingDots.id = #{idTypingDots};          
+
+          const bubbleTailOut = typingIndicator.appendChild((() => {
+            const bubbleTailOut = document.createElement('span');
+            bubbleTailOut.classList.add('bubble-tail-out');
+            bubbleTailOut.appendChild((() => {
+              const bubbleTail = document.createElement('span');
+              bubbleTail.classList.add('bubble-tail');
+              return bubbleTail;
+            }) ());
+            
+            return bubbleTailOut;
+          }) ());
+          
+          return typingDots;
+        }) ());
+        
+        return typingIndicator;
+      }) ());
+
+      return typingIndicatorRow;
+    }) ());
+
+    main.scroll(0, main.scrollHeight);
+    
+    idTimeoutTyping = setTimeout(function (e) {
+      typingIndicatorRow.remove();
+    }, 2000);
+
   } else if (data.type === #{WsMessageTypeChat}) {
+
+    document.getElementById(#{idTypingIndicatorRow})?.remove();
     
     const bubbleRow = chatOutput.appendChild((() => {
       
@@ -651,9 +701,7 @@ ws.onmessage = function (e) {
   
 };
 
-ws.onerror = function (e) {
-  location.reload();
-}; 
+ws.onerror = function (e) { location.reload(); };
 
 
 form.addEventListener('submit', function(e) {
@@ -682,9 +730,16 @@ form.addEventListener('submit', function(e) {
 });
 
 
-input.addEventListener('input',function (e) {
-  buttonSend.disabled = !(this.value && this.value.trim());
-});
+input.addEventListener('input', debounce(function (e) {
+  
+  ws.send( JSON.stringify({ type: #{WsMessageTypeTyping},
+                            message: '...'
+                          })
+         );
+  
+  buttonSend.disabled = !(e.target.value && e.target.value.trim());
+  
+}, 300));
 
 
 document.getElementById(#{idButtonVideoCall}).addEventListener('click', function (event) {
@@ -1012,3 +1067,14 @@ Array.from(
 setTimeout(() => {
   document.querySelectorAll('.snackbar').forEach(x => { x.classList.remove('active'); });
 }, 6000);
+
+
+function debounce(f,t) {
+  let timeoutId = null;
+  return (...args) => {
+    window.clearTimeout(timeoutId);
+    timeoutId = window.setTimeout(() => {
+      f.apply(null, args);
+    }, t);
+  };
+}

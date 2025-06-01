@@ -127,6 +127,7 @@ instance FromJSON ChatType where
 
 
 data WsMessageType = WsMessageTypeChat
+                   | WsMessageTypeTyping
                    | WsMessageTypeDelivered
                    | WsMessageTypeRead
                    | WsMessageTypeRemove
@@ -141,6 +142,18 @@ instance ToJavascript WsMessageType where
 instance ToJSON WsMessageType where
     toJSON :: WsMessageType -> Value
     toJSON = toJSON . show
+
+
+instance FromJSON WsMessageType where
+    parseJSON :: Value -> Parser WsMessageType
+    parseJSON (String "WsMessageTypeChat") = pure WsMessageTypeChat
+    parseJSON (String "WsMessageTypeTyping") = pure WsMessageTypeTyping
+    parseJSON (String "WsMessageTypeDelivered") = pure WsMessageTypeDelivered
+    parseJSON (String "WsMessageTypeRead") = pure WsMessageTypeRead 
+    parseJSON (String "WsMessageTypeRemove") = pure WsMessageTypeRemove
+    parseJSON (String "WsMessageTypeDelete") = pure WsMessageTypeDelete
+    parseJSON (String "WsMessageTypeUndo") = pure WsMessageTypeUndo
+    parseJSON invalid = prependFailure "parsing WsMessageType failed" (typeMismatch "String" invalid)
 
 
 data StoreType = StoreTypeDatabase | StoreTypeSession | StoreTypeGoogleSecretManager

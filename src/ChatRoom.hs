@@ -1,6 +1,6 @@
 {-# LANGUAGE TemplateHaskell   #-}
-{-# LANGUAGE ViewPatterns      #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ViewPatterns          #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RankNTypes #-}
@@ -101,7 +101,7 @@ import Model
       )
     , WsMessageType
       ( WsMessageTypeChat, WsMessageTypeDelete, WsMessageTypeRemove
-      , WsMessageTypeDelivered, WsMessageTypeRead, WsMessageTypeUndo
+      , WsMessageTypeDelivered, WsMessageTypeRead, WsMessageTypeUndo, WsMessageTypeTyping
       )
     , ChatType (ChatTypeMessage, ChatTypeVideoCall, ChatTypeAudioCall)
     , EntityField
@@ -594,16 +594,17 @@ getChatRoomR sid cid rid = do
           Just (Entity tid (Ringtone _ mime _)) -> getUserRingtoneAudioRoute sid tid >>= \r -> return (r, mime)
           Nothing -> do
               defaultRingtone <- liftHandler $ runDB $ selectOne $ do
-                    x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
-                        `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
-                    where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeChatOutgoing
-                    return x
+                  x :& t <- from $ table @Ringtone `innerJoin` table @DefaultRingtone
+                      `on` (\(x :& t) -> x ^. RingtoneId ==. t ^. DefaultRingtoneRingtone)
+                  where_ $ t ^. DefaultRingtoneType ==. val RingtoneTypeChatOutgoing
+                  return x
               case defaultRingtone of
                 Just (Entity did (Ringtone _ mime _)) -> getDefaultRingtoneAudioRoute did >>= \r -> return (r, mime)
                 Nothing -> getStaticRoute ringtones_outgoing_message_ringtone_1_mp3 >>= \r -> return (r, "audio/mpeg")
 
     msgr <- getMessageRender
     msgs <- getMessages
+    
     liftHandler $ defaultLayout $ do
         setTitleI MsgChats
         idButtonVideoCall <- newIdent
@@ -630,6 +631,9 @@ getChatRoomR sid cid rid = do
         idOverlayDialogDeletePref <- newIdent
         classDeleteActions <- newIdent
         idDialogDeletePref <- newIdent
+        idTypingIndicatorRow <- newIdent
+        idTypingIndicator <- newIdent
+        idTypingDots <- newIdent
         idMessageForm <- newIdent
         idMessageInput <- newIdent
         idButtonSend <- newIdent
@@ -654,7 +658,7 @@ getChatRoomR sid cid rid = do
 
 
 data WsocketsMessage = WsocketsMessage
-    { wsmType :: !Text
+    { wsmType :: !WsMessageType
     , wsmMessage :: !Text
     , wsmReply :: !(Maybe ChatId)
     }
@@ -706,6 +710,14 @@ chatApp authorId contactId recipientId = do
               case input of
                 Nothing -> return ()
                 
+                Just (WsocketsMessage WsMessageTypeTyping _ _) -> do
+
+                  atomically $ writeTChan writeChan $ toStrict $ encodeToLazyText $ object
+                      [ "type" .= WsMessageTypeTyping
+                      , "author" .= authorId
+                      , "recipient" .= recipientId
+                      ]
+                      
                 Just (WsocketsMessage _type msg reply) -> do
                   now <- liftIO getCurrentTime
                   let chat = Chat authorId recipientId ChatTypeMessage now msg
@@ -756,7 +768,7 @@ chatApp authorId contactId recipientId = do
                                        ]
                                     ) replied
                       
-                  _ <- forkIO $ do                      
+                  _ <- forkIO $ do
                       threadDelay 2000000
 
                       chat' <- liftHandler $ runDB $ selectOne $ do
