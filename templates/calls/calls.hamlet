@@ -18,8 +18,13 @@
       <i.extra>folder_open
       <figcaption>
         <p>_{MsgYouHaveNotMadeAnyCallsYet}
+        
         <p.secondary-text>
           _{MsgSelectCalleeToCall}
+
+        <a.button.large href=@{CalleesR uid} role=button>
+          <i>add_call
+          _{MsgSelect}
           
   $else
     <ul.list.border.large-space>
@@ -290,7 +295,7 @@
       $with (ringtone, mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@{CalleesR uid} title=_{MsgAdd}>
-    <i>add_call
+    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate href=@{CalleesR uid} title=_{MsgAdd} role=button>
+      <i>add_call
 
 ^{widgetSnackbar msgs}

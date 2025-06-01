@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TemplateHaskell   #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeApplications #-}
@@ -81,7 +81,7 @@ import Foundation
       , MsgContact, MsgPhoto, MsgDele, MsgConfirmPlease, MsgRecordDeleted
       , MsgSubscribeToNotifications, MsgNotGeneratedVAPID, MsgCancel
       , MsgRemoveAreYouSure, MsgSubscriptionSucceeded, MsgSubscriptionFailed
-      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe
+      , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe, MsgSelect
       , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
       , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser

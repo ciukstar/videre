@@ -16,6 +16,11 @@
         <p>_{MsgNoRegisteredUsersYet}
         <p.secondary-text>
           _{MsgYouMightWantToAddAFew}
+
+        $with backlink <- rndr $ CalleesR uid
+          <a.button.large href=@?{(ContactsR uid,[("backlink", backlink)])} role=button>
+            <i>add
+            _{MsgAdd}
           
   $else
     <ul.list.border>
@@ -218,9 +223,9 @@
       $with (ringtone,mime) <- outgoingCallRingtone
         <source src=@{ringtone} type=#{mime}>
 
-  $with backlink <- rndr $ CalleesR uid
-    <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate title=_{MsgAdd}
-            href=@?{(ContactsR uid,[("backlink", backlink)])}>
-      <i>add
+    $with backlink <- rndr $ CalleesR uid
+      <a.button.circle.extra.fixed.right.bottom.margin.medium-elevate title=_{MsgAdd}
+                        href=@?{(ContactsR uid,[("backlink", backlink)])} role=button>
+        <i>add
 
 ^{widgetSnackbar msgs}
