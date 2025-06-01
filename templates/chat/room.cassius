@@ -4,6 +4,8 @@ html
 
 header
 
+    position: fixed
+    
     .interlocutor
         min-width: 0
         white-space: nowrap
@@ -12,7 +14,7 @@ header
 
 main##{idMain}
 
-    margin: 0
+    margin: 0 0 0 0
     padding: 0
     max-height: calc(100dvh - 4rem - 5rem)
     flex: 1
