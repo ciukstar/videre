@@ -38,6 +38,8 @@
 /accounts/#UserId       AccountR      GET POST
 /accounts               AccountsR     GET
 
+/online ServerEventListenerR GET
+
 / HomeR GET
 
 /static StaticR Static appStatic

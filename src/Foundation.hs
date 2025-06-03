@@ -2,8 +2,8 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# LANGUAGE TypeFamilies          #-}
+{-# LANGUAGE ViewPatterns          #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
@@ -48,6 +48,7 @@ import Network.Mail.Mime
     , Mail (mailParts, mailHeaders, mailTo), renderMail', Encoding (None)
     , Address (Address), emptyMail
     )
+import Network.Wai.EventSource (ServerEvent (ServerEvent), eventSourceAppChan)
 import qualified Network.Wreq as W (get, responseHeader, responseBody)
 import Network.Wreq (defaults, auth, oauth2Bearer, postWith, post, FormParam ((:=)))
 import qualified Network.Wreq.Lens as WL
@@ -97,7 +98,7 @@ import Yesod.Auth.Message
       ( ConfirmPass, NewPass, CurrentPassword, SetPassTitle, PasswordResetTitle
       , SendPasswordResetEmail, PasswordResetPrompt, Register, EnterEmail
       , RegisterLong, ConfirmationEmailSentTitle, NewPass, SetPass, InvalidLogin
-      , LoginTitle
+      , LoginTitle, NowLoggedIn
       )
     , defaultMessage, englishMessage, frenchMessage, russianMessage, romanianMessage
     )
@@ -108,18 +109,20 @@ import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
 
 
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
 -- access to the data present here.
 data App = App
-    { appSettings    :: AppSettings
-    , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
-    , appHttpManager :: Manager
-    , appLogger      :: Logger
-    , getChatRoom    :: ChatRoom
-    , getVideoRoom   :: VideoRoom
+    { appSettings           :: AppSettings
+    , appStatic             :: Static -- ^ Settings for static file serving.
+    , appConnPool           :: ConnectionPool -- ^ Database connection pool.
+    , appHttpManager        :: Manager
+    , appLogger             :: Logger
+    , getChatRoom           :: ChatRoom
+    , getVideoRoom          :: VideoRoom
+    , getServerEventChannel :: Chan ServerEvent
     }
 
 mkMessage "App" "messages" "en"
@@ -409,6 +412,7 @@ instance Yesod App where
     isAuthorized r@HomeR _ = setUltDest r >> return Authorized
     isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
+    isAuthorized ServerEventListenerR _ = return Authorized
 
     isAuthorized ServiceWorkerR _ = return Authorized
     isAuthorized WebAppManifestR _ = return Authorized
@@ -465,7 +469,19 @@ getDefaultRingtoneAudioR rid = do
     return $ case ringtone of
       Just (Entity _ (Ringtone _ mime bs)) -> TypedContent (encodeUtf8 mime) $ toContent bs
       Nothing -> TypedContent "audio/mpeg" $ toContent emptyContent
-      
+
+
+postServerEventListenerR :: Handler ()
+postServerEventListenerR = do
+    chan <- getServerEventChannel <$> getYesod
+    writeChan chan $ ServerEvent Nothing Nothing $ return "Important Message"
+
+
+getServerEventListenerR :: Handler ()
+getServerEventListenerR = do
+    chan <- getServerEventChannel <$> getYesod 
+    sendWaiApplication $ eventSourceAppChan chan
+        
 
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
@@ -690,6 +706,28 @@ instance YesodAuth App where
     renderAuthMessage _ ("ro":_) = romanianMessage
     renderAuthMessage _ ("ru":_) = russianMessage
     renderAuthMessage app (_:xs) = renderAuthMessage app xs
+
+    onLogin :: (MonadHandler m, HandlerSite m ~ App) => m ()
+    onLogin = liftHandler $ do
+        chan <- getServerEventChannel <$> getYesod
+        uid <- maybeAuthId
+
+        case uid of
+          Just _uid' -> writeChan chan $ ServerEvent Nothing Nothing $ return "Logged IN"
+          Nothing   -> return ()
+        
+        addMessageI msgSuccess NowLoggedIn
+
+
+    onLogout :: (MonadHandler m, HandlerSite m ~ App) => m ()
+    onLogout = liftHandler $ do
+        chan <- getServerEventChannel <$> getYesod
+        uid <- maybeAuthId
+        setUltDest HomeR
+        case uid of
+          Just _uid' -> writeChan chan $ ServerEvent Nothing Nothing $ return "Logged OUT"
+          Nothing -> return ()
+        
 
 
 instance YesodAuthEmail App where

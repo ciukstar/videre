@@ -39,6 +39,11 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}.incoming[notread]').forEach(x
 
 main.scroll(0, main.scrollHeight);
 
+ws.onopen = function (e) {
+};
+
+ws.onclose = function (e) {
+}
 
 ws.onmessage = function (e) {
   
@@ -116,7 +121,7 @@ ws.onmessage = function (e) {
     }
 
   } else if (data.type === #{WsMessageTypeUndo} && data.source === #{sid}) {
-
+    
     const bubble = document.getElementById(`#{rawJS idBubblePref}${data.chatId}`);
     const bubbleDeleted = !bubble;
     
@@ -1067,6 +1072,11 @@ Array.from(
 setTimeout(() => {
   document.querySelectorAll('.snackbar').forEach(x => { x.classList.remove('active'); });
 }, 6000);
+
+
+window.addEventListener('beforeunload', function (event) {
+  [ws].filter(x => ws && ws.readyState === WebSocket.OPEN).forEach(x => { x.close(); });
+});
 
 
 function debounce(f,t) {

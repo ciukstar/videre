@@ -138,6 +138,7 @@ makeFoundation appSettings = do
 
     getChatRoom <- ChatRoom <$> newTVarIO M.empty
     getVideoRoom <- VideoRoom <$> newTVarIO M.empty
+    getServerEventChannel <- newChan
 
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a

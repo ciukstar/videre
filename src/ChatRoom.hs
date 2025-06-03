@@ -2,7 +2,7 @@
 {-# LANGUAGE ViewPatterns          #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE FlexibleContexts #-}
@@ -45,11 +45,11 @@ import Data.Aeson.Text (encodeToLazyText)
 import Data.Aeson.Types (Parser)
 import Data.Function ((&))
 import qualified Data.Map as M
-    ( Map, lookup, insert, alter, fromListWith, toList
+    ( Map, lookup, insert, alter, fromListWith, toList, filterWithKey
     )
 import Data.List (sortBy)
 import Data.Maybe (fromMaybe, isJust)
-import qualified Data.Set as S (fromList)
+import qualified Data.Set as S (fromList, member)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Text.Lazy (toStrict)
@@ -76,7 +76,7 @@ import Foundation
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
       , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele, MsgReply
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgChatDeletedSuccessfully
-      , MsgRemove, MsgInvalidFormData, MsgDeleteChat
+      , MsgRemove, MsgInvalidFormData, MsgDeleteChat, MsgOnline
       )
     )
 
@@ -493,6 +493,10 @@ getChatRoomR sid cid rid = do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val rid
         return x
+
+    online <- do
+        channels <- (\(ChatRoom x) -> readTVarIO x) =<< getSubYesod
+        return $ not $ null $ M.filterWithKey (\k (_,n) -> S.member rid k && n > 0) channels
 
     accessible <- liftHandler $ (isJust <$>) $ runDB $ selectOne $ do
         x <- from $ table @PushSubscription

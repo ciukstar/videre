@@ -5,7 +5,11 @@ html
 header
 
     position: fixed
-    
+
+    .online.badge
+        margin: 1px -1px
+        border: 2px solid var(--background)
+
     .interlocutor
         min-width: 0
         white-space: nowrap

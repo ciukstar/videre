@@ -1,3 +1,4 @@
+Online: Онлайн
 DeleteChat: Удалить чат
 ChatDeletedSuccessfully: Чат успешно удален
 Undo: Отменить

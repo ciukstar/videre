@@ -35,29 +35,32 @@ navigator.serviceWorker.register('@{ServiceWorkerR}', { scope: '/' }).then((regi
             }).catch((err) => {
               
               registration.pushManager.getSubscription().then((subscription) => {
-                subscription.unsubscribe().then((sccess) => {
-                  registration.pushManager.subscribe({
-                    userVisibleOnly: true,
-                    applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
-                  }).then((subscription) => {
-                    
-                    const subscr = JSON.parse(JSON.stringify(subscription));
-                    
-                    fetch('@{PushSubscriptionEndpointR}', {
-                      method: 'PUT',
-                      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                      body: new URLSearchParams({
-                        endpoint: subscr.endpoint,
-                        p256dh: subscr.keys.p256dh,
-                        auth: subscr.keys.auth,
-                        oldendpoint: endpoint
-                      })
-                    }).then((response) => {
-                      localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+                [subscription].filter(x => !!x).forEach((subscription) => {
+                  subscription.unsubscribe().then((success) => {
+                    registration.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: new Uint8Array(#{toJSON applicationServerKey})
+                    }).then((subscription) => {
+                      
+                      const subscr = JSON.parse(JSON.stringify(subscription));
+                      
+                      fetch('@{PushSubscriptionEndpointR}', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: new URLSearchParams({
+                          endpoint: subscr.endpoint,
+                          p256dh: subscr.keys.p256dh,
+                          auth: subscr.keys.auth,
+                          oldendpoint: endpoint
+                        })
+                      }).then((response) => {
+                        localStorage.setItem(#{localStorageEndpoint}, subscr.endpoint);
+                      });
+                      
                     });
-                    
                   });
                 });
+              
               });
               
             });
@@ -246,3 +249,5 @@ navigator.serviceWorker.addEventListener('message', function (message) {
   }
 
 });
+
+
