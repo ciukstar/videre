@@ -20,9 +20,9 @@ header
 
 main##{idMain}
 
-    padding: 0
-    max-height: calc(100dvh - 4rem - 5rem)
-    flex: 1
+    margin-top: 0
+    margin-bottom: 0
+    max-height: calc(100svh - 4rem - 5rem)
     display: flex
     flex-direction: column-reverse
 

@@ -45,7 +45,7 @@ Array.from(
             dlgOutgoingCall.close();
             window.location.reload();
           }).catch(
-            (err) => console.error(err);
+            (err) => { console.error(err); }
           );
           
         });
