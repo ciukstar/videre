@@ -7,7 +7,9 @@ header
     position: fixed
 
     .online.badge
-        margin: 1px -1px
+        min-inline-size: 0.7rem
+        min-block-size: 0.7rem
+        margin: 6px -4px
         border: 2px solid var(--background)
 
     .interlocutor
@@ -18,7 +20,6 @@ header
 
 main##{idMain}
 
-    margin: 0 0 0 0
     padding: 0
     max-height: calc(100dvh - 4rem - 5rem)
     flex: 1

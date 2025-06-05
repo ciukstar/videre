@@ -127,6 +127,8 @@ instance FromJSON ChatType where
 
 
 data WsMessageType = WsMessageTypeChat
+                   | WsMessageTypeOnline
+                   | WsMessageTypeOffline
                    | WsMessageTypeTyping
                    | WsMessageTypeDelivered
                    | WsMessageTypeRead
@@ -147,6 +149,8 @@ instance ToJSON WsMessageType where
 instance FromJSON WsMessageType where
     parseJSON :: Value -> Parser WsMessageType
     parseJSON (String "WsMessageTypeChat") = pure WsMessageTypeChat
+    parseJSON (String "WsMessageTypeOnline") = pure WsMessageTypeOnline
+    parseJSON (String "WsMessageTypeOffline") = pure WsMessageTypeOffline
     parseJSON (String "WsMessageTypeTyping") = pure WsMessageTypeTyping
     parseJSON (String "WsMessageTypeDelivered") = pure WsMessageTypeDelivered
     parseJSON (String "WsMessageTypeRead") = pure WsMessageTypeRead 

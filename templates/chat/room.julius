@@ -150,6 +150,39 @@ ws.onmessage = function (e) {
       
     }
 
+  } else if (data.type === #{WsMessageTypeOnline} && data.user === #{rid}) {
+
+    if (!document.getElementById(#{idBadgeInterlocutorStatus})) {
+      document.getElementById(#{idDivInterlocutorPhoto}).appendChild((() => {
+        const badge = document.createElement('div');
+        badge.id = #{idBadgeInterlocutorStatus};
+        badge.classList.add('online','badge','bottom','left','green');
+        
+        return badge;
+      }) ());
+    }
+
+    if (!document.getElementById(#{idInterlocutorStatus})) {
+      document.getElementById(#{idDivInterlocutorName}).appendChild((() => {
+        const status = document.createElement('div');
+        status.id = #{idInterlocutorStatus};
+        status.classList.add('small-text','lower');
+        status.textContent = #{msgr MsgOnline};
+        
+        return status;
+      }) ());
+    }
+
+  } else if (data.type === #{WsMessageTypeOffline} && data.user === #{rid}) {
+
+    if (!!document.getElementById(#{idInterlocutorStatus})) {
+      document.getElementById(#{idInterlocutorStatus}).remove();
+    };
+    
+    if (!!document.getElementById(#{idBadgeInterlocutorStatus})) {
+      document.getElementById(#{idBadgeInterlocutorStatus}).remove();
+    }
+
   } else if (data.type === #{WsMessageTypeTyping} && isIncoming) {
 
     window.clearTimeout(idTimeoutTyping);

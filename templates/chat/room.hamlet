@@ -5,12 +5,12 @@
       <a.button.circle.transparent.no-margin href=@{backlink} role=button title=_{MsgBack}>
         <i>arrow_back
 
-      <div>
+      <div ##{idDivInterlocutorPhoto}>
         <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
         $if online
-          <div.online.badge.bottom.left.green>
+          <div.online.badge.bottom.left.green ##{idBadgeInterlocutorStatus}>
 
-    <div.interlocutor.max.small-margin.no-line>
+    <div.interlocutor.max.small-margin.no-line ##{idDivInterlocutorName}>
       <div.interlocutor>
         $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
           $maybe name <- name
@@ -19,7 +19,7 @@
             #{email}
             
       $if online
-        <div.small-text.lower>
+        <div.small-text.lower ##{idInterlocutorStatus}>
           _{MsgOnline}
 
     <button.circle.transparent type=button title=_{MsgVideoCall} ##{idButtonVideoCall}>

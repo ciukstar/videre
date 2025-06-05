@@ -3,7 +3,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -18,7 +18,7 @@
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 
 import ChatRoom.Data
-    ( ChatRoom (ChatRoom), resourcesChatRoom
+    ( ChatRoom (ChatRoom), Line (Line), resourcesChatRoom
     , Route
       ( ChatRoomR, ChatChannelR, ChatMsgRemoveR, ChatMsgRemoveUndoR
       , ChatMsgDeleteR, ChatMsgReadR, ChatMsgDeliveredR, ChatDeleteR
@@ -49,7 +49,6 @@ import qualified Data.Map as M
     )
 import Data.List (sortBy)
 import Data.Maybe (fromMaybe, isJust)
-import qualified Data.Set as S (fromList, member)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Text.Lazy (toStrict)
@@ -101,7 +100,8 @@ import Model
       )
     , WsMessageType
       ( WsMessageTypeChat, WsMessageTypeDelete, WsMessageTypeRemove
-      , WsMessageTypeDelivered, WsMessageTypeRead, WsMessageTypeUndo, WsMessageTypeTyping
+      , WsMessageTypeDelivered, WsMessageTypeRead, WsMessageTypeUndo
+      , WsMessageTypeTyping, WsMessageTypeOnline, WsMessageTypeOffline
       )
     , ChatType (ChatTypeMessage, ChatTypeVideoCall, ChatTypeAudioCall)
     , EntityField
@@ -242,7 +242,7 @@ postChatMsgRemoveUndoR sid _cid rid xid = do
         where_ $ x ^. ChatId ==. val xid
         return x
 
-    let channelId = S.fromList [sid, rid]
+    let channelId = Line (sid, rid)
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -294,7 +294,7 @@ deleteChatMsgRemoveR sid cid rid xid = do
       Nothing -> return ()
     
 
-    let channelId = S.fromList [sid, rid]
+    let channelId = Line (sid, rid)
 
     ChatRoom channelMapTVar <- getSubYesod
     channelMap <- readTVarIO channelMapTVar
@@ -332,7 +332,7 @@ deleteChatMsgDeleteR sid _cid rid xid = do
         where_ $ x ^. ChatId ==. val xid
         where_ $ x ^. ChatAuthor ==. val sid
 
-    let channelId = S.fromList [sid, rid]
+    let channelId = Line (sid, rid)
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -383,7 +383,7 @@ postChatMsgReadR sid _cid rid xid = do
         where_ $ x ^. ChatRecipient ==. val sid
         where_ $ not_ $ isNothing_ $ x ^. ChatTimeDelivered
 
-    let channelId = S.fromList [sid, rid]
+    let channelId = Line (sid, rid)
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -419,7 +419,7 @@ postChatMsgDeliveredR sid _cid rid xid = do
         where_ $ x ^. ChatId ==. val xid
         where_ $ x ^. ChatRecipient ==. val sid
 
-    let channelId = S.fromList [sid, rid]
+    let channelId = Line (sid, rid)
 
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -496,8 +496,16 @@ getChatRoomR sid cid rid = do
 
     online <- do
         channels <- (\(ChatRoom x) -> readTVarIO x) =<< getSubYesod
-        return $ not $ null $ M.filterWithKey (\k (_,n) -> S.member rid k && n > 0) channels
-
+        let line = Line (sid, rid)
+        return $ not $ null $ M.filterWithKey
+            (\l@(Line (s,r)) (_,n) -> let onThisLine = (l == line) && (((s == rid) && (n > 0)) || ((r == rid) && (n > 1)))
+                                          onAnotherFullLine = (l /= line) && ((s == rid) || (r == rid)) && (n > 1)
+                                          onAnotherHalfLine = (l /= line) && (s == rid) && (n == 1)
+                                      in
+                                        onThisLine || onAnotherFullLine || onAnotherHalfLine
+            )
+            channels
+        
     accessible <- liftHandler $ (isJust <$>) $ runDB $ selectOne $ do
         x <- from $ table @PushSubscription
         where_ $ x ^. PushSubscriptionSubscriber ==. val rid
@@ -611,6 +619,10 @@ getChatRoomR sid cid rid = do
     
     liftHandler $ defaultLayout $ do
         setTitleI MsgChats
+        idDivInterlocutorPhoto <- newIdent
+        idBadgeInterlocutorStatus <- newIdent
+        idDivInterlocutorName <- newIdent
+        idInterlocutorStatus <- newIdent
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idMenuChat <- newIdent
@@ -687,7 +699,7 @@ instance ToJSON WsocketsMessage where
 
 chatApp :: YesodChat m => UserId -> ContactId -> UserId -> WebSocketsT (SubHandlerFor ChatRoom m) ()
 chatApp authorId contactId recipientId = do
-    let channelId = S.fromList [authorId, recipientId]
+    let channelId = Line (authorId, recipientId)
     
     ChatRoom channelMapTVar <- getSubYesod
 
@@ -695,19 +707,26 @@ chatApp authorId contactId recipientId = do
     
     let maybeChan = M.lookup channelId channelMap
 
-    writeChan <- atomically $ case maybeChan of
+    writeChan <- case maybeChan of
       Nothing -> do
-          chan <- newBroadcastTChan
-          writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
+          chan <- atomically newBroadcastTChan
+          atomically $ writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
           return chan
           
       Just (writeChan,_) -> do
-          writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
+          atomically $ writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
+          channels <- readTVarIO channelMapTVar
+          forM_ channels $ \(chan,n) -> do 
+              atomically $ writeTChan chan $ toStrict $ encodeToLazyText $ object
+                  [ "type" .= WsMessageTypeOnline
+                  , "user" .= authorId
+                  , "users" .= n
+                  ]
           return writeChan
 
     readChan <- atomically $ dupTChan writeChan
 
-    (e :: Either SomeException ()) <- try $ race_    
+    (e :: Either SomeException ()) <- try $ race_
         (forever $ atomically (readTChan readChan) >>= sendTextData)
         (runConduit $ (sourceWS .|) $ mapM_C $ \json -> do
               let input = decode (TL.encodeUtf8 json)
@@ -853,9 +872,17 @@ chatApp authorId contactId recipientId = do
         )
     case e of
       Left _ -> do
-          m <- readTVarIO channelMapTVar
-          let newChannelMap = M.alter userLeftChannel channelId m
-          atomically $ writeTVar channelMapTVar newChannelMap
+          channels <- readTVarIO channelMapTVar
+          let newChannels = M.alter userLeftChannel channelId channels
+          atomically $ do
+              writeTVar channelMapTVar newChannels
+              forM_ newChannels $ \(chan,n) -> do 
+                  writeTChan chan $ toStrict $ encodeToLazyText $ object
+                      [ "type" .= WsMessageTypeOffline
+                      , "user" .= authorId
+                      , "users" .= n
+                      ]
+                  
       Right () -> return ()
 
   where
