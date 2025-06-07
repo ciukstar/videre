@@ -38,6 +38,8 @@
 /accounts/#UserId       AccountR      GET POST
 /accounts               AccountsR     GET
 
+/online/#UserId OnlineChannelR GET
+
 /sse-online ServerEventListenerR GET
 
 / HomeR GET

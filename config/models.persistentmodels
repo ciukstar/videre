@@ -86,7 +86,6 @@ User
     name Text Maybe
     superuser Bool
     admin Bool
-    lastSeen UTCTime Maybe
     UniqueUser email
     deriving Typeable
     

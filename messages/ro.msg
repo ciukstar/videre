@@ -1,3 +1,4 @@
+Offline: Offline
 Online: Online
 DeleteChat: Șterge chatul
 ChatDeletedSuccessfully: Chatul a fost șters cu succes

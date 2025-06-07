@@ -1,3 +1,4 @@
+Offline: Hors ligne
 Online: En ligne
 DeleteChat: Supprimer le chat
 ChatDeletedSuccessfully: Chat supprimé avec succès
