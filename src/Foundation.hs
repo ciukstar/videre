@@ -11,6 +11,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Foundation where
 
@@ -20,13 +22,18 @@ import Control.Lens (folded, filtered, (^?), _2, to, (?~))
 import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
 
+import Data.Aeson ((.:?))
 import qualified Data.Aeson as A (Value (Bool))
 import Data.Aeson.Lens ( key, AsValue(_String) )
+import qualified Data.Aeson.Text as A (encodeToLazyText)
+import Data.Aeson.Types (Parser, withObject)
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Kind (Type)
 import qualified Data.CaseInsensitive as CI
 import Data.Function ((&))
+import qualified Data.Map as M (alter)
+import qualified Data.Text.Lazy as TL (toStrict)
 import qualified Data.Text as T (intercalate)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
@@ -61,7 +68,7 @@ import Text.Cassius (cassiusFile)
 import Text.Email.Validate (emailAddress, localPart)
 import Text.Hamlet ( hamletFile )
 import Text.Jasmine ( minifym )
-import Text.Julius (juliusFile)
+import Text.Julius (juliusFile, rawJS)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 import Text.Read (readMaybe)
@@ -107,6 +114,7 @@ import Yesod.Form.I18n.English (englishFormMessage)
 import Yesod.Form.I18n.French (frenchFormMessage)
 import Yesod.Form.I18n.Romanian (romanianFormMessage)
 import Yesod.Form.I18n.Russian (russianFormMessage)
+import Yesod.WebSockets (WebSocketsT, webSockets, sendTextData, sourceWS)
 
 
 
@@ -123,6 +131,7 @@ data App = App
     , getChatRoom           :: ChatRoom
     , getVideoRoom          :: VideoRoom
     , getServerEventChannel :: Chan ServerEvent
+    , getOnlineChannel      :: TVar (TChan Text, Map UserId (Maybe UTCTime))
     }
 
 mkMessage "App" "messages" "en"
@@ -323,9 +332,15 @@ instance Yesod App where
 
             case mVAPIDKeys of
               Just vapidKeys -> do
+                  user <- maybeAuth
+                  let authenicated = A.Bool . isJust $ user
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
-                  authenicated <- A.Bool . isJust <$> maybeAuth
+                  
                   $(widgetFile "default-layout")
+                  
+                  case user of
+                    Just (Entity uid _) -> toWidget $(juliusFile "templates/channel.julius")
+                    Nothing -> return ()
                   
               Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
@@ -413,6 +428,8 @@ instance Yesod App where
     isAuthorized DocsR _ = return Authorized
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized ServerEventListenerR _ = return Authorized
+    isAuthorized (OnlineChannelR uid) _ = isAuthenticatedSelf uid
+    
 
     isAuthorized ServiceWorkerR _ = return Authorized
     isAuthorized WebAppManifestR _ = return Authorized
@@ -482,6 +499,70 @@ getServerEventListenerR = do
     chan <- getServerEventChannel <$> getYesod 
     sendWaiApplication $ eventSourceAppChan chan
         
+
+getOnlineChannelR :: UserId -> Handler ()
+getOnlineChannelR = webSockets . onlineApp
+
+
+data UserMessage = UserMessage
+    { umType     :: !WsMessageType
+    , umUser     :: !UserId
+    , umLastSeen :: !(Maybe UTCTime)
+    } deriving (Show, Read)
+
+instance FromJSON UserMessage where
+    parseJSON :: Value -> Parser UserMessage
+    parseJSON = withObject "UserMessage" $ \o -> do
+        umType <- o .: "type"
+        umUser <- o .: "user"
+        umLastSeen <- o .:? "lastSeen"
+        return UserMessage {..}
+
+
+instance ToJSON UserMessage where
+    toJSON :: UserMessage -> Value
+    toJSON (UserMessage {..}) = object [ "type" .= umType
+                                       , "user" .= umUser
+                                       , "lastSeen" .= umLastSeen
+                                       ]
+
+
+onlineApp :: UserId -> WebSocketsT Handler ()
+onlineApp uid = do
+    tvar <- getOnlineChannel <$> getYesod
+    (wChan, online) <- readTVarIO tvar
+    rChan <- atomically $ do        
+        writeTVar tvar (wChan, M.alter userJoinedChannel uid online)
+        writeTChan wChan $ TL.toStrict $ A.encodeToLazyText $ UserMessage WsMessageTypeOnline uid Nothing
+        dupTChan wChan
+
+    (e :: Either SomeException ()) <- try $ race_
+        (forever $ atomically (readTChan rChan) >>= sendTextData)
+        (runConduit $ (sourceWS .|) $ mapM_C $ \json -> do
+              atomically $ writeTChan wChan $ TL.toStrict json
+        )
+    case e of
+      Left _ -> do
+          
+          now <- liftIO getCurrentTime
+          tvar' <- getOnlineChannel <$> getYesod
+          (wrChan, session) <- readTVarIO tvar
+          let newOnline = M.alter (userLeftChannel now) uid session
+          atomically $ writeTVar tvar' (wrChan, newOnline)
+          atomically $ writeTChan wrChan $ TL.toStrict $ A.encodeToLazyText
+              $ UserMessage WsMessageTypeOffline uid (Just now)
+                  
+      Right () -> return ()
+
+
+userJoinedChannel :: Maybe (Maybe UTCTime) -> Maybe (Maybe UTCTime)
+userJoinedChannel _ = Just Nothing
+
+
+userLeftChannel :: UTCTime -> Maybe (Maybe UTCTime) -> Maybe (Maybe UTCTime)
+userLeftChannel _ Nothing = Just Nothing
+userLeftChannel lastSeen (Just _) = Just (Just lastSeen)
+
 
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do

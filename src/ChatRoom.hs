@@ -710,7 +710,7 @@ chatApp authorId contactId recipientId = do
     writeChan <- case maybeChan of
       Nothing -> do
           chan <- atomically newBroadcastTChan
-          atomically $ writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap
+          atomically $ writeTVar channelMapTVar $ M.insert channelId (chan,1) channelMap 
           return chan
           
       Just (writeChan,_) -> do

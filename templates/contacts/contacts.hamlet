@@ -33,7 +33,7 @@
     $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
       <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
 
-        <div>
+        <div #idAvatar#{fromSqlKey rid}>
           <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
           
           $if ns < 1
@@ -46,7 +46,17 @@
             <i.absolute.tiny.circle.tiny-padding.error.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
               phone_disabled
 
-        <div.content.max>
+
+          $case M.lookup rid online
+            $of Just (Just _lastSeen)
+              <div.status.badge.bottom.left.grey #idBadgeOnlinePref#{fromSqlKey rid}>
+            $of Just Nothing
+              <div.status.badge.bottom.left.green #idBadgeOnlinePref#{fromSqlKey rid}>
+            $of Nothing
+              
+                          
+
+        <div.content.max #idContactContentPref#{fromSqlKey rid}>
           <div.headline.large-text>
             $maybe name <- name
               #{name}
@@ -79,6 +89,21 @@
                     check
       
                 #{message}
+
+          $case M.lookup rid online
+            $of Just (Just lastSeen)
+              <div.supporting-text.small-text.secondary-text #idStatusLinePref#{fromSqlKey rid}>
+                <span.lower>_{MsgOffline}, #
+                $with dt <- show lastSeen
+                  <time.daytime datetime=#{dt}>#{dt}
+
+            $of Just Nothing
+              <div.supporting-text.lower.small-text.green-text #idStatusLinePref#{fromSqlKey rid}>
+                _{MsgOnline}
+
+            $of Nothing
+                
+  
 
         <i.secondary-text>arrow_forward_ios
  

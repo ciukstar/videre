@@ -1,6 +1,12 @@
 
 main
 
+    .status.badge
+        min-inline-size: 0.8rem
+        min-block-size: 0.8rem
+        margin: 12px -10px
+        border: 2px solid var(--background)
+
     .notifications-disabled, .call-loop, .phone-disabled
         top: -0.5rem
         right: -0.5rem

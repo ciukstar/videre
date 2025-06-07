@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -35,6 +35,7 @@ import ChatRoom
 import ChatRoom.Data (Route (ChatRoomR))
 
 import Control.Applicative (liftA3)
+import Control.Concurrent.STM.TVar (readTVarIO)
 import Control.Lens ((.~), (?~))
 import Control.Monad (join, forM_, forM)
 import Control.Monad.IO.Class (liftIO)
@@ -45,6 +46,7 @@ import qualified Data.Aeson as A
     )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.List (sortBy)
+import qualified Data.Map as M (lookup)
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
@@ -61,14 +63,13 @@ import Database.Esqueleto.Experimental
     )
 import Database.Esqueleto.Experimental as E ((=.), subSelectCount, Value (Value))
 import Database.Persist
-    ( Entity (Entity), entityVal, entityKey, upsertBy
-    , PersistUniqueWrite (upsert)
+    ( Entity (Entity), entityVal, entityKey, upsertBy, upsert
     )
 import qualified Database.Persist as P ( PersistStoreWrite (delete), (=.) )
 import Database.Persist.Sql (fromSqlKey)
 
 import Foundation
-    ( App (appHttpManager, appSettings), Handler, Form
+    ( App (appHttpManager, appSettings, getOnlineChannel), Handler, Form
     , getVAPIDKeys, widgetMainMenu, widgetSnackbar, widgetAccount
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
@@ -84,14 +85,14 @@ import Foundation
       , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe, MsgSelect
       , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
-      , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser
+      , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser, MsgOffline
       , MsgOutgoingCall, MsgCallDeclined, MsgClose, MsgCalleeDeclinedTheCall
       , MsgIncomingAudioCallFrom, MsgVideoCall, MsgIncomingVideoCallFrom
       , MsgCallCanceledByCaller, MsgAudioCall, MsgUserIsNowAvailable
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers, MsgOnline
       )
     )
 
@@ -634,6 +635,9 @@ getMyContactsR uid = do
             orderBy [desc time]
             return y 
         return (c,(i,(p,x)))
+
+    
+    (_,online) <- liftIO . readTVarIO . getOnlineChannel =<< getYesod
 
     rndr <- getUrlRender
     msgs <- getMessages

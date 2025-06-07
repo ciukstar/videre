@@ -1,0 +1,147 @@
+
+
+const channel = new WebSocket('@{OnlineChannelR uid}');
+
+channel.onmessage = function (e) {
+  
+  const data = JSON.parse(e.data);
+
+  if (data.type === #{WsMessageTypeOnline}) {
+
+    const badge = document.getElementById(`idBadgeOnlinePref${data.user}`);
+    if (badge) {
+      badge.replaceWith((() => {
+        const newBadge = document.createElement('div');
+        newBadge.classList.add('status','badge','bottom','left','green');
+        return newBadge;
+      }) ());
+    } else {
+      const avatar = document.getElementById(`idAvatar${data.user}`);
+      if (avatar) {
+        avatar.appendChild((() => {
+          const newBadge = document.createElement('div');
+          newBadge.classList.add('status','badge','bottom','left','green');
+          return newBadge;        
+        }) ());
+      }
+    }
+
+    const statusLine = document.getElementById(`idStatusLinePref${data.user}`);
+    if (statusLine) {
+      statusLine.classList.add('supporting-text','lower','small-text','green-text');
+      statusLine.textContent = #{msgr MsgOnline};
+    } else {
+      const contactContent = document.getElementById(`idContactContentPref${data.user}`);
+      if (contactContent) {
+        contactContent.appendChild((() => {
+          const line = document.createElement('div');
+          line.id = `idStatusLinePref${data.user}`;
+          line.classList.add('supporting-text','lower','small-text','green-text');
+          line.textContent = #{msgr MsgOnline};
+          return line;
+        }) ());
+      }
+    }
+    
+  } else if (data.type === #{WsMessageTypeOffline}) {
+
+    const badge = document.getElementById(`idBadgeOnlinePref${data.user}`);
+    if (badge) {
+      badge.replaceWith((() => {
+        const newBadge = document.createElement('div');
+        newBadge.classList.add('status','badge','bottom','left','grey4');
+        return newBadge;
+      }) ());
+    } else {
+      const avatar = document.getElementById(`idAvatar${data.user}`);
+      if (avatar) {
+        avatar.appendChild((() => {
+          const newBadge = document.createElement('div');
+          newBadge.classList.add('status','badge','bottom','left','grey4');
+          return newBadge;        
+        }) ());
+      }
+    }
+
+    const statusLine = document.getElementById(`idStatusLinePref${data.user}`);
+    if (statusLine) {
+      statusLine.replaceWith((() => {
+        const newStatusLine = document.createElement('div');
+        newStatusLine.id = `idStatusLinePref${data.user}`;
+        newStatusLine.classList.add('supporting-text','small-text','secondary-text');
+        
+        newStatusLine.appendChild((() => {
+          const span = document.createElement('span');
+          span.classList.add('lower');
+          span.textContent = `#{rawJS $ msgr MsgOffline}, `;
+          
+          return span;
+        }) ());
+        
+        newStatusLine.appendChild((() => {
+          const lastSeen = document.createElement('time');
+          lastSeen.classList.add('daytime');
+          lastSeen.setAttribute('datetime', data.lastSeen);
+          lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
+            navigator.language, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+            }
+          );
+          
+          return lastSeen;
+        }) ());
+        
+        return newStatusLine;
+      }) ());
+      
+    } else {
+      const contactContent = document.getElementById(`idContactContentPref${data.user}`);
+      if (contactContent) {
+        contactContent.appendChild((() => { 
+          
+          const line = document.createElement('div');
+          line.id = `idStatusLinePref${data.user}`;
+          line.classList.add('supporting-text','small-text','secondary-text');
+          
+          line.appendChild((() => {
+            const span = document.createElement('span');
+            span.classList.add('lower');
+            span.textContent = `#{rawJS $ msgr MsgOffline}, `;
+            
+            return span;
+          }) ());
+          
+          line.appendChild((() => {
+            const lastSeen = document.createElement('time');
+            lastSeen.classList.add('daytime');
+            lastSeen.setAttribute('datetime', data.lastSeen);
+            lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
+              navigator.language, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+              }
+            );
+            
+            return lastSeen;
+          }) ());
+          
+          return line;
+        }) ());
+      }
+    }
+    
+  }
+  
+};
+
+
+window.addEventListener('beforeunload', function (e) {
+  channel.close();
+});
