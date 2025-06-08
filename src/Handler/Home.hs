@@ -3,6 +3,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE QuasiQuotes #-}
 
 module Handler.Home (getHomeR) where
 
@@ -10,7 +11,7 @@ import Database.Persist (Entity (Entity))
 
 import Foundation
     ( Handler, widgetMainMenu, widgetAccount, widgetSnackbar
-    , Route (AuthR, MyContactsR)
+    , Route (AuthR, MyContactsR, OnlineChannelR)
     , AppMessage
       ( MsgWelcome, MsgAppName, MsgSendMessagesVideochatOrAudioCall
       , MsgLoginToAccessYourContacts, MsgLogIn, MsgShowMyContacts
@@ -20,11 +21,12 @@ import Foundation
 import Settings (widgetFile)
 
 import Text.Hamlet (Html)
+import Text.Julius (julius)
 
 import Yesod.Auth (maybeAuth, Route (LoginR))
 import Yesod.Core (Yesod(defaultLayout), getMessages, newIdent)
 import Yesod.Core.Handler (setUltDestCurrent)
-import Yesod.Core.Widget (setTitleI)
+import Yesod.Core.Widget (setTitleI, toWidget)
 
 
 getHomeR :: Handler Html
@@ -34,7 +36,16 @@ getHomeR = do
     setUltDestCurrent
     defaultLayout $ do
         setTitleI MsgAppName
+        
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
+
         $(widgetFile "homepage")
+        
+        case user of
+          Just (Entity uid _) -> toWidget
+            [julius|
+                   const channel = new WebSocket('@{OnlineChannelR uid}');
+                   |]
+          Nothing -> return ()
 

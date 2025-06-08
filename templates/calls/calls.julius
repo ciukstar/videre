@@ -111,3 +111,5 @@ Array.from(
   });
   
 });
+
+const channel = new WebSocket('@{OnlineChannelR uid}');

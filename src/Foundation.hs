@@ -68,7 +68,7 @@ import Text.Cassius (cassiusFile)
 import Text.Email.Validate (emailAddress, localPart)
 import Text.Hamlet ( hamletFile )
 import Text.Jasmine ( minifym )
-import Text.Julius (juliusFile, rawJS)
+import Text.Julius (juliusFile)
 import Text.Printf (printf)
 import Text.Shakespeare.Text (stext)
 import Text.Read (readMaybe)
@@ -335,12 +335,7 @@ instance Yesod App where
                   user <- maybeAuth
                   let authenicated = A.Bool . isJust $ user
                   let applicationServerKey = vapidPublicKeyBytes vapidKeys
-                  
                   $(widgetFile "default-layout")
-                  
-                  case user of
-                    Just (Entity uid _) -> toWidget $(juliusFile "templates/channel.julius")
-                    Nothing -> return ()
                   
               Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 

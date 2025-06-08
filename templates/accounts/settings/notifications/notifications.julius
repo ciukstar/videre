@@ -1,1 +1,2 @@
 
+const channel = new WebSocket('@{OnlineChannelR uid}');

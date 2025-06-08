@@ -6,3 +6,5 @@
 document.getElementById(#{idNavScrollTabs}).addEventListener('scrollend', function (e) {
   sessionStorage.setItem(#{keyScrollLeft}, e.target.scrollLeft);
 });
+
+const channel = new WebSocket('@{OnlineChannelR uid}');

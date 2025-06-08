@@ -250,5 +250,3 @@ navigator.serviceWorker.addEventListener('message', function (message) {
 
 });
 
-
-

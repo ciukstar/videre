@@ -7,20 +7,35 @@
 
       <div ##{idDivInterlocutorPhoto}>
         <img.tiny.circle src=@{photor} alt=_{MsgPhoto} loading=lazy>
-        $if online
-          <div.online.badge.bottom.left.green ##{idBadgeInterlocutorStatus}>
 
-    <div.interlocutor.max.small-margin.no-line ##{idDivInterlocutorName}>
+        $case M.lookup rid online
+          $of Just (Just _lastSeen)
+            <div.status.badge.bottom.left.grey ##{idBadgeInterlocutorStatus}>
+          $of Just Nothing
+            <div.status.badge.bottom.left.green ##{idBadgeInterlocutorStatus}>
+          $of Nothing
+
+    <div.interlocutor.max.small-margin.no-line ##{idInterlocutorLine}>
       <div.interlocutor>
         $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor
           $maybe name <- name
             #{name}
           $nothing
             #{email}
-            
-      $if online
-        <div.small-text.lower ##{idInterlocutorStatus}>
-          _{MsgOnline}
+
+      $case M.lookup rid online
+        $of Just (Just lastSeen)
+          <div.supporting-text.lower.small-text ##{idStatusLine}>
+            <span>_{MsgOffline}, #
+            $with dt <- show lastSeen
+              <time.daytime datetime=#{dt}>#{dt}
+
+        $of Just Nothing
+          <div.supporting-text.lower.small-text ##{idStatusLine}>
+            _{MsgOnline}
+
+        $of Nothing
+
 
     <button.circle.transparent type=button title=_{MsgVideoCall} ##{idButtonVideoCall}>
       <i>video_call

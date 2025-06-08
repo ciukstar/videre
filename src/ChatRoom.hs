@@ -4,9 +4,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE OverloadedStrings     #-}
 {-# LANGUAGE RankNTypes            #-}
-{-# LANGUAGE InstanceSigs #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE InstanceSigs          #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -33,7 +33,7 @@ import Control.Applicative ((<|>))
 import Control.Lens ((.~),(?~))
 import Control.Monad (forever, forM_)
 import Control.Concurrent.STM.TChan
-    ( writeTChan, dupTChan, readTChan, newBroadcastTChan
+    ( writeTChan, dupTChan, readTChan, newBroadcastTChan, TChan
     )
 
 import Data.Aeson
@@ -45,7 +45,7 @@ import Data.Aeson.Text (encodeToLazyText)
 import Data.Aeson.Types (Parser)
 import Data.Function ((&))
 import qualified Data.Map as M
-    ( Map, lookup, insert, alter, fromListWith, toList, filterWithKey
+    ( Map, lookup, insert, alter, fromListWith, toList
     )
 import Data.List (sortBy)
 import Data.Maybe (fromMaybe, isJust)
@@ -75,7 +75,7 @@ import Foundation
       , MsgRemoved, MsgAnotherAccountAccessProhibited, MsgMessageDeleted
       , MsgMessageRemoved, MsgAuthenticationRequired, MsgUndo, MsgDele, MsgReply
       , MsgDeleteAreYouSure, MsgConfirmPlease, MsgChatDeletedSuccessfully
-      , MsgRemove, MsgInvalidFormData, MsgDeleteChat, MsgOnline
+      , MsgRemove, MsgInvalidFormData, MsgDeleteChat, MsgOnline, MsgOffline
       )
     )
 
@@ -117,7 +117,7 @@ import Model
 
 import UnliftIO.Concurrent (forkIO, threadDelay)
 import UnliftIO.Exception (try, SomeException)
-import UnliftIO.STM (atomically, readTVarIO, writeTVar)
+import UnliftIO.STM (atomically, readTVarIO, writeTVar, TVar)
 
 import Settings
     ( AppSettings (appSuperuser), Superuser (Superuser, superuserUsername)
@@ -183,6 +183,8 @@ class ( Yesod m, RenderMessage m FormMessage, RenderMessage m AppMessage
     getAppSettings :: HandlerFor m AppSettings
     getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
     getMaybeAuthId :: HandlerFor m (Maybe UserId)
+    getUserStatusChannelRoute :: UserId -> HandlerFor m (Route m)
+    getUserStatusChannel :: HandlerFor m (TVar (TChan Text, M.Map UserId (Maybe UTCTime)))
 
 
 type ChatHandler a = forall m. YesodChat m => SubHandlerFor ChatRoom m a
@@ -465,7 +467,6 @@ getChatRoomR sid cid rid = do
     checkAuthorized sid
     
     backlink <- liftHandler $ getBacklink sid rid
-    
     photos <- liftHandler $ getAccountPhotoRoute sid
     photor <- liftHandler $ getAccountPhotoRoute rid
     contact  <- liftHandler $ getContactRoute sid rid cid
@@ -494,17 +495,9 @@ getChatRoomR sid cid rid = do
         where_ $ x ^. UserId ==. val rid
         return x
 
-    online <- do
-        channels <- (\(ChatRoom x) -> readTVarIO x) =<< getSubYesod
-        let line = Line (sid, rid)
-        return $ not $ null $ M.filterWithKey
-            (\l@(Line (s,r)) (_,n) -> let onThisLine = (l == line) && (((s == rid) && (n > 0)) || ((r == rid) && (n > 1)))
-                                          onAnotherFullLine = (l /= line) && ((s == rid) || (r == rid)) && (n > 1)
-                                          onAnotherHalfLine = (l /= line) && (s == rid) && (n == 1)
-                                      in
-                                        onThisLine || onAnotherFullLine || onAnotherHalfLine
-            )
-            channels
+    userStatusChannelRoute <- liftHandler $ getUserStatusChannelRoute sid
+
+    (_,online) <- liftHandler $ liftIO . readTVarIO =<< getUserStatusChannel
         
     accessible <- liftHandler $ (isJust <$>) $ runDB $ selectOne $ do
         x <- from $ table @PushSubscription
@@ -564,6 +557,7 @@ getChatRoomR sid cid rid = do
             where_ $ t ^. UserRingtoneUser ==. val sid
             where_ $ t ^. UserRingtoneType ==. val RingtoneTypeCallOutgoing
             return x
+            
         case userRingtone of
           Just (Entity tid (Ringtone _ mime _)) -> getUserRingtoneAudioRoute sid tid >>= \r -> return (r, mime)
           Nothing -> do
@@ -621,8 +615,8 @@ getChatRoomR sid cid rid = do
         setTitleI MsgChats
         idDivInterlocutorPhoto <- newIdent
         idBadgeInterlocutorStatus <- newIdent
-        idDivInterlocutorName <- newIdent
-        idInterlocutorStatus <- newIdent
+        idInterlocutorLine <- newIdent
+        idStatusLine <- newIdent
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idMenuChat <- newIdent
@@ -715,13 +709,6 @@ chatApp authorId contactId recipientId = do
           
       Just (writeChan,_) -> do
           atomically $ writeTVar channelMapTVar $ M.alter userJoinedChannel channelId channelMap
-          channels <- readTVarIO channelMapTVar
-          forM_ channels $ \(chan,n) -> do 
-              atomically $ writeTChan chan $ toStrict $ encodeToLazyText $ object
-                  [ "type" .= WsMessageTypeOnline
-                  , "user" .= authorId
-                  , "users" .= n
-                  ]
           return writeChan
 
     readChan <- atomically $ dupTChan writeChan
@@ -874,18 +861,12 @@ chatApp authorId contactId recipientId = do
       Left _ -> do
           channels <- readTVarIO channelMapTVar
           let newChannels = M.alter userLeftChannel channelId channels
-          atomically $ do
-              writeTVar channelMapTVar newChannels
-              forM_ newChannels $ \(chan,n) -> do 
-                  writeTChan chan $ toStrict $ encodeToLazyText $ object
-                      [ "type" .= WsMessageTypeOffline
-                      , "user" .= authorId
-                      , "users" .= n
-                      ]
+          atomically $ writeTVar channelMapTVar newChannels
                   
       Right () -> return ()
 
   where
+      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 

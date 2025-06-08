@@ -1,3 +1,4 @@
+
 Array.from(
   document.body.querySelectorAll('time[datetime]')
 ).forEach(function (x) {
@@ -9,3 +10,5 @@ Array.from(
     }
   );
 });
+
+const channel = new WebSocket('@{OnlineChannelR uid}');

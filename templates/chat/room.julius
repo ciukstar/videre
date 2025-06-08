@@ -150,39 +150,6 @@ ws.onmessage = function (e) {
       
     }
 
-  } else if (data.type === #{WsMessageTypeOnline} && data.user === #{rid}) {
-
-    if (!document.getElementById(#{idBadgeInterlocutorStatus})) {
-      document.getElementById(#{idDivInterlocutorPhoto}).appendChild((() => {
-        const badge = document.createElement('div');
-        badge.id = #{idBadgeInterlocutorStatus};
-        badge.classList.add('online','badge','bottom','left','green');
-        
-        return badge;
-      }) ());
-    }
-
-    if (!document.getElementById(#{idInterlocutorStatus})) {
-      document.getElementById(#{idDivInterlocutorName}).appendChild((() => {
-        const status = document.createElement('div');
-        status.id = #{idInterlocutorStatus};
-        status.classList.add('small-text','lower');
-        status.textContent = #{msgr MsgOnline};
-        
-        return status;
-      }) ());
-    }
-
-  } else if (data.type === #{WsMessageTypeOffline} && data.user === #{rid}) {
-
-    if (!!document.getElementById(#{idInterlocutorStatus})) {
-      document.getElementById(#{idInterlocutorStatus}).remove();
-    };
-    
-    if (!!document.getElementById(#{idBadgeInterlocutorStatus})) {
-      document.getElementById(#{idBadgeInterlocutorStatus}).remove();
-    }
-
   } else if (data.type === #{WsMessageTypeTyping} && isIncoming) {
 
     window.clearTimeout(idTimeoutTyping);
@@ -1112,12 +1079,155 @@ window.addEventListener('beforeunload', function (event) {
 });
 
 
+const channel = new WebSocket('@{userStatusChannelRoute}');
+
+channel.onmessage = debounce (function (e) {
+  
+  const data = JSON.parse(e.data);
+
+  if (data.type === #{WsMessageTypeOnline} && data.user === #{rid}) {
+
+    const badge = document.getElementById(#{idBadgeInterlocutorStatus});
+    if (badge) {
+      
+      badge.replaceWith((() => {
+        const newBadge = document.createElement('div');
+        newBadge.id = #{idBadgeInterlocutorStatus};
+        newBadge.classList.add('status','badge','bottom','left','green');
+        return newBadge;
+      }) ());
+      
+    } else {
+      
+      const avatar = document.getElementById(#{idDivInterlocutorPhoto});
+      if (avatar) {
+        avatar.appendChild((() => {
+          const newBadge = document.createElement('div');
+          newBadge.id = #{idBadgeInterlocutorStatus};
+          newBadge.classList.add('status','badge','bottom','left','green');
+          return newBadge;        
+        }) ());
+      }
+    }
+
+    const statusLine = document.getElementById(#{idStatusLine});
+    if (statusLine) {
+      statusLine.classList.add('supporting-text','lower','small-text');
+      statusLine.textContent = #{msgr MsgOnline};
+    } else {
+      const interlocutorLine = document.getElementById(#{idInterlocutorLine});
+      if (interlocutorLine) {
+        interlocutorLine.appendChild((() => {
+          const line = document.createElement('div');
+          line.id = #{idStatusLine};
+          line.classList.add('supporting-text','lower','small-text');
+          line.textContent = #{msgr MsgOnline};
+          return line;
+        }) ());
+      }
+    }
+    
+  } else if (data.type === #{WsMessageTypeOffline} && data.user === #{rid}) {
+
+    const badge = document.getElementById(#{idBadgeInterlocutorStatus});
+    if (badge) {
+      badge.replaceWith((() => {
+        const newBadge = document.createElement('div');
+        newBadge.id = #{idBadgeInterlocutorStatus};
+        newBadge.classList.add('status','badge','bottom','left','grey4');
+        return newBadge;
+      }) ());
+    } else {
+      const avatar = document.getElementById(#{idDivInterlocutorPhoto});
+      if (avatar) {
+        avatar.appendChild((() => {
+          const newBadge = document.createElement('div');
+          newBadge.id = #{idBadgeInterlocutorStatus};
+          newBadge.classList.add('status','badge','bottom','left','grey4');
+          return newBadge;        
+        }) ());
+      }
+    }
+
+    const statusLine = document.getElementById(#{idStatusLine});
+    if (statusLine) {
+      statusLine.replaceWith((() => {
+        const newStatusLine = document.createElement('div');
+        newStatusLine.id = #{idStatusLine};
+        newStatusLine.classList.add('supporting-text','lower','small-text');
+        
+        newStatusLine.appendChild((() => {
+          const span = document.createElement('span');
+          span.textContent = `#{rawJS $ msgr MsgOffline}, `;          
+          return span;
+        }) ());
+        
+        newStatusLine.appendChild((() => {
+          const lastSeen = document.createElement('time');
+          lastSeen.classList.add('daytime');
+          lastSeen.setAttribute('datetime', data.lastSeen);
+          lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
+            navigator.language, {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: 'numeric',
+              minute: 'numeric'
+            }
+          );
+          
+          return lastSeen;
+        }) ());
+        
+        return newStatusLine;
+      }) ());
+      
+    } else {
+      const interlocutorLine = document.getElementById(#{idInterlocutorLine});
+      if (interlocutorLine) {
+        interlocutorLine.appendChild((() => { 
+          
+          const line = document.createElement('div');
+          line.id = #{idStatusLine};
+          line.classList.add('supporting-text','lower','small-text');
+          
+          line.appendChild((() => {
+            const span = document.createElement('span');
+            span.textContent = `#{rawJS $ msgr MsgOffline}, `;            
+            return span;
+          }) ());
+          
+          line.appendChild((() => {
+            const lastSeen = document.createElement('time');
+            lastSeen.classList.add('daytime');
+            lastSeen.setAttribute('datetime', data.lastSeen);
+            lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
+              navigator.language, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+              }
+            );
+            
+            return lastSeen;
+          }) ());
+          
+          return line;
+        }) ());
+      }
+    }
+    
+  }
+  
+}, 2000);
+
+
 function debounce(f,t) {
   let timeoutId = null;
   return (...args) => {
     window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      f.apply(null, args);
-    }, t);
+    timeoutId = window.setTimeout(() => { f.apply(null, args); }, t);
   };
 }

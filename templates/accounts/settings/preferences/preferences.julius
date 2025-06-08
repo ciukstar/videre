@@ -3,3 +3,5 @@ document.getElementById(#{idInputThemeMode}).addEventListener('click', function 
   const theme = ui('mode', ui('mode') === 'light' ? 'dark' : 'light');  
   localStorage.setItem(#{keyThemeMode},theme);
 });
+
+const channel = new WebSocket('@{OnlineChannelR uid}');

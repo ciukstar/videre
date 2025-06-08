@@ -1,8 +1,8 @@
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TypeApplications  #-}
+{-# LANGUAGE TemplateHaskell   #-}
+{-# LANGUAGE QuasiQuotes       #-}
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts  #-}
 
 module Handler.Accounts
   ( getAccountPhotoR
@@ -34,9 +34,9 @@ import Database.Persist
     )
 import qualified Database.Persist as P ((=.), PersistStoreWrite (delete))
 import Database.Esqueleto.Experimental
-    ( Value (unValue), select, selectOne, from, table, where_, val, update, set
+    ( Value (unValue), select, selectOne, from, table, where_, val, update
     , (^.), (?.), (==.), (=.), (:&)((:&))
-    , just, innerJoin, leftJoin, on, orderBy, asc, delete
+    , just, innerJoin, leftJoin, on, orderBy, asc, delete, set
     )
 
 import Foundation
@@ -46,6 +46,7 @@ import Foundation
       , AccountInfoR, AccountInfoEditR, AccountSubscriptionsR
       , AccountSubscriptionR, AccountSubscriptionDeleR, UserRingtoneAudioR
       , AccountRingtonesR, AccountNotificationsR, AccountPreferencesR
+      , OnlineChannelR
       )
     , AppMessage
       ( MsgUserAccount, MsgBack, MsgCancel, MsgFullName, MsgSignOut, MsgPhoto

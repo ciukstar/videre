@@ -29,13 +29,13 @@ import ChatRoom
       ( getBacklink, getAccountPhotoRoute, getContactRoute, getAppHttpManager
       , getStaticRoute, getVideoPushRoute, getVideoOutgoingRoute, getAppSettings
       , getUserRingtoneAudioRoute, getDefaultRingtoneAudioRoute, getVapidKeys
-      , getMaybeAuthId, getHomeRoute
+      , getMaybeAuthId, getHomeRoute, getUserStatusChannel, getUserStatusChannelRoute
       )
     )
 import ChatRoom.Data (Route (ChatRoomR))
 
 import Control.Applicative (liftA3)
-import Control.Concurrent.STM.TVar (readTVarIO)
+import Control.Concurrent.STM.TVar (readTVarIO, TVar)
 import Control.Lens ((.~), (?~))
 import Control.Monad (join, forM_, forM)
 import Control.Monad.IO.Class (liftIO)
@@ -46,13 +46,13 @@ import qualified Data.Aeson as A
     )
 import Data.Bifunctor (Bifunctor(second, bimap, first))
 import Data.List (sortBy)
-import qualified Data.Map as M (lookup)
+import qualified Data.Map as M (lookup, Map)
 import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Text (pack, Text)
 import Data.Text.Encoding (decodeUtf8)
-import Data.Time.Clock (getCurrentTime)
+import Data.Time.Clock (getCurrentTime, UTCTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
 import Database.Esqueleto.Experimental
@@ -74,7 +74,7 @@ import Foundation
     , Route
       ( AccountPhotoR, ChatR, ContactsR, MyContactsR, ContactR, ContactRemoveR
       , PushSubscriptionsR, StaticR, VideoR, CallsR, PushSubscriptionsDeleR
-      , CalleesR, HomeR, UserRingtoneAudioR, DefaultRingtoneAudioR
+      , CalleesR, HomeR, UserRingtoneAudioR, DefaultRingtoneAudioR, OnlineChannelR
       )
     , AppMessage
       ( MsgAppName, MsgContacts, MsgNoRegisteredUsersYet, MsgCalls
@@ -124,7 +124,7 @@ import Model
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
       , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType
       , DefaultRingtoneRingtone, ChatDelivered, ChatRead
-      )
+      ), WsMessageType (WsMessageTypeOnline, WsMessageTypeOffline)
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -188,6 +188,7 @@ import Yesod.Form.Types
     )
 import Yesod.Static (StaticRoute)
 import Yesod.Persist.Core (YesodPersist(runDB))
+import Control.Concurrent.STM.TChan (TChan)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -246,7 +247,6 @@ getCalleesR uid = do
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
-
     endpoint <- lookupGetParam paramEndpoint
     
     calls <- (unwrap <$>) <$> runDB ( select $ do
@@ -328,7 +328,9 @@ getCallsR uid = do
         idDialogMainMenu <- newIdent
         idAudioOutgoingCallRingtone <- newIdent
         $(widgetFile "calls/calls")
+        
   where
+      
       unwrap = second (first (bimap (second (join . unValue)) (second (join . unValue))))
 
 
@@ -640,6 +642,7 @@ getMyContactsR uid = do
     (_,online) <- liftIO . readTVarIO . getOnlineChannel =<< getYesod
 
     rndr <- getUrlRender
+    msgr <- getMessageRender
     msgs <- getMessages
     setUltDestCurrent
     defaultLayout $ do
@@ -647,13 +650,14 @@ getMyContactsR uid = do
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
         $(widgetFile "contacts/contacts")
+        
   where
+      
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
                                   (Just (t1,_), Just (t2,_)) -> compare t2 t1
                                   (Just _, Nothing) -> LT
                                   (Nothing, Just _) -> GT
                                   (Nothing, Nothing) -> compare cid1 cid2
-
                               )
 
 
@@ -785,6 +789,7 @@ getContactsR uid = do
               setTitleI MsgContacts
               idFabAdd <- newIdent
               $(widgetFile "users/contacts")
+              
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
 
 
@@ -915,3 +920,9 @@ instance YesodChat App where
 
     getMaybeAuthId :: Handler (Maybe UserId)
     getMaybeAuthId = maybeAuthId
+    
+    getUserStatusChannelRoute :: UserId -> Handler (Route App)
+    getUserStatusChannelRoute uid = return $ OnlineChannelR uid
+
+    getUserStatusChannel :: Handler (TVar (TChan Text, M.Map UserId (Maybe UTCTime)))
+    getUserStatusChannel = getYesod >>= \app -> return $ getOnlineChannel app

@@ -64,11 +64,11 @@
               #{email}
               
           $maybe (time, (message, (ctype, (media, (delivered, read))))) <- content
-            <div.supporting-text.secondary-text>
+            <div.supporting-text.secondary-text.small-text>
               $with dt <- iso8601Show time
                 <time.daytime datetime=#{dt}>#{dt}
 
-            <div.supporting-text.secondary-text.no-padding.no-margin>
+            <div.supporting-text.secondary-text.small-text.no-padding.no-margin>
               $if media
                 $case ctype
                   $of CallTypeVideo
@@ -90,18 +90,19 @@
       
                 #{message}
 
-          $case M.lookup rid online
-            $of Just (Just lastSeen)
-              <div.supporting-text.small-text.secondary-text #idStatusLinePref#{fromSqlKey rid}>
-                <span.lower>_{MsgOffline}, #
-                $with dt <- show lastSeen
-                  <time.daytime datetime=#{dt}>#{dt}
+          $nothing
+            $case M.lookup rid online
+              $of Just (Just lastSeen)
+                <div.supporting-text.small-text.secondary-text #idStatusLinePref#{fromSqlKey rid}>
+                  <span.lower>_{MsgOffline}, #
+                  $with dt <- show lastSeen
+                    <time.daytime datetime=#{dt}>#{dt}
 
-            $of Just Nothing
-              <div.supporting-text.lower.small-text.green-text #idStatusLinePref#{fromSqlKey rid}>
-                _{MsgOnline}
+              $of Just Nothing
+                <div.supporting-text.lower.small-text.green-text #idStatusLinePref#{fromSqlKey rid}>
+                  _{MsgOnline}
 
-            $of Nothing
+              $of Nothing
                 
   
 
