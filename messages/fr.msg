@@ -1,3 +1,4 @@
+LastSeenAt: Dernière visite à 
 Offline: Hors ligne
 Online: En ligne
 DeleteChat: Supprimer le chat

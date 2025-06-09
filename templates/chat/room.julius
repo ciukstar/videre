@@ -1,4 +1,14 @@
 
+document.getElementById(#{idInterlocutorLine}).querySelectorAll(`time.#{rawJS classDuration}[datetime]`).forEach(
+  function (x) {
+    x.textContent = new Intl.DurationFormat(
+      navigator.language, { style: 'long' }
+    ).format(
+      ceildur(mstodur((Date.now() - new Date(x.getAttribute('datetime')).getTime())))
+    );
+  }
+);
+
 document.body.querySelectorAll('time.day-bubble[datetime]').forEach(function (x) {
   x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
     navigator.language, { weekday: 'short',year: 'numeric',month: 'long',day: 'numeric' }
@@ -1164,16 +1174,10 @@ channel.onmessage = debounce (function (e) {
         
         newStatusLine.appendChild((() => {
           const lastSeen = document.createElement('time');
-          lastSeen.classList.add('daytime');
+          lastSeen.classList.add(#{classDuration});
           lastSeen.setAttribute('datetime', data.lastSeen);
-          lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
-            navigator.language, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric'
-            }
+          lastSeen.textContent = new Intl.DurationFormat(navigator.language, { style: 'long' }).format(
+            ceildur(mstodur((Date.now() - new Date(lastSeen.getAttribute('datetime')).getTime())))
           );
           
           return lastSeen;
@@ -1199,17 +1203,11 @@ channel.onmessage = debounce (function (e) {
           
           line.appendChild((() => {
             const lastSeen = document.createElement('time');
-            lastSeen.classList.add('daytime');
+            lastSeen.classList.add(#{classDuration});
             lastSeen.setAttribute('datetime', data.lastSeen);
-            lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
-              navigator.language, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric'
-              }
-            );
+            lastSeen.textContent = new Intl.DurationFormat(navigator.language, { style: 'long' }).format(
+              ceildur(mstodur((Date.now() - new Date(lastSeen.getAttribute('datetime')).getTime())))
+            ); 
             
             return lastSeen;
           }) ());

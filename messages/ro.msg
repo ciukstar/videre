@@ -1,3 +1,4 @@
+LastSeenAt: Ultima vizită la 
 Offline: Offline
 Online: Online
 DeleteChat: Șterge chatul

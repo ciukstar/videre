@@ -1,7 +1,7 @@
 
 
 Array.from(
-  document.body.querySelectorAll('time.ctxtime[datetime]')
+  document.body.querySelectorAll('time.#{rawJS classLastSeenTime}[datetime]')
 ).forEach(function (x) {
   x.textContent = ctxtimefmt(new Date(x.getAttribute('datetime')));
 });
@@ -102,25 +102,15 @@ channel.onmessage = debounce (function (e) {
           newStatusLine.appendChild((() => {
             const span = document.createElement('span');
             span.classList.add('lower');
-            span.textContent = `#{rawJS $ msgr MsgOffline}, `;
-            
+            span.textContent = `#{rawJS $ msgr MsgLastSeenAt} `;
             return span;
           }) ());
           
           newStatusLine.appendChild((() => {
             const lastSeen = document.createElement('time');
-            lastSeen.classList.add('daytime');
+            lastSeen.classList.add(#{classLastSeenTime});
             lastSeen.setAttribute('datetime', data.lastSeen);
-            lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
-              navigator.language, {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: 'numeric'
-              }
-            );
-            
+            lastSeen.textContent = ctxtimefmt(new Date(lastSeen.getAttribute('datetime')));
             return lastSeen;
           }) ());
           
@@ -141,25 +131,15 @@ channel.onmessage = debounce (function (e) {
             line.appendChild((() => {
               const span = document.createElement('span');
               span.classList.add('lower');
-              span.textContent = `#{rawJS $ msgr MsgOffline}, `;
-              
+              span.textContent = `#{rawJS $ msgr MsgLastSeenAt} `;
               return span;
             }) ());
             
             line.appendChild((() => {
               const lastSeen = document.createElement('time');
-              lastSeen.classList.add('daytime');
+              lastSeen.classList.add(#{classLastSeenTime});
               lastSeen.setAttribute('datetime', data.lastSeen);
-              lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
-                navigator.language, {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: 'numeric',
-                  minute: 'numeric'
-                }
-              );
-              
+              lastSeen.textContent = ctxtimefmt(new Date(lastSeen.getAttribute('datetime')));              
               return lastSeen;
             }) ());
             

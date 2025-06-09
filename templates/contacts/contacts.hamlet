@@ -66,7 +66,7 @@
 
             $maybe (time, (_, (_, (_, (_, _))))) <- content
               $with dt <- iso8601Show time
-                <time.ctxtime.secondary-text.small-text datetime=#{dt}>#{dt}
+                <time.#{classLastSeenTime}.secondary-text.small-text datetime=#{dt}>#{dt}
 
           $maybe (_, (message, (ctype, (media, (delivered, read))))) <- content
             <div.#{classSupportingText}.secondary-text.small-text.no-padding.no-margin ##{idLastMessage}#{rid}>
@@ -95,9 +95,9 @@
             $case M.lookup rid online
               $of Just (Just lastSeen)
                 <div.#{classSupportingText}.small-text.secondary-text ##{idStatusLine}#{rid}>
-                  <span.lower>_{MsgOffline}, #
+                  <span.lower>_{MsgLastSeenAt} #
                   $with dt <- show lastSeen
-                    <time.daytime datetime=#{dt}>#{dt}
+                    <time.#{classLastSeenTime} datetime=#{dt}>#{dt}
 
               $of Just Nothing
                 <div.#{classSupportingText}.lower.small-text.green-text ##{idStatusLine}#{rid}>

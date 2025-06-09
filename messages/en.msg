@@ -1,3 +1,4 @@
+LastSeenAt: Last seen at
 Offline: Offline
 Online: Online
 DeleteChat: Delete chat

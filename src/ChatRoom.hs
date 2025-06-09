@@ -617,6 +617,7 @@ getChatRoomR sid cid rid = do
         idBadgeInterlocutorStatus <- newIdent
         idInterlocutorLine <- newIdent
         idStatusLine <- newIdent
+        classDuration <- newIdent
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idMenuChat <- newIdent
@@ -659,6 +660,7 @@ getChatRoomR sid cid rid = do
         idOverlayDialogDeleteChat <- newIdent
         idDialogDeleteChat <- newIdent
         
+        toWidget $(juliusFile "static/js/mstodur.julius")
         toWidget $(juliusFile "static/js/debounce.julius")
         $(widgetFile "chat/room")
 

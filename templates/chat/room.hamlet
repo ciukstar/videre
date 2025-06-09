@@ -28,7 +28,8 @@
           <div.supporting-text.lower.small-text ##{idStatusLine}>
             <span>_{MsgOffline}, #
             $with dt <- show lastSeen
-              <time.daytime datetime=#{dt}>#{dt}
+              <time.#{classDuration} datetime=#{dt}>
+                #{dt}
 
         $of Just Nothing
           <div.supporting-text.lower.small-text ##{idStatusLine}>

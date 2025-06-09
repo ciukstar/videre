@@ -92,7 +92,7 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers, MsgOnline
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers, MsgOnline, MsgLastSeenAt
       )
     )
 
@@ -656,6 +656,7 @@ getMyContactsR uid = do
         classContactLines <- newIdent
         idContactLines <- newIdent
         classHeadline <- newIdent
+        classLastSeenTime <- newIdent
         classSupportingText <- newIdent
         idLastMessage <- newIdent
         idStatusLine <- newIdent

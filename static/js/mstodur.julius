@@ -1,0 +1,40 @@
+
+function ceildur (dur) {
+  if (dur.weeks > 0) {
+    
+    return { weeks: dur.weeks };
+    
+  } else if (dur.days > 0) {
+
+    return { days: dur.days };
+    
+  } else if (dur.hours > 0) {
+
+    return { hours: dur.hours };
+    
+  } else if (dur.minutes > 0) {
+
+    return { minutes: dur.minutes };
+    
+  } else if (dur.seconds > 0) {
+
+    return { seconds: dur.seconds };
+    
+  } else {
+    
+    return dur;
+    
+  }
+}
+
+function mstodur (millis) {
+
+  const x = Math.floor(millis / 1000);
+  
+  return ({ seconds:            (((x % 604800) % 86400) % 3600) % 60,
+            minutes: Math.floor((((x % 604800) % 86400) % 3600) / 60),
+            hours:   Math.floor(((x % 604800) % 86400) / 3600),
+            days:    Math.floor((x % 604800) / 86400),
+            weeks:   Math.floor(x / 604800)
+          });
+}

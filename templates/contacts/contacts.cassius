@@ -19,6 +19,9 @@ main
             overflow: hidden
             text-overflow: ellipsis
 
+        time
+            vertical-align: baseline
+
     .app-attribution
         position: relative
         
