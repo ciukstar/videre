@@ -1,23 +1,16 @@
 
+
 Array.from(
-  document.body.querySelectorAll('time.daytime[datetime]')
+  document.body.querySelectorAll('time.ctxtime[datetime]')
 ).forEach(function (x) {
-  x.textContent = new Date(x.getAttribute('datetime')).toLocaleDateString(
-    navigator.language, {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: 'numeric',
-      minute: 'numeric'
-    }
-  );
+  x.textContent = ctxtimefmt(new Date(x.getAttribute('datetime')));
 });
 
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
   if (message.data.messageType === #{PushMsgTypeRefresh}) {
-    document.getElementById(`idBadgePhoto${message.data.senderId}`)?.remove();
+    document.getElementById(`#{rawJS idBadgePhoto}${message.data.senderId}`)?.remove();
   }
 
 });
@@ -30,110 +23,83 @@ channel.onmessage = debounce (function (e) {
 
   if (data.type === #{WsMessageTypeOnline}) {
 
-    const badge = document.getElementById(`idBadgeOnlinePref${data.user}`);
+    const badge = document.getElementById(`#{rawJS idBadgeOnline}${data.user}`);
     if (badge) {
       badge.replaceWith((() => {
         const newBadge = document.createElement('div');
-        newBadge.id = `idBadgeOnlinePref${data.user}`;
-        newBadge.classList.add('status','badge','bottom','left','green');
+        newBadge.id = `#{rawJS idBadgeOnline}${data.user}`;
+        newBadge.classList.add(#{classStatus},'badge','bottom','left','green');
         return newBadge;
       }) ());
     } else {
-      const avatar = document.getElementById(`idAvatar${data.user}`);
+      const avatar = document.getElementById(`#{rawJS idUserAvatar}${data.user}`);
       if (avatar) {
         avatar.appendChild((() => {
           const newBadge = document.createElement('div');
-          newBadge.id = `idBadgeOnlinePref${data.user}`;
-          newBadge.classList.add('status','badge','bottom','left','green');
+          newBadge.id = `#{rawJS idBadgeOnline}${data.user}`;
+          newBadge.classList.add(#{classStatus},'badge','bottom','left','green');
           return newBadge;        
         }) ());
       }
     }
 
-    const statusLine = document.getElementById(`idStatusLinePref${data.user}`);
-    if (statusLine) {
-      statusLine.classList.add('supporting-text','lower','small-text','green-text');
-      statusLine.textContent = #{msgr MsgOnline};
-    } else {
-      const contactContent = document.getElementById(`idContactContentPref${data.user}`);
-      if (contactContent) {
-        contactContent.appendChild((() => {
-          const line = document.createElement('div');
-          line.id = `idStatusLinePref${data.user}`;
-          line.classList.add('supporting-text','lower','small-text','green-text');
-          line.textContent = #{msgr MsgOnline};
-          return line;
-        }) ());
+    const messageLine = document.getElementById(`#{rawJS idLastMessage}${data.user}`);
+
+    if (!messageLine) {
+      const statusLine = document.getElementById(`#{rawJS idStatusLine}${data.user}`);
+      if (statusLine) {
+        statusLine.classList.add(#{classSupportingText},'lower','small-text','green-text');
+        statusLine.textContent = #{msgr MsgOnline};
+      } else {
+        const contactContent = document.getElementById(`#{rawJS idContactLines}${data.user}`);
+        if (contactContent) {
+          contactContent.appendChild((() => {
+            const line = document.createElement('div');
+            line.id = `#{rawJS idStatusLine}${data.user}`;
+            line.classList.add(#{classSupportingText},'lower','small-text','green-text');
+            line.textContent = #{msgr MsgOnline};
+            return line;
+          }) ());
+        }
       }
     }
     
   } else if (data.type === #{WsMessageTypeOffline}) {
 
-    const badge = document.getElementById(`idBadgeOnlinePref${data.user}`);
+    const badge = document.getElementById(`#{rawJS idBadgeOnline}${data.user}`);
     if (badge) {
       badge.replaceWith((() => {
         const newBadge = document.createElement('div');
-        newBadge.id = `idBadgeOnlinePref${data.user}`;
-        newBadge.classList.add('status','badge','bottom','left','grey4');
+        newBadge.id = `#{rawJS idBadgeOnline}${data.user}`;
+        newBadge.classList.add(#{classStatus},'badge','bottom','left','grey4');
         return newBadge;
       }) ());
     } else {
-      const avatar = document.getElementById(`idAvatar${data.user}`);
+      const avatar = document.getElementById(`#{rawJS idUserAvatar}${data.user}`);
       if (avatar) {
         avatar.appendChild((() => {
           const newBadge = document.createElement('div');
-          newBadge.id = `idBadgeOnlinePref${data.user}`;
-          newBadge.classList.add('status','badge','bottom','left','grey4');
+          newBadge.id = `#{rawJS idBadgeOnline}${data.user}`;
+          newBadge.classList.add(#{classStatus},'badge','bottom','left','grey4');
           return newBadge;        
         }) ());
       }
     }
 
-    const statusLine = document.getElementById(`idStatusLinePref${data.user}`);
-    if (statusLine) {
-      statusLine.replaceWith((() => {
-        const newStatusLine = document.createElement('div');
-        newStatusLine.id = `idStatusLinePref${data.user}`;
-        newStatusLine.classList.add('supporting-text','small-text','secondary-text');
+    const messageLine = document.getElementById(`#{rawJS idLastMessage}${data.user}`);
+
+    if (!messageLine) {
+
+      const statusLine = document.getElementById(`#{rawJS idStatusLine}${data.user}`);
+    
+      if (statusLine) {
         
-        newStatusLine.appendChild((() => {
-          const span = document.createElement('span');
-          span.classList.add('lower');
-          span.textContent = `#{rawJS $ msgr MsgOffline}, `;
+        statusLine.replaceWith((() => {
+          const newStatusLine = document.createElement('div');
+          newStatusLine.id = `#{rawJS idStatusLine}${data.user}`;
+          newStatusLine.classList.add(#{classSupportingText},'small-text','secondary-text');
           
-          return span;
-        }) ());
-        
-        newStatusLine.appendChild((() => {
-          const lastSeen = document.createElement('time');
-          lastSeen.classList.add('daytime');
-          lastSeen.setAttribute('datetime', data.lastSeen);
-          lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
-            navigator.language, {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: 'numeric',
-              minute: 'numeric'
-            }
-          );
-          
-          return lastSeen;
-        }) ());
-        
-        return newStatusLine;
-      }) ());
-      
-    } else {
-      const contactContent = document.getElementById(`idContactContentPref${data.user}`);
-      if (contactContent) {
-        contactContent.appendChild((() => { 
-          
-          const line = document.createElement('div');
-          line.id = `idStatusLinePref${data.user}`;
-          line.classList.add('supporting-text','small-text','secondary-text');
-          
-          line.appendChild((() => {
+          newStatusLine.appendChild((() => {
             const span = document.createElement('span');
             span.classList.add('lower');
             span.textContent = `#{rawJS $ msgr MsgOffline}, `;
@@ -141,7 +107,7 @@ channel.onmessage = debounce (function (e) {
             return span;
           }) ());
           
-          line.appendChild((() => {
+          newStatusLine.appendChild((() => {
             const lastSeen = document.createElement('time');
             lastSeen.classList.add('daytime');
             lastSeen.setAttribute('datetime', data.lastSeen);
@@ -158,22 +124,51 @@ channel.onmessage = debounce (function (e) {
             return lastSeen;
           }) ());
           
-          return line;
+          return newStatusLine;
         }) ());
+        
+      } else {
+        
+        const contactContent = document.getElementById(`#{rawJS idContactLines}${data.user}`);
+        
+        if (contactContent) {
+          contactContent.appendChild((() => { 
+            
+            const line = document.createElement('div');
+            line.id = `#{rawJS idStatusLine}${data.user}`;
+            line.classList.add(#{classSupportingText},'small-text','secondary-text');
+            
+            line.appendChild((() => {
+              const span = document.createElement('span');
+              span.classList.add('lower');
+              span.textContent = `#{rawJS $ msgr MsgOffline}, `;
+              
+              return span;
+            }) ());
+            
+            line.appendChild((() => {
+              const lastSeen = document.createElement('time');
+              lastSeen.classList.add('daytime');
+              lastSeen.setAttribute('datetime', data.lastSeen);
+              lastSeen.textContent = new Date(lastSeen.getAttribute('datetime')).toLocaleDateString(
+                navigator.language, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: 'numeric'
+                }
+              );
+              
+              return lastSeen;
+            }) ());
+            
+            return line;
+          }) ());
+        }
       }
     }
     
   }
   
 }, 2000);
-
-
-function debounce(f,t) {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => {
-      f.apply(null, args);
-    }, t);
-  };
-}

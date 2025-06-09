@@ -1222,12 +1222,3 @@ channel.onmessage = debounce (function (e) {
   }
   
 }, 2000);
-
-
-function debounce(f,t) {
-  let timeoutId = null;
-  return (...args) => {
-    window.clearTimeout(timeoutId);
-    timeoutId = window.setTimeout(() => { f.apply(null, args); }, t);
-  };
-}

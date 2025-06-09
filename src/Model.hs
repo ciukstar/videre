@@ -193,6 +193,11 @@ instance ToJavascript UserId where
     toJavascript = toJavascript . rawJS . show . fromSqlKey
 
 
+instance ToMarkup UserId where
+    toMarkup :: UserId -> Markup
+    toMarkup = toMarkup . show . fromSqlKey
+
+
 instance FromJSON PushSubscription where
     parseJSON :: Value -> Parser PushSubscription
     parseJSON = withObject "PushSubscription" $ \v -> do

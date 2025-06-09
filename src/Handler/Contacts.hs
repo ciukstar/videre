@@ -2,8 +2,8 @@
 {-# LANGUAGE TemplateHaskell       #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE TypeApplications      #-}
+{-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
@@ -143,7 +143,7 @@ import Settings.StaticFiles
 
 import Text.Cassius (cassius)
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS))
+import Text.Julius (RawJS(rawJS), juliusFile)
 import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 
 import VideoRoom
@@ -649,6 +649,20 @@ getMyContactsR uid = do
         setTitleI MsgAppName
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
+        idUserAvatar <- newIdent
+        idBadgePhoto <- newIdent
+        classStatus <- newIdent
+        idBadgeOnline <- newIdent
+        classContactLines <- newIdent
+        idContactLines <- newIdent
+        classHeadline <- newIdent
+        classSupportingText <- newIdent
+        idLastMessage <- newIdent
+        idStatusLine <- newIdent
+
+        toWidget $(juliusFile "static/js/debounce.julius")
+        toWidget $(juliusFile "static/js/ctxtimefmt.julius")
+        
         $(widgetFile "contacts/contacts")
         
   where

@@ -7,7 +7,7 @@
 {-# LANGUAGE InstanceSigs          #-}
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE UndecidableInstances  #-}
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeApplications      #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE RecordWildCards #-}
@@ -135,7 +135,7 @@ import Settings.StaticFiles
 
 import Text.Blaze.Html (preEscapedText)
 import Text.Hamlet (Html)
-import Text.Julius (RawJS(rawJS))
+import Text.Julius (RawJS(rawJS), juliusFile)
 
 import Web.WebPush
     ( mkPushNotification, pushUrgency
@@ -156,7 +156,7 @@ import Yesod.Core.Handler
     , getMessageRender
     )
 import Yesod.Core.Types (YesodSubRunnerEnv)
-import Yesod.Core.Widget (setTitleI, whamlet, WidgetFor)
+import Yesod.Core.Widget (setTitleI, whamlet, WidgetFor, toWidget)
 import Yesod.Form.Fields (FormMessage)
 import Yesod.Persist.Core (YesodPersist(runDB, YesodPersistBackend))
 import Yesod.Static (StaticRoute)
@@ -659,6 +659,7 @@ getChatRoomR sid cid rid = do
         idOverlayDialogDeleteChat <- newIdent
         idDialogDeleteChat <- newIdent
         
+        toWidget $(juliusFile "static/js/debounce.julius")
         $(widgetFile "chat/room")
 
     where      

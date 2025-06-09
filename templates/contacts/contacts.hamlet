@@ -33,42 +33,43 @@
     $forall (Entity cid _,(Entity rid (User email _ _ _ _ name _ _),((attrib,(ns,(nl,na))),content))) <- entries
       <a.row.padding.wave href=@{ChatR $ ChatRoomR uid cid rid}>
 
-        <div #idAvatar#{fromSqlKey rid}>
+        <div ##{idUserAvatar}#{rid}>
           <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
           
           $if ns < 1
-            <i.absolute.tiny.circle.tiny-padding.error.notifications-disabled #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.notifications-disabled ##{idBadgePhoto}#{rid}>
               notifications_off
           $elseif nl > 0
-            <i.absolute.tiny.circle.tiny-padding.error.call-loop #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.call-loop ##{idBadgePhoto}#{rid}>
               repeat
           $elseif na < 1
-            <i.absolute.tiny.circle.tiny-padding.error.phone-disabled #idBadgePhoto#{fromSqlKey rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.phone-disabled ##{idBadgePhoto}#{rid}>
               phone_disabled
 
 
           $case M.lookup rid online
             $of Just (Just _lastSeen)
-              <div.status.badge.bottom.left.grey #idBadgeOnlinePref#{fromSqlKey rid}>
+              <div.#{classStatus}.badge.bottom.left.grey ##{idBadgeOnline}#{rid}>
             $of Just Nothing
-              <div.status.badge.bottom.left.green #idBadgeOnlinePref#{fromSqlKey rid}>
+              <div.#{classStatus}.badge.bottom.left.green ##{idBadgeOnline}#{rid}>
             $of Nothing
               
                           
 
-        <div.content.max #idContactContentPref#{fromSqlKey rid}>
-          <div.headline.large-text>
-            $maybe name <- name
-              #{name}
-            $nothing
-              #{email}
-              
-          $maybe (time, (message, (ctype, (media, (delivered, read))))) <- content
-            <div.supporting-text.secondary-text.small-text>
-              $with dt <- iso8601Show time
-                <time.daytime datetime=#{dt}>#{dt}
+        <div.#{classContactLines}.max ##{idContactLines}#{rid}>
+          <div.row.#{classHeadline}.large-text>
+            <div.max>
+              $maybe name <- name
+                #{name}
+              $nothing
+                #{email}
 
-            <div.supporting-text.secondary-text.small-text.no-padding.no-margin>
+            $maybe (time, (_, (_, (_, (_, _))))) <- content
+              $with dt <- iso8601Show time
+                <time.ctxtime.secondary-text.small-text datetime=#{dt}>#{dt}
+
+          $maybe (_, (message, (ctype, (media, (delivered, read))))) <- content
+            <div.#{classSupportingText}.secondary-text.small-text.no-padding.no-margin ##{idLastMessage}#{rid}>
               $if media
                 $case ctype
                   $of CallTypeVideo
@@ -93,18 +94,17 @@
           $nothing
             $case M.lookup rid online
               $of Just (Just lastSeen)
-                <div.supporting-text.small-text.secondary-text #idStatusLinePref#{fromSqlKey rid}>
+                <div.#{classSupportingText}.small-text.secondary-text ##{idStatusLine}#{rid}>
                   <span.lower>_{MsgOffline}, #
                   $with dt <- show lastSeen
                     <time.daytime datetime=#{dt}>#{dt}
 
               $of Just Nothing
-                <div.supporting-text.lower.small-text.green-text #idStatusLinePref#{fromSqlKey rid}>
+                <div.#{classSupportingText}.lower.small-text.green-text ##{idStatusLine}#{rid}>
                   _{MsgOnline}
 
               $of Nothing
-                
-  
+
 
         <i.secondary-text>arrow_forward_ios
  

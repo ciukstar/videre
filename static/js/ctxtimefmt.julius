@@ -1,0 +1,27 @@
+
+function ctxtimefmt (dt) {
+  
+  const now = new Date();
+
+  const isToday = now.getFullYear() == dt.getFullYear()
+        && now.getMonth() == dt.getMonth()
+        && now.getDay() == dt.getDay();
+
+  const isThisWeek = now.getFullYear() == dt.getFullYear()
+        && now.getMonth() == dt.getMonth()
+        && Math.ceil((now.getDate() - 1 - now.getDay()) / 7) == Math.ceil((dt.getDate() - 1 - dt.getDay()) / 7);
+  
+  const isThisMonth = now.getFullYear() == dt.getFullYear() && now.getMonth() == dt.getMonth();
+  
+  const isThisYear = now.getFullYear() == dt.getFullYear();
+  
+  return isToday ? dt.toLocaleTimeString(navigator.language, { hour: 'numeric', minute: 'numeric' })
+    : ( isThisWeek ? dt.toLocaleDateString(navigator.language, { weekday: 'long' })
+        : ( isThisMonth ? dt.toLocaleDateString(navigator.language, { month: 'short', day: 'short' })
+            : ( isThisYear ? dt.toLocaleDateString(navigator.language, { month: 'short', day: 'short' })
+                : dt.toLocaleDateString(navigator.language, { year: 'numeric', month: 'numeric', day: 'numeric' })
+              )
+          )
+      );
+  
+}
