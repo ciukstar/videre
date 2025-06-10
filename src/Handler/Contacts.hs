@@ -35,6 +35,7 @@ import ChatRoom
 import ChatRoom.Data (Route (ChatRoomR))
 
 import Control.Applicative (liftA3)
+import Control.Concurrent.STM.TChan (TChan)
 import Control.Concurrent.STM.TVar (readTVarIO, TVar)
 import Control.Lens ((.~), (?~))
 import Control.Monad (join, forM_, forM)
@@ -51,7 +52,7 @@ import Data.Maybe (fromMaybe)
 import Data.Function ((&))
 import Data.Functor ((<&>))
 import Data.Text (pack, Text)
-import Data.Text.Encoding (decodeUtf8)
+import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Time.Clock (getCurrentTime, UTCTime)
 import Data.Time.Format.ISO8601 (iso8601Show)
 
@@ -85,14 +86,14 @@ import Foundation
       , MsgRemove, MsgSubscriptionCanceled, MsgSubscribe, MsgSelect
       , MsgPostpone, MsgYourContactListIsEmpty, MsgYouMightWantToAddAFew
       , MsgAllowToBeNotifiedBy, MsgYouAreNotSubscribedToNotificationsFrom
-      , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser, MsgOffline
+      , MsgSelectCalleeToCall, MsgYouAreNotYetInContactListOfUser, MsgBack
       , MsgOutgoingCall, MsgCallDeclined, MsgClose, MsgCalleeDeclinedTheCall
       , MsgIncomingAudioCallFrom, MsgVideoCall, MsgIncomingVideoCallFrom
       , MsgCallCanceledByCaller, MsgAudioCall, MsgUserIsNowAvailable
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgBack, MsgUsers, MsgOnline, MsgLastSeenAt
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgUsers, MsgOnline, MsgLastSeenAt
       )
     )
 
@@ -109,12 +110,14 @@ import Model
     , RingtoneType (RingtoneTypeCallOutgoing), DefaultRingtone
     , PushMsgType
       ( PushMsgTypeAudioCall, PushMsgTypeVideoCall, PushMsgTypeCancel
-      , PushMsgTypeDecline, PushMsgTypeAccept, PushMsgTypeRefresh
+      , PushMsgTypeDecline, PushMsgTypeAccept, PushMsgTypeSubscribed
+      , PushMsgTypeUnsubscribed
       )
     , Unique (UniquePushSubscription)
     , CallStatus
       ( CallStatusAccepted, CallStatusDeclined, CallStatusCanceled, CallStatusEnded
       )
+    , WsMessageType (WsMessageTypeOnline, WsMessageTypeOffline)
     , EntityField
       ( UserId, UserPhotoUser, UserPhotoAttribution, ContactOwner, ContactEntry
       , ContactId, ChatRecipient, ChatCreated, PushSubscriptionSubscriber
@@ -124,7 +127,7 @@ import Model
       , CallStart, ChatMessage, CallType, PushSubscriptionUserAgent, RingtoneId
       , UserRingtoneRingtone, UserRingtoneUser, UserRingtoneType, DefaultRingtoneType
       , DefaultRingtoneRingtone, ChatDelivered, ChatRead
-      ), WsMessageType (WsMessageTypeOnline, WsMessageTypeOffline)
+      )
     )
 
 import Network.HTTP.Client.Conduit (Manager)
@@ -188,7 +191,7 @@ import Yesod.Form.Types
     )
 import Yesod.Static (StaticRoute)
 import Yesod.Persist.Core (YesodPersist(runDB))
-import Control.Concurrent.STM.TChan (TChan)
+import Network.HTTP.Types.URI (extractPath)
 
 
 getCalleesR :: UserId -> Handler Html
@@ -650,7 +653,8 @@ getMyContactsR uid = do
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
         idUserAvatar <- newIdent
-        idBadgePhoto <- newIdent
+        classBadgeRtcStatus <- newIdent
+        idBadgeRtcStatus <- newIdent
         classStatus <- newIdent
         idBadgeOnline <- newIdent
         classContactLines <- newIdent
@@ -726,16 +730,18 @@ postContactsR uid = do
                           manager <- appHttpManager <$> getYesod
 
                           msgr <- getMessageRender
-                          urlr <- getUrlRender
+                          rndr <- getUrlRender
                           user <- maybeAuth
+
+                          let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
 
                           forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
                               let notification = mkPushNotification endpoint' p256dh' auth'
                                       & pushMessage .~ object
-                                          [ "messageType" A..= PushMsgTypeRefresh
+                                          [ "messageType" A..= PushMsgTypeSubscribed
                                           , "title" A..= msgr MsgAppName
-                                          , "icon" A..= urlr (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
-                                          , "image" A..= (urlr . AccountPhotoR . entityKey <$> user)
+                                          , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                          , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
                                           , "body" A..= ( msgr . MsgUserIsNowAvailable .
                                                           (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
                                                         )
@@ -743,14 +749,13 @@ postContactsR uid = do
                                           ]
                                       & pushSenderEmail .~ superuserUsername
                                       & pushExpireInSeconds .~ 30 * 60
-                                      & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeRefresh)
+                                      & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeSubscribed)
                                       & pushUrgency ?~ PushUrgencyHigh
 
                               result <- sendPushNotification vapidKeys manager notification
 
                               case result of
-                                Left ex -> do
-                                    liftIO $ print ex
+                                Left ex -> liftIO $ print ex
                                 Right () -> return ()
                               return ()
                       Nothing -> return ()

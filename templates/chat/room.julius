@@ -860,7 +860,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idOverlayDialogCallDeclined}).classList.add('active');
     document.getElementById(#{idDialogCallDeclined}).show();
     
-  } else if (message.data.messageType === #{PushMsgTypeRefresh}) {
+  } else if (message.data.messageType === #{PushMsgTypeSubscribed}) {
     
     window.location.reload();
     

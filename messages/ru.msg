@@ -1,4 +1,4 @@
-LastSeenAt: Последний раз был в  
+LastSeenAt: Последний раз был в
 Offline: Офлайн
 Online: Онлайн
 DeleteChat: Удалить чат

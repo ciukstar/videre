@@ -35,15 +35,15 @@
 
         <div ##{idUserAvatar}#{rid}>
           <img.circle src=@{AccountPhotoR rid} alt=_{MsgPhoto} loading=lazy>
-          
+
           $if ns < 1
-            <i.absolute.tiny.circle.tiny-padding.error.notifications-disabled ##{idBadgePhoto}#{rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.#{classBadgeRtcStatus} ##{idBadgeRtcStatus}#{rid}>
               notifications_off
           $elseif nl > 0
-            <i.absolute.tiny.circle.tiny-padding.error.call-loop ##{idBadgePhoto}#{rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.#{classBadgeRtcStatus} ##{idBadgeRtcStatus}#{rid}>
               repeat
           $elseif na < 1
-            <i.absolute.tiny.circle.tiny-padding.error.phone-disabled ##{idBadgePhoto}#{rid}>
+            <i.absolute.tiny.circle.tiny-padding.error.#{classBadgeRtcStatus} ##{idBadgeRtcStatus}#{rid}>
               phone_disabled
 
 

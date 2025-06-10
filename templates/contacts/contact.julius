@@ -1,0 +1,2 @@
+
+const channel = new WebSocket('@{OnlineChannelR sid}');

@@ -92,7 +92,7 @@ import Model
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
-      , PushMsgTypeRefresh
+      , PushMsgTypeSubscribed
       )
     , RingtoneId, UserRingtone, DefaultRingtone
     , RingtoneType

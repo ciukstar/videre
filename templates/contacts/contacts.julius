@@ -9,8 +9,14 @@ Array.from(
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{PushMsgTypeRefresh}) {
-    document.getElementById(`#{rawJS idBadgePhoto}${message.data.senderId}`)?.remove();
+  if (message.data.messageType === #{PushMsgTypeSubscribed}) {
+    
+    document.getElementById(`#{rawJS idBadgeRtcStatus}${message.data.senderId}`)?.remove();
+    
+  } else if (message.data.messageType === #{PushMsgTypeUnsubscribed}) {
+    
+    document.getElementById(`#{rawJS idBadgeRtcStatus}${message.data.senderId}`)?.remove();
+    
   }
 
 });

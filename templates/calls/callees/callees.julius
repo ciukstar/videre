@@ -89,7 +89,7 @@ Array.from(
 
 navigator.serviceWorker.addEventListener('message', function (message) {
 
-  if (message.data.messageType === #{PushMsgTypeRefresh}) {
+  if (message.data.messageType === #{PushMsgTypeSubscribed}) {
     window.location.reload();
   }
 

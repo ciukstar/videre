@@ -7,7 +7,7 @@ main
         margin: 12px -10px
         border: 2px solid var(--background)
 
-    .notifications-disabled, .call-loop, .phone-disabled
+    .#{classBadgeRtcStatus}
         top: -0.5rem
         right: -0.5rem
 
