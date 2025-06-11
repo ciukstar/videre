@@ -82,7 +82,7 @@
     /users               UsersR      GET
 
     /tokens/vapid/clear TokensVapidClearR      POST
-    /tokens/vapid       TokensVapidR           POST
+    /tokens/vapid       TokenVapidR            GET POST
     /tokens/clear       TokensGoogleapisClearR POST
     /tokens/hook        TokensGoogleapisHookR  GET
-    /tokens             TokensR                GET POST
+    /tokens/gmail       TokenGmailR            GET POST

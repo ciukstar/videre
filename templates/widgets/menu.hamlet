@@ -52,8 +52,8 @@
             <i>ring_volume
             <span>_{MsgRingtones}
         
-        <li.wave.round :curr == Just (DataR TokensR):.active>
-          <a href=@{DataR TokensR}>
+        <li.wave.round :curr == Just (DataR TokenGmailR):.active :curr == Just (DataR TokenVapidR):.active>
+          <a href=@{DataR TokenGmailR}>
             <i>token
             <span>_{MsgTokens}
 

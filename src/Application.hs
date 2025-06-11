@@ -99,8 +99,8 @@ import Handler.Ringtones
     )
 
 import Handler.Tokens
-    ( getTokensR, postTokensR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
-    , postTokensVapidR, postTokensVapidClearR
+    ( getTokenGmailR, postTokenGmailR, getTokensGoogleapisHookR, postTokensGoogleapisClearR
+    , getTokenVapidR, postTokenVapidR, postTokensVapidClearR
     )
 
 import Handler.Users

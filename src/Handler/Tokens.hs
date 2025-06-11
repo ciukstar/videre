@@ -4,11 +4,11 @@
 {-# LANGUAGE TypeApplications #-}
 
 module Handler.Tokens
-  ( getTokensR
-  , postTokensR
+  ( getTokenGmailR
+  , postTokenGmailR
   , getTokensGoogleapisHookR
   , postTokensGoogleapisClearR
-  , postTokensVapidR
+  , getTokenVapidR, postTokenVapidR
   , postTokensVapidClearR
   ) where
 
@@ -42,8 +42,8 @@ import Foundation
     , widgetMainMenu, widgetSnackbar, widgetAccount
     , Route (DataR)
     , DataR
-      ( TokensR, TokensGoogleapisHookR, TokensGoogleapisClearR, TokensVapidR
-      , TokensVapidClearR
+      ( TokenGmailR, TokensGoogleapisHookR, TokensGoogleapisClearR
+      , TokenVapidR, TokensVapidClearR
       )
     , AppMessage
       ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
@@ -60,7 +60,8 @@ import Material3 (md3radioField, md3widget)
 import Model
     ( gmailAccessToken, gmailRefreshToken, apiInfoGoogle
     , StoreType
-      ( StoreTypeDatabase, StoreTypeSession, StoreTypeGoogleSecretManager )
+      ( StoreTypeDatabase, StoreTypeSession, StoreTypeGoogleSecretManager
+      )
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi, StoreToken, TokenId, StoreKey)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
@@ -118,25 +119,26 @@ postTokensVapidClearR = do
         where_ $ x ^. TokenApi ==. val apiInfoVapid
         return x
 
-    ((fr,fwVapidClear),etVapidClear) <- runFormPost formTokensClear
+    ((fr,fwClear),etClear) <- runFormPost formTokensClear 
     
     case (fr,tokenVapid) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR TokensR
+          redirect $ DataR TokenVapidR
+          
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
 
           refreshToken <- case tokenGmail of
             Just (Entity _ (Token _ StoreTypeSession)) -> lookupSession gmailRefreshToken
                 
             Just (Entity _ (Token _ StoreTypeDatabase)) -> do
-                (unValue <$>) <$> runDB ( selectOne $ do
+                ((unValue <$>) <$>) $ runDB $ selectOne $ do
                     x :& k <- from $ table @Store
                         `innerJoin` table @Token `on` (\(x :& k) -> x ^. StoreToken ==. k ^. TokenId)
                     where_ $ x ^. StoreKey ==. val gmailRefreshToken
                     where_ $ k ^. TokenApi ==. val apiInfoGoogle
-                    return $ x ^. StoreVal )
+                    return $ x ^. StoreVal
                 
             Just (Entity _ (Token _ StoreTypeGoogleSecretManager)) -> do
               liftIO $ pure . pack <$> readFile' secretVolumeGmail
@@ -180,45 +182,43 @@ postTokensVapidClearR = do
 
                 runDB $ delete tid
                 addMessageI statusSuccess MsgRecordDeleted
-                redirect $ DataR TokensR
+                redirect $ DataR TokenVapidR
+                
             Nothing -> do
                 addMessageI statusError MsgInvalidGoogleAPITokens
-                redirect $ DataR TokensR
+                redirect $ DataR TokenVapidR
 
       (FormSuccess (),Nothing) -> do
           addMessageI statusSuccess MsgCleared
-          redirect $ DataR TokensR
+          redirect $ DataR TokenVapidR
+          
       _otherwise -> do
-          (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
-          (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
-          (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
+          (fw,et) <- generateFormPost $ formVapid tokenVapid
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               idOverlay <- newIdent
               idDialogMainMenu <- newIdent
-              formTokensGmail <- newIdent
-              formTokensGmailClear <- newIdent
-              formTokensVapid <- newIdent
-              formTokensVapidClear <- newIdent
-              $(widgetFile "data/tokens/tokens")
+              idForm <- newIdent
+              idFormClear <- newIdent
+              $(widgetFile "data/tokens/vapid")
 
 
-postTokensVapidR :: Handler Html
-postTokensVapidR = do
+postTokenVapidR :: Handler Html
+postTokenVapidR = do
 
     ((fr,_),_) <- runFormPost $ formVapid Nothing
 
     VAPIDKeysMinDetails s xc yc <- liftIO generateVAPIDKeys
     let triple = pack $ show (s,xc,yc)
     
-    case fr of          
+    case fr of
       FormSuccess t@StoreTypeDatabase -> do
           Entity tid _ <- runDB $ upsert (Token apiInfoVapid t) [TokenStore P.=. t]
           _ <- runDB $ upsert (Store tid "vapidTriple" triple) [StoreVal P.=. triple]
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR TokensR
+          redirect $ DataR TokenVapidR
           
       FormSuccess t@StoreTypeGoogleSecretManager -> do
 
@@ -290,13 +290,66 @@ postTokensVapidR = do
                 _ <- runDB $ upsert (Token apiInfoVapid t) [TokenStore P.=. t]
 
                 addMessageI statusSuccess MsgRecordEdited
-                redirect $ DataR TokensR
+                redirect $ DataR TokenVapidR
             Nothing -> do
                 addMessageI statusError MsgInvalidGoogleAPITokens
-                redirect $ DataR TokensR 
+                redirect $ DataR TokenVapidR
+                
       _otherwise -> do
           addMessageI statusError MsgInvalidStoreType
-          redirect $ DataR TokensR
+          redirect $ DataR TokenVapidR
+
+
+getTokenVapidR :: Handler Html
+getTokenVapidR = do
+        
+    tokenVapid <- runDB $ selectOne $ do
+        x <- from $ table @Token
+        where_ $ x ^. TokenApi ==. val apiInfoVapid
+        return x
+        
+    (fw,et) <- generateFormPost $ formVapid tokenVapid
+    (fwClear,etClear) <- generateFormPost formTokensClear
+    
+    msgs <- getMessages
+    defaultLayout $ do
+        setUltDestCurrent
+        setTitleI MsgTokens
+        idOverlay <- newIdent
+        idDialogMainMenu <- newIdent
+        idForm <- newIdent
+        idFormClear <- newIdent
+        $(widgetFile "data/tokens/vapid")
+
+
+formVapid :: Maybe (Entity Token) -> Form StoreType
+formVapid token extra = do
+    let storeOptions = [ (MsgDatabase, StoreTypeDatabase)
+                       , (MsgGoogleSecretManager, StoreTypeGoogleSecretManager)
+                       ]
+    (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
+        { fsLabel = SomeMessage MsgStoreType
+        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
+        , fsAttrs = []
+        } (tokenStore . entityVal <$> token)
+        
+    return ( storeR
+           , do
+                 toWidget [cassius|
+                             ##{fvId storeV}
+                                 display: flex
+                                 flex-direction: column
+                                 row-gap: 1rem
+                          |]
+                 [whamlet|
+                   #{extra}
+                   <fieldset.shape-medium>
+                     <legend.body-medium>
+                       _{MsgStoreType}<sup>*
+                       
+                     ^{fvInput storeV}
+                 |]
+           )
 
 
 getTokensGoogleapisHookR :: Handler Html
@@ -334,7 +387,7 @@ getTokensGoogleapisHookR = do
           setSession gmailSender email
           _ <- runDB $ upsert (Token apiInfoGoogle x) [TokenStore P.=. x]
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
       Just (email,x@StoreTypeDatabase) -> do
           setSession gmailSender email
           Entity tid _ <- runDB $ upsert (Token apiInfoGoogle x) [TokenStore P.=. x]
@@ -342,7 +395,7 @@ getTokensGoogleapisHookR = do
           _ <- runDB $ upsert (Store tid gmailRefreshToken refreshToken) [StoreVal P.=. refreshToken]
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
       Just (email,x@StoreTypeGoogleSecretManager) -> do
           setSession gmailSender email
 
@@ -378,10 +431,10 @@ getTokensGoogleapisHookR = do
           _ <- runDB $ upsert (Store tid gmailSender email) [StoreVal P.=. email]
 
           addMessageI statusSuccess MsgRecordEdited
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
       Nothing -> do
           addMessageI statusError MsgInvalidStoreType
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
 
 
 postTokensGoogleapisClearR :: Handler Html
@@ -392,12 +445,7 @@ postTokensGoogleapisClearR = do
         where_ $ x ^. TokenApi ==. val apiInfoGoogle
         return x
 
-    tokenVapid <- runDB $ selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return x
-
-    ((fr,fwGmailClear),etGmailClear) <- runFormPost formTokensClear
+    ((fr,fwClear),etClear) <- runFormPost formTokensClear
     case (fr,tokenGmail) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeSession))) -> do
           deleteSession gmailAccessToken
@@ -406,7 +454,8 @@ postTokensGoogleapisClearR = do
           deleteSession gmailSender
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
+          
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           deleteSession gmailAccessToken
           deleteSession gmailRefreshToken
@@ -414,7 +463,8 @@ postTokensGoogleapisClearR = do
           deleteSession gmailSender
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
+          
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
           app <- appSettings <$> getYesod
           -- 1. read refresh token from mounted volume
@@ -456,7 +506,7 @@ postTokensGoogleapisClearR = do
 
           runDB $ delete tid
           addMessageI statusSuccess MsgRecordDeleted
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
 
       (FormSuccess (),Nothing) -> do
           deleteSession gmailAccessToken
@@ -464,43 +514,34 @@ postTokensGoogleapisClearR = do
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
           addMessageI statusSuccess MsgCleared
-          redirect $ DataR TokensR
+          redirect $ DataR TokenGmailR
           
       _otherwise -> do
-          (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
-          (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
-          (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
+          (fw,et) <- generateFormPost $ formStoreOptions tokenGmail
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               idOverlay <- newIdent
               idDialogMainMenu <- newIdent
-              formTokensGmail <- newIdent
-              formTokensGmailClear <- newIdent
-              formTokensVapid <- newIdent
-              formTokensVapidClear <- newIdent
-              $(widgetFile "data/tokens/tokens")
+              idForm <- newIdent
+              idFormClear <- newIdent
+              $(widgetFile "data/tokens/gmail")
 
 
 formTokensClear :: Form ()
 formTokensClear extra = return (FormSuccess (),[whamlet|#{extra}|])
 
 
-postTokensR :: Handler Html
-postTokensR = do
+postTokenGmailR :: Handler Html
+postTokenGmailR = do
 
     tokenGmail <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoGoogle
         return x
 
-    tokenVapid <- runDB $ selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return x
-
-    ((fr,fwGmail),etGmail) <- runFormPost $ formStoreOptions tokenGmail
+    ((fr,fw),et) <- runFormPost $ formStoreOptions tokenGmail
     case fr of
       FormSuccess x -> do
           app <- appSettings <$> getYesod
@@ -522,38 +563,27 @@ postTokensR = do
           return $ preEscapedToHtml $ decodeUtf8 $ toStrict (r L.^. responseBody)
 
       _otherwise -> do
-          (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
-          (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
-          (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
+          (fwClear,etClear) <- generateFormPost formTokensClear
           msgs <- getMessages
           defaultLayout $ do
               setTitleI MsgTokens
               idOverlay <- newIdent
               idDialogMainMenu <- newIdent
-              formTokensGmail <- newIdent
-              formTokensGmailClear <- newIdent
-              formTokensVapid <- newIdent
-              formTokensVapidClear <- newIdent
-              $(widgetFile "data/tokens/tokens")
+              idForm <- newIdent
+              idFormClear <- newIdent
+              $(widgetFile "data/tokens/gmail")
 
 
-getTokensR :: Handler Html
-getTokensR = do
+getTokenGmailR :: Handler Html
+getTokenGmailR = do
     
     tokenGmail <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoGoogle
         return x
-        
-    tokenVapid <- runDB $ selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoVapid
-        return x
 
-    (fwGmail,etGmail) <- generateFormPost $ formStoreOptions tokenGmail
-    (fwGmailClear,etGmailClear) <- generateFormPost formTokensClear
-    (fwVapid,etVapid) <- generateFormPost $ formVapid tokenVapid
-    (fwVapidClear,etVapidClear) <- generateFormPost formTokensClear
+    (fw,et) <- generateFormPost $ formStoreOptions tokenGmail
+    (fwClear,etClear) <- generateFormPost formTokensClear
     
     msgs <- getMessages
     defaultLayout $ do
@@ -561,41 +591,9 @@ getTokensR = do
         setTitleI MsgTokens
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
-        formTokensGmail <- newIdent
-        formTokensGmailClear <- newIdent
-        formTokensVapid <- newIdent
-        formTokensVapidClear <- newIdent
-        $(widgetFile "data/tokens/tokens")
-
-
-formVapid :: Maybe (Entity Token) -> Form StoreType
-formVapid token extra = do
-    let storeOptions = [ (MsgDatabase, StoreTypeDatabase)
-                       , (MsgGoogleSecretManager, StoreTypeGoogleSecretManager)
-                       ]
-    (storeR,storeV) <- mreq (md3radioField (optionsPairs storeOptions)) FieldSettings
-        { fsLabel = SomeMessage MsgStoreType
-        , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
-        , fsAttrs = []
-        } (tokenStore . entityVal <$> token)
-        
-    return ( storeR
-           , do
-                 toWidget [cassius|
-                             ##{fvId storeV}
-                                 display: flex
-                                 flex-direction: column
-                                 row-gap: 1rem
-                          |]
-                 [whamlet|
-                   #{extra}
-                   <fieldset.shape-medium>
-                     <legend.body-medium>
-                       _{MsgStoreType}<sup>*
-                       
-                     ^{fvInput storeV}
-                 |]
-           )
+        idForm <- newIdent
+        idFormClear <- newIdent
+        $(widgetFile "data/tokens/gmail")
 
 
 formStoreOptions :: Maybe (Entity Token)-> Form (Text,StoreType)
@@ -627,13 +625,13 @@ formStoreOptions token extra = do
                                  row-gap: 1rem
                           |]
                  [whamlet|
-                   #{extra}
-                   ^{md3widget emailV}
-                   <fieldset>
-                     <legend>
-                       _{MsgStoreType}<sup>*
+                     #{extra}
+                     ^{md3widget emailV}
+                     <fieldset>
+                       <legend>
+                         _{MsgStoreType}<sup>*
 
-                     ^{fvInput storeV}
+                       ^{fvInput storeV}
                  |]
            )
 

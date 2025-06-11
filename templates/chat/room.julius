@@ -858,6 +858,49 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idOverlayDialogCallDeclined}).classList.add('active');
     document.getElementById(#{idDialogCallDeclined}).show();
     
+  } else if (#{PushMsgTypeSubscribed} === message.data.messageType) {
+    
+    [#{idButtonVideoCall},#{idButtonAudioCall}].map(x => document.getElementById(x)).forEach(x => {
+      x.querySelector(`.badge.#{rawJS classWarning}`)?.remove();
+    });
+    
+  } else if (#{PushMsgTypeUnsubscribed} === message.data.messageType) {
+    
+    [#{idButtonVideoCall},#{idButtonAudioCall}].map(x => document.getElementById(x)).forEach(x => {
+      const badge = x.querySelector(`.badge.#{rawJS classWarning}`);
+      
+      if (badge) {
+        
+        badge.replaceWith((() => {
+          const newBadge = document.createElement('div');
+          newBadge.classList.add('badge','no-margin','no-padding',#{classWarning});
+          newBadge.appendChild((() => {
+            const icon = document.createElement('i');
+            icon.classList.add('tiny','no-margin','tiny-padding');
+            icon.textContent = 'warning';
+            return icon;
+          }) ());
+          return newBadge;
+        }) ());
+        
+      } else {
+        
+        x.appendChild((() => {
+          const newBadge = document.createElement('div');
+          newBadge.classList.add('badge','no-margin','no-padding',#{classWarning});
+          newBadge.appendChild((() => {
+            const icon = document.createElement('i');
+            icon.classList.add('tiny','no-margin','tiny-padding');
+            icon.textContent = 'warning';
+            return icon;
+          }) ());
+          return newBadge;
+        }) ());
+        
+      }
+      
+    });
+    
   } else if ([#{PushMsgTypeSubscribed},#{PushMsgTypeUnsubscribed}].includes(message.data.messageType)) {
     
     window.location.reload();

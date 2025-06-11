@@ -1,0 +1,43 @@
+
+^{widgetMainMenu idOverlay idDialogMainMenu}
+
+<header.fixed.primary>
+  <nav.responsive.max>
+    <button.circle.transparent data-ui=##{idDialogMainMenu}>
+      <i>menu
+
+    <h1.title.max>
+      _{MsgTokens}
+
+    ^{widgetAccount}
+
+<main.responsive.no-padding>
+  
+  <div.tabs.min>
+    <a.active href=@{DataR TokenGmailR}>
+      Gmail
+    
+    <a href=@{DataR TokenVapidR}>
+      VAPID
+
+  <div.page.active.padding>
+
+    <article>
+      <h2.title>
+        Gmail
+      <p>
+
+        <form.formStoreType method=post action=@{DataR TokenGmailR} enctype=#{et} ##{idForm}>
+          ^{fw}
+
+      <nav>
+        <form method=post action=@{DataR TokensGoogleapisClearR} enctype=#{etClear} ##{idFormClear}>
+          ^{fwClear}
+          
+        <button.transparent.link type=submit form=#{idFormClear}>
+          _{MsgClearSettings}
+
+        <button type=submit form=#{idForm}>
+          _{MsgInitialize}
+
+^{widgetSnackbar msgs}

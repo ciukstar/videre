@@ -10,7 +10,7 @@
 
         $case M.lookup rid online
           $of Just (Just _lastSeen)
-            <div.status.badge.bottom.left.grey ##{idBadgeInterlocutorStatus}>
+            <div.status.badge.bottom.left.grey4 ##{idBadgeInterlocutorStatus}>
           $of Just Nothing
             <div.status.badge.bottom.left.green ##{idBadgeInterlocutorStatus}>
           $of Nothing
@@ -40,13 +40,15 @@
 
     <button.circle.transparent type=button title=_{MsgVideoCall} ##{idButtonVideoCall}>
       <i>video_call
-      $if (||) ((||) (not subscribed) (not accessible)) loop
-        <div.badge>
+      $if ((not subscribed) || (not accessible)) || loop
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>warning
 
     <button.circle.transparent type=button title=_{MsgAudioCall} ##{idButtonAudioCall}>
       <i>call
-      $if (||) ((||) (not subscribed) (not accessible)) loop
-        <div.badge>
+      $if ((not subscribed) || (not accessible)) || loop
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>warning
 
     <button.circle.transparent type=button title=_{MsgActions}>
       <i>more_vert

@@ -394,10 +394,10 @@ instance Yesod App where
     isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin
 
     isAuthorized (DataR TokensVapidClearR) _ = isAdmin
-    isAuthorized (DataR TokensVapidR) _ = isAdmin
+    isAuthorized (DataR TokenVapidR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
-    isAuthorized r@(DataR TokensR) _ = setUltDest r >> isAdmin
+    isAuthorized r@(DataR TokenGmailR) _ = setUltDest r >> isAdmin
 
 
     isAuthorized (DataR (RingtoneSettingDeleR _)) _ = isAdmin

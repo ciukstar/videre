@@ -619,6 +619,7 @@ getChatRoomR sid cid rid = do
         idInterlocutorLine <- newIdent
         idStatusLine <- newIdent
         classDuration <- newIdent
+        classWarning <- newIdent
         idButtonVideoCall <- newIdent
         idButtonAudioCall <- newIdent
         idMenuChat <- newIdent
@@ -663,6 +664,7 @@ getChatRoomR sid cid rid = do
         
         toWidget $(juliusFile "static/js/mstodur.julius")
         toWidget $(juliusFile "static/js/debounce.julius")
+        
         $(widgetFile "chat/room")
 
     where      

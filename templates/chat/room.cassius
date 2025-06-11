@@ -3,6 +3,7 @@
 
     box-sizing: border-box
     max-inline-size: 100vw
+    max-block-size: 4rem
     padding-inline: 0.5rem
 
     .status.badge
@@ -185,6 +186,10 @@ main##{idMain}
         
 
 footer
+    box-sizing: border-box
+    max-inline-size: 100vw
+    max-block-size: 5rem
+    
     ##{idMessageForm}
         margin: 0
 
