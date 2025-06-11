@@ -1,5 +1,5 @@
 
-<header.fixed.primary>              
+<header.fixed.primary ##{idHeader}>
   <nav.responsive.max.no-space>
     <div.row.no-space>
       <a.button.circle.transparent.no-margin href=@{backlink} role=button title=_{MsgBack}>
@@ -192,7 +192,7 @@
                     <span.bubble-tail>
 
 
-<footer>
+<footer.small-padding>
   <form.row.tiny-space ##{idMessageForm}>
     <div.responsive.max.field.textarea.min.border.round>
       <textarea ##{idMessageInput} autofocus placeholder=_{MsgMessage}>

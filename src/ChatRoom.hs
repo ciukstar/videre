@@ -11,7 +11,7 @@
 {-# LANGUAGE TypeOperators         #-}
 {-# LANGUAGE ScopedTypeVariables   #-}
 {-# LANGUAGE RecordWildCards       #-}
-{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE QuasiQuotes           #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -613,6 +613,7 @@ getChatRoomR sid cid rid = do
     
     liftHandler $ defaultLayout $ do
         setTitleI MsgChats
+        idHeader <- newIdent
         idDivInterlocutorPhoto <- newIdent
         idBadgeInterlocutorStatus <- newIdent
         idInterlocutorLine <- newIdent
