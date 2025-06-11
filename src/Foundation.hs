@@ -562,7 +562,8 @@ userLeftChannel lastSeen (Just _) = Just (Just lastSeen)
 getServiceWorkerR :: Handler TypedContent
 getServiceWorkerR = do
 
-    rndr <- getUrlRenderParams
+    rndr <- getUrlRender
+    rndp <- getUrlRenderParams
     msgr <- getMessageRender
     mVAPIDKeys <- getVAPIDKeys
 
@@ -571,11 +572,12 @@ getServiceWorkerR = do
     case mVAPIDKeys of
       Just vapidKeys -> do
           let applicationServerKey = vapidPublicKeyBytes vapidKeys
+          let expath = TE.decodeUtf8 . extractPath . TE.encodeUtf8 . rndr
           declineCall <- newIdent
           acceptCall <- newIdent
           ignoreChat <- newIdent
           replyChat <- newIdent
-          return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndr
+          return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndp
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
   where
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)

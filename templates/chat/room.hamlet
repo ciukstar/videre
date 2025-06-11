@@ -62,7 +62,7 @@
               
 
 <main.responsive.no-padding ##{idMain}>
-
+  
   <div ##{idChatOutput}>
 
     $forall (day,logs) <- dayLogs

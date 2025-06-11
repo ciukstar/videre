@@ -90,7 +90,7 @@
   
   <p>_{MsgRemoveAreYouSure}
   
-  <form method=post action=@?{(ContactRemoveR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et0}>
+  <form method=post action=@?{(ContactRemoveR sid pid cid,[(paramBacklink,backlink)])} enctype=#{et0} ##{idFormRemove}>
     ^{fw0}
     
     <nav.right-align.no-space>

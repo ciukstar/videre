@@ -15,7 +15,34 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     
   } else if (message.data.messageType === #{PushMsgTypeUnsubscribed}) {
     
-    document.getElementById(`#{rawJS idBadgeRtcStatus}${message.data.senderId}`)?.remove();
+    const badge = document.getElementById(`#{rawJS idBadgeRtcStatus}${message.data.senderId}`);
+
+    if (badge) {
+      
+      badge.replaceWith((() => {
+        const newBadge = document.createElement('i');
+        newBadge.id = `#{rawJS idBadgeRtcStatus}${message.data.senderId}`
+        newBadge.classList.add('absolute','tiny','circle','tiny-padding','error',#{classBadgeRtcStatus});
+        newBadge.textContent = 'phone_disabled';
+        return newBadge;
+      }) ());
+      
+    } else {
+      
+      const avatar = document.getElementById(`#{rawJS idUserAvatar}${message.data.senderId}`);
+      if (avatar) {
+        
+        avatar.appendChild((() => {
+          const newBadge = document.createElement('i');
+          newBadge.id = `#{rawJS idBadgeRtcStatus}${message.data.senderId}`
+          newBadge.classList.add('absolute','tiny','circle','tiny-padding','error',#{classBadgeRtcStatus});
+          newBadge.textContent = 'phone_disabled';
+          return newBadge;
+        }) ());
+        
+      }
+      
+    }
     
   }
 

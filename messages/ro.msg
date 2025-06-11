@@ -62,6 +62,7 @@ WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configurare
 Answer: Răspunde
 NewMessageFrom user: Mesaj nou de la #{user}
+UserHasUnsubscribed user: Utilizatorul #{user} s-a dezabonat
 UserIsNowAvailable user: #{user} este acum disponibil
 RefreshPage: Actualizează pagina
 Refresh: Actualizează

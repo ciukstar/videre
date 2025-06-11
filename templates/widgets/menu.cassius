@@ -11,9 +11,13 @@
             ##{idButtonMainMenuClose}
                 margin-left: auto
 
-    nav.drawer > a:is(:hover)
-        background-color: var(--active)
+    ol
+        li a
+            display: inline-flex
+        
+        li:is(:hover)
+            background-color: var(--active)
 
-    nav.drawer > a:is(.active)
-        background-color: var(--secondary-container)
-        color: var(--on-secondary-container)
+        li:is(.active)
+            background-color: var(--secondary-container)
+            color: var(--on-secondary-container)

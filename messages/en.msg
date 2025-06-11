@@ -62,6 +62,7 @@ WebRealTimeCommunication: Web Real-Time Communication
 Configuration: Configuration
 Answer: Answer
 NewMessageFrom user@Text: New message from Julian
+UserHasUnsubscribed user@Text: The user #{user} has unsubscribed
 UserIsNowAvailable user@Text: #{user} is now available
 RefreshPage: Refresh page
 Refresh: Refresh

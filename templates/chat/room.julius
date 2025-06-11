@@ -49,11 +49,9 @@ chatOutput.querySelectorAll('.#{rawJS classBubble}.incoming[notread]').forEach(x
 
 main.scroll(0, main.scrollHeight);
 
-ws.onopen = function (e) {
-};
+ws.onopen = function (e) { };
 
-ws.onclose = function (e) {
-}
+ws.onclose = function (e) { };
 
 ws.onmessage = function (e) {
   
@@ -860,7 +858,7 @@ navigator.serviceWorker.addEventListener('message', function (message) {
     document.getElementById(#{idOverlayDialogCallDeclined}).classList.add('active');
     document.getElementById(#{idDialogCallDeclined}).show();
     
-  } else if (message.data.messageType === #{PushMsgTypeSubscribed}) {
+  } else if ([#{PushMsgTypeSubscribed},#{PushMsgTypeUnsubscribed}].includes(message.data.messageType)) {
     
     window.location.reload();
     

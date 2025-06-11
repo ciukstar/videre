@@ -1,7 +1,7 @@
 
 <div.overlay ##{idOverlay}>
 
-<dialog.left.no-padding.primary ##{idDialogMainMenu}>
+<dialog.left.primary ##{idDialogMainMenu}>
 
   <header.fixed.max>
     <nav.margin>
@@ -11,51 +11,64 @@
       <button.transparent.circle.large ##{idButtonMainMenuClose} data-ui=##{idDialogMainMenu}>
         <i>close
 
-  <nav.drawer>
+  <ol.list>
 
-    <a href=@{HomeR} :curr == Just HomeR:.active>
-      <i.no-round>home
-      <span>_{MsgHome}
+    <li.wave.round :curr == Just HomeR:.active>
+      <a href=@{HomeR}>
+        <i>home
+        <span>_{MsgHome}
 
     $maybe Entity uid _ <- user
-      <a href=@{MyContactsR uid} :curr == Just (MyContactsR uid):.active>
-        <i.no-round>contacts
-        <span>_{MsgContacts}
+      <li.wave.round :curr == Just (MyContactsR uid):.active>
+        <a href=@{MyContactsR uid}>
+          <i>contacts
+          <span>_{MsgContacts}
 
-      <a href=@{CallsR uid} :curr == Just (CallsR uid):.active>
-        <i.no-round>call_log
-        <span>_{MsgCalls}
+      <li.wave.round :curr == Just (CallsR uid):.active>
+        <a href=@{CallsR uid}>
+          <i.no-round>call_log
+          <span>_{MsgCalls}
 
-    $maybe Entity _ (User _ _ _ _ _ _ super admin) <- user
-      $if super || admin
-        <hr.top-margin>
-        <div.small-text>
-          _{MsgData}
+  $maybe Entity _ (User _ _ _ _ _ _ super admin) <- user
+    $if super || admin
+      <hr.top-margin>
+      <div.small-text>
+        _{MsgData}
+        
 
-        <a href=@{DataR UsersR} :curr == Just (DataR UsersR):.active>
-          <i.no-round>group
-          <span>_{MsgUsers}
+      <ol.list>
+        <li.wave.round :curr == Just (DataR UsersR):.active>
+          <a href=@{DataR UsersR}>
+            <i>group
+            <span>_{MsgUsers}
+        
+        <li.wave.round :curr == Just (DataR SubscriptionsR):.active>
+          <a href=@{DataR SubscriptionsR}>
+            <i>circle_notifications
+            <span>_{MsgSubscriptions}
+        
+        <li.wave.round :curr == Just (DataR RingtonesR):.active>
+          <a href=@{DataR RingtonesR}>
+            <i>ring_volume
+            <span>_{MsgRingtones}
+        
+        <li.wave.round :curr == Just (DataR TokensR):.active>
+          <a href=@{DataR TokensR}>
+            <i>token
+            <span>_{MsgTokens}
 
-        <a href=@{DataR SubscriptionsR} :curr == Just (DataR SubscriptionsR):.active>
-          <i.no-round>circle_notifications
-          <span>_{MsgSubscriptions}
+  <hr.top-margin>
+  <div.small-text>
+    _{MsgResources}
+        
+       
+  <ol.list>
+    <li.wave.round :curr == Just DocsR:.active>
+      <a href=@{DocsR}>
+        <i>quick_reference
+        <span>_{MsgDocumentation}
 
-        <a href=@{DataR RingtonesR} :curr == Just (DataR RingtonesR):.active>
-          <i.no-round>ring_volume
-          <span>_{MsgRingtones}
-
-        <a href=@{DataR TokensR} :curr == Just (DataR TokensR):.active>
-          <i.no-round>token
-          <span>_{MsgTokens}
-
-    <hr.top-margin>
-    <div.small-text>
-      _{MsgResources}
-
-    <a href=@{DocsR} :curr == Just DocsR:.active>
-      <i.no-round>quick_reference
-      <span>_{MsgDocumentation}
-
-    <a href="https://github.com/ciukstar/videre" target=_blank>
-      <i.no-round>code
-      <span>_{MsgSourceCode}
+    <li.wave.round>
+      <a href="https://github.com/ciukstar/videre" target=_blank>
+        <i>code
+        <span>_{MsgSourceCode}

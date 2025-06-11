@@ -4,9 +4,9 @@
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE TypeApplications      #-}
 {-# LANGUAGE InstanceSigs          #-}
-{-# LANGUAGE QuasiQuotes #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE QuasiQuotes           #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE LambdaCase            #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
@@ -93,7 +93,7 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgUsers, MsgOnline, MsgLastSeenAt
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgUsers, MsgOnline, MsgLastSeenAt, MsgUserHasUnsubscribed
       )
     )
 
@@ -383,12 +383,63 @@ postPushSubscriptionsDeleR sid cid pid = do
 
     case fr of
       FormSuccess endpoint -> do
+
+          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionPublisher ==. val sid
+              where_ $ x ^. PushSubscriptionSubscriber ==. val pid
+              return ( x ^. PushSubscriptionEndpoint
+                     , ( x ^. PushSubscriptionP256dh
+                       , x ^. PushSubscriptionAuth
+                       )
+                     ) )
+          
           runDB $ delete $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionSubscriber ==. val sid
               where_ $ x ^. PushSubscriptionPublisher ==. val pid
               where_ $ x ^. PushSubscriptionEndpoint ==. val endpoint
+
+          keys <- getVAPIDKeys
+
+          case keys of
+            Nothing -> return ()
+            Just vapidKeys -> do
+
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+                manager <- appHttpManager <$> getYesod
+
+                msgr <- getMessageRender
+                user <- maybeAuth
+
+                let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
+
+                forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
+                    let notification = mkPushNotification endpoint' p256dh' auth'
+                            & pushMessage .~ object
+                                [ "messageType" A..= PushMsgTypeUnsubscribed
+                                , "title" A..= msgr MsgAppName
+                                , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
+                                , "body" A..= ( msgr . MsgUserHasUnsubscribed .
+                                                (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                              )
+                                , "senderId" A..= sid
+                                ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 30 * 60
+                            & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeUnsubscribed)
+                            & pushUrgency ?~ PushUrgencyHigh
+
+                    result <- sendPushNotification vapidKeys manager notification
+
+                    case result of
+                      Left ex -> liftIO $ print ex
+                      Right () -> return ()
+                    return ()
+              
           redirect (ContactR pid sid cid,[(paramBacklink, backlink)])
+          
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
           redirect (ContactR pid sid cid,[(paramBacklink, backlink)])
@@ -406,19 +457,69 @@ deletePushSubscriptionsR sid pid = do
     endpoint <- lookupGetParam paramEndpoint
 
     case endpoint of
-      Just x -> do
+      Just ep -> do
+
+          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionSubscriber ==. val pid
+              where_ $ x ^. PushSubscriptionPublisher ==. val sid
+              return (x ^. PushSubscriptionEndpoint, ( x ^. PushSubscriptionP256dh, x ^. PushSubscriptionAuth)))
+                           
           runDB $ delete $ do
               y <- from $ table @PushSubscription
               where_ $ y ^. PushSubscriptionSubscriber ==. val sid
               where_ $ y ^. PushSubscriptionPublisher ==. val pid
-              where_ $ y ^. PushSubscriptionEndpoint ==. val x
+              where_ $ y ^. PushSubscriptionEndpoint ==. val ep
+
+          keys <- getVAPIDKeys
+
+          case keys of
+            Nothing -> return ()
+            Just vapidKeys -> do
+
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+                manager <- appHttpManager <$> getYesod
+
+                rndr <- getUrlRender
+                msgr <- getMessageRender
+                user <- maybeAuth
+
+                let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
+
+                forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
+                    let notification = mkPushNotification endpoint' p256dh' auth'
+                            & pushMessage .~ object
+                                [ "messageType" A..= PushMsgTypeUnsubscribed
+                                , "title" A..= msgr MsgAppName
+                                , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
+                                , "body" A..= ( msgr . MsgUserHasUnsubscribed .
+                                                (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                              )
+                                , "senderId" A..= sid
+                                ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 30 * 60
+                            & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeUnsubscribed)
+                            & pushUrgency ?~ PushUrgencyHigh
+
+                    result <- sendPushNotification vapidKeys manager notification
+
+                    case result of
+                      Left ex -> liftIO $ print ex
+                      Right () -> return ()
+                    return ()
+                    
           addMessageI statusSuccess MsgSubscriptionCanceled
+          
       Nothing -> do
           runDB $ delete $ do
               y <- from $ table @PushSubscription
               where_ $ y ^. PushSubscriptionSubscriber ==. val sid
               where_ $ y ^. PushSubscriptionPublisher ==. val pid
+              
           addMessageI statusSuccess MsgSubscriptionCanceled
+          
     returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
 
 
@@ -435,6 +536,52 @@ postPushSubscriptionsR sid pid = do
               , PushSubscriptionAuth P.=. psKeyAuth
               , PushSubscriptionUserAgent P.=. ua
               ]
+
+          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionSubscriber ==. val pid
+              where_ $ x ^. PushSubscriptionPublisher ==. val sid
+              return (x ^. PushSubscriptionEndpoint, ( x ^. PushSubscriptionP256dh, x ^. PushSubscriptionAuth)))
+
+          keys <- getVAPIDKeys
+
+          case keys of
+            Nothing -> return ()
+            Just vapidKeys -> do
+
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+                manager <- appHttpManager <$> getYesod
+
+                rndr <- getUrlRender
+                msgr <- getMessageRender
+                user <- maybeAuth
+
+                let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
+
+                forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
+                    let notification = mkPushNotification endpoint' p256dh' auth'
+                            & pushMessage .~ object
+                                [ "messageType" A..= PushMsgTypeSubscribed
+                                , "title" A..= msgr MsgAppName
+                                , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
+                                , "body" A..= ( msgr . MsgUserIsNowAvailable .
+                                                (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                              )
+                                , "senderId" A..= sid
+                                ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 30 * 60
+                            & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeSubscribed)
+                            & pushUrgency ?~ PushUrgencyHigh
+
+                    res <- sendPushNotification vapidKeys manager notification
+
+                    case res of
+                      Left ex -> liftIO $ print ex
+                      Right () -> return ()
+                    return ()
+                    
           addMessageI statusSuccess MsgSubscriptionSucceeded
           returnJson $ A.object [ "data" A..= A.object [ "success" A..= A.Bool True ] ]
 
@@ -476,13 +623,61 @@ postContactRemoveR uid rid cid = do
 
     case fr of
       FormSuccess () -> do
+
+          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
+              x <- from $ table @PushSubscription
+              where_ $ x ^. PushSubscriptionSubscriber ==. val rid
+              where_ $ x ^. PushSubscriptionPublisher ==. val uid
+              return (x ^. PushSubscriptionEndpoint, ( x ^. PushSubscriptionP256dh, x ^. PushSubscriptionAuth)))
+              
           runDB $ P.delete cid
           runDB $ delete $ do
               x <- from $ table @PushSubscription
               where_ $ x ^. PushSubscriptionPublisher ==. val rid
               where_ $ x ^. PushSubscriptionSubscriber ==. val uid
+
+          keys <- getVAPIDKeys
+
+          case keys of
+            Nothing -> return ()
+            Just vapidKeys -> do
+
+                Superuser {..} <- appSuperuser . appSettings <$> getYesod
+                manager <- appHttpManager <$> getYesod
+
+                msgr <- getMessageRender
+                user <- maybeAuth
+
+                let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
+
+                forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
+                    let notification = mkPushNotification endpoint' p256dh' auth'
+                            & pushMessage .~ object
+                                [ "messageType" A..= PushMsgTypeUnsubscribed
+                                , "title" A..= msgr MsgAppName
+                                , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
+                                , "body" A..= ( msgr . MsgUserHasUnsubscribed .
+                                                (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                              )
+                                , "senderId" A..= uid
+                                ]
+                            & pushSenderEmail .~ superuserUsername
+                            & pushExpireInSeconds .~ 30 * 60
+                            & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeUnsubscribed)
+                            & pushUrgency ?~ PushUrgencyHigh
+
+                    result <- sendPushNotification vapidKeys manager notification
+
+                    case result of
+                      Left ex -> liftIO $ print ex
+                      Right () -> return ()
+                      
+                    return ()
+                    
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ MyContactsR uid
+          
       _otherwise -> do
           addMessageI statusError MsgInvalidFormData
           redirect (ContactR uid rid cid,[(paramBacklink, backlink)])
@@ -546,6 +741,7 @@ getContactR sid pid cid = do
               setTitleI MsgViewContact
               idOverlay <- newIdent
               idDialogRemove <- newIdent
+              idFormRemove <- newIdent
               $(widgetFile "contacts/contact")
 
       Nothing -> invalidArgsI [MsgNotGeneratedVAPID]

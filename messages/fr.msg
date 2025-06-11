@@ -62,6 +62,7 @@ WebRealTimeCommunication: Communication en temps réel pour le Web
 Configuration: Configuration
 Answer: Répondre
 NewMessageFrom user: Nouveau message de #{user}
+UserHasUnsubscribed user: L'utilisateur #{user} s'est désabonné
 UserIsNowAvailable user: #{user} est maintenant disponible
 RefreshPage: Actualiser la page
 Refresh: Actualiser

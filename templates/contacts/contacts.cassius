@@ -1,26 +1,30 @@
 
 main
+    a.row
 
-    .#{classStatus}.badge
-        min-inline-size: 0.8rem
-        min-block-size: 0.8rem
-        margin: 12px -10px
-        border: 2px solid var(--background)
-
-    .#{classBadgeRtcStatus}
-        top: -0.5rem
-        right: -0.5rem
-
-    div.#{classContactLines}
         min-width: 0
-        
-        div.#{classHeadline} > div.max, div.#{classSupportingText}
-            white-space: nowrap
-            overflow: hidden
-            text-overflow: ellipsis
+        max-width: 100vw
 
-        time
-            vertical-align: baseline
+        .#{classStatus}.badge
+            min-inline-size: 0.8rem
+            min-block-size: 0.8rem
+            margin: 12px -10px
+            border: 2px solid var(--background)
+
+        .#{classBadgeRtcStatus}
+            top: -0.5rem
+            right: -0.5rem
+
+        div.#{classContactLines}
+            min-width: 0
+
+            div.#{classHeadline} > div.max, div.#{classSupportingText}
+                white-space: nowrap
+                overflow: hidden
+                text-overflow: ellipsis
+
+            time
+                vertical-align: baseline
 
     .app-attribution
         position: relative

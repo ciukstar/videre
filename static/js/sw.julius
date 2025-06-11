@@ -241,7 +241,7 @@ self.addEventListener('notificationclose', function (e) {
     
     fetch(e.notification.data.links.delivered, { method: 'POST' });
     
-  } else {
+  } else if ([#{PushMsgTypeVideoCall},#{PushMsgTypeAudioCall}].includes(e.notification.data.messageType)) {
     
     fetch(e.notification.data.targetPush, {
       method: 'POST',
@@ -249,7 +249,7 @@ self.addEventListener('notificationclose', function (e) {
       body: new URLSearchParams({
         messageType: #{PushMsgTypeIgnore},
         title: #{msgr MsgAppName},
-        icon: '@{StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg}',
+        icon: #{expath $ StaticR img_phone_missed_FILL0_wght400_GRAD0_opsz24_svg},
         body: #{msgr MsgCallDeclined},
         videor: e.notification.data.videor,
         audior: e.notification.data.audior,
@@ -294,6 +294,7 @@ self.addEventListener('fetch', function (e) {
   }
 
 });
+
 
 self.addEventListener('pushsubscriptionchange', (event) => {
 

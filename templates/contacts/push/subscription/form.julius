@@ -41,21 +41,24 @@ document.getElementById(#{fvId v}).addEventListener('change', function (e) {
       
     });
     
-  } else {
+  } else if (!this.checked) {
     
     navigator.serviceWorker.ready.then(function (registration) {
       registration.pushManager.getSubscription().then(function (subscription) {
 
         let url = !!subscription
             ? `@{PushSubscriptionsR sid pid}?endpoint=${subscription.endpoint}`
-            : '@{PushSubscriptionsR sid pid}'
+            : '@{PushSubscriptionsR sid pid}';
         
         fetch(url, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(subscription)      
         }).then(function (result) {
+          
+          subscription?.unsubscribe();
           window.location.href = '@?{(ContactR sid pid cid,[((paramBacklink,backlink))])}';
+          
         });
         
       });

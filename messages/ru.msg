@@ -62,6 +62,7 @@ WebRealTimeCommunication: Коммуникации по сети в реальн
 Configuration: Конфигурация
 Answer: Ответить
 NewMessageFrom user: Новое сообщение от #{user}
+UserHasUnsubscribed user: Пользователь #{user} отписался
 UserIsNowAvailable user: Пользователь #{user} теперь доступен
 RefreshPage: Обновить страницу
 Refresh: Обновить

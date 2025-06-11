@@ -1,2 +1,12 @@
 
 const channel = new WebSocket('@{OnlineChannelR sid}');
+
+document.getElementById(#{idFormRemove}).addEventListener('submit', function (e) {
+  navigator.serviceWorker.ready.then(function (registration) {
+    registration?.pushManager.getSubscription().then(function (subscription) {
+      
+      subscription?.unsubscribe();
+      
+    });
+  });
+});

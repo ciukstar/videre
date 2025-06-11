@@ -8,9 +8,9 @@
 {-# LANGUAGE FlexibleContexts      #-}
 {-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE TypeApplications      #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeOperators         #-}
+{-# LANGUAGE ScopedTypeVariables   #-}
+{-# LANGUAGE RecordWildCards       #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 {-# OPTIONS_GHC -fno-warn-orphans #-}
@@ -92,7 +92,7 @@ import Model
     , PushMsgType
       ( PushMsgTypeVideoCall, PushMsgTypeAudioCall, PushMsgTypeChat
       , PushMsgTypeCancel, PushMsgTypeDecline, PushMsgTypeAccept
-      , PushMsgTypeSubscribed
+      , PushMsgTypeSubscribed, PushMsgTypeUnsubscribed
       )
     , RingtoneId, UserRingtone, DefaultRingtone
     , RingtoneType
