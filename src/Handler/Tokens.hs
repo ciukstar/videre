@@ -12,6 +12,7 @@ module Handler.Tokens
   , postTokensVapidClearR
   ) where
 
+import Control.Applicative ((<|>))
 import Control.Exception.Safe (tryAny)
 import qualified Control.Lens as L ((^.), (?~))
 import Control.Monad ((<=<), void)
@@ -109,17 +110,12 @@ import Yesod.Form.Types
 postTokensVapidClearR :: Handler Html
 postTokensVapidClearR = do
 
-    tokenGmail <- runDB $ selectOne $ do
-        x <- from $ table @Token
-        where_ $ x ^. TokenApi ==. val apiInfoGoogle
-        return x
-
     tokenVapid <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoVapid
         return x
 
-    ((fr,fwClear),etClear) <- runFormPost formTokensClear 
+    ((fr,fwClear),etClear) <- runFormPost formTokensClear
     
     case (fr,tokenVapid) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
@@ -128,6 +124,11 @@ postTokensVapidClearR = do
           redirect $ DataR TokenVapidR
           
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeGoogleSecretManager))) -> do
+
+          tokenGmail <- runDB $ selectOne $ do
+              x <- from $ table @Token
+              where_ $ x ^. TokenApi ==. val apiInfoGoogle
+              return x
 
           refreshToken <- case tokenGmail of
             Just (Entity _ (Token _ StoreTypeSession)) -> lookupSession gmailRefreshToken
@@ -303,17 +304,16 @@ postTokenVapidR = do
 getTokenVapidR :: Handler Html
 getTokenVapidR = do
         
-    tokenVapid <- runDB $ selectOne $ do
+    token <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoVapid
         return x
         
-    (fw,et) <- generateFormPost $ formVapid tokenVapid
+    (fw,et) <- generateFormPost $ formVapid token
     (fwClear,etClear) <- generateFormPost formTokensClear
     
     msgs <- getMessages
     defaultLayout $ do
-        setUltDestCurrent
         setTitleI MsgTokens
         idOverlay <- newIdent
         idDialogMainMenu <- newIdent
@@ -331,7 +331,7 @@ formVapid token extra = do
         { fsLabel = SomeMessage MsgStoreType
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
         , fsAttrs = []
-        } (tokenStore . entityVal <$> token)
+        } ((tokenStore . entityVal <$> token) <|> Just StoreTypeDatabase)
         
     return ( storeR
            , do
@@ -530,7 +530,7 @@ postTokensGoogleapisClearR = do
 
 
 formTokensClear :: Form ()
-formTokensClear extra = return (FormSuccess (),[whamlet|#{extra}|])
+formTokensClear extra = return (pure (),[whamlet|#{extra}|])
 
 
 postTokenGmailR :: Handler Html

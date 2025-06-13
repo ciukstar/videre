@@ -4,7 +4,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies          #-}
 {-# LANGUAGE ViewPatterns          #-}
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes            #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE QuasiQuotes #-}
@@ -23,7 +23,6 @@ import qualified Control.Lens as L ((^.))
 import Control.Monad.Logger (LogSource)
 
 import Data.Aeson ((.:?))
-import qualified Data.Aeson as A (Value (Bool))
 import Data.Aeson.Lens ( key, AsValue(_String) )
 import qualified Data.Aeson.Text as A (encodeToLazyText)
 import Data.Aeson.Types (Parser, withObject)
@@ -262,8 +261,6 @@ instance Yesod App where
             backlink <- fromMaybe HomeR <$> getCurrentRoute
             calleeName <- resolveName <$> maybeAuth
 
-            mVAPIDKeys <- liftHandler getVAPIDKeys
-
             incomingChatRingtone <- do
                 user <- maybeAuth
                 case user of
@@ -329,20 +326,23 @@ instance Yesod App where
                         Just (Entity rid (Ringtone _ mime _)) -> return (DefaultRingtoneAudioR rid, mime)
                         Nothing -> return (StaticR ringtones_incoming_call_samsung_ringtones_1_mp3, "audio/mpeg")
             
-
-            case mVAPIDKeys of
-              Just vapidKeys -> do
-                  user <- maybeAuth
-                  let authenicated = A.Bool . isJust $ user
-                  let applicationServerKey = vapidPublicKeyBytes vapidKeys
-                  $(widgetFile "default-layout")
+            $(widgetFile "default-layout")
+            
+            vapidKeys <- liftHandler getVAPIDKeys
+            
+            case vapidKeys of
+              Just vapid -> do
+                  let applicationServerKey = vapidPublicKeyBytes vapid
+                  toWidget $(juliusFile "static/js/updatefound.julius")
                   
-              Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+              Nothing -> return ()
 
         lang <- fromMaybe "en" . headMay <$> languages
 
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+        
       where
+          
           resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
@@ -394,11 +394,10 @@ instance Yesod App where
     isAuthorized r@(DataR SubscriptionsR) _ = setUltDest r >> isAdmin
 
     isAuthorized (DataR TokensVapidClearR) _ = isAdmin
-    isAuthorized (DataR TokenVapidR) _ = isAdmin
+    isAuthorized r@(DataR TokenVapidR) _ = setUltDest r >> isAdmin
     isAuthorized (DataR TokensGoogleapisClearR) _ = isAdmin
     isAuthorized (DataR TokensGoogleapisHookR) _ = isAdmin
     isAuthorized r@(DataR TokenGmailR) _ = setUltDest r >> isAdmin
-
 
     isAuthorized (DataR (RingtoneSettingDeleR _)) _ = isAdmin
     isAuthorized (DataR (RingtoneSettingR _)) _ = isAdmin
@@ -565,31 +564,38 @@ getServiceWorkerR = do
     rndr <- getUrlRender
     rndp <- getUrlRenderParams
     msgr <- getMessageRender
-    mVAPIDKeys <- getVAPIDKeys
 
     calleeName <- resolveName <$> maybeAuth
 
-    case mVAPIDKeys of
-      Just vapidKeys -> do
-          let applicationServerKey = vapidPublicKeyBytes vapidKeys
-          let expath = TE.decodeUtf8 . extractPath . TE.encodeUtf8 . rndr
-          declineCall <- newIdent
-          acceptCall <- newIdent
-          ignoreChat <- newIdent
-          replyChat <- newIdent
-          return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndp
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+    let expath = TE.decodeUtf8 . extractPath . TE.encodeUtf8 . rndr
+    declineCall <- newIdent
+    acceptCall <- newIdent
+    ignoreChat <- newIdent
+    replyChat <- newIdent
+
+    vapidKeys <- getVAPIDKeys
+    
+    case vapidKeys of
+      Nothing -> return $ TypedContent typeJavascript $ toContent $ $(juliusFile "static/js/sw.julius") rndp
+              
+      Just vapid -> do
+          let applicationServerKey = vapidPublicKeyBytes vapid
+          return $ TypedContent typeJavascript $ toContent $
+              $(juliusFile "static/js/sw.julius") rndp
+              <> $(juliusFile "static/js/pushsubscriptionchange.julius") rndp
+      
   where
+      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 
 
 getVAPIDKeys :: Handler (Maybe VAPIDKeys)
 getVAPIDKeys = do
 
-    storeType <- (bimap unValue unValue <$>) <$> runDB ( selectOne $ do
+    storeType <- ((bimap unValue unValue <$>) <$>) $ runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi E.==. val apiInfoVapid
-        return (x ^. TokenId, x ^. TokenStore) )
+        return (x ^. TokenId, x ^. TokenStore)
 
     let readTriple (s,x,y) = VAPIDKeysMinDetails s x y
 
@@ -598,10 +604,10 @@ getVAPIDKeys = do
           liftIO $ (readTriple <$>) . readMaybe <$> readFile' secretVolumeVapid
 
       Just (tid, StoreTypeDatabase) -> do
-          ((readTriple <$>) . readMaybe . unpack . unValue =<<) <$> runDB ( selectOne $ do
+          (((readTriple <$>) . readMaybe . unpack . unValue =<<) <$>) $ runDB $ selectOne $ do
               x <-from $ table @Store
               where_ $ x ^. StoreToken E.==. val tid
-              return $ x ^. StoreVal )
+              return $ x ^. StoreVal
 
       Just (_,StoreTypeSession) -> return Nothing
       Nothing -> return Nothing
