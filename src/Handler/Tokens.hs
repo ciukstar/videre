@@ -28,15 +28,14 @@ import Data.Text (Text, pack, unpack, splitOn)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, innerJoin, on
-    , (^.), (==.), (:&) ((:&)), Value (unValue)
+    ( selectOne, from, table, where_, val, innerJoin, on, delete
+    , (^.), (==.), (:&) ((:&))
+    , Value (unValue)
     )
 import Database.Persist
-    ( Entity(Entity, entityVal)
-    , PersistStoreWrite (delete)
-    , PersistUniqueWrite (upsert)
+    ( Entity(Entity, entityVal), upsert
     )
-import qualified Database.Persist as P ((=.))
+import qualified Database.Persist as P ((=.), delete)
 
 import Foundation
     ( App (appSettings), Form, Handler
@@ -47,12 +46,11 @@ import Foundation
       , TokenVapidR, TokensVapidClearR
       )
     , AppMessage
-      ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase
+      ( MsgTokens, MsgInitialize, MsgUserSession, MsgDatabase, MsgGenerate
       , MsgStoreType, MsgInvalidStoreType, MsgRecordEdited, MsgClearSettings
       , MsgRecordDeleted, MsgInvalidFormData, MsgCleared, MsgEmailAddress
-      , MsgGmailAccount, MsgGoogleSecretManager
-      , MsgGenerate, MsgVapidGenerationWarning
-      , MsgInvalidGoogleAPITokens
+      , MsgGmailAccount, MsgGoogleSecretManager, MsgVapidGenerationWarning
+      , MsgInvalidGoogleAPITokens, MsgVapidNotGenerated, MsgGenerateNewVapid
       )
     )
 
@@ -66,7 +64,7 @@ import Model
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi, StoreToken, TokenId, StoreKey)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
-    , secretVolumeGmail, apiInfoVapid, secretVapid
+    , secretVolumeGmail, apiInfoVapid, secretVapid, PushSubscription
     )
     
 import Network.Wreq
@@ -110,16 +108,17 @@ import Yesod.Form.Types
 postTokensVapidClearR :: Handler Html
 postTokensVapidClearR = do
 
-    tokenVapid <- runDB $ selectOne $ do
+    token <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoVapid
         return x
 
-    ((fr,fwClear),etClear) <- runFormPost formTokensClear
+    ((fr0,fw0),et0) <- runFormPost formTokensClear
     
-    case (fr,tokenVapid) of
+    case (fr0,token) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
-          runDB $ delete tid
+          runDB $ P.delete tid
+          runDB $ delete $ void $ from $ table @PushSubscription
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR TokenVapidR
           
@@ -181,7 +180,7 @@ postTokensVapidClearR = do
 
                   Nothing -> return ()
 
-                runDB $ delete tid
+                runDB $ P.delete tid
                 addMessageI statusSuccess MsgRecordDeleted
                 redirect $ DataR TokenVapidR
                 
@@ -194,7 +193,7 @@ postTokensVapidClearR = do
           redirect $ DataR TokenVapidR
           
       _otherwise -> do
-          (fw,et) <- generateFormPost $ formVapid tokenVapid
+          (fw,et) <- generateFormPost $ formVapid token
           addMessageI statusError MsgInvalidFormData
           msgs <- getMessages
           defaultLayout $ do
@@ -310,7 +309,7 @@ getTokenVapidR = do
         return x
         
     (fw,et) <- generateFormPost $ formVapid token
-    (fwClear,etClear) <- generateFormPost formTokensClear
+    (fw0,et0) <- generateFormPost formTokensClear
     
     msgs <- getMessages
     defaultLayout $ do
@@ -452,7 +451,7 @@ postTokensGoogleapisClearR = do
           deleteSession gmailRefreshToken
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
-          runDB $ delete tid
+          runDB $ P.delete tid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR TokenGmailR
           
@@ -461,7 +460,7 @@ postTokensGoogleapisClearR = do
           deleteSession gmailRefreshToken
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
-          runDB $ delete tid
+          runDB $ P.delete tid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR TokenGmailR
           
@@ -504,7 +503,7 @@ postTokensGoogleapisClearR = do
           deleteSession gmailAccessTokenExpiresIn
           deleteSession gmailSender
 
-          runDB $ delete tid
+          runDB $ P.delete tid
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR TokenGmailR
 

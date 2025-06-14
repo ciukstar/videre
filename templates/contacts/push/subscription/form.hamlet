@@ -4,5 +4,11 @@
 <div ##{idFormFieldSubscribe}>
   ^{md3widgetSwitch v}
 
-<p.secondary-text>
-  _{MsgAllowToBeNotifiedBy publisherName}
+$maybe _ <- vapidKeys
+  <p.secondary-text>
+    _{MsgAllowToBeNotifiedBy publisherName}
+
+$nothing
+  <p>
+    <i.error-text>warning
+    _{MsgVapidNotGenerated}

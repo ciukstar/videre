@@ -1,0 +1,6 @@
+
+document.body.querySelectorAll('main details').forEach(x => {
+  x.addEventListener('click', function (e) {
+    x.querySelector('i').textContent = x.open ? 'expand_more' : 'expand_less';
+  });
+});

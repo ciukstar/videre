@@ -17,12 +17,31 @@
         
   $else
 
-    <form method=post action=@{(ContactsR uid)} enctype=#{et} ##{idFormPostContacts}>
+    $maybe _ <- vapid 
+    $nothing
+      <details.padding>
+        <summary.error-text>
+          <i>warning
+          _{MsgNotGeneratedVAPID}...
+
+        <p.small-text>
+          _{MsgVapidRequiredToSubscribe}. _{MsgAskAdminToGenerateVapid}.
+   
+
+    <form method=post action=@{ContactsR uid} enctype=#{et} ##{idFormPostContacts}>
       ^{fw}
 
-  <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd} data-ui=##{idDialogSubscribe}>
-    <i>add
-    _{MsgAdd}
+  $maybe _ <- vapid 
+
+    <a.button.round.extra.fixed.right.bottom.margin.medium-elevate ##{idFabAdd} data-ui=##{idDialogSubscribe}>
+      <i>add
+      _{MsgAdd}
+      
+  $nothing
+
+    <button.round.extra.fixed.right.bottom.margin.medium-elevate type=submit form=#{idFormPostContacts} ##{idFabAdd}>
+      <i>add
+      _{MsgAdd}
     
 
 ^{widgetSnackbar msgs}

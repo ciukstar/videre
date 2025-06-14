@@ -1,3 +1,7 @@
+AskAdminToGenerateVapid: Ask your administrator to generate a VAPID
+VapidRequiredToSubscribe: VAPID is required to subscribe, send and receive notifications
+GenerateNewVapid: Generate new VAPID
+VapidNotGenerated: VAPID not generated
 LastSeenAt: Last seen at
 Offline: Offline
 Online: Online

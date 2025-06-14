@@ -22,25 +22,45 @@
 
   <div.page.active.padding>
 
-    <article>
-      <h2.title>
-        VAPID
-      <p>_{MsgVapidGenerationWarning}.
+    $maybe _ <- token
+      <article>
+        <h2.title>
+          VAPID
 
-      <p>
+        <p.secondary-text>
+          _{MsgVapidGenerationWarning}.
+
+        <p>
+
+          <form.formStoreType method=post action=@{DataR TokenVapidR} enctype=#{et} ##{idForm}>
+            ^{fw}
+
+        <nav>
+          <form method=post action=@{DataR TokensVapidClearR} enctype=#{et0} ##{idFormClear}>
+            ^{fw0}
+
+          <button.transparent.link type=submit form=#{idFormClear}>
+            _{MsgClearSettings}
+
+          <button type=submit form=#{idForm}>
+            _{MsgGenerate}
+        
+    $nothing
+      <p.center-align.large-text>
+        <i>warning
+        _{MsgVapidNotGenerated}
+        
+      <details.top-margin>
+        <summary.button.responsive.transparent.border>
+          <i>expand_more
+          _{MsgGenerateNewVapid}
 
         <form.formStoreType method=post action=@{DataR TokenVapidR} enctype=#{et} ##{idForm}>
           ^{fw}
 
-      <nav>
-        <form method=post action=@{DataR TokensVapidClearR} enctype=#{etClear} ##{idFormClear}>
-          ^{fwClear}
-
-        <button.transparent.link type=submit form=#{idFormClear}>
-          _{MsgClearSettings}
-
-        <button type=submit form=#{idForm}>
-          _{MsgGenerate}
+          <nav.right-align>
+            <button type=submit>
+              _{MsgGenerate}
 
 
 ^{widgetSnackbar msgs}

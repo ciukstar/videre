@@ -1,3 +1,7 @@
+AskAdminToGenerateVapid: Rugați administratorul să genereze un VAPID
+VapidRequiredToSubscribe: VAPID este necesar pentru abonare, trimitere și primire de notificări
+GenerateNewVapid: Generați un nou VAPID
+VapidNotGenerated: VAPID nu este generat
 LastSeenAt: Ultima vizită la
 Offline: Offline
 Online: Online

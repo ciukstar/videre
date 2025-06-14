@@ -93,7 +93,9 @@ import Foundation
       , MsgUserAppearsToBeUnavailable, MsgUserSubscribedOnThisDevice
       , MsgCancelThisSubscription, MsgAudio, MsgYouHaveNotMadeAnyCallsYet
       , MsgUserYouSeemsUnsubscribed, MsgCallerCalleeSubscriptionLoopWarning
-      , MsgAllowToBeNotifiedBySelectedUsers, MsgUsers, MsgOnline, MsgLastSeenAt, MsgUserHasUnsubscribed
+      , MsgAllowToBeNotifiedBySelectedUsers, MsgAskAdminToGenerateVapid
+      , MsgUserHasUnsubscribed, MsgVapidRequiredToSubscribe, MsgLastSeenAt
+      , MsgOnline, MsgUsers, MsgVapidNotGenerated
       )
     )
 
@@ -168,7 +170,7 @@ import Web.WebPush
 import Yesod.Auth (maybeAuth, YesodAuth (maybeAuthId))
 import Yesod.Core
     ( Yesod(defaultLayout), getMessages, handlerToWidget, addMessageI
-    , addMessage, toHtml, getYesod, invalidArgsI, MonadHandler (liftHandler)
+    , addMessage, toHtml, getYesod, MonadHandler (liftHandler)
     , getMessageRender, lookupHeader, getCurrentRoute
     )
 import Yesod.Core.Handler
@@ -590,27 +592,38 @@ postPushSubscriptionsR sid pid = do
           sendStatusJSON status400 (A.object [ "msg" A..= msg ])
 
 
-formSubscribe :: Text -> VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
+formSubscribe :: Text -> Maybe VAPIDKeys -> UserId -> UserId -> ContactId -> Bool -> Form Bool
 formSubscribe backlink vapidKeys sid pid cid notif extra = do
 
     let subscriberId = pack $ show (fromSqlKey sid)
     let publisherId = pack $ show (fromSqlKey pid)
 
-    publisherName <- liftHandler $ maybe "" ((\(x,y) -> fromMaybe y x) . bimap unValue unValue) <$> runDB ( selectOne $ do
+    publisherName <- liftHandler $ (unwrap <$>) $ runDB $ selectOne $ do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val pid
-        return (x ^. UserName, x ^. UserEmail) )
+        return (x ^. UserName, x ^. UserEmail)
 
     (r,v) <- mreq checkBoxField FieldSettings
-        { fsLabel = SomeMessage MsgSubscribeToNotifications
+        { fsLabel = SomeMessage MsgSubscribeToNotifications 
         , fsId = Nothing, fsName = Nothing, fsTooltip = Nothing
-        , fsAttrs = []
+        , fsAttrs = case vapidKeys of
+                      Just _ -> []
+                      Nothing -> [("disabled","")]
         } ( pure notif )
 
     idFormFieldSubscribe <- newIdent
 
-    let applicationServerKey = vapidPublicKeyBytes vapidKeys
-    return (r, $(widgetFile "contacts/push/subscription/form")) 
+    case vapidKeys of
+      Nothing -> return (r, $(widgetFile "contacts/push/subscription/form"))
+      Just vapid -> do
+          let applicationServerKey = vapidPublicKeyBytes vapid
+          let w = do
+                  $(widgetFile "contacts/push/subscription/form")
+                  $(widgetFile "contacts/push/subscription")
+          return (r, w)
+
+  where
+      unwrap = maybe "" ((\(x,y) -> fromMaybe y x) . bimap unValue unValue)
 
 
 postContactRemoveR :: UserId -> UserId -> ContactId -> Handler Html
@@ -719,32 +732,31 @@ getContactR sid pid cid = do
         where_ $ x ^. ContactId ==. val cid
         return (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible)))) )
 
-    mVAPIDKeys <- getVAPIDKeys
+    vapidKeys <- getVAPIDKeys
 
-    case mVAPIDKeys of
-      Just vapidKeys -> do
+    permission <- (maybeToBool <$>) $ runDB $ selectOne $ do
+        x <- from $ table @PushSubscription
+        where_ $ x ^. PushSubscriptionSubscriber ==. val sid
+        where_ $ x ^. PushSubscriptionPublisher ==. val pid
+        where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
+        return x
 
-          permission <- (\case Just _ -> True; Nothing -> False) <$> runDB ( selectOne $ do
-              x <- from $ table @PushSubscription
-              where_ $ x ^. PushSubscriptionSubscriber ==. val sid
-              where_ $ x ^. PushSubscriptionPublisher ==. val pid
-              where_ $ just (x ^. PushSubscriptionEndpoint) ==. val endpoint
-              return x )
+    (fw3,et3) <- generateFormPost $ formSubscriptionDelete endpoint
+    (fw2,et2) <- generateFormPost $ formSubscribe backlink vapidKeys sid pid cid permission
 
-          (fw3,et3) <- generateFormPost $ formSubscriptionDelete endpoint
-          (fw2,et2) <- generateFormPost $ formSubscribe backlink vapidKeys sid pid cid permission
+    (fw0,et0) <- generateFormPost formContactRemove
 
-          (fw0,et0) <- generateFormPost formContactRemove
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgViewContact
+        idOverlay <- newIdent
+        idDialogRemove <- newIdent
+        idFormRemove <- newIdent
+        $(widgetFile "contacts/contact")
 
-          msgs <- getMessages
-          defaultLayout $ do
-              setTitleI MsgViewContact
-              idOverlay <- newIdent
-              idDialogRemove <- newIdent
-              idFormRemove <- newIdent
-              $(widgetFile "contacts/contact")
+  where
 
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+      maybeToBool = \case Just _ -> True; Nothing -> False
 
 
 formContactRemove :: Form ()
@@ -756,7 +768,7 @@ getMyContactsR uid = do
 
     endpoint <- lookupGetParam paramEndpoint
 
-    contacts <- (second (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue)))) <$>) <$> runDB ( select $ do
+    contacts <- (unwrap <$>) $ runDB $ select $ do
         x :& u :& p <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
@@ -783,7 +795,7 @@ getMyContactsR uid = do
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
 
         where_ $ x ^. ContactOwner ==. val uid
-        return (x, (u, (p ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
+        return (x, (u, (p ?. UserPhotoAttribution, (subscriptions, (loops, accessible)))))
 
     let unValeAll = (bimap unValue (bimap unValue (bimap unValue (bimap unValue (bimap unValue unValue)))) <$>)
 
@@ -868,6 +880,8 @@ getMyContactsR uid = do
         
   where
       
+      unwrap = (second (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue)))) <$>)
+      
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
                                   (Just (t1,_), Just (t2,_)) -> compare t2 t1
                                   (Just _, Nothing) -> LT
@@ -889,92 +903,91 @@ postContactsR uid = do
     idOverlay <- newIdent
     idDialogSubscribe <- newIdent
 
-    mVAPIDKeys <- getVAPIDKeys
+    vapid <- getVAPIDKeys
 
-    case mVAPIDKeys of
-      Just vapidKeys -> do
+    ((fr,fw),et) <- runFormPost $ formContacts
+        uid users vapid idFormPostContacts idDialogSubscribe idOverlay Nothing
 
-          ((fr,fw),et) <- runFormPost $ formContacts
-              uid users vapidKeys idFormPostContacts idDialogSubscribe idOverlay Nothing
-
-          case fr of
-            FormSuccess (contacts, subscription, location) -> do
-                now <- liftIO getCurrentTime
-                forM_ contacts $ \(Entity eid _) -> do
-                    _ <- runDB $ upsert (Contact uid eid now) []
-                    case subscription of
-                      Just (endpoint,p256dh,auth) ->  do
-                          ua <- (decodeUtf8 <$>) <$> lookupHeader "User-Agent"
-                          _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
-                              (PushSubscription uid eid endpoint p256dh auth ua)
-                              [ PushSubscriptionP256dh P.=. p256dh
-                              , PushSubscriptionAuth P.=. auth
-                              , PushSubscriptionUserAgent P.=. ua
-                              ]
-
-                          subscriptions <- (bimap unValue (bimap unValue unValue) <$>) <$> runDB ( select $ do
-                              x <- from $ table @PushSubscription
-                              where_ $ x ^. PushSubscriptionPublisher ==. val uid
-                              where_ $ x ^. PushSubscriptionSubscriber ==. val eid
-                              return ( x ^. PushSubscriptionEndpoint
-                                     , ( x ^. PushSubscriptionP256dh
-                                       , x ^. PushSubscriptionAuth
-                                       )
-                                     ) )
-
-                          Superuser {..} <- appSuperuser . appSettings <$> getYesod
-                          manager <- appHttpManager <$> getYesod
-
-                          msgr <- getMessageRender
-                          rndr <- getUrlRender
-                          user <- maybeAuth
-
-                          let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
-
-                          forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
-                              let notification = mkPushNotification endpoint' p256dh' auth'
-                                      & pushMessage .~ object
-                                          [ "messageType" A..= PushMsgTypeSubscribed
-                                          , "title" A..= msgr MsgAppName
-                                          , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
-                                          , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
-                                          , "body" A..= ( msgr . MsgUserIsNowAvailable .
-                                                          (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
-                                                        )
-                                          , "senderId" A..= uid
-                                          ]
-                                      & pushSenderEmail .~ superuserUsername
-                                      & pushExpireInSeconds .~ 30 * 60
-                                      & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeSubscribed)
-                                      & pushUrgency ?~ PushUrgencyHigh
-
-                              result <- sendPushNotification vapidKeys manager notification
-
-                              case result of
-                                Left ex -> liftIO $ print ex
-                                Right () -> return ()
-                              return ()
-                      Nothing -> return ()
-                addMessageI statusSuccess MsgNewContactsAdded
-                redirect location
+    case fr of
+      FormSuccess (contacts, subscription, location) -> do
+          now <- liftIO getCurrentTime
+          forM_ contacts $ \(Entity eid _) -> do
+              _ <- runDB $ upsert (Contact uid eid now) []
+              
+              case (vapid,subscription) of
                 
-            FormFailure errs -> defaultLayout $ do
-                setTitleI MsgContacts
-                forM_ errs $ \err -> addMessage statusError (toHtml err)
-                msgs <- getMessages
-                idFabAdd <- newIdent
-                backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
-                $(widgetFile "users/contacts")
+                (Just vapidKeys,Just (endpoint,p256dh,auth)) -> do
+                    ua <- (decodeUtf8 <$>) <$> lookupHeader "User-Agent"
+                    _ <- runDB $ upsertBy (UniquePushSubscription uid eid endpoint)
+                        (PushSubscription uid eid endpoint p256dh auth ua)
+                        [ PushSubscriptionP256dh P.=. p256dh
+                        , PushSubscriptionAuth P.=. auth
+                        , PushSubscriptionUserAgent P.=. ua
+                        ]
+
+                    subscriptions <- ((bimap unValue (bimap unValue unValue) <$>) <$>) $ runDB $ select $ do
+                        x <- from $ table @PushSubscription
+                        where_ $ x ^. PushSubscriptionPublisher ==. val uid
+                        where_ $ x ^. PushSubscriptionSubscriber ==. val eid
+                        return ( x ^. PushSubscriptionEndpoint
+                               , ( x ^. PushSubscriptionP256dh
+                                 , x ^. PushSubscriptionAuth
+                                 )
+                               )
+
+                    Superuser {..} <- appSuperuser . appSettings <$> getYesod
+                    manager <- appHttpManager <$> getYesod
+
+                    msgr <- getMessageRender
+                    rndr <- getUrlRender
+                    user <- maybeAuth
+
+                    let expath = decodeUtf8 . extractPath . encodeUtf8 . rndr
+
+                    forM_ subscriptions $ \(endpoint', (p256dh', auth')) -> do
+                        let notification = mkPushNotification endpoint' p256dh' auth'
+                                & pushMessage .~ object
+                                    [ "messageType" A..= PushMsgTypeSubscribed
+                                    , "title" A..= msgr MsgAppName
+                                    , "icon" A..= expath (StaticR img_notifications_24dp_FILL0_wght400_GRAD0_opsz24_svg)
+                                    , "image" A..= (expath . AccountPhotoR . entityKey <$> user)
+                                    , "body" A..= ( msgr . MsgUserIsNowAvailable .
+                                                    (\u -> fromMaybe (userEmail u) (userName u)) . entityVal <$> user
+                                                  )
+                                    , "senderId" A..= uid
+                                    ]
+                                & pushSenderEmail .~ superuserUsername
+                                & pushExpireInSeconds .~ 30 * 60
+                                & pushTopic ?~ (PushTopic . pack . show $ PushMsgTypeSubscribed)
+                                & pushUrgency ?~ PushUrgencyHigh
+
+                        result <- sendPushNotification vapidKeys manager notification
+
+                        case result of
+                          Left ex -> liftIO $ print ex
+                          Right () -> return ()
+                        return ()
+                        
+                _otherwise -> return ()
                 
-            FormMissing -> defaultLayout $ do
-                setTitleI MsgContacts
-                addMessageI statusError MsgInvalidFormData
-                msgs <- getMessages
-                idFabAdd <- newIdent
-                backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
-                $(widgetFile "users/contacts")
-                
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+          addMessageI statusSuccess MsgNewContactsAdded
+          redirect location
+
+      FormFailure errs -> defaultLayout $ do
+          setTitleI MsgContacts
+          forM_ errs $ \err -> addMessage statusError (toHtml err)
+          msgs <- getMessages
+          idFabAdd <- newIdent
+          backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
+          $(widgetFile "users/contacts")
+
+      FormMissing -> defaultLayout $ do
+          setTitleI MsgContacts
+          addMessageI statusError MsgInvalidFormData
+          msgs <- getMessages
+          idFabAdd <- newIdent
+          backlink <- getUrlRender >>= \rndr -> return $ rndr $ MyContactsR uid
+          $(widgetFile "users/contacts")
 
 
 getContactsR :: UserId -> Handler Html
@@ -992,24 +1005,19 @@ getContactsR uid = do
     rndr <- getUrlRender
     backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
 
-    mVAPIDKeys <- getVAPIDKeys
+    vapid <- getVAPIDKeys
 
-    case mVAPIDKeys of
-      Just vapidKeys -> do
+    (fw,et) <- generateFormPost $ formContacts 
+        uid users vapid idFormPostContacts idDialogSubscribe idOverlay (Just backlink)
 
-          (fw,et) <- generateFormPost $ formContacts
-              uid users vapidKeys idFormPostContacts idDialogSubscribe idOverlay (Just backlink)
-
-          msgs <- getMessages
-          defaultLayout $ do
-              setTitleI MsgContacts
-              idFabAdd <- newIdent
-              $(widgetFile "users/contacts")
-              
-      Nothing -> invalidArgsI [MsgNotGeneratedVAPID]
+    msgs <- getMessages
+    defaultLayout $ do
+        setTitleI MsgContacts
+        idFabAdd <- newIdent
+        $(widgetFile "users/contacts")
 
 
-formContacts :: UserId -> [Entity User] -> VAPIDKeys -> Text -> Text -> Text -> Maybe Text
+formContacts :: UserId -> [Entity User] -> Maybe VAPIDKeys -> Text -> Text -> Text -> Maybe Text
              -> Form ([Entity User], Maybe (Text,Text,Text),Text)
 formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverlay backlink extra = do
 
@@ -1023,12 +1031,19 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverla
     idButtonSubmitNoSubscription <- newIdent
     idButtonSubmitWithSubscription <- newIdent
 
-    let applicationServerKey = vapidPublicKeyBytes vapidKeys
+    let r = (,,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR) <*> locationR
 
-    return ( (,,) <$> usersR <*> (liftA3 (,,) <$> endpointR <*> p256dhR <*> authR) <*> locationR
-           , $(widgetFile "users/form")
-           )
+    let w = case vapidKeys of
+          Nothing -> $(widgetFile "users/form")
+          Just vapid -> do
+              let applicationServerKey = vapidPublicKeyBytes vapid
+              $(widgetFile "users/form")
+              $(widgetFile "users/subscription")
+
+    return (r, w)
+    
   where
+      
       option e@(Entity _ (User email _ _ _ _ _ _ _)) = (email,e)
 
       usersFieldList :: RenderMessage App msg => [(msg, Entity User)] -> Field Handler [Entity User]
@@ -1036,7 +1051,7 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverla
 
       usersField :: Handler (OptionList (Entity User)) -> Field Handler [Entity User]
       usersField ioptlist = (multiSelectField ioptlist)
-          { fieldView = \theId name attrs x isReq -> do
+          { fieldView = \theId name attrs x _isReq -> do
               opts <- olOptions <$> handlerToWidget ioptlist
               
               let sel (Left _) _ = False
@@ -1067,7 +1082,7 @@ formContacts uid options vapidKeys idFormPostContacts idDialogSubscribe idOverla
 
                       <label.checkbox>
                         <input type=checkbox ##{theId}-#{i} name=#{name} value=#{optionExternalValue opt}
-                          :sel x opt:checked :isReq:required=true>
+                          :sel x opt:checked>
                         <span>
               |]
           }

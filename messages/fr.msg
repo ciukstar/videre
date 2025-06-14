@@ -1,3 +1,7 @@
+AskAdminToGenerateVapid: Demandez à votre administrateur de générer un VAPID
+VapidRequiredToSubscribe: VAPID est requis pour s'abonner, envoyer et recevoir des notifications
+GenerateNewVapid: Générer un nouveau VAPID
+VapidNotGenerated: VAPID non généré
 LastSeenAt: Dernière visite à
 Offline: Hors ligne
 Online: En ligne
