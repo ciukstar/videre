@@ -28,7 +28,7 @@ import Data.Text (Text, pack, unpack, splitOn)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 
 import Database.Esqueleto.Experimental
-    ( selectOne, from, table, where_, val, innerJoin, on, delete
+    ( selectOne, from, table, where_, val, innerJoin, on
     , (^.), (==.), (:&) ((:&))
     , Value (unValue)
     )
@@ -64,7 +64,7 @@ import Model
     , Store (Store), Token (Token, tokenStore)
     , EntityField (StoreVal, TokenStore, TokenApi, StoreToken, TokenId, StoreKey)
     , gmailSender, statusSuccess, statusError, gmailAccessTokenExpiresIn
-    , secretVolumeGmail, apiInfoVapid, secretVapid, PushSubscription
+    , secretVolumeGmail, apiInfoVapid, secretVapid
     )
     
 import Network.Wreq
@@ -118,7 +118,6 @@ postTokensVapidClearR = do
     case (fr0,token) of
       (FormSuccess (),Just (Entity tid (Token _ StoreTypeDatabase))) -> do
           runDB $ P.delete tid
-          runDB $ delete $ void $ from $ table @PushSubscription
           addMessageI statusSuccess MsgRecordDeleted
           redirect $ DataR TokenVapidR
           

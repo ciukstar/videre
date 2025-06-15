@@ -1,0 +1,31 @@
+function snackbar (message, timeout, ...classes) {
+  
+  const snackbar = document.createElement('div');
+  snackbar.classList.add('snackbar','active', ...classes);
+  
+  snackbar.appendChild((() => {
+    const content = document.createElement('div');
+    content.classList.add('max');
+    content.textContent = message;
+    return content;
+  }) ());
+  
+  snackbar.appendChild((() => {
+    const close = document.createElement('button');
+    close.classList.add('close','transparent','circle','small');
+    close.addEventListener('click', e => {
+      snackbar.remove();
+    });
+    close.appendChild((() => {
+      const icon = document.createElement('i');
+      icon.textContent = 'close';
+      return icon; 
+    }) ());         
+    return close;
+  }) ());
+  
+  document.body.appendChild(snackbar);
+
+  setTimeout(() => { snackbar.remove(); }, timeout);
+  
+}

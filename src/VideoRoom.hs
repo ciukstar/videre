@@ -44,7 +44,7 @@ import Data.Time.Clock (getCurrentTime)
 import Foundation
     ( AppMessage
       ( MsgNotGeneratedVAPID, MsgCallEnded, MsgInterlocutorEndedSession
-      , MsgEndSession, MsgAppName, MsgBack, MsgVideoCall, MsgAudioCall
+      , MsgEndSession, MsgAppName, MsgBack, MsgVideoCall, MsgAudioCall, MsgOutgoingCall
       )
     )
 
@@ -72,7 +72,7 @@ import Model
     )
 
 import Network.HTTP.Client (Manager)
-import Network.HTTP.Types (extractPath)
+import Network.HTTP.Types (extractPath, status500)
 
 import UnliftIO.Exception (try, SomeException)
 import UnliftIO.STM
@@ -108,11 +108,12 @@ import Yesod
     ( Yesod, YesodSubDispatch, yesodSubDispatch , mkYesodSubDispatch
     , SubHandlerFor, MonadHandler (liftHandler) , getSubYesod
     , Application, newIdent , YesodPersist (YesodPersistBackend)
-    , RenderMessage , FormMessage, HandlerFor, lookupPostParam, getRouteToParent
+    , RenderMessage , FormMessage, HandlerFor, lookupPostParam
+    , getRouteToParent, sendStatusJSON, sendResponse
     )
 import Yesod.Core (defaultLayout)
 import Yesod.Core.Content (TypedContent (TypedContent), toContent)
-import Yesod.Core.Handler (invalidArgsI, getUrlRender, getMessageRender)
+import Yesod.Core.Handler (getUrlRender, getMessageRender)
 import Yesod.Core.Types (YesodSubRunnerEnv)
 import Yesod.Form.Input (runInputGet, runInputPost, ireq, iopt)
 import Yesod.Form.Fields (boolField, intField, textField)
@@ -192,7 +193,8 @@ getWebSoketR cid polite = webSockets (wsApp cid polite)
 postPushMessageR :: (Yesod m, YesodVideo m)
                  => (YesodPersist m, YesodPersistBackend m ~ SqlBackend)
                  => (RenderMessage m FormMessage, RenderMessage m AppMessage)
-                 => UserId -> ContactId -> UserId -> SubHandlerFor VideoRoom m ()
+                 => UserId -> ContactId -> UserId
+                 -> SubHandlerFor VideoRoom m TypedContent
 postPushMessageR sid cid rid = do
 
     messageType <- (\x -> x <|> Just PushMsgTypeVideoCall) . (readMaybe . unpack =<<) <$> lookupPostParam "messageType"
@@ -294,8 +296,8 @@ postPushMessageR sid cid rid = do
                 result <- sendPushNotification vapidKeys manager notification
 
                 case result of
-                  Left ex -> do
-                      liftIO $ print ex
+                  Left ex -> liftIO $ print ex
+                  
                   Right () -> do
                       case (messageType, callId) of
 
@@ -326,8 +328,10 @@ postPushMessageR sid cid rid = do
                         _otherwise -> return ()
 
                       return ()
-
-      Nothing -> liftHandler $ invalidArgsI [MsgNotGeneratedVAPID]
+                      
+          sendResponse (object ["message" .= msgr MsgOutgoingCall])
+          
+      Nothing -> liftHandler $ sendStatusJSON status500 (object ["message" .= msgr MsgNotGeneratedVAPID])
 
 
 userJoinedChannel :: Num b => Maybe (a,b) -> Maybe (a,b)

@@ -1,0 +1,12 @@
+
+function iconBadge (icon, ...classes) {
+  const newBadge = document.createElement('div');
+  newBadge.classList.add('badge','no-margin','no-padding',...classes);
+  newBadge.appendChild((() => {
+    const newIcon = document.createElement('i');
+    newIcon.classList.add('tiny','no-margin','tiny-padding');
+    newIcon.textContent = 'warning';
+    return newIcon;
+  }) ());
+  return newBadge;
+}

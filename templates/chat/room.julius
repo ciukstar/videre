@@ -771,9 +771,27 @@ document.getElementById(#{idButtonVideoCall}).addEventListener('click', function
       audios: true
     })
   }).then(function (result) {
-    document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
-    document.getElementById(#{idDialogOutgoingCall}).show();
-    document.getElementById(#{idAudioOutgoingCallRingtone}).play().catch(_ => {});
+    
+    if (result.ok) {
+      document.getElementById(#{idOverlayDialogOutgoingCall}).classList.add('active');
+      document.getElementById(#{idDialogOutgoingCall}).show();
+      document.getElementById(#{idAudioOutgoingCallRingtone}).play().catch(_ => {});
+    } else {
+      result.json().then(x => {
+        [#{idButtonVideoCall},#{idButtonAudioCall}].map(x => document.getElementById(x)).forEach(x => {
+          const badge = x.querySelector(`.badge.#{rawJS classWarning}`);
+          
+          if (badge) {
+            badge.replaceWith(iconBadge('warning',#{classWarning}));
+          } else {
+            x.appendChild(iconBadge('warning',#{classWarning}));            
+          }
+          
+        });
+        snackbar(x.message,6000,'error');
+      });
+    }
+    
   }).catch(function (err) {
     console.error(err);
   });
@@ -871,31 +889,11 @@ navigator.serviceWorker.addEventListener('message', function (message) {
       
       if (badge) {
         
-        badge.replaceWith((() => {
-          const newBadge = document.createElement('div');
-          newBadge.classList.add('badge','no-margin','no-padding',#{classWarning});
-          newBadge.appendChild((() => {
-            const icon = document.createElement('i');
-            icon.classList.add('tiny','no-margin','tiny-padding');
-            icon.textContent = 'warning';
-            return icon;
-          }) ());
-          return newBadge;
-        }) ());
+        badge.replaceWith(iconBadge('warning',#{classWarning}));
         
       } else {
         
-        x.appendChild((() => {
-          const newBadge = document.createElement('div');
-          newBadge.classList.add('badge','no-margin','no-padding',#{classWarning});
-          newBadge.appendChild((() => {
-            const icon = document.createElement('i');
-            icon.classList.add('tiny','no-margin','tiny-padding');
-            icon.textContent = 'warning';
-            return icon;
-          }) ());
-          return newBadge;
-        }) ());
+        x.appendChild(iconBadge('warning',#{classWarning}));
         
       }
       

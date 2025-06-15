@@ -13,7 +13,7 @@
 {-# LANGUAGE RecordWildCards       #-}
 {-# LANGUAGE QuasiQuotes           #-}
 
-{-# OPTIONS_GHC -fno-warn-orphans #-}
+{-# OPTIONS_GHC -fno-warn-orphans  #-}
 
 module ChatRoom (module ChatRoom.Data, module ChatRoom) where
 
@@ -48,7 +48,7 @@ import qualified Data.Map as M
     ( Map, lookup, insert, alter, fromListWith, toList
     )
 import Data.List (sortBy)
-import Data.Maybe (fromMaybe, isJust)
+import Data.Maybe (fromMaybe, isJust, isNothing)
 import Data.Text (Text, pack)
 import Data.Text.Encoding (decodeUtf8, encodeUtf8)
 import Data.Text.Lazy (toStrict)
@@ -451,7 +451,6 @@ getChatChannelR sid cid rid = do
 
 checkAuthorized :: UserId -> ChatHandler ()
 checkAuthorized sid = do
-
     muid <- liftHandler getMaybeAuthId
 
     case muid of
@@ -482,6 +481,8 @@ getChatRoomR sid cid rid = do
         return x
 
     endpoint <- liftHandler $ lookupGetParam paramEndpoint
+
+    vapid <- liftHandler getVapidKeys
 
     subscribed <- liftHandler $ (isJust <$>) $ runDB $ selectOne $ do
         x <- from $ table @PushSubscription
@@ -666,7 +667,9 @@ getChatRoomR sid cid rid = do
         toWidget $(juliusFile "static/js/debounce.julius")
         
         $(widgetFile "chat/room")
-
+        toWidget $(juliusFile "static/js/snackbar.julius")
+        toWidget $(juliusFile "static/js/badge.julius")
+        
     where      
       resolveName = fromMaybe "" . ((\(Entity _ (User email _ _ _ _ name _ _)) -> name <|> Just email) =<<)
 

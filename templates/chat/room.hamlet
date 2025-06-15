@@ -40,15 +40,33 @@
 
     <button.circle.transparent type=button title=_{MsgVideoCall} ##{idButtonVideoCall}>
       <i>video_call
-      $if ((not subscribed) || (not accessible)) || loop
+      $if isNothing vapid
         <div.badge.no-margin.no-padding.#{classWarning}>
           <i.tiny.no-margin.tiny-padding>warning
+      $elseif not subscribed
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>notifications_off
+      $elseif not accessible
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>phone_disabled
+      $elseif loop
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>repeat
 
     <button.circle.transparent type=button title=_{MsgAudioCall} ##{idButtonAudioCall}>
       <i>call
-      $if ((not subscribed) || (not accessible)) || loop
+      $if isNothing vapid
         <div.badge.no-margin.no-padding.#{classWarning}>
           <i.tiny.no-margin.tiny-padding>warning
+      $elseif not subscribed
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>notifications_off
+      $elseif not accessible
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>phone_disabled
+      $elseif loop
+        <div.badge.no-margin.no-padding.#{classWarning}>
+          <i.tiny.no-margin.tiny-padding>repeat
 
     <button.circle.transparent type=button title=_{MsgActions}>
       <i>more_vert
