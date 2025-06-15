@@ -1,21 +1,56 @@
 
+<div.overlay ##{idOverlay} data-ui=##{idOverlay}>
+
 #{extra}
+
+<figure.center-align.vertical-margin ##{idFigurePhotoUser}>
+
+  <label for=#{fvId photoV} ##{idLabelPhotoUser}>
   
-<label for=#{fvId photoV} ##{idLabelPhotoUser}>
-  <figure.center-align.vertical-margin ##{idFigurePhotoUser}>
     $maybe Entity uid _ <- user
       <img.circle.extra src=@{AccountPhotoR uid} ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
     $nothing
       <img.circle.extra src=@{StaticR img_person_FILL0_wght400_GRAD0_opsz24_svg}
            ##{idImgPhotoUser} loading=lazy alt=_{MsgPhoto}>
-    <figcaption>
-      <p.small-text.secondry-text>
-        _{MsgPhoto}
 
-      $maybe Entity _ (User email _ _ _ _ _ _ _) <- user
-        <p.large-text ##{idUserIdent}>
-          #{email}
-      
-^{fvInput photoV}
+    ^{fvInput photoV}
+  
+  <figcaption.margin>
+
+    $maybe errs <- fvErrors photoV
+      <div.error>
+        #{errs}
+        
+    <nav.center-align>
+      <button.border.round.transparent type=button ##{idButtonUploadPhoto}>
+        <i>upload_file
+        _{MsgUploadPhoto}
+
+      <button.circle.transparent.border title=_{MsgTakePhoto} type=button ##{idButtonTakePhoto} data-ui=##{idOverlay}>
+        <i>photo_camera
+        
+
+    $maybe Entity _ (User email _ _ _ _ _ _ _) <- user
+      <p.large-text.secondry-text ##{idUserIdent}>
+        #{email}
+
+  
 
 ^{md3widget nameV}
+
+
+<dialog ##{idDialogSnapshot}>
+
+  <h6.row>
+    <div.max>
+      _{MsgTakePhoto}
+    <button.transparent.circle type=button title=_{MsgClose} ##{idButtonCloseDialogSnapshot} data-ui=##{idOverlay}>
+      <i>close
+
+  <figure.center-align>
+    <video ##{idVideo} playsinline autoplay width=128 height=128
+           poster=@{StaticR img_camera_24dp_0000F5_FILL0_wght400_GRAD0_opsz24_svg}>
+
+  <nav.center-align>
+    <button.circle.extra.transparent.border type=button ##{idButtonCapture} data-ui=##{idOverlay}>
+      <i.extra>circle

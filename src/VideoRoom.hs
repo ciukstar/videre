@@ -131,6 +131,7 @@ class YesodVideo m where
     getStaticRoute :: StaticRoute -> HandlerFor m (Route m)
     getAppSettings :: HandlerFor m AppSettings
     getVapidKeys :: HandlerFor m (Maybe VAPIDKeys)
+    getUserStatusChannelRoute :: UserId -> HandlerFor m (Route m)
 
 
 getRoomR :: (Yesod m, YesodVideo m)
@@ -157,10 +158,12 @@ getRoomR sid cid rid polite = do
 
     config <- liftHandler $ fromMaybe (object []) <$> getRtcPeerConnectionConfig
 
-    interlocutorName <- liftHandler $ resolveName <$> runDB ( selectOne $ do
+    userStatusChannelRoute <- liftHandler $ getUserStatusChannelRoute sid
+
+    interlocutorName <- liftHandler $ (resolveName <$>) $ runDB $ selectOne $ do
         x <- from $ table @User
         where_ $ x ^. UserId ==. val rid
-        return x )
+        return x
 
     msgr <- getMessageRender
     iconCallEnd <- liftHandler $ getStaticRoute img_call_end_FILL0_wght400_GRAD0_opsz24_svg

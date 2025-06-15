@@ -2,3 +2,4 @@
 ##{idFormForgotPassword}
 
     max-width: 30rem
+    margin: auto

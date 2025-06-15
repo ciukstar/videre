@@ -254,3 +254,5 @@ navigator.mediaDevices.enumerateDevices().then((devices) => {
 document.getElementById(#{idDialogCallEnded}).addEventListener('open', (e) => {
   document.getElementById(#{idOverlay}).classList.add('active');
 });
+
+const channel = new WebSocket('@{userStatusChannelRoute}');

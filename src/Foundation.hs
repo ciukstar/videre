@@ -1125,16 +1125,13 @@ instance YesodAuthEmail App where
 
               case response of
                 Left e@(SomeException _) -> case fromException e of
-                  Just (HttpExceptionRequest _ (StatusCodeException r' bs)) -> do
+                  Just (HttpExceptionRequest _ (StatusCodeException r' _bs)) -> do
                       case r' L.^. WL.responseStatus . WL.statusCode of
-                        401 -> do
-                            liftIO $ print response
-                        403 -> do
-                            liftIO $ print response
-                        _   -> do
-                            liftIO $ print response
-                  _other -> do
-                      liftIO $ print response
+                        401 -> liftIO $ print response
+                        403 -> liftIO $ print response
+                        _   -> liftIO $ print response
+                        
+                  _other -> liftIO $ print response
                 Right _ok -> return ()
           _otherwise -> do
               curr <- getCurrentRoute

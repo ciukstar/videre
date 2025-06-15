@@ -155,7 +155,7 @@ import Text.Shakespeare.I18N (RenderMessage, SomeMessage (SomeMessage))
 import VideoRoom
     ( YesodVideo
       ( getRtcPeerConnectionConfig, getAppHttpManager, getStaticRoute
-      , getAppSettings, getHomeRoute, getVapidKeys
+      , getAppSettings, getHomeRoute, getVapidKeys, getUserStatusChannelRoute
       )
     , Route (RoomR)
     )
@@ -1110,6 +1110,9 @@ instance YesodVideo App where
 
     getVapidKeys :: Handler (Maybe VAPIDKeys)
     getVapidKeys = getVAPIDKeys
+
+    getUserStatusChannelRoute :: UserId -> Handler (Route App)
+    getUserStatusChannelRoute uid = return $ OnlineChannelR uid
 
 
 instance YesodChat App where

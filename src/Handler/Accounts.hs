@@ -57,7 +57,7 @@ import Foundation
       , MsgInvalidFormData, MsgRecordDeleted, MsgUserSettings, MsgRingtones
       , MsgNotifications, MsgYouHaveNotSetAnyRingtonesYet, MsgIncomingChat
       , MsgIncomingCall, MsgOutgoingCall, MsgRingtoneNotFound, MsgOutgoingChat
-      , MsgAppearance, MsgTheme
+      , MsgAppearance, MsgTheme, MsgClose, MsgTakePhoto, MsgUploadPhoto
       )
     )
 
@@ -86,7 +86,7 @@ import Model
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
-    , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg, img_camera_24dp_0000F5_FILL0_wght400_GRAD0_opsz24_svg
     )
 
 import Text.Hamlet (Html)
@@ -109,7 +109,7 @@ import Yesod.Form.Fields
     )
 import Yesod.Form.Functions (generateFormPost, mopt, runFormPost)
 import Yesod.Form.Types
-    ( MForm, FormResult (FormSuccess), FieldView (fvInput, fvId)
+    ( MForm, FormResult (FormSuccess), FieldView (fvInput, fvId, fvErrors)
     , Field (fieldView)
     , FieldSettings
       ( FieldSettings, fsLabel, fsTooltip, fsId, fsName, fsAttrs)
@@ -381,7 +381,9 @@ getAccountsR = undefined
 getAccountEditR :: UserId -> Handler Html
 getAccountEditR uid = do
     user <- maybeAuth
+    
     (fw,et) <- generateFormPost $ formAccount user
+    
     defaultLayout $ do
         setTitleI MsgUserAccount
         $(widgetFile "accounts/edit")
@@ -400,14 +402,21 @@ formAccount user extra = do
     (photoR,photoV) <- mopt fileField FieldSettings
         { fsLabel = SomeMessage MsgPhoto
         , fsTooltip = Nothing, fsId = Nothing, fsName = Nothing
-        , fsAttrs = [("style","display:none")]
+        , fsAttrs = [("style","display:none"),("accept","image/*")]
         } Nothing
 
+    idOverlay <- newIdent    
     idUserIdent <- newIdent
-    idLabelPhotoUser <- newIdent
     idFigurePhotoUser <- newIdent
+    idLabelPhotoUser <- newIdent
     idImgPhotoUser <- newIdent
-
+    idButtonTakePhoto <- newIdent
+    idButtonUploadPhoto <- newIdent
+    idDialogSnapshot <- newIdent
+    idButtonCloseDialogSnapshot <- newIdent
+    idVideo <- newIdent
+    idButtonCapture <- newIdent 
+    
     return ( (,) <$> nameR <*> photoR
            , $(widgetFile "accounts/form")
            )

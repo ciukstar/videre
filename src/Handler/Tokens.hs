@@ -575,12 +575,12 @@ postTokenGmailR = do
 getTokenGmailR :: Handler Html
 getTokenGmailR = do
     
-    tokenGmail <- runDB $ selectOne $ do
+    token <- runDB $ selectOne $ do
         x <- from $ table @Token
         where_ $ x ^. TokenApi ==. val apiInfoGoogle
         return x
 
-    (fw,et) <- generateFormPost $ formStoreOptions tokenGmail
+    (fw,et) <- generateFormPost $ formStoreOptions token
     (fwClear,etClear) <- generateFormPost formTokensClear
     
     msgs <- getMessages
