@@ -39,7 +39,7 @@ import Control.Applicative (liftA3)
 import Control.Concurrent.STM.TChan (TChan)
 import Control.Concurrent.STM.TVar (readTVarIO, TVar)
 import Control.Lens ((.~), (?~))
-import Control.Monad (join, forM_, forM)
+import Control.Monad (forM_, forM)
 import Control.Monad.IO.Class (liftIO)
 
 import Data.Aeson (toJSON, object)
@@ -207,7 +207,7 @@ getCalleesR uid = do
         where_ $ x ^. UserId ==. val uid
         return x
 
-    callees <- (unwrap <$>) <$> runDB ( select $ do
+    callees <- ((unwrap <$>) <$>) $ runDB $ select $ do
 
         x :& e :& h <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
@@ -237,7 +237,7 @@ getCalleesR uid = do
         where_ $ x ^. ContactOwner ==. val uid
 
         orderBy [desc (e ^. UserId)]
-        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))) )
+        return (x ^. ContactId, (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible)))))
 
     outgoingCallRingtone <- resolveOutgoingCallRingtone uid
 
@@ -248,14 +248,14 @@ getCalleesR uid = do
         idAudioOutgoingCallRingtone <- newIdent
         $(widgetFile "calls/callees/callees")
   where
-      unwrap = bimap unValue (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))))
+      unwrap = bimap unValue (second (bimap unValue (bimap unValue (bimap unValue unValue))))
 
 
 getCallsR :: UserId -> Handler Html
 getCallsR uid = do
     endpoint <- lookupGetParam paramEndpoint
     
-    calls <- (unwrap <$>) <$> runDB ( select $ do
+    calls <- ((unwrap <$>) <$>) $ runDB $ select $ do
 
         x :& caller :& callerPhoto :& callee :& calleePhoto :& c <- from $ table @Call
             `innerJoin` table @User
@@ -321,7 +321,7 @@ getCallsR uid = do
                , ( ((caller, callerPhoto ?. UserPhotoAttribution), (callee, calleePhoto ?. UserPhotoAttribution))
                  , (c,((subscriptions1,(loops1, accessible1)),(subscriptions2,(loops2, accessible2))))
                  )
-               ) )
+               )
 
     outgoingCallRingtone <- resolveOutgoingCallRingtone uid
 
@@ -337,7 +337,7 @@ getCallsR uid = do
         
   where
       
-      unwrap = second (first (bimap (second (join . unValue)) (second (join . unValue))))
+      unwrap = second (first (bimap (second unValue) (second unValue)))
 
 
 resolveOutgoingCallRingtone :: UserId -> Handler (Route App, Text)
@@ -704,7 +704,7 @@ getContactR sid pid cid = do
     backlink <- fromMaybe (rndr HomeR) <$> runInputGet ( iopt textField paramBacklink )
     endpoint <- lookupGetParam paramEndpoint
 
-    contact <- (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue))) <$>) <$> runDB ( selectOne $ do
+    contact <- ((second (bimap unValue (bimap unValue (bimap unValue unValue))) <$>) <$>) $ runDB $ selectOne $ do
         x :& e :& h <- from $ table @Contact
             `innerJoin` table @User `on` (\(x :& e) -> x ^. ContactEntry ==. e ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& e :& h) -> just (e ^. UserId) ==. h ?. UserPhotoUser)
@@ -731,7 +731,7 @@ getContactR sid pid cid = do
                 where_ $ just (y ^. PushSubscriptionEndpoint) !=. val endpoint
 
         where_ $ x ^. ContactId ==. val cid
-        return (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible)))) )
+        return (e, (h ?. UserPhotoAttribution, (subscriptions, (loops, accessible))))
 
     vapidKeys <- getVAPIDKeys
 
@@ -881,7 +881,7 @@ getMyContactsR uid = do
         
   where
       
-      unwrap = (second (second (bimap (join . unValue) (bimap unValue (bimap unValue unValue)))) <$>)
+      unwrap = (second (second (bimap unValue (bimap unValue (bimap unValue unValue)))) <$>)
       
       sortDescByTime = sortBy (\(Entity cid1 _,(_,(_,mt1))) (Entity cid2 _,(_,(_,mt2))) -> case (mt1,mt2) of
                                   (Just (t1,_), Just (t2,_)) -> compare t2 t1

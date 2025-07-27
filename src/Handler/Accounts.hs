@@ -23,7 +23,7 @@ module Handler.Accounts
   , getAccountNotificationsR
   ) where
 
-import Control.Monad (void, join)
+import Control.Monad (void)
 
 import Data.Bifunctor (Bifunctor(second))
 import Data.Text (Text)
@@ -86,7 +86,8 @@ import Model
 import Settings (widgetFile)
 import Settings.StaticFiles
     ( img_person_FILL0_wght400_GRAD0_opsz24_svg
-    , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg, img_camera_24dp_0000F5_FILL0_wght400_GRAD0_opsz24_svg
+    , img_shield_person_FILL0_wght400_GRAD0_opsz24_svg
+    , img_camera_24dp_0000F5_FILL0_wght400_GRAD0_opsz24_svg
     )
 
 import Text.Hamlet (Html)
@@ -102,6 +103,7 @@ import Yesod.Core
 import Yesod.Core.Content
     ( TypedContent (TypedContent), ToContent (toContent)
     )
+import Yesod.Core.Handler (cacheSeconds)
 import Yesod.Core.Widget (setTitleI)
 import Yesod.Form.Fields
     ( fileField, optionsPairs, radioField', OptionList (olOptions)
@@ -120,12 +122,12 @@ import Yesod.Persist (YesodPersist(runDB))
 getAccountNotificationsR :: UserId -> Handler Html
 getAccountNotificationsR uid = do
 
-    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+    subscriptions <- ((second (second unValue) <$>) <$>) $ runDB $ select $ do
         x :& u :& h <- from $ table @PushSubscription
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PushSubscriptionSubscriber ==. val uid
-        return (x, (u, h ?. UserPhotoAttribution)) )
+        return (x, (u, h ?. UserPhotoAttribution))
         
     msgs <- getMessages
     defaultLayout $ do
@@ -273,12 +275,12 @@ formAccountSubscriptionDelete extra = return (pure () ,[whamlet|^{extra}|])
 getAccountSubscriptionsR :: UserId -> Handler Html
 getAccountSubscriptionsR uid = do
 
-    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+    subscriptions <- ((second (second unValue) <$>) <$>) $ runDB $ select $ do
         x :& u :& h <- from $ table @PushSubscription
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PushSubscriptionSubscriber ==. val uid
-        return (x, (u, h ?. UserPhotoAttribution)) )
+        return (x, (u, h ?. UserPhotoAttribution))
         
     msgs <- getMessages
     defaultLayout $ do
@@ -441,6 +443,9 @@ getAccountPhotoR uid = do
         x <- from $ table @UserPhoto
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
+
+    cacheSeconds $ 60 * 3
+        
     case photo of
       Just (Entity _ (UserPhoto _ mime bs _)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
       

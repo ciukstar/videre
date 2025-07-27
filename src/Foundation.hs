@@ -29,13 +29,13 @@ import Data.Aeson.Types (Parser, withObject)
 import qualified Data.ByteString.Base64.Lazy as B64L (encode)
 import qualified Data.ByteString.Lazy as BSL (toStrict)
 import Data.Kind (Type)
-import qualified Data.CaseInsensitive as CI
 import Data.Function ((&))
 import qualified Data.Map as M (alter)
 import qualified Data.Text.Lazy as TL (toStrict)
 import qualified Data.Text as T (intercalate)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text.Lazy.Encoding as TLE (encodeUtf8)
+import Data.Type.Equality (type (~))
 
 import Import.NoFoundation
 

@@ -9,8 +9,6 @@ module Handler.Subscriptions
   , postUserSubscriptionDeleR
   ) where
 
-import Control.Monad (join)
-
 import Data.Bifunctor (second, Bifunctor (bimap))
 
 import Database.Esqueleto.Experimental
@@ -107,18 +105,18 @@ formUserSubscriptionDelete extra = return (pure () ,[whamlet|^{extra}|])
 getUserSubscriptionsR :: UserId -> Handler Html
 getUserSubscriptionsR uid = do
 
-    user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+    user <- ((second unValue <$>) <$>) $ runDB $ selectOne $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. UserId ==. val uid
-        return (x, h ?. UserPhotoAttribution) )
+        return (x, h ?. UserPhotoAttribution)
 
-    subscriptions <- (second (second (join . unValue)) <$>) <$> runDB ( select $ do
+    subscriptions <- ((second (second unValue) <$>) <$>) $ runDB $ select $ do
         x :& u :& h <- from $ table @PushSubscription
             `innerJoin` table @User `on` (\(x :& u) -> x ^. PushSubscriptionPublisher ==. u ^. UserId)
             `leftJoin` table @UserPhoto `on` (\(_ :& u :& h) -> just (u ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. PushSubscriptionSubscriber ==. val uid
-        return (x, (u, h ?. UserPhotoAttribution)) )
+        return (x, (u, h ?. UserPhotoAttribution))
     
     msgs <- getMessages
     defaultLayout $ do
@@ -129,7 +127,7 @@ getUserSubscriptionsR uid = do
 getSubscriptionsR :: Handler Html
 getSubscriptionsR = do
     
-    subscriptions <- (bimap (second (join . unValue)) unValue <$>) <$> runDB ( select $ do
+    subscriptions <- ((bimap (second unValue) unValue <$>) <$>) $ runDB $ select $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
 
@@ -141,7 +139,7 @@ getSubscriptionsR = do
         where_ $ count >. val 0
             
         orderBy [desc (x ^. UserId)]
-        return ((x, h ?. UserPhotoAttribution), count) )
+        return ((x, h ?. UserPhotoAttribution), count)
     
     msgs <- getMessages
     defaultLayout $ do

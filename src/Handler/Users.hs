@@ -12,7 +12,7 @@ module Handler.Users
   , postUserR
   ) where
 
-import Control.Monad (void, join)
+import Control.Monad (void)
 
 import Data.Bifunctor (Bifunctor(second))
 import Data.Maybe (isJust)
@@ -75,6 +75,7 @@ import Yesod.Core
     , addMessageI, redirect, TypedContent (TypedContent), ToContent (toContent)
     , fileSourceByteString, MonadHandler (liftHandler)
     )
+import Yesod.Core.Handler (cacheSeconds)
 import Yesod.Core.Widget (setTitleI, whamlet)
 import Yesod.Form.Fields (fileField, textField, checkBoxField, htmlField)
 import Yesod.Form.Functions (generateFormPost, runFormPost, mopt, mreq)
@@ -106,7 +107,7 @@ postUserDeleR uid = do
           redirect $ DataR $ UserR uid
           
       _otherwise -> do
-          user <- ((second (join . unValue) <$>) <$>) $ runDB $ selectOne $ do
+          user <- ((second unValue <$>) <$>) $ runDB $ selectOne $ do
               x :& h <- from $ table @User
                   `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
               where_ $ x ^. UserId ==. val uid
@@ -170,11 +171,11 @@ postUserR uid = do
 getUserR :: UserId -> Handler Html
 getUserR uid = do
 
-    user <- (second (join . unValue) <$>) <$> runDB ( selectOne $ do
+    user <- ((second unValue <$>) <$>) $ runDB $ selectOne $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
         where_ $ x ^. UserId ==. val uid
-        return (x, h ?. UserPhotoAttribution) )
+        return (x, h ?. UserPhotoAttribution)
     
     (fw0,et0) <- generateFormPost formDelete
     msgs <- getMessages
@@ -253,7 +254,7 @@ formUser user extra = do
 getUsersR :: Handler Html
 getUsersR = do
 
-    users <- ((second (join . unValue) <$>) <$>) $ runDB $ select $ do
+    users <- ((second unValue <$>) <$>) $ runDB $ select $ do
         x :& h <- from $ table @User
             `leftJoin` table @UserPhoto `on` (\(x :& h) -> just (x ^. UserId) ==. h ?. UserPhotoUser)
         orderBy [desc (x ^. UserId)]
@@ -275,6 +276,8 @@ getUserPhotoR uid = do
         x <- from $ table @UserPhoto
         where_ $ x ^. UserPhotoUser ==. val uid
         return x
+
+    cacheSeconds $ 60 * 3
         
     case photo of
       Just (Entity _ (UserPhoto _ mime bs _)) -> return $ TypedContent (encodeUtf8 mime) $ toContent bs
