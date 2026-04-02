@@ -126,7 +126,7 @@
                       _{MsgUserSubscribedOnThisDevice email}
 
               $elseif na < 1
-                <dl.vertical-margin>
+                <dl>
                   <dt>
                     <i.tiny.error.circle.tiny-padding>phone_disabled
                   <dd>

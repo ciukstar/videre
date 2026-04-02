@@ -243,7 +243,7 @@ $forall (s,msg) <- msgs
   <h6>
     _{MsgOutgoingCall}...
 
-  <div.content.vertical-margin>
+  <div.content>
     
     <figure>
       <img.circle src=@{photos} alt=_{MsgPhoto} loading=lazy>
@@ -299,8 +299,8 @@ $forall (s,msg) <- msgs
   <h6>
     _{MsgCallDeclined}
 
-  <figure.center-align.vertical-margin>
-    <i.extra.margin>phone_disabled
+  <figure.center-align>
+    <i.extra.padding>phone_disabled
     
     <figcaption.large-text>
       $maybe Entity _ (User email _ _ _ _ name _ _) <- interlocutor

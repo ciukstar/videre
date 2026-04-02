@@ -192,6 +192,9 @@ footer
     
     ##{idMessageForm}
         margin: 0
+        
+        ##{idMessageInput}
+            overflow-wrap: anywhere
 
 
 ##{idDialogOutgoingCall}

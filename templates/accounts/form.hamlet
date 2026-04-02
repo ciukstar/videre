@@ -3,7 +3,7 @@
 
 #{extra}
 
-<figure.center-align.vertical-margin ##{idFigurePhotoUser}>
+<figure.center-align ##{idFigurePhotoUser}>
 
   <label for=#{fvId photoV} ##{idLabelPhotoUser}>
   

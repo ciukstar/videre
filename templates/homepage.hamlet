@@ -13,10 +13,10 @@
 
 <main.responsive.vertical.middle-align>
 
-  <h2.title.vertical-margin.center-align>
+  <h2.title.center-align>
     _{MsgWelcome}
     
-  <p.vertical-margin.center-align.large-text>
+  <p.center-align.large-text>
     _{MsgSendMessagesVideochatOrAudioCall}
 
   $maybe Entity uid _ <- user

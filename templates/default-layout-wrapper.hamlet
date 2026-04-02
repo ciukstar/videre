@@ -25,7 +25,7 @@ $doctype 5
     <link rel=icon type="image/svg+xml" href=@{StaticR img_video_chat_primary_icon_svg}>
     <link rel=manifest href=@{WebAppManifestR}>
 
-    <link href="https://cdn.jsdelivr.net/npm/beercss@3.11.30/dist/cdn/beer.min.css" rel=stylesheet>
+    <link href="https://cdn.jsdelivr.net/npm/beercss@4.0.20/dist/cdn/beer.min.css" rel=stylesheet>
 
     ^{pageHead pc}
 
@@ -42,8 +42,8 @@ $doctype 5
 
     ^{pageBody pc}
 
-    <script type=module src="https://cdn.jsdelivr.net/npm/beercss@3.11.30/dist/cdn/beer.min.js">
-    <script type=module src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.2/dist/cdn/material-dynamic-colors.min.js">
+    <script type=module src="https://cdn.jsdelivr.net/npm/beercss@4.0.20/dist/cdn/beer.min.js">
+    <script type=module src="https://cdn.jsdelivr.net/npm/material-dynamic-colors@1.1.4/dist/cdn/material-dynamic-colors.min.js">
 
     $maybe analytics <- appAnalytics $ appSettings master
       <script>
